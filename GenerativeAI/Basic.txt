@@ -1,0 +1,19 @@
+What is Generative AI
+1. GenAI is a type of AI that creates new content based on what it has learned from exsting content
+2. The process of learning from existing content is called training and results in the creation of a statistical model
+3. When given a prompt, GenAI uses this statistical model to predict what an expected response might be-and this generates new content
+
+Two type(upper level)
+1. Gen language models : Generative language models learn abot patterns in language through training data.
+Then, given some text, they predict what comes next...
+
+2. Gen Image models : Generative image models produce new images using tech like diffusion.
+Then, given a promot or related imagery, they transform random noise into images or generate images from prompts.
+
+Type of models
+1. text-to-text : take a natural laguage input and produce text optput. These modles are trained to learn the mapping between a pair of texts
+2. text-to-image : trained on a large set of images, each captioned with a short text desription
+3. text-to-video & text-to-3D : aim to generate a video representation from text input
+                                text-to-3d models generate three-dimensional object that correspond to a user's text description
+4. text-to-task : trained to perform a specific task or action based on text input
+                  ex. answering a question, performing a search, making a prediction etc
