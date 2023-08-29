@@ -1,0 +1,5 @@
+LLM : Large, general-purpose ianguage models can be pre-trained and then fin-tuned for specific purposes
+      Are trained to solve common language problems(text classification / QA / Document Sumarizaton, text generation)
+
+prompt : 
+
