@@ -17,3 +17,7 @@ Type of models
                                 text-to-3d models generate three-dimensional object that correspond to a user's text description
 4. text-to-task : trained to perform a specific task or action based on text input
                   ex. answering a question, performing a search, making a prediction etc
+
+
+*** Responsible AI 
+The goal of responsible AI is to employ AI in a safe, trustworthy and ethical fashion. Using AI responsibly should increase transparency and help reduce issues such as AI bias
