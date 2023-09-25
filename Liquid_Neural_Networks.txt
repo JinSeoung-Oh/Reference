@@ -1,0 +1,21 @@
+# Liquid_Neural_Network
+A time-continuous Recurrent Neural Network(RNN) that processes data sequentially, keeps the memory of past inputs, adjusts its behaviors based on new inputs
+and can handle variable-length inputs to enhacne the task-understading capailties of NNs
+
+1. Dynamic architecture
+Its neurons are more expressive than the neurons of a regular neual network, making LNNs more interpretable. They can handle real-time sequential data effectively
+
+2. Continual leaning & adaptability
+LNNs adapt to chaning data enve after traning, mimicking the brain of living oranisms(?) more accurately compared to traditional NNs that stop learning new information after the model training phase
+Hence, LNNs don't require vast amounts of labeled training data to generate accurate results.
+
+Since LNN neurons offer rich connections that can express more informtation, they are smaller in size compared to regular NNs. Hence, it becomes easier for researchers to explain how an LNN reached a decision.
+
+Ex 1. Time Series data processing & forecasting
+Ex 2. Image & video processing
+Ex 3. Natual Language understaind
+
+# Contraints & Challenges of Liquid NN
+1. Vanishing Gradinet Problem
+2. Parameter Tuning
+3. Lack of Literature
