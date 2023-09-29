@@ -1,1 +1,56 @@
+## Intoroduction
 
+Directly training a generalizable 3D diffusion model usually requires a large amount of 3D data 
+while existing 3D datasets are insufficient for capture the complexity of arbitrary 3D shapes. 
+
+Therefore, recent methods resort to distilling pretrained text-to-image diffusion models for creating 3D models from texts, which
+shows impressive results on this text-to-3D task
+The distillation process along with the textual inversion usually
+takes a long time to generate a single shape and requires tedious parameter tuning for satisfactory quality
+
+Instead of distillation, some recent works apply 2D diffusion models to directly generate multiview images for the 3D reconstruction task. 
+
+We propose a simple yet effective framework to generate multiview-consistent images for the single-view 3D reconstruction of arbitrary objects.
+The key idea is to extend the diffusion framework to model the joint probability distribution of multiview images
+
+## Method
+Given an input view y of an object, our target is to generate multiview images of the object. 
+We assume that the object is located at the origin and is normalized inside a cube of length 1
+The target images are generated on N fixed viewpoints looking at the object with azimuths evenlyranging from 0◦ to 360◦ and elevations of 30◦
+
+- Diffusion models aim to learn a probability model pθ(x0) = ∫ pθ(x0:T )dx1:T where x0 is the data and
+x1:T := x1, ..., xT are latent variables.
+
+- Multiview diffusion
+- Let us denote the N images that we want to generate on the predefined viewpoints as {x^(1)_0, ..., x^(N)_0}
+where suffix 0 means the time step 0. We want to learn the joint distribution of all these views pθ(x^(1:N)_0|y) :=pθ(x^(1)_0, ..., x^(N)_0|y). 
+
+See : https://arxiv.org/pdf/2309.03453.pdf (more deteail equation. Github is not a good when I wrtie equation..)
+
+- Synchronized N-view noise predictor. 
+The proposed multiview diffusion model can be regarded as N synchronized noise predictors {ϵ^(n)_θ|n = 1, ..., N}. On each time
+step t, each noise predictor ϵ^(n) is in charge of predicting noise on its corresponding view x^(n)_t to get x^(n)_t−1.
+Meanwhile, these noise predictors are synchronized because, on every denoising step, every noise predictor exchanges information with 
+each other by correlating the states x^(1:N)_t of all the other views
+
+## The pipline of a sychronized multiview noise predictor
+See : https://arxiv.org/pdf/2309.03453.pdf, page 5
+First, a spatial feature volume is constructed from all the noisy target views x^(1:N)_t. Then, we construct a view frustum feature volume 
+for x^(n)_t by interpolating the features of spatial feature volume. The input view y, current target view x^(n)_t
+and viewpoint difference ∆v^(n) are fed into the backbone UNet initialized from Zero123. 
+On the intermediate feature maps of the UNet, new depth-wise attention layers are applied to extract
+features from the view frustum feature volume. Finally, the output of the UNet is used to denoise x^(n)_t to obtain x^(n)_t−1
+
+## 3D-aware feature attention for denoising
+- Backbone UNet
+Zero123 concatenates the input view with the noisy target view as the input to UNet. Then, to encode the viewpoint difference ∆v^(n)
+in UNet, Zero123 reuses the text attention layers of Stable Diffusion to process the concatenation of ∆v^(n) and the CLIP
+feature of the input image. 
+
+-3D-aware feature attention
+First construct a 3D volume with V^3 vertices and then project the vertices onto all the target views to obtain the features
+Next, a 3D CNN is applied to the feature volume to capture and process spatial relationships. 
+In order to denoise n-th target view, we construct a view frustum that is pixel-wise aligned with this view, 
+whose features are obtained by interpolatingthe features from the spatial volume. 
+Finally, on every intermediate feature map of the current view in the UNet, we apply a new depth-wise attention layer to extract features
+from the pixel-wise aligned view-frustum feature volume along the depth dimension.
