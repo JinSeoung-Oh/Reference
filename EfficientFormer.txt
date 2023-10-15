@@ -1,0 +1,48 @@
+https://github.com/snap-research/EfficientFormer
+
+## ‘Patch Embedding with large kernel and stride’ causes performance degradation in mobile devices
+   - The large kernel and stride of the non-overlapping CNN for patch embedding affects the execution speed on mobile devices
+
+## Consistent feature dimension is important for token mixer and MHSA (Multi head Self-Attention) is not the cause of slowdown
+   - Choosing a token mixer is essential when designing a ViT-based model. 
+     The author selected pooling and MHSA as candidates for the token mixer and was able to conclude that 'pooling is simple and efficient' and 'MHSA has better performance'
+
+** Token mixer - https://openreview.net/pdf?id=8l5GjEqGiRG
+   - The token-mixing MLPs allow communication between different spatial locations (tokens); 
+     they operate on each channel independently and take individual columns of the table as inputs. 
+     These two types of layers are interleaved to enable interaction of both input dimensions
+
+## Overall Architectur
+see : https://openreview.net/pdf?id=NXHXoYMLIG - page 5
+- The network consists of a patch embedding (PatchEmbed) and stack of meta Transformer blocks
+   y = ∏(i to m) MB_i(PatchEmbed(x_0^B,3H,W))
+- where X0 is the input image with batch size(B) and spatial size(H,W) and Y is the desired output, and m is the total number of blocks(depth_)
+- MB consists of unspecified token mixer followed by a MLP block
+  X_i+1 = MB_i(X_i) = MLP(TokenMixer(X_i))
+- where Xi|i>0 is the intermediate feature that forwarded into the ith MB.
+- The network includes 4 Stages
+
+## Dimension-Consistent Design
+- The network starts with 4D partition, while 3D partition is applied in the last stages
+- First, input images are processed by a CONV stem with two 3 × 3 convolutions with stride 2 as patch embedding
+- Then the network starts with MB4D with a simple Pool mixer to extract low level features
+- After processing all the MB4D blocks, we perform a one-time reshaping to transform the features size and enter 3D partition
+- MB3D follows conventional ViT
+- In the paper, LinearG denotes the Linear followed by GeLU
+- In the MHSA equation, Q, K, V represents query, key, and values, and b is parameterized attention bias as position encodings
+
+## Latency Driven Slimming
+#  Supernet
+- supernet is defined for searching efficient models
+- MetaPath (MP) is defined, which is the collection of possible blocks
+** The network starts with 4D partition, while 3D partition is applied in the last stages (why MB3D only enabling in the last two stages)
+   - Since the computation of MHSA grows quadratically with respect to token length, integrating it in early Stages would largely increase the computation cost.
+   - Early stages in the networks capture low-level features, while late layers learn long-term dependencies
+
+## Searching Space
+# Searching Algorithm
+- First, the supernet is trained with Gumbel Softmax sampling to get the importance score for the blocks within each MP
+  x_(i+1) = sigma_n {(e^(a_i^n+ε_i^n)/T / (sigma_n e(a_i^n+ε_i^n)/T} ⋅ MP_i,j(X_i)
+- Where a evaluates the importance of each block in MP as it represents the probability to select a block. ε∼U(0, 1) ensures exploration
+- n ∈ {4D, I} for Stage 1 and Stage 2, and n ∈ {4D, 3D, I} for Stage 3 and Stage 4
+- Then, a latency lookup table is built by collecting the on-device latency of MB4D and MB3D with different widths (multiples of 16)
