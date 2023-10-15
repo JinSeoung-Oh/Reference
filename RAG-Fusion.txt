@@ -1,1 +1,71 @@
+From https://towardsdatascience.com/forget-rag-the-future-is-rag-fusion-1147298d8ad1
+
+## Retrieval Augmented Generation (RAG)
+   - Retrieval-augmented generation is a technique that can provide more accurate results to queries 
+     than a generative large language model on its own because RAG uses knowledge external to data already contained in the LLM
+
+# Advantage
+Vector Search Fusion: RAG introduces a novel paradigm by integrating vector search capabilities with generative models. 
+                      This fusion enables the generation of richer, more context-aware outputs from large language models (LLMs).
+
+Reduced Hallucination: RAG significantly diminishes the LLM’s propensity for hallucination, making the generated text more grounded in data.
+
+Personal and Professional Utility: From personal applications like sifting through notes to more professional integrations, 
+                                   RAG showcases versatility in enhancing productivity and content quality while being based on a trustworthy data source.
+
+#  Limitations
+Constraints with Current Search Technologies: RAG is limited by the same things limiting our retrieval-based lexical and vector search technologies.
+
+Human Search Inefficiencies: Humans are not great at writing what they want into search systems, such as typos, vague queries, or limited vocabulary, which often lead to missing the vast 
+                             reservoir of information that lies beyond the obvious top search results. While RAG assists, it hasn’t entirely solved this problem.
+
+Over-Simplification of Search: Our prevalent search paradigm linearly maps queries to answers, lacking the depth to understand the multi-dimensional nature of human queries. 
+                               This linear model often fails to capture the nuances and contexts of more complex user inquiries, resulting in less relevant results.
+
+## RGA-Fusion
+RAG-Fusion aspires to bridge the gap between what users explicitly ask and what they intend to ask, 
+inching closer to uncovering the transformative knowledge that typically remains hidden
+
+See : https://github.com/Raudaschl/rag-fusion
+
+The foundational triad of RAG Fusion is similar to RAG and lies in the same three key technologies:
+  1. A general-purpose programming language, often Python.
+  2. A dedicated vector search database, such as Elasticsearch or Pinecone, steering the document retrieval.
+  3. A potent large language model, like ChatGPT, crafting the text.
+However, unlike RAG, RAG-Fusion differentiates itself with a few additional steps — query generation and a reranking of the results
+
+
+# RAG-Fusion’s Workflow
+Step 1. Query Duplication with a Twis 
+        Translate a user’s query into similar, yet distinct queries via an LLM.
+Step 2. Vector Search Unleashed
+        Perform vector searches for the original and its newly generated query siblings
+Step 3. Intelligent Reranking
+        Aggregate and refine all the results using reciprocal rank fusion.
+Step 4. Eloquent Finale
+        Pair the cherry-picked results with the new queries, 
+        guiding the large language model to a crafted output that considers all the queries and the reranked list of results
+
+
+# Multi-Query Generation
+A single query may not capture the full scope of what the user is interested in, or it may be too narrow to yield comprehensive results
+  -Generate multiple queries that are "not only similar to the original query but also offer different angles or perspectives"
+
+# Reciprocal Rank Fusion (RRF) - Intelligent Reranking
+Reciprocal Rank Fusion (RRF) is a technique for combining the ranks of multiple search result lists to produce a single, unified ranking
+See : https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf
+
+RRFscore(d ∈ D) = sigma_r∈D (1 / (k+r(d))
+
+By combining ranks from different queries, we increase the chances that the most relevant documents will appear at the top of the final list. 
+RRF is particularly effective because it doesn’t rely on the absolute scores assigned by the search engine but rather on the relative ranks, 
+making it well-suited for combining results from queries that might have different scales or distributions of scores
+Typically, RRF has been used to blend lexical and vector results. And although that method can help make up for the lack of specificity of vector search 
+when looking up specific terms like acronyms
+
+# Generative Output
+One of the challenges in using multiple queries is the potential dilution of the user’s original intent. 
+To mitigate this, instruct the model to give more weight to the original query in the prompt engineering
+Finally, the reranked documents and all queries are fed into an LLM prompt to produce the generative output in a typical RAG way, 
+like asking for a response or summary.
 
