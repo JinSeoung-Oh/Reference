@@ -12,6 +12,8 @@ https://github.com/snap-research/EfficientFormer
      they operate on each channel independently and take individual columns of the table as inputs. 
      These two types of layers are interleaved to enable interaction of both input dimensions
 
+-- CONV-BN has a faster processing speed than the LN(GN)-Linear structure, and the performance decrease that comes from selecting CONV-BN can be tolerated
+
 ## Overall Architectur
 see : https://openreview.net/pdf?id=NXHXoYMLIG - page 5
 - The network consists of a patch embedding (PatchEmbed) and stack of meta Transformer blocks
