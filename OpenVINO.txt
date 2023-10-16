@@ -1,1 +1,2 @@
+from https://medium.com/openvino-toolkit/introducing-openvino-2023-1-power-of-generative-ai-at-the-edge-84d8ce08d095
 
