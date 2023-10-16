@@ -1,1 +1,61 @@
+from https://pub.towardsai.net/inside-dinov2-meta-ais-new-self-supervised-learning-model-for-computer-vision-8b61baf37191
+code : https://github.com/facebookresearch/dinov2
+       -The release includes the pretraining code and recipe for pretraining code 
+        and a recipe for ViT-L/16 (300 M params) and ViT-g/14 (1.1 B params) architectures.
 
+** Since the model doesn’t rely on fine-tuning, the backbone remains general, 
+   and the same features can be used for many different tasks simultaneously.
+
+## The Architecture
+1) Training Pipeline
+   The data pipeline includes curated/uncurated data sources, image deduplication, and the retrieval system. 
+   The pipeline directly works with images, without requiring metadata or text
+
+   ** The curated datasets
+   ImageNet-22k, the train split of ImageNet-1k, Google Landmarks, and several fine-grained datasets
+
+   ** The uncurated data source
+   unfiltered dataset of images collected from a publicly available repository of crawled web data
+
+   The deduplication stage removes near-duplicate images, 
+   while the self-supervised image retrieval stage builds the curated pretraining dataset 
+   by retrieving images close to those in the curated sources. 
+   This is done by computing image embeddings using a self-supervised ViT-H/16 network pretrained 
+   on ImageNet-22k and using cosine-similarity as a distance measure between images.
+   
+   ** Uncurated Data & Curated Data --> Embedding(Each dataset) --> Deduplication on only Uncurated embedding 
+      --> Retrieval (Curated embedding to deduplicated uncurated embedding) --> Augmented Curated Data
+
+2) Algorithmic Improvements
+   In DINOv2, they included additional regularization methods inspired 
+   by the similarity search and classification literature to make the training algorithm more stable
+
+   To make larger models tractable, they used the latest mixed-precision and distributed training implementations 
+   proposed in the cutting-edge PyTorch 2 (fully sharded data parallel), 
+   as well as efficient implementation of the stochastic depth technique and latest compute algorithm implementations 
+   of xFormers, particularly variable-length memory-efficient attention
+
+3) Efficient Implementation and Model Distillation
+   1. Fast and memory-efficient attention 
+      - They implemented their own version of FlashAttention to improve memory usage and speed on the self-attention layers
+      - Their ViT-g architecture slightly differs from the original architecture in order to maximize compute efficiency, 
+        and they use an embedding dimension of 1536 with 24 heads (64 dim/head), rather than 1408 with 16 heads (88 dim/head). 
+      - Their ViT-g backbone counts 1.1B parameters.
+
+   2. Nested tensors in self-attention
+      Their version also allows running in the same forward pass the global crops and the local crops 
+      (that have different numbers of patch tokens), leading to significant compute efficiency gains compared to 
+      using separate forward and backward passes as done in prior implementations.
+
+   3. Efficient stochastic depth
+      They implemented an improved stochastic depth that skips the computation of the dropped residuals rather than masking the result
+      With high drop rates, this allows a drastic improvement in computing efficiency and memory usage
+
+   4. Fully-Sharded Data Parallel (FSDP)
+      They split the model replicas across GPUs using the PyTorch implementation of FSDP.
+
+   5.  Model distillation
+       For smaller models, they distilled them from their largest model
+       Knowledge distillation aims at reproducing the output of a large model with a smaller model 
+       by minimizing some distance between both outputs for a set of given inputs
+       
