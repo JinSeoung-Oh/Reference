@@ -1,1 +1,56 @@
+from https://arxiv.org/pdf/2210.17323.pdf
 
+## What is GPTQ?
+   GPTQ is a one-shot weight quantization method based on approximate second-order information specially GPT model
+   Example - https://lightning.ai/blog/how-to-finetune-gpt-like-large-language-models-on-a-custom-dataset/
+
+## Background
+1. Layer-Wise Quantization
+   At a high level, our method follows the structure of state-of-the-art post-training quantization methods, 
+   by performing quantization layer-by-layer, solving a corresponding reconstruction problem for each layer
+   Concretely, let W_l be the weights corresponding to a linear layer l and let
+   X_l denote the layer input corresponding to a small set of m data points running through the network
+   Then,the objective is to find a matrix of quantized weights Wc which minimizes the squared error,
+   relative to the full precision layer output. Formally, this can be restated as
+                   
+   argminWc ||WX − WcX ||2_2 
+
+2. Optimal Brain Quantization(OBQ)
+   OBQ, quantizes weights iteratively one-ata-time, depending on their impact on the loss increase, 
+   after which it applies a closed-form update to the remaining unquantized weights, further reducing the loss
+   from https://arxiv.org/pdf/2208.11580.pdf
+
+## The GPTQ algorithm
+Step 1. Arbitrary Order Insight
+   The original OBQ method quantizes rows of W independently, in a specific order defined by the corresponding errors. 
+   By contrast, we will aim to quantize the weights of all rows in the same order, and will show that this typically yields
+   results with a final squared error that is similar to the original solutions
+
+Step 2.  Lazy Batch-Updates
+   The final rounding decisions for column i are only affected by updates performed on this very column, and so updates to later
+   columns are irrelevant at this point in the process. This makes it possible to “lazily batch” update together, 
+   thus achieving much better GPU utilization.
+   Although this strategy does not reduce the theoretical amount of compute, it effectively addresses
+   the memory-throughput bottleneck
+
+Step 3. Cholesky Reformulation
+   we begin by noting that the only information required from H−1_Fq, where Fq denotes
+   the set of unquantized weights when quantizing weight q, is row q, or more precisely, the elements in
+   this row starting with the diagonal. The consequence is that we could precompute all of these rows
+   using a more numerically-stable method without any significant increase in memory consumption
+   Using a well-optimized Cholesky kernel also yields further speedup
+
+
+
+Algorithm 1 Quantize W given inverse Hessian H^−1 = (2XX> + λI)^−1 and blocksize B.
+Q ← 0drow×dcol                                                   // quantized output
+E ← 0drow×B                                                      // block quantization errors
+H^−1 ← Cholesky(H^−1)^T                                          // Hessian inverse information
+for i = 0, B, 2B, . . . do
+  for j = i, . . . , i + B − 1 do
+      Q_:,j ← quant(W_:,j )                                        // quantize column
+      E_:,j−i ← (W_:,j − Q_:,j ) / [H^−1]_jj                       // quantization error
+      W_:,j:(i+B) ← W_:,j:(i+B) − E_:,j−i · H^−1_j,j:(i+B)         // update weights in block
+   end for
+   W_:,(i+B): ← W_:,(i+B): − E·H^−1_i:(i+B),(i+B):                 // update all remaining weights
+end for
