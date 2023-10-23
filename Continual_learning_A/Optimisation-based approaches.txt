@@ -50,3 +50,42 @@ for p in model.parameters():
 
 optimizer.step()
 #################################################################################################################
+
+
+#################################################################################################################
+## Update Rule: The update rule provides a direction in which θ should move
+import torch
+
+# Constraint radius
+radius = 0.1
+
+for epoch in range(num_epochs):  
+    for batch_idx, (data, target) in enumerate(data_loader):
+        optimizer.zero_grad()
+
+        # Forward pass
+        output = model(data)
+        loss = loss_function(output, target)
+
+        # Backward pass to get gradients for params
+        loss.backward()
+        model_grad = torch.cat([p.grad.data.view(-1) for p in model.parameters()])
+
+        # Compute δ using the NCL method
+        # δ = Λ^(-1) * grad - (θ - µ)
+        delta = torch.matmul(torch.inverse(covarianceMatrix), model_grad) - (torch.cat([p.data.view(-1) for p in model.parameters()]) - parametersForPrevTask)
+
+        # Check constraint
+        if torch.norm(delta) > radius:
+            delta = radius * delta / torch.norm(delta)
+
+        # Update model parameters (θ) using δ
+        idx = 0
+        for p in model.parameters():
+            length = p.data.numel()
+            p.data += delta[idx: idx + length].view(p.data.shape)
+            idx += length
+
+        # Update Λ and µ for the next task, probably going to be task-specific and non-trivial
+
+################################################################################################################
