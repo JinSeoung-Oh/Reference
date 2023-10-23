@@ -1,1 +1,18 @@
+from https://towardsdatascience.com/the-current-state-of-continual-learning-in-ai-af4a05c42f3c
 
+## Continual learning is the ability to pause the model training process, save the model’s current state, and then later resume training on new data. 
+   The model should be able to generalise well to new data, while still maintaining its ability to generalise to old data
+
+## The 5 sub-categories of continual learning techniques
+In, https://arxiv.org/pdf/2302.00487.pdf states training strategies for continual learning can be divided into 5 sub categories
+1. Regularisation-based approach
+   This approach adds constraints or penalties to the learning process during the training process.
+2. Optimisation-based approach
+   This technique focuses on modifying the optimisation algorithm.
+3. Representation-based approach
+   This aims to learn a shared feature representation across different tasks, helping the model generalise better to new but related tasks.
+4. Replay-based approach
+   This involves storing some data or learned features from previous tasks and replaying them during training on new tasks to maintain performance on earlier learned tasks. 
+   In other words, mixing both the old and new datasets when training on new tasks.
+5. Architecture-based approach
+   In this approach, the network architecture is dynamically adjusted, often by growing or partitioning, delegating different parts of the network to different tasks
