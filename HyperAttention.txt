@@ -1,3 +1,7 @@
 from https://levelup.gitconnected.com/googles-masterpiece-after-flashattention-the-hyperattention-a071bcfcbe64
 And https://arxiv.org/pdf/2310.05869.pdf
 
+## Problem
+The key problem that HyperAttention aims to solve is the quadratic scaling cost of 
+the standard dot-product attention mechanism used in transformers and large language models
+
