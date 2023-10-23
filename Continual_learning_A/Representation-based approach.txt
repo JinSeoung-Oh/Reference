@@ -1,0 +1,57 @@
+##  It’s important to note that the pre-training of LLM’s to be further fine-tuned on a downstream task is an example of continual learning in this sub-category
+
+# Knowledge Distillation for continual learning
+You can transfer (or “distill”) the knowledge of one network into another network, 
+and the second network does a reasonable job of approximating the function learned by the original network
+
+The distilled model (the student), is trained to mimic the output of the larger network (the teacher), instead of training it on the raw data directly
+Run the original pre-training dataset through the teacher model to generate “soft targets.” These are probability distributions over potential outputs
+
+The student model in this case is a copy of the teacher model, with an additional output classification layer for each new entity type that the model should learn. 
+During training, the new output layer learns from the new annotated data, and the older layers are guided by the teacher model’s outputs to minimise forgetting
+After training, the old output layers are not discarded. It then uses the algorithm and heuristics described in the conflict resolver section
+to combine these outputs into a single, final prediction for each token in the sequence
+
+Forward Pass
+Old Entity Types: The input sentence is passed through the teacher model to obtain probability distributions (the “soft targets” in this context) for the old entity types.
+New Entity Types: The same sentence is also passed through the new student model with additional output layers specific to the new entity types​.
+
+Backward Pass
+Combined loss function:
+1. KD Loss: calculated by comparing how closely the output probabilities of the old entity types from the new model (student) match those from the old model (teacher). 
+   It uses KL-divergence to calculate this. It’s probably calculated token-by-token and then summed or averaged over all tokens in a sentence or batch, 
+   but I don’t think the paper goes into this.
+2. Cross-Entropy Loss: This is the usual loss function that compares the model’s predictions for the new entity types against the actual labels from the new dataset.
+3. Combining the two: these two losses are combined into a combined loss by taking a weighted sum of them both. 
+   The weights for combining these losses are set by the hyperparameters alpha and beta, 
+   which are adjusted like any other hyperparameter to better performance based on experiments.
+
+#############################################################################################################
+# Hyperparameters alpha and beta for weighting the two loss functions
+alpha = 0.5
+beta = 0.5
+
+for epoch in range(num_epochs):
+    for sentence, labels in D_new:
+        # Forward pass in teacher model for old entity types
+        teacher_probs_Ei = teacher_model(sentence)
+        
+        # Forward pass in student model for old and new entity types
+        # Note: the new entity types must go through the new output layer (not shown in this pseudocode)
+        student_probs_Ei, student_probs_Enew = student_model(sentence)
+        
+        # Compute KD loss
+        kd_loss = KL_divergence(teacher_probs_Ei, student_probs_Ei)
+        
+        # Compute CE loss for new entity types
+        ce_loss = cross_entropy(labels, student_probs_Enew)
+        
+        # Combined loss
+        total_loss = alpha * kd_loss + beta * ce_loss
+        
+        # Backward pass
+        total_loss.backward()
+        
+        # Update student model parameters
+        optimizer.step()
+##################################################################################################################
