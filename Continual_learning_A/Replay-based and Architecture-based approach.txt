@@ -1,0 +1,21 @@
+## Replay-based approach
+Fine-tuned language models are continual learners
+Single-task model like GPT trained just for conversational response. Instead, it’s fine-tuned for a sequence of specialised tasks,
+ranging from text simplification to Haiku generation. 
+Each of these tasks has unique requirements, evaluation metrics, and specialised training datasets.
+
+This all seems positive, the fact we can just add 1% of the old dataset and continual learning is solved, but of course, applying it to a chatbot like chatGPT,
+will be empirical and can be completely different. 
+Even if, hypothetically, chatGPT could be continually trained in the fine-tuning and RLHF stages like this, 
+it would require an immense amount of labeled conversation data.
+
+## Architecture-based approach
+1. Parameter Allocation: Here, a subset of the network parameters is dedicated to each task. 
+   This can be done either by masking out irrelevant neurons or by explicitly identifying important ones for the current task.
+2. Modular Network: This involves using separate sub-networks or modules for each task.
+
+Below are a few common methods for connecting sub-networks
+1. Concatenation of Outputs
+2. Voting Mechanism
+3. Skip Connections
+4. Sequential
