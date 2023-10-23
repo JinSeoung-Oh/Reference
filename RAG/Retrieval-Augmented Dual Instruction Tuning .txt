@@ -1,0 +1,28 @@
+from https://blog.llamaindex.ai/improving-rag-effectiveness-with-retrieval-augmented-dual-instruction-tuning-ra-dit-01e73116655d
+
+An AI Research team at Meta has proposed a method called RA-DIT: RETRIEVAL-AUGMENTED DUAL INSTRUCTION TUNING 
+that allows any LLM to be upgraded to include retrieval features
+
+The RA-DIT approach involves two distinct fine-tuning steps:
+1. Update a pre-trained LM to better use retrieved information.
+2. Update the retriever to return more relevant result
+
+## How it works
+The RA-DIT approach separately fine-tunes the LLM and the retriever. 
+The LLM is updated to maximize the probability of the correct answer given the retrieval-augmented instructions, 
+while the retriever is updated to minimize how much the document is semantically similar (relevant) to the query
+
+## Fine-tuning Dataset
+The fine-tuning dataset is tailored to enhance the language model’s ability to leverage knowledge 
+and boost its contextual awareness during prediction generation
+
+## LLM fine-tuning
+The purpose of fine-tuning(could get it with fine-tuning dataset):
+1. Adapt the LLM to better utilization of relevant background knowledge
+2. Train the LLM to produce accurate predictions even with incorrectly retrieved chunks, empowering the model to rely on its own knowledge.
+
+## Retriever Fine-tuning
+The retriever is fine-tuned using the LM-Supervised Retrieval (LSR) method
+1. The LLM assesses the information fetched by the retriever
+2. If the LLM finds the information misaligned with the given query, it sends feedback to the retriever
+3. Using this feedback, the retriever refines its search process, ensuring it fetches data that the LLM can effectively use
