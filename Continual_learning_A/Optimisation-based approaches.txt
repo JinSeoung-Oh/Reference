@@ -1,0 +1,52 @@
+## Gradient Direction Preservation
+https://arxiv.org/pdf/2302.00487.pdf
+The paper talks about manipulating the gradient-based optimisation process to make the gradient directions of new training samples close to those from old training samples.
+Breaking down the formula, we take the dot product of the gradient of the loss from the new task (∇θ Lₖ(θ; Dₖ)) and the gradient of the loss 
+from the old task (∇θ Lₖ(θ; Mₜ)) should be non-negative. In this context, 
+a positive dot product implies that the gradients for the old task and the new task are generally pointing in the same direction, 
+with the angle between these two vectors is less than or equal to 90 degrees
+
+# Forward/Backward Passes
+1. Forward Pass
+   Run your input data Dₖ for the new task and Mₜ​ for the old task through the same model to calculate the loss for each
+2. Backward Pass
+   1. Compute the gradients of the loss with respect to the network parameters for both the old and new task
+   2. Alignment Check: Compute the dot product of the two gradients. 
+      You’d then use this information to modify the gradients for the new task in such a way that the dot product is non-negative
+   3. Update Weights: Update the model parameters using these “aligned” gradients
+
+#########################################################################################################
+import torch
+
+# Forward pass for the new task
+output_k = model(D_k)
+loss_k = criterion(output_k, y_k)
+
+# Forward pass for the old task
+output_t = model(M_t)
+loss_t = criterion(output_t, y_t)
+
+# Compute gradients for both tasks
+loss_k.backward(retain_graph=True)  # Compute gradients for new task but keep computation graph
+grad_k = torch.cat([p.grad.view(-1) for p in model.parameters()])  
+
+optimizer.zero_grad() 
+
+loss_t.backward()  # Compute gradients for old task
+grad_t = torch.cat([p.grad.view(-1) for p in model.parameters()]) 
+
+# Compute dot product and modify gradients if they don't align
+dot_product = torch.dot(grad_k, grad_t)
+if dot_product < 0:
+    # I'm not sure how you modify the gradients here if they don't align, I'm not sure the paper specifies it
+
+# Use the modified gradient to update model parameters
+index = 0
+for p in model.parameters():
+    num_params = p.numel()
+    # Update using modified gradients
+    p.grad = grad_k[index: index + num_params].view(p.shape)
+    index += num_params
+
+optimizer.step()
+#################################################################################################################
