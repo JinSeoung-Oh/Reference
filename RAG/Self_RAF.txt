@@ -1,0 +1,35 @@
+From https://medium.com/@raphael.mansuy/improving-factuality-of-ai-systems-with-self-reflective-retrieval-augmented-generation-aa13817d401a
+
+standard RAG approaches have some key limitations
+1. They retrieve a fixed number of passages regardless of relevance, which can introduce unnecessary or irrelevant information
+2. The outputs are not guaranteed to be consistent with the retrieved passages, since models are not explicitly trained to follow the facts.
+3. There is no mechanism to verify whether the retrieved passages are actually useful for the task.
+
+The SELF-RAG paper introduces a new training framework to address these limitations through retrieval and self-reflection
+
+## Overview of SELF-RAG Framework
+The key idea in SELF-RAG is to train a single LLM that can
+1. Decide when retrieval is needed using a special Retrieve token
+2. Retrieve relevant passages on demand from a retriever
+3. Generate outputs grounded in the retrieved passages
+4. Critique its own outputs and retrieved passages through reflection tokens like ISREL, ISSUP, ISUSE
+
+## Key steps
+1. Conditional retrieval: Model predicts Retrieve to trigger retriever.
+2. Relevance checking: Predicts ISREL to check passage relevance.
+3. Grounded generation: Generates output grounded in retrieved passages.
+4. ** Self-critique: Predicts ISSUP for supportedness and ISUSE for utility **
+
+## Reflection Tokens
+Retrieve: Triggers retriever if predicted as 1.
+ISREL: Binary relevance score for each passage.
+ISSUP: Binary score if output is supported by retrieved passages.
+ISUSE: Score from 1-5 for overall utility of the output.
+
+## Training Methodology
+1. Use a large dataset of input-output pairs (e.g. Q&A pairs)
+2. For each example, retrieve top passages using a fixed retriever.
+3. Annotate passages with ISREL scores for relevance.
+4. Annotate outputs with ISSUP and ISUSE scores.
+5. Train model to generate output text and reflection tokens using cross-entropy loss.
+6. Jointly learn to retrieve, generate, and critique via multi-tasking.
