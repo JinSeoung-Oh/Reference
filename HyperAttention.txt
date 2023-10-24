@@ -4,4 +4,49 @@ And https://arxiv.org/pdf/2310.05869.pdf
 ## Problem
 The key problem that HyperAttention aims to solve is the quadratic scaling cost of 
 the standard dot-product attention mechanism used in transformers and large language models
+-Severely limits the maximum context size that can be handled by large language models like BERT and GPT-3 to under 2,000 tokens
+ But human reasoning works over much larger contexts spanning multiple documents or passages
 
+The HyperAttention algorithm manages to break the quadratic barrier under realistic conditions using several ingenious techniques
+1. Novel fine-grained parameters to capture attention difficulty instead of relying on strict entry bounds
+2. Leveraging locality sensitive hashing to efficiently detect large entries
+3. Avoiding expensive density estimation by using row norm sampling
+4. Achieving near-linear time even if attention matrices have unbounded entries or high rank
+
+## The key innovations
+1. Carefully parameterized conditions on the attention matrix that capture hardness more precisely without needing strict bounds
+2. A simple and practical procedure based on locality sensitive hashing to detect large entries in the matrix
+3. Efficiently approximating the softmax computation via row norm sampling
+
+## What HyperAttention does?
+1. It focuses on optimized parallelism and kernel fusion to speed up computations, but does not change the underlying algorithm
+2. It uses the exact attention computations without approximation
+3. The optimizations provide a 2–4x speedup, but the quadratic complexity remains
+4. It requires no changes to model architecture or parameters
+
+## HyperAttention algorithm
+1. Identify Large Entries
+   -1. HyperAttention first uses Locality Sensitive Hashing (LSH) to detect large entries in the attention matrix A
+   -2. It hashes similar queries and keys to nearby buckets using a variant of LSH optimized for GPU efficiency
+   -3. This shifting of similar vectors concentrates large unattended attention values along the main diagonal
+   -4. The heavy hitters are captured in fixed-size blocks discretized along this diagonal
+   -5. The output is a binary mask matrix specifying the locations of significant entries
+
+2. Approximate Row Sums
+   -1. With the large values masked out, the goal is now to approximate the row sums of A which are needed for normalization
+   -2. HyperAttention shows that randomly sampling columns according to the squared l2 row norms of the values matrix V yields an unbiased estimator
+   -3. This avoids expensive density estimation procedures like KDE used in prior works
+   -4. The output is an estimated diagonal matrix containing the approximate row sums
+
+3. Sparse Matrix Product
+   -1. Given the large value mask and estimated row sums, HyperAttention approximates the normalized attention matrix by random column sampling
+   -2. It samples columns from A proportionally to V’s row norms to get an unbiased estimator
+   -3. This approximate matrix is multiplied with V to attend to the relevant content
+   -4. The number of samples is small since the large entries have already been removed. So this final step can be done in near-linear time
+
+## The overall HyperAttention procedure can be summarized below:
+1. Use LSH to find large entries in A
+2. Remove heavy hitters to leave a matrix with small hardness parameters
+3. Approximate D by random sampling based on V’s row norms
+4. Sample columns to approximate D-1A and perform softmax
+5. Achieve near-linear runtime in n due to small sample size
