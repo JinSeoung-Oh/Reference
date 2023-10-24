@@ -1,0 +1,86 @@
+from https://towardsdatascience.com/clip-intuitively-and-exhaustively-explained-1d02c07dbf40
+
+## Definition
+“contrastive language-image pre-training” (CLIP), A strategy for creating vision and language representations so good they can be used to make highly specific 
+and performant classifiers without any training data
+
+## CLIP, in a Nutshell
+The core idea of CLIP is to use captioned images scraped from the internet to create a model which can predict if text is compatible with an image or not
+CLIP does this by learning how to encode images and text in such a way that, when the text and image encodings are compared to each other, 
+matching images have a high value and non-matching images have a low value
+In essence, the model learns to map images and text into a landscape such that matching pairs are close together, and not matching pairs are far apart
+In CLIP, contrastive learning is done by learning a text encoder and an image encoder, which learns to put an input into some position in a vector space. 
+CLIP then compares these positions during training and tries to maximize the closeness of positive pairs, and minimize the closeness of negative pairs
+
+## The Components of CLIP
+1. The Text Encoder
+At its highest level, the text encoder converts input text into a vector (a list of numbers) that represents the text’s meaning
+The text encoder within CLIP is a standard transformer encoder
+A transformer can be thought of as a system which takes an entire input sequence of words, then re-represents and compares those words to create an abstract, 
+contextualized representation of the entire input
+One modification CLIP makes to the general transformer strategy is that it results in a vector, not a matrix, 
+which is meant to represent the entire input sequence. It does this by simply extracting the vector for the last token in the input sequence. 
+This works because the self attention mechanism is designed to contextualize each input with every other input.
+
+2. The Image Encoder
+At its highest level, the image encoder converts an image into a vector (a list of numbers) that represents the images meaning
+From the perspective of CLIP, the end result ends up being a vector which can be thought of as a summary of the input image
+
+3. The Multi-Modal Embedding Space, and CLIP Training
+These embedding vectors as representing the input as some point in high dimensional space
+For demonstrative purposes we can imagine creating encoders which embed their input into a vector of length two. 
+These vectors could then be considered as points in a two dimensional space(Multi-Modal Embedding Space)
+Train CLIP (by training the image and text encoders) to put these points in spots such that positive pairs are close(with cosine similarity) to each other
+
+** Calculating dot products between the embedding of images and text because of the way loss is calculated, 
+   all the image and text vectors will have a length of 1 and, as a result, we can forgo dividing by the magnitude of the vectors. 
+   So, while we’re not dividing by the denominator, this is still conceptually trained using cosine similarity **
+
+## CLIP and contrastive loss
+The whole idea of contrastive loss is, instead of looking at individual examples to try to boost performance on a per-pair basis, 
+you can instead think of the problem as incrementally improving the closeness of positive pairs while, 
+simultaneously, preserving the distance of negative pairs
+
+** In CLIP this is done by computing the dot product between the encoded text and image representations which can be used to quantify “closeness” **
+
+The CLIP paper includes the following pseudo code which describes how loss is calculated within CLIP:
+
+# image_encoder - ResNet or Vision Transformer
+# text_encoder - CBOW or Text Transformer
+# I[n, h, w, c] - minibatch of aligned images
+# T[n, l] - minibatch of aligned texts
+# W_i[d_i, d_e] - learned proj of image to embed
+# W_t[d_t, d_e] - learned proj of text to embed
+# t - temperature parameter
+
+# 1) get a batch of aligned images and text
+I, T = get_mini_batch()
+
+# 2) extract feature representations of each modality
+I_f = image_encoder(I) #[n, d_i]
+T_f = text_encoder(T) #[n, d_t]
+
+# 3) joint multimodal embedding [n, d_e]
+I_e = l2_normalize(np.dot(I_f, W_i), axis=1)
+T_e = l2_normalize(np.dot(T_f, W_t), axis=1)
+
+# 4) scaled pairwise cosine similarities [n, n]
+logits = np.dot(I_e, T_e.T) * np.exp(t)
+
+# 5) symmetric loss function
+# logits = nxn matrix of cosin similarity predictions
+# labels = nxn matrix of true values
+labels = np.arange(n)
+loss_i = cross_entropy_loss(logits, labels, axis=0)
+loss_t = cross_entropy_loss(logits, labels, axis=1)
+loss = (loss_i + loss_t)/2
+
+Element by element in each matrix, calculating the loss for that element. Then we can sum all the losses across both matrices to compute the total loss
+
+********************************************************************************************************************************
+The whole point of contrastive learning is that you’re learning to optimize both positive and negative pairs. 
+We want to push positive pairs close together, while pushing negative pairs apart
+
+This is a sneaky but incredibly important characteristic of the softmax function: 
+when the probability of negative pairs get bigger, the probability of positive pairs get smaller as a direct consequence
+********************************************************************************************************************************
