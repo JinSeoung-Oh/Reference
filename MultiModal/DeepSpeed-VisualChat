@@ -1,0 +1,29 @@
+From https://medium.com/syncedreview/microsofts-deepspeed-visualchat-breaking-boundaries-in-multi-modal-language-models-3c11bfeab002
+From https://arxiv.org/abs/2309.14327
+
+Existing models face limitations in handling interleaved image-and-text inputs in multi-image, multi-round dialogues, 
+and their adaptability and scalability across diverse interaction realms are hampered by constraints related to training and data accessibility.
+
+--> The DeepSpeed-VisualChat framework, which is designed to optimize Large Language Models (LLMs) by incorporating multi-modal capabilities, 
+demonstrating superior scalability, even up to a 70 billion parameter language model size, when compared to existing frameworks
+
+1. Fully Open-Sourced Multi-round Multi-image Framework:
+   DeepSpeed-VisualChat, one of the pioneering fully open-sourced frameworks, enables multi-round and multi-image dialogues, 
+   accommodating interleaved text-and-image inputs.
+2. Multi-Modal Causal Attention (MMCA): 
+   We devise a novel MMCA for multi-modal models that independently computes attention weights across various modalities.
+3. Data Blending for Interleaved Inputs:
+   To facilitate conversations with interleaved modalities, DeepSpeed-VisualChat employs assorted data blending techniques 
+   on existing datasets, overcoming the shortage of interleaved text-and-image inputs in most available open-sourced datasets.
+4. Unprecedented Scalability: 
+   We leverage the DeepSpeed framework to amplify our training with a 2B visual encoder from and a 70B language decoder from LLaMA-2,
+   illustrating the remarkable scalability of our framework.
+
+** DeepSpeed-VisualChat is structured based on MiniGPT4, where a pre-trained vision encoder encodes an image, 
+   which is then aligned with the hidden dimension of the text embedding layer’s output through a linear layer. 
+   These diverse inputs are then passed to language models like LLaMA2, powered by the new Multi-Modal Causal Attention (MMCA) mechanism. 
+   Both the vision encoder and the language model are kept frozen
+
+   In contrast to the conventional Cross Attention (CrA), which introduces new parameters 
+   and complexities, MMCA addresses these issues by having visual tokens attend to themselves and textual 
+   tokens attend to their previous tokens with separate attention weight matrices for text and image tokens.
