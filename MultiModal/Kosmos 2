@@ -1,0 +1,38 @@
+From https://blog.tdg.international/introducing-kosmos-2-56b81c3e49cf
+
+## The Evolution from Kosmos 1 to Kosmos 2
+Kosmos 2 introduces a groundbreaking feature called grounding. 
+This feature enables the AI to interact with images more accurately and meaningfully by creating hyperlinks 
+between image elements and their descriptions.
+
+With grounding, Kosmos 2 can identify individual objects in an image and create hyperlinks to their descriptions, 
+enabling users to easily navigate through the various elements present.
+This level of granularity in image analysis enhances the AI’s ability to interpret and describe complex scenes with greater accuracy.
+
+## Training 
+During the training process, Kosmos 2 was exposed to a diverse set of image-text pairs, 
+enabling it to learn the correlations between visual content and textual descriptions
+
+In addition to image understanding, Kosmos 2 has also been trained to excel in processing text. 
+The large text corpus used for training allowed Kosmos 2 to develop a deep understanding of language patterns, grammar, and semantics. 
+
+## Capabilities of Kosmos 2
+One of the most remarkable capabilities of Kosmos 2 is its ability to answer questions about specific regions within images
+
+-Grounded Picture Captioning
+Kosmos 2 offers practical applications in grounded picture captioning, a task that involves generating textual descriptions for images. 
+It utilizes a multimodal approach, combining visual and textual information, to generate accurate and contextually relevant captions
+
+-Grounded Visual Question Answering
+GVQA involves answering questions about images by understanding both the visual content and the textual context of the questions. 
+Kosmos 2’s multimodal AI capabilities enable it to accurately interpret the contents of images and provide meaningful answers to questions related to them
+
+- *Grounded Visual Reasoning(important)
+Kosmos 2’s practical applications extend to grounded visual reasoning, 
+which involves performing logical reasoning tasks based on visual information.
+
+ex) 
+In fields such as robotics and automation, Kosmos 2’s grounded visual reasoning can be utilized to develop AI-powered robots
+that can navigate and interact with their environment effectively.
+For example, a robot equipped with Kosmos 2 can analyze visual inputs from its surroundings,
+apply reasoning to understand the layout of a room, and make intelligent decisions on navigation paths or object manipulation
