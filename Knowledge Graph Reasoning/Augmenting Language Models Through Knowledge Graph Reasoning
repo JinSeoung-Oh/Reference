@@ -1,0 +1,76 @@
+from https://ai.plainenglish.io/augmenting-language-models-through-knowledge-graph-reasoning-1a390df61fe5
+from https://arxiv.org/pdf/2310.01061.pdf
+
+I. Limits of Large Language Models
+   1. Logical deductive reasoning
+   2. Checking claims against facts
+   3. Drawing accurate analogies and conclusions
+
+II. Enhancing Language Models with Knowledge Graphs
+    Knowledge graphs model concepts (entities) and their relationships (predicates) in a structured format
+
+    Key knowledge graph reasoning tasks include:
+    1. Triple classification — Determine if a graph fact is true or false
+    2. Relation prediction — Identify the relationship between two entities(concepts)
+    3. Entity prediction — Find missing entities based on relations
+    4. Entity resolution -Deduplicate entity nodes referring to the same real-world entity
+    5. Link prediction — Predict likely but unstated links between entities(Relation)
+    6. Collective reasoning — Reason holistically over multiple connected facts
+    7. Handling missing values — Make inferences despite incomplete graphs
+
+III. Knowledge Graph Reasoning Tasks
+     1. Triple classification
+        Determine if a graph fact is true or false
+        It’s a binary classification problem - Logistic Regression, Support Vector Machine, Decision Trees, Random Forest, and Gradient Boosting
+        ex) triple = ("Seoul", "isCapitalOF", "south korea")
+            prompt = f"Is this true:{triple}"
+        -Teaches LLMs to logically evaluate claims against known facts
+
+     2.  Relation Prediction
+         Identify the relationship between two entities - Logistic Regression, Decision Trees, Random Forest, and Gradient Boosting
+         ex) head = "Barack Obama"
+             tail = "US"
+             prompt = f"What is the relation between {head} and {tail}?"
+         -Requires mapping entities to known relations
+
+     3. Entity Prediction
+        Find missing entities given a known relation, 
+        Involves predicting a missing entity in a triple when the relation and one of the entities are known - Named Entity Recognition (NER), Maximum Entropy Markov Model (MEMM) and Common Random Fields (CRF) and BERT
+        ex) relation = "foundeBy"
+            tail = "Microsoft"
+            prompt = f"who founded {tail}?"
+        -Invoke analogical reasoning to determine plausible entities
+
+     4. Entity Resolution(ER)  
+        This task involves deduplicating entity nodes - Entity resolution
+
+     5. Link Prediction
+        This task involves predicting correct facts that can be expressed by the vocabulary of a given knowledge graph, 
+        which are not explicitly stated in that graph - Several statistical models(structured logistic regression models, local conditional probability models)
+
+     6. Collective Reasoning
+        Reason holistically over multiple connected facts
+        ex) facts = [("seoung", "brotherOf", "young"), ("young", "sisterOf", "janny")]
+            prompt = f"Given: {facts}, what is seoung's relation to janny?"
+        -Perform logical inference over a graph structure
+
+     7. Dealing with Missing Values
+        This task involves handling missing values in the knowledge graph -  The Generalized Linear Model
+
+## Augmenting LLM with KG
+1. Use knowledge graphs as a source of relational training data for fine-tuning LLMs on reasoning tasks like triple classification, relation prediction, etc. This teaches the LLM logical reasoning skills.
+2. After fine-tuning, the LLM can act as a reasoning module in a graph neural network architecture. The LLM conditions on entity embeddings and decoded relation types to make predictions.
+3. Graph algorithms like node2vec, DeepWalk, etc can be used to generate entity embeddings that capture graph structure. These embeddings serve as input to the LLM.
+4. For missing value imputation, the fine-tuned LLM can make predictions based on local graph context. Generalized linear models can also leverage graph feature vectors.
+5. For collective reasoning, the LLM can recursively pass messages along graph edges, updating its inferences by reasoning over multiple related facts.
+6. For link prediction, the LLM can make predictions based on entity embeddings enhanced with graph metadata like node degrees, clustering coefficients etc.
+7. The knowledge graph can be indexed/stored in a vector database. Relevant subgraphs are retrieved to provide contextual knowledge for the LLM when generating text
+
+## RoG Method
+RoG method involve fine-tuning a large language model (LLM) on a specific knowledge graph (KG) during training
+1. RoG uses an LLM as the backbone model for both the planning and reasoning modules.
+2. The LLM starts with no prior knowledge about the relations in the KG.
+3. To teach the LLM how to generate valid relation paths grounded in the KG, RoG fine-tunes the LLM on two instruction tuning tasks: planning optimization and retrieval-reasoning optimization.
+4. The planning optimization task distills knowledge from the KG into the LLM, allowing it to generate faithful relation paths that exist in the KG. This relies on training examples extracted from the KG.
+5. The retrieval-reasoning optimization task further fine-tunes the LLM to conduct reasoning based on paths retrieved from the KG.
+6. So a key part of RoG’s training process is fine-tuning the LLM on examples specific to the KG being used, to teach it to generate plans grounded in that KG and leverage its structure.
