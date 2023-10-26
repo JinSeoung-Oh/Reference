@@ -1,1 +1,28 @@
+From https://pub.towardsai.net/llava-15-5733993c3033
+From https://llava-vl.github.io/
 
+## Multimodality
+Multimodality represents the capacity of a model to process at least two different modalities, 
+when a model’s different modality components share a common embedding space,
+a modality being a type of input data (words, images, sounds, et al)
+
+## There are three ways to achieve multimodality
+1. Tool/model-based methods
+   By combining different models or tools you can allow your solution to handle multiple inputs
+   While the solution is multimodal, the underlying models aren’t.
+
+2. Grafting
+   Implies using pre-trained image encoders and LLMs and projecting the encoder’s vector embedding 
+   into the LLM’s latent space using a projecting matrix or an MLP layer
+
+3. Generalist systems
+   Most probably how GPT-4V was trained, training an image encoder and an LLM from scratch into the same embedding space. 
+   Importantly, here all weights are trained from scratch
+
+- LLaVa-1.5 were trained using grafting
+  The image encoder and the LLM’s weights remain frozen, and simply train the projecting matrix to 
+  learn to transform the encoder’s vectors, or ‘grafting’ them, into the LLM’s high-dimensional space
+
+  When an image is sent to the image encoder (a CLIP encoder in LLaVa’s case), it processes it, 
+  and then it goes through an ‘adapter’ which in reality is simply a matrix (or a MLP layer like in LLaVa-1.5’s case) 
+  that transforms the output vector of the image encoder into an acceptable vector that the LLM (Vicuna in LLaVa’s case)
