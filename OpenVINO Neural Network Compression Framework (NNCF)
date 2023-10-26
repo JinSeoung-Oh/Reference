@@ -1,0 +1,83 @@
+From https://medium.com/openvino-toolkit/joint-pruning-quantization-and-distillation-for-efficient-inference-of-transformers-21333481f2ad
+
+An overview of The OpenVINO Neural Network Compression Framework (NNCF) and
+its Joint Pruning, Quantization, and Distillation (JPQD) approach for accelerating transformer models like BERT on Intel platforms
+
+## Why NNCF?
+Pre-trained transformer models are popular for various NLP tasks, but they require substantial compute resources and energy for deployment. 
+Model compression techniques like pruning, quantization, and knowledge distillation are used to simplify models without significantly reducing accuracy.
+
+## JPQD Approach
+OpenVINO NNCF introduces the JPQD method, which combines pruning, quantization, and distillation in one pipeline for optimizing transformer inference. 
+This reduces the complexity of sequentially applying these techniques and results in an efficient model while preserving task accuracy
+
+## Components of JPQD
+1. Pruning
+   Pruning reduces the size of the model by eliminating unimportant weights. 
+   This method includes unstructured and structured sparsity with parameters like warmup epochs, importance regularization, and sparsity levels
+
+2. Quantization
+   Quantization reduces storage and computational requirements by representing data with fewer bits. 
+   It supports quantization-aware training (QAT) with symmetric weights and activations
+
+3. Distillation
+   Knowledge distillation involves training a smaller model to mimic the behavior of a larger one. 
+   It includes distillation weight and temperature hyperparameters
+
+## Usage of JPQD
+The example code demonstrates how to apply JPQD to the BERT-base model for text classification. 
+It provides a configuration for compression and explains the optimization process
+
+########################################################################################################
+compression_config = [
+    {
+        "compression":
+        {
+        "algorithm":  "movement_sparsity",
+        "params": {
+            "warmup_start_epoch":  1,
+            "warmup_end_epoch":    4,
+            "importance_regularization_factor":  0.01,
+            "enable_structured_masking":  True
+        },
+        "sparse_structure_by_scopes": [
+            {"mode":  "block",   "sparse_factors": [32, 32], "target_scopes": "{re}.*BertAttention.*"},
+            {"mode":  "per_dim", "axis":  0,                 "target_scopes": "{re}.*BertIntermediate.*"},
+            {"mode":  "per_dim", "axis":  1,                 "target_scopes": "{re}.*BertOutput.*"},
+        ],
+        "ignored_scopes": ["{re}.*NNCFEmbedding", "{re}.*pooler.*", "{re}.*LayerNorm.*"]
+        }
+    },
+    {
+        "algorithm": "quantization",
+        "weights": {"mode": "symmetric"}
+        "activations": { "mode": "symmetric"},
+    }
+]
+########################################################################################################
+from optimum. intel import OVConfig, OVTrainer, OVTrainingArguments
+# Load teacher model
+teacher_model = AutoModelForSequenceClassification.from_pretrained(
+    teacher_model_or_path)
+
+ov_config = OVConfig(compression=compression_config)
+
+trainer = OVTrainer(
+    model=model,
+    teacher_model=teacher_model,
+    args=OVTrainingArguments(save_dir, num_train_epochs=1.0, do_train=True,
+                             do_eval=True, distillation_temperature=3, distillation_weight=0.9),
+    train_dataset=dataset["train"].select(range(300)),
+    eval_dataset=dataset["validation"],
+    compute_metrics=compute_metrics,
+    tokenizer=tokenizer,
+    data_collator=default_data_collator,
+    ov_config=ov_config,
+    task="text-classification",
+)
+
+# Train the model like usual, internally the training is applied with pruning, quantization, and distillation
+train_result = trainer.train()
+metrics = trainer.evaluate()
+# Export the quantized model to OpenVINO IR format and save it
+trainer.save_model()
