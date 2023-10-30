@@ -1,0 +1,57 @@
+from https://towardsdatascience.com/sagemaker-multi-model-vs-multi-container-endpoints-304f4c151540
+I just want to summary what is multi-model and multi-container endpoints
+
+# What is SageMaker
+Amazon SageMaker has a plethora of inference options for model hosting and deployment
+
+## Multi-Model Endpoints(MME)
+Multi-Model Endpoints help you scale thousands of models into one endpoint.
+By using a shared serving container, you can host multiple models in a cost-effective scalable manner within the same endpoint.
+
+[Model1, Model2, ... , ModelN] --> Container(SM Managed/Custom) --> Instance
+
+The most important feature to understand with MME usage is that all models must be built in the same framework
+** You cannot mix and match frameworks for models with a Multi-Model Endpoint **
+
+## Multi-Container Endpoints(MCE)
+Provide containers for your different frameworks that you will be working with
+
+{[Model1 - Container1], [Model2 - Container2], ... , [ModelN - ContainerN]} --> Instance
+
+Multi-Container Endpoints also offer the power in that you can stitch together containers 
+in a Serial Inference Pipeline or invoke the container of your choice. A Serial Inference 
+Pipeline lets you stitch together 2–15 containers, 
+the output of one becomes the input of the next container in sequence essentially
+
+## Multi-Model Endpoints Code
+from sagemaker.multidatamodel import MultiDataModel
+mme = MultiDataModel(name=f'mme-tensorflow-{current_time}',
+                     model_data_prefix=model_data_prefix,
+                     model=model_1,
+                     sagemaker_session=sagemaker_session)
+target_model = "petrol.tar.gz"
+jsons = JSONSerializer()
+payload = jsons.serialize(sampInput)
+response = runtime_sm_client.invoke_endpoint(
+        EndpointName=endpoint_name,
+        TargetModel=target_model,
+        Body=payload)
+result = json.loads(response['Body'].read().decode())['outputs']
+
+
+## Multi-Container Endpoints Code
+create_model_response = sm_client.create_model(
+    ModelName="mnist-multi-container-ex",
+    #multi-container-example
+    Containers=[pytorch_container, tensorflow_container],
+    InferenceExecutionConfig={"Mode": "Direct"},
+    ExecutionRoleArn=role,
+)
+
+pt_result = runtime_sm_client.invoke_endpoint(
+    EndpointName="mnist-multi-container-ep",
+    ContentType="application/json",
+    Accept="application/json",
+    TargetContainerHostname="pytorch-mnist",
+    Body=json.dumps({"inputs": np.expand_dims(pt_samples, axis=1).tolist()}),
+)
