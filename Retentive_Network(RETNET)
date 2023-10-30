@@ -88,4 +88,72 @@ ensuring that the attention weights are properly scaled.
 The term X[i] is a modulation factor, fine-tuning the balance between chunkwise and global information
 
 Overall:
-                                                
+Q[i] = Q_Bi:B(i+1), K[i] = K_Bi:B(i+1), V[i] = V_Bi:B(i+1)
+R_i = K^T_[i](V_[i]⊙ξ)+γ^BR_(i-1), ξ_ij = γ^(B-i-1)
+Retention(X[i] = Inner_Chunk(Q[i]K^T[i]⊙D)V[i] + Cross_Chunk(Q[i]R_(i-1))⊙ξ, ξ_ij = γ^(i+1)
+
+## Gated Multi-Scale Retention
+RETNET’s multi-scale retention is a testament to its ability to capture patterns at various granularities
+γ = 1-2^(-5-arange(0,h))
+head_i = Retention(X, γ_i)
+Y = GroupNorm_h(Concat(head_1,...,head_h))
+
+MSR(X) = (swish(XㆍW_G)∘Y)ㆍW_oThe swish activation function introduces non-linearity, enhancing the model’s expressiveness. 
+Its mathematical properties, such as smoothness and boundedness, make it conducive for gradient-based optimization.
+
+## Pseudocode for Retention
+def ParalleRetention(q,k,v,decay_mask):
+    retention = q @ k.transpose(-1,-2)
+    retention = retention * decay_mask
+    output = retention @ v
+    output = group_norm(output)
+    return  output
+
+def RecurrentRetention(q,k,v, past_kv, decay):
+    current_kv = decay * past_kv + k.unsqueeze(-1)*v.unsqueeze(-2)
+    output = torch.sum(q.unsqueeze(-1)*current_kv, dim=2)
+    output = group_norm(output)
+    return output, current_kv
+
+def ChunkwiseRetention(q,k,v,past_kv,decay_mask, chunk_decay, inner_decay):
+    retention = q @ k.transpose(-1,-2)
+    retention = retention * decay_mask
+    inner_retention = retention @ v
+    cross_retention = (q @ past_kv) * inner_decay
+    retention = inner_retention + cross_retetion
+    output = group_norm(retention)
+    current_kv = chunk_decay * past_kv + k.transpose(-1,-2) @ v
+    return output, current_kv
+
+## Retention Score Normalization: Enhancing Numerical Precision
+In the quest to maximize the numerical precision of retention layers, we harness the scale-invariant property of GroupNorm
+GroupNorm(a*head_i) = GroupNorm(head_i)
+
+1. Normalizing QK⊺
+QK^T --> QK^T/np.root(d)
+This normalization ensures that the scaling factor aligns with the dimensionality of the data
+
+2. Replacing D with D˜
+D --> D˜_(nm) = D_(nm) / np.root(sigma i=1 to i=n D_(ni))
+This transformation enhances the stability of the numerical computations
+
+3. Normalizing Retention Scores (R)
+R = QK^T⊙D --> R˜_(nm) = R_(nm) / max(abs(sigma i=1 to n=n R_ni),1)
+This normalization ensures that the retention scores maintain their scale-invariant properties.
+
+With these adjustments, the retention output is transformed into Retention(X) = RV˜. Importantly, 
+these optimizations have no adverse impact on the final results while significantly stabilizing 
+the numerical flow in both the forward and backward passes
+
+## Overall Architecture of Retention Networks
+In the framework of a retention network comprising L layers, multi-scale retention (MSR) and a feed-forward network (FFN) 
+are thoughtfully stacked to construct the model
+The formal procedure involves the transformation of the input sequence {xi}^|x|i=1 into vectors using a word embedding layer. 
+The packed embeddings, denoted as X_0 = [x_1, · · · , x|x|] ∈ R^|x|×d_model, 
+serve as the input for computing the model output, specifically X_L
+
+Y^l = MSR(LN(X^l)) + X^l
+X^(l+1) = FFN(LN(Y^l) + Y^l
+
+In these equations, LN(·) represents LayerNorm. 
+The FFN component is calculated as FFN(X) = gelu(XW_1)W_2, with W_1 and W_2 denoting parameter matrices
