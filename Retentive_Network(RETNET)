@@ -1,0 +1,91 @@
+from https://medium.com/autonomous-agents/what-next-after-transformers-a-rigorous-mathematical-examination-of-the-retentive-network-retnet-f5b819980878
+& https://arxiv.org/pdf/2307.08621.pdf
+from https://kimjy99.github.io/%EB%85%BC%EB%AC%B8%EB%A6%AC%EB%B7%B0/retnet/
+
+## Limitations of Transformation
+1. Inefficient Inference
+   Transformers exhibit suboptimal efficiency during inference due to their inherent O(N) complexity per step 
+   and memory-bound key-value caching.
+2. Growing GPU Demands
+   As the demand for accommodating longer sequences grows, Transformers consume an increasingly substantial amount of GPU memory
+3. Intractable “Impossible Triangle” 
+   Achieving a balance between training parallelism, inference efficiency, 
+   and competitive performance has been dubbed the “impossible triangle.” 
+   Transformers often find it challenging to strike this balance effectively
+4. Linearized Attention’s Limitations
+   Linearized attention, which approximates attention scores, falls short in terms of modeling capability 
+   and performance when compared to Transformers, making it a less favorable alternative.
+5. Sacrificing Training Parallelism
+   Some approaches have revisited recurrent models for efficient inference but at the cost 
+   of sacrificing the training parallelism that makes Transformers powerful
+6. Alternative Mechanisms with Limited Success
+   Explorations into replacing attention with other mechanisms have yielded mixed results, 
+   with no clear winner compared to Transformers emerging
+
+RetNet navigates the complex terrain of sequence modeling, 
+offering solutions to these shortcomings while preserving the training parallelism and competitive performance 
+that made Transformers legendary
+
+## The Retention Paradigm
+A retention mechanism with a dual form of repetition and parallelism was introduced. 
+Therefore, you can train the model in parallel while repeatedly performing inference.
+
+## Rigorous Math for Retention   --> Check figure in Paper to more understand
+suppose we have an input X ∈ R^|x|×d_model
+To transform this input, we can project it into a one-dimensional function represented as v(n) = X_n · w_V
+Delve into a genomic sequence modeling problem, where we aim to map v(n) to o(n) through intermediary states s_n
+
+Given A,Q,K
+s_n = As_(n-1) + K^T_nv_n,                             A ∈ R^(dxd), K_n ∈ R^1xd
+o_n = Q_ns_n = sigma m=1 to m=n Q_nA^(n-m)K^T_mvm,     Q_n ∈ R^1xd                         --- Equ(1)
+
+The process involves mapping v_n to the state vector s_n and subsequently 
+applying a recurrent linear transformation to encode vital sequence information
+
+Now, let’s shift our focus to enhancing the projections Q_n and K_n to be content-aware:
+Q = XW_Q, K=XW_K, where W_Q, W_K ∈ R^d×d are learnable matrices                            --- Equ(2)
+
+This embarks on a journey of diagonalizing the matrix A, denoted as A = Λ(γe^iθ)Λ⁻¹, 
+where γ and θ are real values within the space R^d. This transformation leads to the derivation of An−m = Λ(γe^iθ)^(n−m)Λ⁻¹
+
+To streamline the process, let’s absorb Λ into the matrices W_Q and W_K, resulting in a refined Equ(1)
+o_n = sigma m=1 to m=n Q_n(γe^iθ)^(n-m)K^T_mv_m
+    = sigma m=1 to m=n (Q_n(γe^iθ)^n)(K_m(γe^iθ)^-m)^Tv_m                                   --- Equ(3)
+
+The expressions Q_n(γe^iθ)^n and K_m(γe^iθ)^-m are recognized as xPos(Proposed relative position embedding for Transformer), 
+a relative position embedding originally introduced for Transformers
+
+To streamline our approach, we opt for further simplification by treating γ as a scalar, which transforms Equation (3) as follows
+o_n = sigma m=1 to m=n γ^(n-m)(Q_ne^inθ)(K_me^imθ)^† v_m                                    --- Equ(4)
+we employ the conjugate transpose symbol †
+This formulation readily lends itself to parallelization across training instances, enhancing efficiency
+
+To recap the approach, we initiate with recurrent modeling, as depicted in Equation (1), 
+and subsequently derive its parallel counterpart in Equation (4). 
+We conceive the original mapping from v(n) to o(n) as vectors and deduce the retention mechanism in the following manner
+
+## The Parallel Representation of Retention
+Q=(XW_Q)⊙Θ, K=(XW_k)⊙Θ^-, V = XW_v
+Θ_n = e^inθ, D_(nm) = {r^n-m, n>=n / 0, n<m}
+Retention(X) = (QK^T⊙D)V
+
+In mathematical terms, Θ represents the complex conjugate of Θ, and D is an element of the real matrix space R^|x|×|x|, 
+which combines causal masking and exponential decay along relative distance into a unified matrix
+
+## Recurrent Representation
+The recurrent representation captures the temporal dynamics of sequences
+S_n = γㆍS_(n-1) + K^T_nㆍV_n
+Retentin(X_n) = Q_nㆍS_n
+The coefficient gamma acts as a retention factor
+Its value, typically between 0 and 1, determines the balance between past information and current data
+
+## Chunkwise Recurrent Representation
+For handling extensive sequences, RETNET employs a chunkwise approach
+R_i = K^T_iㆍV_i + γ_BㆍR_(i-1)
+Retention(X[i]) = (Q[i]ㆍK^T_i ∘ D)ㆍV[i] + (Q[i]ㆍR_i)∘ξ
+Here, gamma_B introduces a bias based on previous chunks. The matrix D is a diagonal normalization matrix, 
+ensuring that the attention weights are properly scaled. 
+The term X[i] is a modulation factor, fine-tuning the balance between chunkwise and global information
+
+Overall:
+                                                
