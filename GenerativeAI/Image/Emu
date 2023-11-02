@@ -1,0 +1,11 @@
+From https://generativeai.pub/metas-first-ai-image-generator-emu-is-here-958a95c383b5
+     https://ai.meta.com/research/publications/emu-enhancing-image-generation-models-using-photogenic-needles-in-a-haystack/
+
+## Emu
+Emu is based on an AI technique called “diffusion models”. 
+Specifically, Emu uses a “latent diffusion model,” which means it first encodes the text prompt into
+a latent representation before going through the diffusion process to generate the image
+And Emu is faster then Midjourney and Dall-E3
+
+Meta compared Emu to the state-of-the-art SDXL1.0 model and found that Emu is preferred 
+68.4% of the time on visual appeal on the standard PartiPrompts benchmark and 71.3% on their Open User Input benchmark
