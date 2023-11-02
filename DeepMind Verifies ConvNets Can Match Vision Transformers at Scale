@@ -1,0 +1,37 @@
+From https://medium.com/syncedreview/deepmind-verifies-convnets-can-match-vision-transformers-at-scale-fed84c497da1
+
+The paper "ConvNets Match Vision Transformers at Scale" by a Google DeepMind research team challenges 
+the prevailing belief that Vision Transformers (ViTs) are superior to Convolutional Neural Networks (ConvNets) 
+when it comes to scaling to large datasets and computational resources. 
+
+# NFNet Models on JFT-4B Dataset
+The researchers trained various NFNet models on the massive JFT-4B dataset, 
+which contains around 4 billion labeled images spanning 30,000 classes. 
+After fine-tuning these pre-trained NFNet models over 50 epochs, 
+they achieved impressive results, particularly with the largest model, 
+F7+, which reached an ImageNet Top-1 accuracy of 90.3%.
+
+# Scaling Law for Validation Loss and Pre-training Compute
+The research team identified a discernible linear trend that follows a logarithmic scaling law. 
+This trend shows that as computational resources increase, the optimal model size and the budget 
+for training epochs also increase. It suggests that for ConvNets, 
+adjusting the model size and the number of training epochs in proportion 
+to the available computational resources is a reliable approach for scaling.
+
+# Optimal Learning Rate for Different Model Sizes
+The study also looked into the optimal learning rate for various models from the NFNet family (F0, F3, F7+) 
+under different epoch budgets. The findings indicated that, when constrained by small epoch budgets, 
+all models demonstrated a similar optimal learning rate (approximately 𝛼 ≈ 1.6). 
+However, as the epoch budget expanded, larger models experienced a more rapid decline in the optimal learning rate.
+
+# Importance of Computational Resources and Data
+The research reinforces the importance of computational resources and the volume of data available 
+for training in determining the performance of a computer vision model. It suggests that ConvNets, 
+particularly the NFNet architecture, can compete with Vision Transformers at a scale 
+that was traditionally believed to be the domain of ViTs.
+
+In essence, this paper highlights that ConvNets, when properly scaled and trained on large datasets, 
+can rival Vision Transformers, challenging the notion that ViTs are superior at scale. 
+The results emphasize the need to consider both computational resources and data availability 
+when designing and training computer vision models. This research opens up new possibilities 
+for the future of computer vision research, where ConvNets can play a more prominent role in handling web-scale datasets.
