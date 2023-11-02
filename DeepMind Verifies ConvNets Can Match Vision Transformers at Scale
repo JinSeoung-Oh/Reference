@@ -1,4 +1,5 @@
 From https://medium.com/syncedreview/deepmind-verifies-convnets-can-match-vision-transformers-at-scale-fed84c497da1
+From https://arxiv.org/abs/2310.16764
 
 The paper "ConvNets Match Vision Transformers at Scale" by a Google DeepMind research team challenges 
 the prevailing belief that Vision Transformers (ViTs) are superior to Convolutional Neural Networks (ConvNets) 
