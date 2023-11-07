@@ -1,0 +1,31 @@
+from https://medium.com/gitconnected/lema-for-an-llm-learning-math-is-making-mistakes-f758f63eaafe
+
+Large Language Models (LLMs) have demonstrated impressive problem-solving abilities, 
+especially in mathematics and reasoning tasks. However, there is still room for improvement in these models. 
+To enhance their performance, researchers have explored various approaches, 
+such as fine-tuning on CoT data (consisting of question-answer pairs and explanations), extensive training on mathematical and STEM data, 
+and models like Google Minerva and LLemma.
+
+One intriguing idea for improvement comes from the way humans learn mathematics.
+Just as students learn from their mistakes when studying math, LLMs could benefit from learning from their errors. 
+The learning process can be divided into forward learning, 
+where students study textbooks and demonstrations, and backward learning, where students correct their mistakes
+
+To implement learning from mistakes in LLMs, researchers at Microsoft have proposed an approach in which the model learns from its errors. 
+This approach involves collecting incorrect reasoning paths, correcting them, and fine-tuning the model with these corrected paths. 
+The data used for correction includes the incorrect step, an explanation of the error and how to fix it, and the correct solution.
+
+To create correction data, several LLMs were used to answer problems and collect incorrect responses.
+GPT-4 was then used to generate the corrections. Human evaluation was necessary to ensure the correctness of model-generated corrections. 
+The authors found that this approach significantly improved the performance of the models, especially larger ones.
+
+The study also examined the role of model size, showing that larger LLMs were better at learning from their mistakes. 
+Additionally, specialized models also benefited from the correction approach. 
+The research highlighted the importance of the amount of data used for training and revealed 
+that even the best models could make mistakes when generating corrections.
+
+While the approach has shown promise in improving LLMs' reasoning capabilities, 
+it's important to note that it doesn't necessarily mean that the models possess deep understanding of the underlying logic and rules. 
+They may emulate human reasoning behavior without truly comprehending the logic, 
+requiring external guidance from a "world model" that understands the real-world rules. 
+Nonetheless, this approach offers a potential pathway for enhancing LLMs' problem-solving abilities further.
