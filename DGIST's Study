@@ -1,0 +1,29 @@
+A research team led by Professor Sang-hyun Park at Daegu Gyeongbuk Institute of Science and Technology (DGIST) 
+has developed an innovative image translation model aimed at mitigating biases in data used for artificial intelligence (AI) models. 
+In the development of AI models using images from diverse sources, biases can emerge, affecting model performance. 
+The newly created model effectively removes biases without specific information about the factors causing them, enhancing image analysis accuracy. 
+This breakthrough is expected to have applications in self-driving technology, content creation, and medical fields.
+
+The problem addressed by the research lies in biases that often arise in datasets used to train deep learning models. 
+For example, when creating a dataset to differentiate between bacterial pneumonia and COVID-19, 
+variations in image collection conditions due to the risk of infection can lead to subtle differences in images. 
+Existing deep learning models trained on such biased datasets may struggle to generalize effectively to data from different sources, 
+resulting in overfitting issues.
+
+The developed image translation model employs texture debiasing during the learning process, 
+differentiating it from traditional models. Unlike standard models that might inadvertently alter content when adjusting textures, 
+this model simultaneously considers error functions for both textures and contents. 
+It extracts information on the input image's contents and textures from a different domain, 
+enabling the generation of images with the texture of a different domain while retaining information about the original image's contents.
+
+The model's superior performance was demonstrated on datasets with texture biases,
+including those for distinguishing numbers, dogs and cats with various hair colors,
+and COVID-19 from bacterial pneumonia. It outperformed existing methods on datasets with diverse biases, 
+showcasing its effectiveness in tasks such as classifying multi-label numbers and distinguishing between photos, images, animations, and sketches.
+
+Furthermore, the developed image translation technology extends to image manipulation, 
+altering only the textures of an image while preserving its original contents. 
+This method surpassed existing image manipulation techniques. 
+The researchers believe that this technology will significantly enhance the robustness of AI models used in
+industrial and medical fields where biased datasets are prevalent, 
+making a substantial contribution to improving the performance and reliability of AI models in diverse environments for commercial purposes.
