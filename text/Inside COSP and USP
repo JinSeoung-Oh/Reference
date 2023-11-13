@@ -1,0 +1,30 @@
+Google Research has introduced two innovative techniques, 
+Consistency-Based Self-Adaptive Prompting (COSP) and Universal Self-Adaptive Prompting (USP),
+to improve the zero-shot adaptive prompting capabilities of large language models (LLMs). 
+These techniques address challenges in prompt generation, particularly for tasks such as summarizing articles 
+and answering specialized medical queries.
+
+COSP focuses on generating suitable prompts by leveraging unlabeled samples and the model's own predictions.
+It introduces the concept of "Consistency-Based Self-Adaptive Prompting," which uses high-confidence,
+consistent model predictions as pseudo-demonstrations. The model's confidence in its output is assessed through self-consistency, 
+and a range of possible answers is generated using zero-shot chain-of-thought prompting. 
+COSP outperforms standard zero-shot baselines in tasks like arithmetic and commonsense reasoning, 
+as demonstrated across three different large language models (LLMs).
+
+USP extends the idea of self-adaptive prompting to a broader spectrum of natural language understanding and generation tasks. 
+It employs confidence measurement techniques adapted to different tasks, including classification, short-form generation,
+and long-form generation. USP consistently outperforms baseline methods across various benchmarks, showcasing its effectiveness 
+in tasks ranging from classification to addressing the BIG-Bench Hard suite of tasks, 
+where LLMs have historically struggled compared to human performance.
+
+Both COSP and USP share a common methodology:
+1. Input unlabeled questions to the model to obtain multiple rationales and answers.
+2. Highlight the most frequent answers and measure their consistency across multiple model outputs.
+3. Penalize repetition and promote diversity in selected demonstrations.
+4. Concatenate pseudo-demonstrations into test questions and query the model for the final predicted answer.
+
+The commitment of Google Research to understanding the mechanics of USP is evident in their investigation 
+into the relationship between confidence and correctness. 
+USP predominantly selects confident predictions, yielding superior results across various tasks. 
+These advancements represent significant progress in AI prompting, enabling models to prompt themselves effectively 
+and enhance their performance across a wide range of natural language tasks.
