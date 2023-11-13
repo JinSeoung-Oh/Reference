@@ -1,0 +1,24 @@
+Direct Preference Optimization (DPO) was introduced as an alternative to 
+Reinforcement Learning from Human Feedback (RLHF) and has gained popularity, 
+notably used in Zephyr, a leading 7B language model at that time.
+
+DPO is specifically designed for generative language models like GPT, Llama, Zephyr, and T5, with the primary goal of improving
+the alignment of language models with human preferences. 
+Unlike RLHF, DPO doesn't require a reward model and directly optimizes the model based on preference data.
+
+Preference data for DPO consists of triplets (prompt, chosen answer, rejected answer), 
+where each prompt has an associated better and worse response. These responses, unlike RLHF, 
+don't need to be sampled from the model being optimized.
+
+The fine-tuning process in DPO involves creating an exact copy of the language model (LM) being trained,
+freezing its parameters, and scoring chosen and rejected responses for each data point using both the trained and frozen models. 
+The scores are calculated as the product of probabilities associated with the desired response token for each generation step
+
+The ratio between the scores from the trained and frozen models is then used to calculate the final loss, 
+which guides the modification of model weights in the gradient descent update. 
+The DPO loss equation includes a hyperparameter β and the sigmoid function, ensuring stability and performance.
+
+DPO is praised for being a stable, performant, and computationally lightweight algorithm. 
+Unlike RLHF, it eliminates the need for fitting a reward model, sampling during fine-tuning, and extensive hyperparameter tuning.
+In essence, DPO represents a significant advancement, 
+simplifying and enhancing the process of building language models that better understand and cater to human needs.
