@@ -1,0 +1,53 @@
+Key Drivers of Hallucinations in LLMs
+1. Overconfidence:
+   LLMs are trained to produce fluent, human-like text, 
+   allowing them to generate detailed and convincing yet false information without adequate grounding.
+2. Lack of Reasoning:
+   Unlike humans who leverage general knowledge and reasoning skills, LLMs are narrowly 
+   trained on statistical relationships, lacking logical consistency
+3. Insufficient World Knowledge:
+   LLMs lack common sense and general knowledge about how the world works, relying on limited input data.
+4. Anthropomorphism:
+   LLMs, designed to mimic human conversational ability, can build undeserved trust in their factual accuracy
+5. Automated Training:
+   LLMs are trained using automated algorithms without direct oversight, potentially learning false information without human judgment.
+
+Hallucination Detection Methods
+1. Confidence Scoring:
+   Assigning scores indicating the model's confidence in the correctness of generated text.
+2. Consistency Modeling:
+   Checking if claims are logically consistent with each other and general world knowledge.
+3. External Knowledge Retrieval:
+   Querying external knowledge bases to retrieve relevant facts for verification.
+4. Semi-Supervised Learning:
+   Leveraging labeled hallucinated examples to train models for better recognition.
+5. Human-in-the-Loop:
+   Involving human judges in the evaluation process to manually identify hallucinations.
+6. Formal Verification:
+   Framing the problem as proving whether generated claims violate predefined logical rules.
+
+Hallucination Mitigation During Training
+1. Logic-Guided Learning:
+   Incorporating symbolic logical rules into pre-training to improve reasoning and consistency modeling.
+2. External Knowledge Integration:
+   Pre-training on additional structured knowledge resources to provide richer world knowledge.
+3. Uncertainty Modeling:
+   Explicitly modeling uncertainty during pre-training to capture lack of confidence.
+4. Causal Modeling:
+   Training systems to infer and reason about causal relations from data.
+5. Finetuning on Hallucination Data:
+   Further fine-tuning models using an adversarial dataset of labeled hallucinations.
+6. Human Judgment Integration:
+   Presenting samples to human evaluators during training to improve modeling of plausibility.
+7. Self-Debiasing Objectives:
+   Optimizing models to detect their own false outputs and misconfidences.
+
+Tradeoffs in Hallucination Mitigation
+1. Factuality vs. Uncertainty:
+   Balancing over-constraining outputs to prevent hallucinations without losing nuanced human uncertainty.
+2. Truthfulness vs. Scalability:
+   Weighing improvements in factual consistency against potential reductions in automated scalability.
+3. Reasoning vs. Comprehension:
+   Balancing improvements in reasoning abilities for factuality against learning statistical patterns for language understanding.
+4. Alignment vs. Capability:
+   Debiasing against falsehoods without limiting general capabilities, requiring careful targeting.
