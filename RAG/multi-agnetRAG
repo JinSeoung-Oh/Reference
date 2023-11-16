@@ -1,0 +1,37 @@
+From https://ai.plainenglish.io/multi-agent-systems-the-ideal-framework-for-scalable-rag-cfd9c56acc3
+
+The concept of Retrieval Augmented Generation (RAG) has indeed proven to be a powerful technique for enhancing the capabilities 
+of large language models (LLMs). 
+The integration of relevant information from knowledge sources into prompts provides contextual grounding for LLM outputs. 
+However, single-agent RAG systems have faced challenges such as inefficient retrieval, high latency, and suboptimal prompt engineering.
+The adoption of multi-agent architectures presents a promising solution to overcome these challenges and unlock the full potential of RAG. 
+By dividing the RAG workflow into specialized roles executed concurrently by different agents, 
+multi-agent systems offer flexibility, specialization, and collaboration to optimize the entire process.
+
+Limitations of Single-Agent RAG
+1. Bottlenecks and Inefficiencies
+   * Single-agent systems face bottlenecks, especially in handling tasks like passage retrieval from extensive corpora.
+   * Inefficient retrieval of marginally relevant passages leads to wasted time and resources.
+2. Latency Issues
+   * Retrieving information from large databases results in latency spikes, making real-time applications challenging.
+3. Suboptimal Summarization
+   * Long contexts are often summarized poorly, affecting the overall quality of the generated prompts.
+
+Advantages of Multi-Agent RAG
+1. Factored Retrieval
+   * Dedicated retriever agents focus solely on efficient passage retrieval, minimizing latency.
+2. Parallelized Search
+   * Retrieval tasks are parallelized across multiple agents, reducing wait times and improving efficiency
+3. Specialized Ranking
+   * Separate ranker agents evaluate retrieved passages based on various relevance signals, filtering for maximal relevance.
+4. Distilled Summarization
+   * Reader agents specialize in summarizing lengthy contexts into concise snippets, improving the quality of information extraction.
+5. Optimized Prompting
+   * Orchestrator agents dynamically adjust the integration of the original prompt and retrieved information for optimal results.
+6. Flexible Architecture
+   * Agents can be substituted or added to tailor the system to specific needs. Visualizer agents can provide insights into the workflow.
+
+Multi-Agent RAG in Action
+  The example of the Llama index demonstrates the implementation of multi-agent RAG using document agents, 
+  vector indexes, summary indexes, and a top-level agent for coordination. 
+  This system showcases real benefits over single-agent RAG baselines, particularly in multi-document question-answering scenarios.
