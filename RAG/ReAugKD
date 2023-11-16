@@ -1,0 +1,36 @@
+## Overview of ReAugKD
+# Objective:
+   Bridging the efficiency gap between smaller "student" models and larger "teacher" models.
+# Techniques Involved:
+   Knowledge Distillation (KD)
+      Optimizing the size of foundation models by transferring knowledge from larger teacher models to smaller student models.
+   Retrieval-Augmented Generation (RAG):
+      Expanding foundation model knowledge by incorporating external data sources.
+
+#Amazon Science's Contribution : Retrieval-Augmented Knowledge Distillation (ReAugKD)
+   Concept:
+     Utilizes teacher models' data representations and predictions stored in a lookup table to guide predictions of student models for similar inputs.
+     Adaptable beyond language models to various task-specific external knowledge domains.
+   Evaluation:
+     Tasks:
+       Evaluated on six natural language processing tasks, including paraphrasing, natural-language inference, and question answering.
+     Results:
+       ReAugKD outperformed ten existing models in five tasks and secured the second spot in the sixth.
+       Established a new state-of-the-art benchmark with minimal latency overhead (3%).
+
+# Training Method
+    Two-Step trining Process:
+      step 1
+        Teacher model fine-funed for a specific downstream task
+        Linear-projection layer introduced atop the models' encoder
+        Supervised contrastive loss mechanism to optimize the parameters of the linear-projection layer
+      step 2
+        Generation of resized teacher embeddings and predictions tailored for student model training.
+        Creation of similarity matrix for teacher embeddings to quantify likeness between inputs.
+   
+    Loss Function:
+      Kullback–Leibler Divergence
+         Minimizes the divergence between teacher-teacher and teacher-student similarity distributions.
+      Cross-Entropy Loss
+         Computes divergence between student's and teacher's predictions.
+      
