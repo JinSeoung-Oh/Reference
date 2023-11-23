@@ -1,0 +1,35 @@
+From https://github.com/THUDM/CogVLM
+From https://medium.com/@artgor/paper-review-cogvlm-visual-expert-for-pretrained-language-models-5ed620e71e50
+
+1. Architecture:
+   CogVLM integrates four key components: 
+      ViT encoder, MLP adapter, language model (GPT-style), and a visual expert module added to each layer.
+      The ViT encoder (EVA2-CLIP-E) aligns image features with text features by removing the final layer.
+      MLP adapter maps image features into the text feature space.
+     The visual expert module aligns visual and language features by transforming image features to match semantic aspects captured by attention heads.
+
+2. Pretraining:
+   CogVLM is pretrained on 1.5 billion image-text pairs from public datasets LAION-2B and COYO-700M.
+   A custom visual grounding dataset with 40 million images is created, linking nouns in captions to bounding boxes.
+   Pretraining occurs in two stages: image captioning loss for 120,000 iterations and mixing captioning with Referring Expression Comprehension tasks for another 60,000 iterations.
+
+3. Alignment to Human Interaction (CogVLM-Chat):
+   CogVLM-Chat is a refined version for flexible human interaction with free-form instructions.
+   Finetuning involves using high-quality SFT data from multiple sources, totaling around 500,000 VQA pairs.
+   Particular attention is given to data quality, with manual corrections made to the LLaVA-Instruct dataset.
+
+4. Experiments:
+   CogVLM demonstrates state-of-the-art or comparable performance in image captioning on multiple benchmarks, outperforming previous methods.
+   Excels in Visual Question Answering (VQA) across benchmarks, showing strong multi-modal capabilities.
+   A generalist approach to training on a wide range of multi-modal datasets maintains leadership across tasks without significant impact on individual task performance.
+   Visual grounding capabilities are enhanced, achieving top performance across various grounding tasks.
+   CogVLM-Chat significantly outperforms other Visual Language Models (VLMs) in real-world user behavior scenarios assessed by the TouchStone benchmark.
+
+5. Ablation Study:
+   Ablation study highlights the importance of model structure and parameter tuning, emphasizing the impact of the visual expert module and initialization method.
+   The causal visual attention mask is beneficial, and there are no substantial gains from self-supervised learning loss on image features.
+   The use of an exponential moving average during pretraining proves beneficial across tasks.
+
+In summary, CogVLM showcases strong performance in various multi-modal tasks, demonstrating its effectiveness in image captioning, 
+Visual Question Answering, visual grounding, and real-world user interaction scenarios. The architecture and training methodologies, 
+including pretraining and fine-tuning, contribute to its success.
