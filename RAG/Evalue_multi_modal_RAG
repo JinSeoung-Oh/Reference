@@ -1,0 +1,73 @@
+from https://blog.llamaindex.ai/evaluating-multi-modal-retrieval-augmented-generation-db3ca824d428
+
+1. Build Considerations for RAG Systems:
+   In text-only RAG, an encoder for text data is needed and stored in an index.
+   In multi-modal RAG, two encoders are required: one for text and another for images, and they are stored in separate indices or namespaces.
+   
+2. Query Pipeline:
+   In text-only RAG, the user submits a text-only query, and relevant text data is retrieved.
+   In multi-modal RAG, the user submits a query containing both image and text, and both types of data are used to retrieve relevant information.
+
+3. Evaluation of Text-Only RAG:
+   Retrieval evaluation involves assessing the relevance of retrieved documents to the user query.
+   Popular metrics include recall, hit rate, mean reciprocal rank, mean average precision, and normalized discounted cumulative gain.
+   Generator evaluation involves assessing whether the response uses the retrieved documents to sufficiently answer the user query, relying on subjective judgment or LLM judges.
+
+4. Evaluation of Multi-Modal RAG:
+   Separate retrieval evaluations are performed for text and image modalities, allowing for a more nuanced understanding of system performance.
+   Multi-modal LMMs are used for generator evaluations, considering both textual and visual context for relevancy and faithfulness.
+   The LMM-As-A-Judge pattern is employed to compute metrics in the multi-modal case.
+
+5. Using Multi-Modal LLMs for Generator Evaluations (LMM-As-A-Judge):
+   Relevancy and faithfulness are assessed by passing retrieved context, query, and generated response to the LMM judge.
+   The llama-index library supports various metrics for retrieval and generator evaluation.
+
+6. Important Remarks:
+   Using LLMs or LMMs as judges has drawbacks, including hallucinations and inconsistencies.
+   Evaluation should consider factors like alignment and safety.
+
+7. Coding Example:
+###########################################################################
+from llama_index.evaluation.multi_modal import (
+	MultiModalRelevancyEvaluator,
+	MultiModalFaithfulnessEvaluator
+)
+from llama_index.multi_modal_llm import OpenAIMultiModal
+
+relevancy_judge = MultiModalRelevancyEvaluator(
+    multi_modal_llm=OpenAIMultiModal(
+        model="gpt-4-vision-preview",
+        max_new_tokens=300,
+    )
+)
+
+faithfulness_judge = MultiModalRelevancyEvaluator(
+    multi_modal_llm=OpenAIMultiModal(
+        model="gpt-4-vision-preview",
+        max_new_tokens=300,
+    )
+)
+
+# Generated response to a query and its retrieved context information
+query = ...
+response = ...
+contexts = ...  # retrieved text contexts
+image_paths = ...  # retrieved image contexts
+
+# Evaluations
+relevancy_eval = relevancy_judge.evaluate(
+ query=query,
+ response=response,
+ contexts=contexts,
+ image_paths=image_paths
+)
+
+faithfulness_eval = faithfulness_judge.evaluate(
+ query=query,
+ response=response,
+ contexts=contexts,
+ image_paths=image_paths
+)
+#######################################################################
+
+A code snippet is provided for using beta Multi-Modal Evaluator abstractions to perform evaluations on a generated response.
