@@ -1,0 +1,42 @@
+From https://chat.openai.com/c/750a6b78-16f3-4f70-a4e0-844a8f3fbf38
+
+1. Challenges with RALMs:
+   1. Surface-Level Processing
+      - RALMs may rely on superficial information, missing nuances in complex or indirect questions.
+   2. Handling Contradictory Information
+      - Difficulty in resolving contradictions or determining the credibility of information.
+   3. Transparency and Interpretability
+      - Limited insight into the decision-making process, reducing user understanding.
+   4. Overdependence on Retrieved Documents
+      - Potential to ignore the model's inherent knowledge, especially with noisy or outdated documents.
+
+2. Chain-of-Noting (CON) Framework
+   1. Objective
+      - Enhance RALMs' ability to critically assess and use retrieved documents.
+   2. Methodology
+     - Notes Design
+       Constructing reading notes based on document relevance, providing concise and relevant summaries.
+     - Data Collection
+       Training data generated using ChatGPT, with human evaluation for note relevance.
+     - Model Training
+       LLaMa-2 7B architecture trained with a focus on generating reading notes and final answers.
+
+3 Experiments and Results:
+  1. Performance Improvement:
+     RALMs with Dense Passage Retrieval (DPR) and LLaMa-2 with retrieval outperform LLaMa-2 alone.
+     CON-enhanced RALMs outperform standard RALMs, showing an average improvement of +1.97 in Exact Match scores.
+
+  2. Noise Robustness Evaluation:
+     CON-enhanced RALMs consistently outperform standard RALMs in scenarios with noisy documents, showing +7.9 improvement in Exact Match scores.
+     CON-enhanced model nearly matches the performance of LLaMa-2 without information retrieval, demonstrating robustness against irrelevant data.
+
+4. Case Studies
+   CON-enhanced RALMs demonstrate superior performance in information processing and interpretation compared to standard RALMs.
+   Examples highlight CON's ability to avoid surface-level details, integrate information from various sources, and provide more nuanced and accurate conclusions.
+
+5. Key Observations
+   Semantic vs. Total Noise: CON performs better in scenarios with semantically relevant noise compared to entirely random noise.
+   Case Studies: CON improves accuracy in specific cases, recognizing unsuccessful bids and synthesizing information to answer complex questions accurately.
+
+In summary, the Chain-of-Noting (CON) framework appears to be effective in addressing the limitations of retrieval-augmented language models, 
+providing better performance in noisy scenarios and enhancing the models' ability to process and interpret information from various sources.
