@@ -1,0 +1,48 @@
+From https://medium.com/autonomous-agents/part-2-llms-beyond-memorization-9f0d634f7166
+
+## Dynamic Contextual Learning (LLMs)
+* Architecture and Mechanism
+  - LLMs, especially those based on the Transformer architecture, utilize a sequence-to-sequence model with an attention mechanism
+  - Attention mechanism involves query (Q), key (K), and value (V) matrices, enabling dynamic focus on different parts of input sequences
+
+* Flexibility and Generalization
+  - LLMs exhibit complexity and flexibility with multi-layered, attention-driven architectures
+  - They generalize effectively, adapting to new scenarios and generating novel responses
+
+* Continuous Space Interpolation
+  - LLMs operate in a continuous, high-dimensional vector space, allowing for nuanced variations in meaning and context
+  - Attention-based interpolation enables handling ambiguity, synonyms, and diverse sentence structures
+
+* Adaptability and Gradient Descent
+  - LLMs use gradient descent optimization, continuously adjusting parameters based on computed gradients
+  - Non-linearities introduced through activation functions enhance adaptability, enabling modeling of complex relationships
+
+* Deep Learning with Neural Networks
+  - LLMs employ deep neural networks, introducing non-linearity and enabling the capture of intricate patterns
+  - Layered learning with hierarchical features facilitates understanding and generation of contextually rich language
+
+* Probabilistic Output Generation
+  - LLMs use probabilistic language models with the softmax function for novel output generation
+
+## Static Mapping (Memorization Models)
+* Finite State Automata (FSA)
+  - Memorization models are represented using advanced finite state automata with complex transition matrices
+  - They have fixed relationships and lack adaptability beyond programmed state transitions
+
+* Discrete Mapping with Algebraic Structures
+  - Algebraic structures represent discrete mapping in memorization models, limiting interpolation and generalization
+  - The output is strictly defined by the presence or absence of specific input patterns
+
+* Stochastic Processes in Fixed Probabilistic Spaces
+  - Memorization models use stochastic processes with fixed transition probabilities, constraining adaptability to new patterns
+  - The model's behavior is predetermined and does not evolve based on new data
+
+* Set Theory-Based Limitations
+  - Memorization models, represented through set theory, have static knowledge sets, restricting adaptation and generalization
+  - They operate like lookup tables with predetermined responses to specific inputs
+
+## Comparative Analysis
+* LLMs vs. Memorization Models
+  - LLMs demonstrate superior flexibility, adaptability, and generalization capabilities compared 
+    to the rigid and static nature of memorization models.
+
