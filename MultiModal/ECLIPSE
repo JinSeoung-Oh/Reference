@@ -1,0 +1,52 @@
+From https://medium.com/@multiplatform.ai/eclipse-a-game-changer-in-text-to-image-generation-unveiled-by-arizona-state-university-ccdb002ced6f
+
+The breakthrough from Arizona State University, introducing the "ECLIPSE" contrastive learning technique, 
+indeed marks a significant advancement in the field of text-to-image generation. 
+The researchers' focus on addressing the limitations of current T2I diffusion 
+priors and offering a solution that enhances efficiency is noteworthy
+
+## Diffusion Models and T2I Production
+* Diffusion models, particularly Text-to-Picture (T2I) production, 
+  have been successful in various applications such as depth-driven image generation and subject/segmentation identification.
+* CLIP models and Latent Diffusion Models (LDM), including Stable Diffusion, play crucial roles in these advancements
+
+## unCLIP Models vs. LDM
+* unCLIP models, such as DALL-E-2, Karlo, and Kandinsky, stand out for their composition benchmarks, 
+  surpassing LDM in certain aspects
+* unCLIP models integrate a text-to-image prior and a diffusion image decoder, 
+  leading to larger model sizes exceeding 2 billion parameters
+
+## Challenges with T2I Models
+* T2I models with a substantial number of parameters require precise alignment between images and text during training.
+* Larger model sizes demand extensive training data, raising questions about the impact of model size on performance.
+
+## Introduction of ECLIPSE
+* ECLIPSE is a contrastive learning technique designed to elevate the T2I non-diffusion prior while addressing limitations
+* It optimizes the Evidence Lower Bound (ELBO) in generating picture embeddings from text embeddings
+
+## Performance of ECLIPSE
+* ECLIPSE enables the training of compact non-diffusion prior models with a remarkable 
+  97% reduction in size (33 million parameters)
+* It achieves this using a tiny fraction of image-text pairings (0.34% — 8.69%), demonstrating high parameter efficiency
+
+## Extending ECLIPSE to unCLIP Diffusion Image Decoders
+* ECLIPSE is extended to unCLIP diffusion image decoder variations (Karlo and Kandinsky), 
+  outperforming their 1 billion parameter counterparts and baseline prior learning algorithms.
+
+## Noteworthy Contributions
+* ECLIPSE is the first attempt to utilize contrastive learning for text-to-image priors within the unCLIP framework
+* Empirical validation supports ECLIPSE's superiority over baseline priors in resource-constrained scenarios
+
+## Implications
+* Efficiency and Cost-Effectiveness
+  - ECLIPSE's ability to achieve outstanding performance with significantly reduced model 
+    sizes and data requirements implies cost-effective and resource-efficient image generation
+* Competitive Market for T2I Generative Models
+  - The breakthrough opens doors to a more accessible and competitive market for businesses seeking advanced T2I generative models.
+  - Smaller model sizes and reduced data dependencies make the technology more viable for a broader range of applications
+* Broader Adoption of T2I Technology
+  - The research paves the way for broader adoption of T2I generative models by overcoming challenges 
+    related to model size and data availability
+
+In conclusion, the introduction of ECLIPSE presents a promising direction for advancing text-to-image generation, 
+making it more efficient, cost-effective, and accessible for various industries and applications
