@@ -1,4 +1,5 @@
 from https://blog.gopenai.com/mixture-of-experts-moe-in-ai-models-explained-2163335eaf85
+from Mixture of Experts Explained
 
 ## Understanding Mixture of Experts
 # Definition and Components
@@ -9,10 +10,12 @@ from https://blog.gopenai.com/mixture-of-experts-moe-in-ai-models-explained-2163
 
 # Role of Sparse MoE Layers and Experts
   - MoE employs sparse MoE layers
+  - MoE layers have a certain number of “experts”, where each expert is a neural network
   - Each layer houses several “experts,” with each expert being a neural network, often in the form of FFNs(feed-forward network)
 
 # Gate Network Functionality
   - The gate network plays a crucial role in determining the routing of tokens to appropriate experts
+  - The router is composed of learned parameters and is pretrained at the same time as the rest of the network
   - Not just pivotal in the functioning of MoEs but also brings in the complexity of decision-making about token routing, 
     where the router itself is a learned entity that evolves during the pretraining of the network.
 
@@ -26,32 +29,54 @@ from https://blog.gopenai.com/mixture-of-experts-moe-in-ai-models-explained-2163
   3. Solutions and Strategies
      - Load balancing to prevent the overuse of certain experts
      - Incorporation of an auxiliary loss to ensure equitable training across all experts
+       *An auxiliary loss - This loss ensures that all experts receive a roughly equal number of training examples
 
 * Skip history of MoE
 
 ## The Principle of Sparsity
 # Concept of Sparsity
   - Sparsity is based on the principle of conditional computation
+  - While in dense models all the parameters are used for all the inputs, sparsity allows us to only run some parts of the whole system
   - This allows scaling the model size without proportionally increasing the computation, 
     leading to the use of thousands of experts in each MoE layer
 
-# Gating Mechanisms
+## Gating Mechanisms
   -Ex.Noisy Top-K Gating
    * This approach adds noise to the routing process and then selects the top ‘k’ values, 
      creating a balance between efficiency and diversity in expert utilization *
+     - Random routing 
+       1) In a top-2 setup, we always pick the top expert, but the second expert is picked with probability proportional to its weight
+     - Expert capacity
+       1) Set a threshold of how many tokens can be processed by one expert
+       2) If both experts are at capacity, the token is considered overflowed, and it’s sent to the next layer via residual connections 
+  - In a normal MoE training, the gating network converges to mostly activate the same few experts
 
-# MoEs in Transformers
+## MoEs in Transformers
  - GShard’s implementation of MoEs in transformers is a notable example of large-scale application. 
    It introduces novel concepts like random routing and expert capacity, ensuring balanced load and efficiency at scale
    * https://openreview.net/pdf?id=qrwe7XHTmYb *
 
-# Breakthrough with Switch Transformers
+## Breakthrough with Switch Transformers
   -They simplify the routing process and reduce the communication costs, all while preserving the quality of the model
+   1) The router computation is reduced
+   2) The batch size of each expert can be at least halved
+   3) Communication costs are reduced
+   4) Quality is preserved
 
-# Fine-Tuning MoEs
+## Stabilizing training with router Z-loss
+  - Router z-loss significantly improves training stability without quality degradation by penalizing large logits entering the gating network
+  - Since this loss encourages absolute magnitude of values to be smaller, roundoff errors are reduced, 
+    which can be quite impactful for exponential functions such as the gating
+
+## Fine-Tuning MoEs
   - Main problem : overfitting problem
-  - Higher regularization within experts and adjustments to the auxiliary loss
-  - Selective freezing of MoE layer parameters during fine-tuning
+    sol 1) Higher regularization within experts and adjustments to the auxiliary loss
+    sol 2) Selective freezing of MoE layer parameters during fine-tuning
+  - See Fine-tuning MoES in https://huggingface.co/blog/moe for more detail
+
+## When to use sparse MoEs vs dense models
+  - Given a fixed compute budget for pretraining, a sparse model will be more optimal. 
+    For low throughput scenarios with little VRAM, a dense model will be better
 
 Megablocks: https://github.com/stanford-futuredata/megablocks
 Fairseq: https://github.com/facebookresearch/fairseq/tree/main/examples/moe_lm
