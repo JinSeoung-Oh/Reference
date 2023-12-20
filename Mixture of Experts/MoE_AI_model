@@ -1,0 +1,63 @@
+from https://blog.gopenai.com/mixture-of-experts-moe-in-ai-models-explained-2163335eaf85
+
+## Understanding Mixture of Experts
+# Definition and Components
+ - At its core, a MoE, particularly in the context of transformer models, 
+   consists of two primary elements: 
+     1) Sparse MoE layers
+     2) A gate network (or router).
+
+# Role of Sparse MoE Layers and Experts
+  - MoE employs sparse MoE layers
+  - Each layer houses several “experts,” with each expert being a neural network, often in the form of FFNs(feed-forward network)
+
+# Gate Network Functionality
+  - The gate network plays a crucial role in determining the routing of tokens to appropriate experts
+  - Not just pivotal in the functioning of MoEs but also brings in the complexity of decision-making about token routing, 
+    where the router itself is a learned entity that evolves during the pretraining of the network.
+
+## Challenges and Solutions
+# Training and Inference Challenges
+  1. Training Challenges
+     - A significant obstacle has been in generalizing the MoE during fine-tuning, where it can tend toward "overfitting"
+  2. Inference Challenges
+     - Only a subset of these parameters are active during inference
+     - All parameters must be loaded into RAM regardless of their active status during inference
+  3. Solutions and Strategies
+     - Load balancing to prevent the overuse of certain experts
+     - Incorporation of an auxiliary loss to ensure equitable training across all experts
+
+* Skip history of MoE
+
+## The Principle of Sparsity
+# Concept of Sparsity
+  - Sparsity is based on the principle of conditional computation
+  - This allows scaling the model size without proportionally increasing the computation, 
+    leading to the use of thousands of experts in each MoE layer
+
+# Gating Mechanisms
+  -Ex.Noisy Top-K Gating
+   * This approach adds noise to the routing process and then selects the top ‘k’ values, 
+     creating a balance between efficiency and diversity in expert utilization *
+
+# MoEs in Transformers
+ - GShard’s implementation of MoEs in transformers is a notable example of large-scale application. 
+   It introduces novel concepts like random routing and expert capacity, ensuring balanced load and efficiency at scale
+   * https://openreview.net/pdf?id=qrwe7XHTmYb *
+
+# Breakthrough with Switch Transformers
+  -They simplify the routing process and reduce the communication costs, all while preserving the quality of the model
+
+# Fine-Tuning MoEs
+  - Main problem : overfitting problem
+  - Higher regularization within experts and adjustments to the auxiliary loss
+  - Selective freezing of MoE layer parameters during fine-tuning
+
+Megablocks: https://github.com/stanford-futuredata/megablocks
+Fairseq: https://github.com/facebookresearch/fairseq/tree/main/examples/moe_lm
+OpenMoE: https://github.com/XueFuzhao/OpenMoE
+
+Switch Transformers (Google): Collection of T5-based MoEs going from 8 to 2048 experts. The largest model has 1.6 trillion parameters.
+NLLB MoE (Meta): A MoE variant of the NLLB translation model.
+OpenMoE: A community effort that has released Llama-based MoEs.
+Mixtral 8x7B (Mistral): A high-quality MoE that outperforms Llama 2 70B and has much faster inference. A instruct-tuned model is also released. Read more about it in the announcement blog post.
