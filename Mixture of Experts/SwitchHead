@@ -1,0 +1,53 @@
+From https://medium.com/gitconnected/switchhead-be-faster-to-catch-the-prey-3e28ccd84ce1
+From https://arxiv.org/abs/2312.07987v2?source=post_page-----3e28ccd84ce1--------------------------------
+
+## Article 
+   The article explores the challenges of training Large Language Models (LLMs), especially the Transformer model, due to its high computational cost.
+   It introduces the concept of Mixture-of-Experts (MoE) as a potential solution and focuses on a novel MoE-based attention mechanism called SwitchHead.
+
+   SwitchHead is designed to address the quadratic cost associated with self-attention in transformers. 
+   Unlike traditional transformers with fixed attention heads, SwitchHead dynamically selects attention heads for each token, 
+   allowing for a reduction in computational and memory requirements. 
+   The method involves obtaining a linear projection and using the head with the highest activation for each output position.
+
+   The authors aim to maintain the fundamental properties of attention while reducing the model's cost. 
+   The article discusses the empirical results of SwitchHead, 
+   demonstrating that it matches the performance of traditional models with a fraction of the memory and compute requirements. 
+   SwitchHead achieves a significant speedup in the training pipeline without sacrificing performance.
+
+   The article highlights the independence of SwitchHead from the type of attention used and its lack of regularization. 
+   The authors compare SwitchHead with other transformers and emphasize its ability to outperform baseline models with similar numbers of parameters. 
+   Additionally, they explore combining SwitchHead with MoE for MLP layers, further improving performance.
+
+   In conclusion, the article underscores SwitchHead's efficiency in reducing the computational cost of transformers and suggests 
+   its potential for accelerating the training of large-scale language models. 
+   It emphasizes the need for additional testing on larger models and diverse tasks to assess the broader applicability of MoE-based approaches like SwitchHead.
+
+
+## What is SwitchHead?
+   SwitchHead is a novel Mixture-of-Experts (MoE)-based attention mechanism designed to enhance the efficiency of transformers, 
+   particularly in the context of Large Language Models (LLMs). The primary goal of SwitchHead is to reduce the computational cost 
+   and memory requirements associated with the attention mechanism in transformers.
+
+   The attention mechanism in transformers involves multiple heads that process information independently, 
+   and this can be computationally expensive. SwitchHead introduces a method to dynamically choose a subset of attention heads for each output position, 
+   thereby reducing the number of attention matrices that need to be computed and stored. 
+   The mechanism involves a linear projection that selects the head with the highest activation for each output position.
+
+   The key innovation is the integration of MoE for computation of the matrices, allowing different experts to handle specific aspects of the computation. 
+   This approach aims to maintain the fundamental properties of attention while achieving significant savings in terms of computational resources and memory.
+
+   ** In SwitchHead, each head can be considered as an independent expert model
+
+## Attention in SwitchHead
+   In the context of SwitchHead, the attention mechanism is modified so that each head deals with the same data, 
+   but only a subset of heads is active for a given token at each step. 
+   The model uses a linear projection to dynamically select a subset of heads based on their activations.
+
+   In a traditional attention mechanism, each head attends to different parts of the input sequence, 
+   allowing the model to capture various relationships and dependencies. 
+   However, in SwitchHead, the focus is on selecting a subset of heads for each token, 
+   effectively reducing the computational cost associated with processing all heads for every token. 
+   So, while each head processes the same input data, not all heads are active for every token, and the model dynamically chooses which heads to use based on the context.
+
+Preliminary results indicate that SwitchHead can match the performance of dense counterparts with a fraction of the computational cost and memory usage. The authors of the research propose that SwitchHead could be combined with MoE methods for multi-layer perceptrons (MLPs) to further improve efficiency in various downstream tasks and larger models.
