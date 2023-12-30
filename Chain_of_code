@@ -1,0 +1,38 @@
+Chain-of-Code (CoC) is a reasoning method proposed by Google DeepMind 
+that enhances the capabilities of foundation language models (LLMs) by integrating code generation and interpretation. 
+The goal is to improve the reasoning abilities of LLMs by enabling them to generate executable code and mimic the behavior of an interpreter.
+
+** CoC convert human language to code-like structure. By this, computer can more deeply understand given text and accurate reasoning
+
+## Key Components and Operation:
+
+  Inspiration: 
+    CoC addresses limitations in chain-of-thought (CoT) prompting, especially for arithmetic tasks, by allowing LLMs to "reason in code form."
+
+  LMulator Concept: 
+    CoC operates with an LMulator, a combination of "LM" (language model) and "emulator."
+    This enables LLMs to write code and simulate the execution of challenging code segments, providing anticipated outputs.
+
+  Reasoning in Code: 
+     CoC allows LLMs to break down complex semantic tasks within a program into manageable pseudocode segments. 
+     It combines writing executable code for algorithmic computations and creating pseudocode for semantic challenges.
+
+  Architecture: 
+     CoC builds on three essential methods in LLM reasoning: Chain of Thought (CoT), ScratchPad, and Program of Thoughts (PoT). 
+     CoT breaks down problems using natural language, ScratchPad tracks intermediate steps like a code interpreter, and PoT focuses on creating executable code.
+
+  Operation:
+     Generation Phase: LLMs formulate code during the Generation phase, responding to a given problem. 
+     The code can range from explicit code to pseudocode or natural language, reflecting different levels of abstraction.
+
+  Execution Phase: 
+     In the Execution phase, the generated code is attempted to be run by a code interpreter. 
+     If successful, the program state is updated. If errors occur, the LMulator steps in to simulate the execution, updating the program state based on the model's outputs.
+
+## Results:
+   CoC was evaluated across different benchmarks and consistently outperformed other methods in tasks surpassing the human baseline.
+   In benchmarks such as BIG-Bench-Hard, CoC performed exceptionally well across complex tasks involving various forms of reasoning.
+
+## Significance:
+   CoC represents a pioneering model that combines reasoning with coding, offering a novel approach for general-purpose LLM scenarios.
+   Coding is viewed as a clear expression of reasoning, and CoC aims to leverage this clarity to enhance LLM reasoning capabilities.
