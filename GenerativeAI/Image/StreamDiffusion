@@ -1,0 +1,41 @@
+from https://artgor.medium.com/paper-review-streamdiffusion-a-pipeline-level-solution-for-real-time-interactive-generation-849d6481259a
+
+StreamDiffusion is a real-time diffusion pipeline designed for interactive image generation, 
+particularly suitable for live streaming scenarios.
+
+1. Batching the Denoise Step
+   Traditional diffusion models use sequential denoising steps, leading to increased processing time with each step. 
+   StreamDiffusion introduces a batching process, restructuring the denoising into a batched approach. 
+   This reduces the need for multiple U-Net inferences, improving processing efficiency
+
+2. Residual Classifier-Free Guidance (RCFG)
+   RCFG is a novel method introduced in StreamDiffusion to improve image generation. 
+   Traditional Classifier-Free Guidance (CFG) adjusts conditioning terms but requires multiple passes through a U-Net model. 
+   RCFG introduces virtual residual noise, predicting the original input image's latent representation. 
+   This enables effective image generation without the need for additional U-Net computations, making the process more efficient.
+
+3. Input-Output Queue
+   To optimize high-speed image generation, tasks that don't require neural network processing are shifted 
+   to be processed in parallel outside the main pipeline. An input-output queuing system is implemented to enhance system efficiency 
+   and speed up image generation by processing input and output tensors in parallel
+
+4. Stochastic Similarity Filter (SSF)
+   SSF addresses the issue of generating redundant images in scenarios with minimal changes. 
+   It calculates the cosine similarity between the current input image and a past reference image, 
+   determining the probability of skipping the VAE and U-Net processes. 
+   This probabilistic approach adapts to varying scene dynamics, ensuring smoother video generation
+
+5. Pre-computation
+   Various optimizations involve pre-computing and caching certain data. 
+   Prompt embedding, Gaussian noise for denoising steps, noise strength coefficients, 
+   and necessary functions for Latent Consistency Models are precomputed to reduce overhead and improve efficiency in image-to-image tasks
+
+6. Model Acceleration and Tiny AutoEncoder
+   The U-Net and VAE engines are constructed using TensorRT. 
+   The system uses static batch sizes and fixed input dimensions to optimize the computational graph and memory allocation, 
+   resulting in faster processing times. Additionally, a Tiny AutoEncoder is introduced as an efficient alternative 
+   to the traditional Stable Diffusion AutoEncoder, 
+   achieving rapid conversion of latents into full-size images with reduced computational demands.
+
+These optimizations collectively contribute to achieving up to 1.5x faster processing and up to 2.05x speed increase with RCFG 
+in StreamDiffusion, making it a more efficient solution for real-time image generation, especially in live streaming scenarios.
