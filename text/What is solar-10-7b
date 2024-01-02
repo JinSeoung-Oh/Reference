@@ -1,0 +1,63 @@
+from https://medium.com/syncedreview/breaking-llms-limits-upstage-ai-s-solar-10-7b-shines-bright-with-simple-scaling-magic-3d4df4009449
+
+## What is solar model?
+The Upstage team introduces a technique called depth up-scaling (DUS) to efficiently increase the size of large language models (LLMs), 
+aiming to achieve superior performance without continually increasing the model size according to the performance scaling law
+
+1. Challenges in Scaling Language Models
+   The pursuit of larger language models has presented challenges, 
+   especially the need to constantly increase model size to maintain performance improvements
+
+2. Depth Up-Scaling (DUS) Technique
+   The paper proposes DUS as a technique to amplify LLMs. It involves duplicating a high-performing base model, 
+   trimming layers, and concatenating to create a scaled-up model while utilizing pre-trained weights.
+
+3. Resource-Efficient Expansion
+  DUS advocates for scaling up existing LLMs, specifically the 7B-sized models, 
+  by leveraging pre-trained weights from base models to achieve resource-efficient expansion
+
+4. Implementation of DUS
+   The team uses a 32-layer Llama2 architecture with Mistral 7B pre-trained weights as the base model. 
+   DUS involves duplicating and trimming layers to create a depth up-scaled model, SOLAR 10.7B, with 48 layers and 10.7 billion parameters
+
+5. Empirical Evaluation
+   SOLAR 10.7B is evaluated against other top-performing models across six tasks. 
+   It outperforms similarly sized pretrained models like Qwen 14B and Mistral 7B, demonstrating the effectiveness of DUS
+
+6. Superior Performance of SOLAR 10.7B
+   Despite its smaller size, SOLAR 10.7B achieves the highest H6 score, 
+   surpassing leading open-source LLMs like Mixtral 8x7B Instruct-0.1 and Qwen 72B
+
+## What is DUS?
+Depth up-scaling (DUS) is a technique introduced in the context of scaling up large language models (LLMs).
+The primary goal of DUS is to efficiently increase the depth (number of layers) of a base language model 
+to achieve better performance without significantly increasing the number of parameters, 
+thereby addressing the challenges associated with the scaling of LLMs
+
+1. Base Model Selection
+   Choose a high-performing base language model with a certain number of layers. 
+   In the example provided, the base model is a 32-layer Llama2 architecture with Mistral 7B pre-trained weights
+
+2. Duplication and Trimming
+   Duplicate the base model, creating two copies of it. The next step involves trimming layers from both the original and duplicated models. 
+   Specifically, the last 8 layers are trimmed from the original model, and the first 8 layers are trimmed from the duplicated model.
+
+3. Concatenation
+   Concatenate the trimmed original model and the trimmed duplicate model. The result is a depth up-scaled model 
+   with a larger number of layers compared to the base model. In the example, this results in SOLAR 10.7B, which has 48 layers
+
+4. Utilizing Pre-trained Weights
+   Importantly, during the up-scaling process, pre-trained weights from the base model are utilized. This is a key aspect of the technique, 
+   ensuring that the knowledge gained by the base model through pre-training is retained and utilized in the scaled-up model
+
+5. Integration into Existing Framework
+   The depth up-scaled model seamlessly integrates into the existing training and inference framework of the base LLMs. 
+   This integration ensures that the efficiency and efficacy of the base models are retained in the scaled-up version
+
+The DUS technique, as described, aims to strike a balance between model size and performance, 
+providing a way to achieve superior performance without the need for continually increasing the number of parameters. 
+It offers a resource-efficient approach to scaling language models while leveraging the knowledge captured 
+by pre-trained weights from the base models
+
+
+   
