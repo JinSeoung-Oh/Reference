@@ -1,0 +1,83 @@
+From https://levelup.gitconnected.com/convnext-in-search-of-the-last-convolutional-layer-da801d9f123b
+
+## What is ConvNeXt model
+The ConvNeXt model is a neural network architecture that undergoes a series of transformations and improvements compared to the original ResNet-50. 
+These changes are applied to enhance the model's accuracy and computational efficiency.
+
+Macro Design Adjustments:
+  Changes in the computation distribution ratio (3:4:6:3) to a new ratio (3:3:9:3) in the stages, leading to improved accuracy.
+  Introduction of a "patchify" layer in the stem, downsampling the image by dividing it into smaller patches.
+
+ResNeXt-ify Transformation:
+  Incorporation of the ResNeXt concept, extending residual networks with grouped convolutions to increase network width and capacity.
+  Increase in network width to match Swin-T's number of channels, resulting in improved accuracy with increased FLOPs.
+
+Inverted Bottleneck Design:
+  Adoption of an inverted bottleneck design where the hidden dimension inside a block is larger than the input dimension.
+  Reduction of whole network FLOPs despite an increased FLOPs for the depthwise convolution layer, leading to slightly improved performance.
+
+Large Kernel Integration:
+  Reintroduction of larger kernels in the vision landscape, inspired by Vision Transformers (ViTs).
+  Experimentation with various kernel sizes, with a preference for a 7x7 kernel size.
+  Micro Design Enhancements:
+
+Replacement of ReLU activation with GELU, reducing GFLOPs without affecting accuracy.
+Reduction of activation functions, normalization layers, and substitution of Batch Normalization (BN) with Layer Normalization (LN), contributing to improved accuracy.
+Introduction of separate downsampling layers between stages, following the Swin Transformer approach, leading to significant accuracy gains.
+The ConvNeXt model is designed to achieve high accuracy and computational efficiency by incorporating elements from different neural network architectures, 
+including ResNet, ResNeXt, and Vision Transformers. 
+The model undergoes a thoughtful process of adjustments and enhancements in both macro and micro designs to optimize its performance.
+
+## Focus on ConvNeXt model vs different neural network architectures(like ResNet, ResNeXt, and Vision Transformers)
+The ConvNeXt model differentiates itself from other neural network architectures, 
+including ResNet, ResNeXt, and Vision Transformers, through a series of key design choices and transformations. 
+
+
+Macro Design Adjustments:
+  ConvNeXt introduces changes in the computation distribution ratio in the stages, moving from the traditional ResNet ratio (3:4:6:3) to a new ratio (3:3:9:3). 
+  This adjustment contributes to improved accuracy.
+  The incorporation of a "patchify" layer in the stem, inspired by Vision Transformers, sets the initial processing stage apart from the convolutional layer used in ResNets.
+
+ResNeXt-ify Transformation:
+  ConvNeXt adopts the ResNeXt concept, extending the principles of residual networks by incorporating grouped convolutions. 
+  This design allows the model to increase its width and capacity while maintaining computational efficiency.
+  The network width is increased to match the number of channels in Swin-T, resulting in improved accuracy with higher FLOPs.
+
+Inverted Bottleneck Design:
+  ConvNeXt incorporates an inverted bottleneck design, starting with a narrower input, expanding it to a wider internal dimension, and then compressing it back to a narrower output. 
+  This design choice differs from the standard bottleneck design used in architectures like ResNet.
+  Despite an increased FLOPs for the depthwise convolution layer, this change reduces the overall network FLOPs, leading to slightly improved performance.
+
+Large Kernel Integration:
+  ConvNeXt reintroduces larger kernels in the vision landscape, inspired by Vision Transformers (ViTs), where larger kernel sizes (7x7) are used to capture global contextual information.
+  The design choice of using larger kernels is aligned with the benefits observed in ViTs, facilitating the capture of broader receptive fields.
+
+Micro Design Enhancements:
+  ConvNeXt incorporates micro design enhancements such as the replacement of ReLU activation with GELU, reduction of activation functions, 
+  normalization layers, and substitution of Batch Normalization (BN) with Layer Normalization (LN).
+
+The introduction of separate downsampling layers between stages follows the Swin Transformer approach, resulting in significant accuracy gains.
+Overall, ConvNeXt is characterized by a combination of macro and micro design adjustments, drawing inspiration from various successful architectures. 
+It integrates elements from ResNeXt, ResNet, and Vision Transformers to create a model that aims for high accuracy and computational efficiency in sequence processing tasks.
+
+** What is Macro design?
+Macro design, in the context of neural network architectures, refers to the high-level structural and organizational decisions made during the development of the model. 
+It involves choices regarding the overall architecture, layer arrangements, and the distribution of computational tasks across different sections of the network.
+Macro design decisions can significantly impact the model's performance, efficiency, and capabilities.
+
+In the provided context of the ConvNeXt model, macro design adjustments include changes to the computation distribution ratio and the introduction of a "patchify" layer in the stem. 
+
+Computation Distribution Ratio:
+  The term "ratio" is used to describe how computation tasks are divided among different sections or stages of a neural network.
+  In the case of the ConvNeXt model, adjustments are made to the ratio in the stages of the network. The traditional ResNet design had a specific ratio (3:4:6:3), 
+  and ConvNeXt modifies it to a new ratio (3:3:9:3).
+  This adjustment is made empirically, based on experimental data and observations, aiming to improve the overall performance and accuracy of the model.
+
+Introduction of "Patchify" Layer in the Stem:
+  The stem of a neural network refers to the initial layers that process the input data.
+  ConvNeXt introduces a "patchify" layer in the stem, which involves downsampling the input image by dividing it into smaller patches.
+  This change in the stem's design is inspired by Vision Transformers (ViTs) and represents a macro design choice to modify the initial processing stage of the network.
+
+In summary, macro design decisions involve high-level choices that shape the overall structure and functionality of a neural network. 
+These decisions can impact the model's performance in terms of accuracy, efficiency, and the ability to handle specific types of data and tasks. 
+Adjustments to the computation distribution ratio and modifications in the stem's design are examples of macro design considerations in the context of ConvNeXt.
