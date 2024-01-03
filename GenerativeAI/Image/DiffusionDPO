@@ -1,0 +1,48 @@
+From https://artgor.medium.com/paper-review-diffusion-model-alignment-using-direct-preference-optimization-cb6e75c0da0b
+
+The DiffusionDPO method is a novel approach for aligning text-to-image diffusion models with human preferences, 
+particularly adapted from Direct Preference Optimization (DPO). 
+In contrast to traditional fine-tuning methods that utilize high-quality images and captions, DiffusionDPO optimizes models based on human comparison data. 
+
+## Method Overview:
+1. Background:
+   Diffusion Models generate data by reversing a process that gradually adds noise to the data. Training involves minimizing the evidence lower bound.
+   DPO, initially used for language models, is adapted for diffusion models. It involves pairs of generated samples given some condition, 
+   expressed using the Bradley-Terry model for human preferences.
+
+2. DPO for Diffusion Models:
+   -1. Dataset and Goal: 
+       Uses prompts and pairs of images where one image is preferred over the other according to human judgment.
+   -2. Challenge: 
+       The complexity of the model's distribution is addressed using the evidence lower bound.
+   -3. Objective Formulation: 
+       Aims to maximize the reward for generating images in reverse while maintaining similarity to the original reference model.
+   -4. Efficient Training: 
+       Approximates the model's distribution using the forward process and formulates a loss function based on image denoising.
+
+3. Experiments:
+   -1. Diffusion-DPO-finetuned SDXL Model:
+       Significantly outperforms the baseline SDXL-base model in terms of general appeal, visual appeal, and prompt alignment.
+       Tops the leaderboard on the HPSv2 reward model.
+   -2. Comparisons:
+       Outperforms the complete SDXL pipeline (base + refinement model) in various aspects, including general preference and image-to-image translation tasks.
+       Performs well in visual appeal and prompt alignment when compared to human preferences and AI feedback.
+
+4. AI Feedback Variant:
+   -1. Alternative to Human Preferences: 
+       Includes an AI feedback-based variant that shows comparable results to human-based training, indicating scalability without heavy reliance on human data.
+
+5. Ablations and Analysis:
+   -1. Implicit Reward Model: 
+       Learns a reward model that estimates differences in rewards between two images, showing strong performance in binary preference classification.
+   -2. Training Data Quality: 
+       Improves performance even for a superior model (SDXL) compared to its training data.
+   -3. Supervised Fine-Tuning (SFT): 
+       SFT is less effective for SDXL models, possibly due to the higher quality of the Pick-a-Pic dataset.
+
+6. Conclusion:
+DiffusionDPO demonstrates significant improvements in aligning text-to-image diffusion models with human preferences
+outperforming baseline models and showing promise in various evaluation tasks. 
+It introduces a scalable approach that incorporates both human preferences and AI feedback for training
+
+.
