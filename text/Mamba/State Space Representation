@@ -1,0 +1,112 @@
+From https://en.wikipedia.org/wiki/State-space_representation
+# Please check this information is correct or not
+
+## What is State Space Representation
+   In control engineering and system identification, a state-space representation is a mathematical model of a physical system 
+   specified as a set of input, output and variables related by first-order (not involving second derivatives) differential equations or difference equations. 
+   Such variables, called state variables, evolve over time in a way that depends on the values 
+   they have at any given instant and on the externally imposed values of input variables. 
+   Output variables’ values depend on the values of the state variables and may also depend on the values of the input variables.
+
+   The state space or phase space is the geometric space in which the variables on the axes are the state variables. 
+   The state of the system can be represented as a vector, the state vector, within state space.
+   - State Space Representation is not probability model
+
+## Example In LM
+In language modeling, the state space can be represented as the set of possible states the model considers as it processes a sequence of words. 
+Each state corresponds to a specific position or token in the sequence, and the transitions between states represent the flow of information from one token to the next.
+
+1. States:
+   Each state in the language modeling context corresponds to a specific word or token in a sequence.
+   For example, if we have the sequence: "The cat sat on the mat," each word represents a state in the state space.
+
+2. Transitions:
+   Transitions between states occur as the model processes the sequence.
+   For instance, the transition from "The" to "cat" represents the model's understanding of the context and information flow from one word to the next.
+
+3. Selective State Spaces (Relevance):
+   Mamba's innovation lies in its ability to selectively consider or ignore certain states based on their relevance.
+   The state space representation, in this case, would involve mechanisms to determine the relevance of each word/token in the sequence.
+
+4. Adaptive Information Processing:
+   As the model encounters each word, it adapts its internal representation of the state space.
+   The state space representation is dynamic, allowing the model to process information adaptively based on the context of the sequence.
+
+5. Linear-Time Sequence Modeling:
+   Mamba's state space representation, when combined with its architecture, enables linear-time sequence modeling.
+   This means that the processing time for the entire sequence is proportional to its length, enhancing efficiency.
+
+6. Enhanced Performance with Increasing Context Length:
+   The state space representation contributes to Mamba's ability to handle sequences with varying context lengths.
+   Longer sequences can be accommodated without a significant increase in processing time.
+
+In this example, the state space represents the model's internal understanding of the sequence, and it involves considerations of relevance and adaptability. 
+While this example simplifies the concept, the state space representation in Mamba's context likely involves more sophisticated mathematical structures 
+and mechanisms for effective sequence modeling in various domains, such as language processing, genomics, and audio analysis.
+
+## What is difference between Latent vector space and State space representation
+The terms "latent vector space" and "state space" are related concepts used in the context of machine learning and deep learning, but they represent slightly different ideas.
+
+1. Latent Vector Space:
+   A latent vector is a hidden or unobservable variable in a model. It is often used to represent features or characteristics of the data that may not be directly observed.
+   The latent vector space refers to the multi-dimensional space in which these latent vectors exist. 
+   Each dimension in this space corresponds to a different feature or aspect captured by the latent vector.
+   Latent vectors are learned during the training of a model and are used to encode information in a more compact and expressive form. 
+   Autoencoders and variational autoencoders are examples of models that utilize latent vectors.
+
+2. State Space:
+   In the context of sequential models like recurrent neural networks (RNNs) or transformers, the state space refers to the set of all possible internal states 
+   that the model can assume at a given point in time.
+   In natural language processing, for example, the state space would represent the model's understanding of the input sequence up to the current token. 
+   It includes information about the context, relationships between words, and other relevant features.
+   The state space evolves as the model processes the input sequence, and attention mechanisms in transformer architectures 
+   play a role in determining how the model attends to different parts of the sequence, influencing the states.
+
+In summary, while both latent vector space and state space involve representations in a multi-dimensional space, 
+latent vector space is more associated with encoding hidden features of the data, often in a static context, 
+whereas state space typically involves the dynamic evolution of representations in sequential models over time.
+
+## Generate method for Latent vector space and State space
+Latent vectors and state spaces can both be generated and updated by the learning process of a model, but they serve different purposes and arise from different mechanisms.
+
+1. Latent Vector Space:
+   Latent vectors are often learned using statistical methods during the training of a model. 
+   In models like autoencoders or variational autoencoders, the latent vectors are learned to represent hidden features or patterns in the data in an unsupervised manner.
+   The process involves encoding input data into a lower-dimensional latent space, 
+   where each dimension of the latent space corresponds to a learned feature or characteristic. The model aims to capture the most salient aspects of the data in these latent vectors.
+
+2. State Space:
+   In the context of sequential models like recurrent neural networks (RNNs) or transformers, 
+   the state space is not generated independently but evolves dynamically as the model processes a sequence over time.
+   The internal states in the state space are updated at each time step as the model encounters new input. 
+   The information captured in the state space reflects the model's understanding of the context, dependencies, and relationships within the sequence.
+   Attention mechanisms in transformer architectures contribute to determining how the model attends to different parts of the input sequence, 
+   influencing the evolution of the state space.
+
+In summary, latent vectors are typically generated by encoding data into a lower-dimensional space during training, emphasizing static representations. 
+State space, on the other hand, involves dynamic and evolving representations that capture the context and dependencies within sequential data as the model processes it over time.
+
+## What is diffferent Latent vector space and state space in generate stage
+1. Latent Vector Space:
+   In models utilizing latent vector spaces, the latent vectors serve as compressed representations of meaningful information from the input data.
+   During the generation stage, new samples are often generated by sampling directly from a probability distribution within the latent vector space. 
+   This distribution is explicitly treated as a probability model over possible latent vectors.
+
+2. State Space:
+   In sequential models like transformers, the state space characterizes the dynamic internal states of the model as it processes a sequence. 
+   The state space, while capturing evolving context and dependencies, doesn't inherently represent a direct probability distribution. 
+   Probabilities for generating the next element are typically derived from the model's parameters and the current state, 
+   without an explicit probability distribution over the state space.
+
+* During the generation stage:
+1. For models relying on latent vector spaces, the generation process often involves the direct sampling of latent vectors from a specified probability distribution, 
+   forming a clear probabilistic interpretation.
+
+2. In models employing state space, the generation process encompasses the dynamic evolution of internal states. 
+   Probabilities for generating subsequent elements arise from the model's parameters and current states, 
+   but without a direct representation of a probability distribution over the state space.
+
+In summary, while both latent vector space and state space contribute to sequence generation, 
+the distinction lies in the explicit use of probability distributions during the generation stage. 
+Latent vector spaces often involve direct probabilistic sampling, whereas state spaces derive probabilities dynamically during the sequential processing of data.
+
