@@ -1,0 +1,111 @@
+From https://medium.com/@kargarisaac/at-the-frontier-of-ai-reviewing-top-papers-on-mixture-of-experts-in-machine-learning-f35b5ecca4fe
+
+1. Scaling Vision with Sparse Mixture of Experts: 
+   - Model Introduction:
+     Introduces V-MoE, a sparse variant of Vision Transformer (ViT). 
+     Utilizes sparsely-gated Mixture of Experts networks (MoEs).
+   - Key Components:
+     -1. Conditional Computation with MoEs:
+         Activates different network subsets for different inputs.
+         Replaces dense feedforward layers in ViT with sparse MoE layers.
+     -2. Routing Algorithm:
+         Uses a modified Top-K gating mechanism for distributing input patches.
+     -3. Expert’s Buffer Capacity:
+         Implements fixed buffer capacity for each expert.
+         Complemented with auxiliary losses for load balancing.
+     -4. Batch Prioritized Routing:
+         A novel routing algorithm that prioritizes certain tokens (image patches).
+         Focuses on the most informative parts of an image.
+     -5. Transfer Learning:
+         Demonstrates adaptability to new tasks with minimal data.
+         Showcases flexibility in transfer learning scenarios.
+     * Token-Dropping Mechanism:
+       Employs Batch Prioritized Routing (BPR).
+       Prioritizes important tokens and reduces computational load.
+
+2. MegaBlocks: Efficient Sparse Training with Mixture-of-Experts:
+   - MegaBlocks System Overview:
+     Proposes a system for efficient training of MoE models on GPUs.
+     Addresses limitations in existing frameworks leading to token dropping.
+   - Block-Sparse Operations:
+     Reformulates MoE computation using block-sparse operations.
+     Focuses on high-performance GPU kernels for block-sparse matrix products.
+   - Eliminating Token Dropping:
+     Efficiently handles imbalances in token assignment to experts.
+     Significantly improves training speedups over existing frameworks.
+
+3. Mixture-of-Experts with Expert Choice Routing:
+  - Expert Choice Routing:
+    Introduces a novel routing method named "expert choice" for MoE.
+    Experts select top-k tokens instead of tokens choosing experts.
+  - Load Balancing:
+    Ensures better load balancing by allowing a variable number of experts for each token.
+    Resolves load imbalance issues without auxiliary loss.
+  - Efficiency Improvements:
+    Achieves over 2× faster training in larger scale models.
+    Demonstrates scalability with increasing experts.
+    Outperforms comparable dense models in downstream tasks.
+  - EC Routing Process:
+    Expert capacity determined by multiplying average tokens per expert by a capacity factor.
+    Uses a token-to-expert score matrix for efficient distribution.
+    Reduces training and inference time by about 20% compared to previous models.
+
+
+********************************************************************************************
+Soft MoE vs. Sparse MoE:
+1. Soft MoE
+   -1. Soft MoE Introduction:
+       Soft MoE is introduced as a fully differentiable sparse Transformer addressing challenges faced by traditional MoE architectures.
+       Implements a soft assignment mechanism, distributing weighted combinations of input tokens across different experts.
+
+   -2. Key Differences:
+       Sparse MoE involves discrete token assignment to specific slots, leading to optimization challenges.
+       Soft MoE assigns weighted averages of input tokens to slots, avoiding optimization and implementation issues.
+       Soft MoE maintains computational efficiency and model performance, outperforming standard Transformers and MoE variants.
+
+   -3. Routing Algorithm:
+       Describes the multi-step routing algorithm in Soft MoE, involving logits computation, normalization, expert processing, and final combination.
+       Learnable parameters are adjusted during training to optimize token routing and processing.
+
+   -4. Properties of Soft MoEs:
+       Fully differentiable, utilizing softmax scores for soft assignments.
+       Overcomes token dropping and expert unbalance issues associated with Sparse MoEs.
+       Fast and efficient, determined by the total number of slots.
+
+   -5. Combining Sparse and Dense Models:
+       Soft MoEs involve every token in each slot, technically non-sparse but not a Dense MoE.
+       Achieves per-sequence determinism and avoids token competition among different sequences.
+
+2. Sparse Upcycling:
+   -1. Introduction:
+       Sparse upcycling addresses the challenge of training large neural networks being prohibitively expensive.
+       Proposes a method to convert pre-trained dense models into more efficient sparsely activated Mixture-of-Experts (MoE) models.
+   -2. Upcycling Algorithm Steps:
+       Starts with a pre-trained dense model, replacing dense layers with MoE layers.
+       Preserves learned knowledge by initializing MoE weights with dense model weights.
+       Further trains the upcycled model, optimizing performance and adjusting sparsity levels.
+       Demonstrates effectiveness in language and vision tasks, outperforming dense models with reduced computational cost.
+
+********************************************************************************************************************************
+
+1. LIMoE: Learning Multiple Modalities with One Sparse Mixture-of-Experts Model:
+   - Introduction to LIMoE:
+     LIMoE is introduced as a Language-Image Mixture of Experts model for multimodal learning.
+     Handles both image and text inputs using a single sparse Transformer-based architecture.
+   
+   - LIMoE Architecture:
+     Features experts that process both image and text modalities simultaneously.
+     Uses a Transformer-based architecture with routers deciding expert assignments.
+     Employs auxiliary losses and routing prioritization to stabilize multimodal learning.
+   
+   - Challenges and Solutions:
+     LIMoE addresses challenges in training stability and expert utilization specific to MoE models.
+     Implements innovative auxiliary losses and routing prioritization during training.
+
+   - Multimodal Contrastive Learning:
+     LIMoE is trained on paired image-text data for multimodal contrastive learning.
+     Adapts to new tasks without extra training data, demonstrating zero-shot learning capabilities.
+
+   - Performance and Efficiency:
+     LIMoE demonstrates significant improvements over traditional dense models and two-tower approaches.
+     Achieves high accuracy in zero-shot image classification with controlled computational cost.
