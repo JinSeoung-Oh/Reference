@@ -1,0 +1,127 @@
+From https://medium.com/@kargarisaac/at-the-frontier-of-ai-reviewing-top-papers-on-mixture-of-experts-in-machine-learning-f35b5ecca4fe
+
+1. Hierarchical Mixtures of Experts (HME) Model:
+   -1. Overview:
+       - Architecture: 
+         Tree-structured for supervised learning and mixture of experts.
+       - Coefficients and components: 
+         Generalized linear models (GLIMs).
+       - Learning: 
+         Maximum likelihood problem solved using Expectation-Maximization (EM) algorithm.
+       - Online learning: 
+         Parameters updated incrementally.
+       - Applications: 
+         Demonstrated efficiency and accuracy in robot dynamics through simulations.
+   -2. Components:
+       - Expert Networks: 
+         GLIMs operating at nodes.
+         Specialize in modeling specific parts of the data space.
+       - Gating Mechanism:
+         GLIMs acting as 'gates' at each node.
+         Determine allocation of data points to different experts.
+   -3. Advantages:
+       - Adaptive partitioning of data space.
+       - Local models for accurate and flexible modeling.
+       - Statistical framework, versatility, and potential for Bayesian approaches.
+
+2. Sparsely-Gated Mixture-of-Experts Layer:
+   -1. Overview:
+       - Introduces MoE Layer for increased model capacity without proportional computation increase.
+       - Thousands of feed-forward sub-networks with a trainable gating network.
+       - Applications: 
+         Language modeling and machine translation with significant improvements and lower computational costs.
+   -2. Components:
+       - Expert Networks:
+         Feed-forward neural networks with identical structures but different parameters.
+       - Gating Network:
+         Softmax Gating and Noisy Top-K Gating.
+       - Training:
+         Back-propagation with gradient backpropagation through the gating network.
+   -3. Efficiency:
+       Sparsity of the gating network's output enhances computational efficiency.
+       Softmax and Noisy Top-K approaches for efficient gating.
+
+3. GShard: Scaling Giant Models with Conditional Computation:
+   -1. Overview:
+       - Addresses challenges of scaling machine learning models.
+       - Features Sparsely-Gated MoE layers in a Transformer architecture with 600 billion parameters.
+       - Achieves sub-linear computation cost and constant compilation time.
+   -2. Design Principles:
+       - Sub-linear scaling to keep computation and communication requirements in check.
+       - Separation of model description from partitioning implementation.
+       - Scalable compilers for infrastructure scalability.
+   -3. Transformer Architecture:
+       - Every other feed-forward layer replaced with Position-wise MoE layers.
+       - Sublinear scaling of computation costs due to sparse activation.
+       - Distribution across multiple devices for parallel processing.
+  -4. MoE Layer Goals:
+      - Balanced Load: 
+        Even distribution of processing load across all experts.
+      - Efficiency at Scale: 
+        Efficient gating function for large-scale computation.
+   -5. Efficiency Mechanisms:
+       - Expert capacity enforcement, local group dispatching, auxiliary loss, and random routing.
+   -6. Scaling:
+       - MoE layers distributed for parallel processing on multiple devices.
+       - Other layers like self-attention are replicated for coherence and efficiency.
+   -7. Sub-linear Scaling:
+       - Critical for handling the enormous size of state-of-the-art models.
+       - MoE layer part of an effort to scale neural machine translation models efficiently.
+
+4. Switch Transformer
+   -1. Selective Precision Training:
+       -Uses lower precision formats to stabilize training and minimize computational costs.
+   -2. Modified Initialization Scheme:
+       - Allows scaling to a larger number of experts, enhancing model capacity.
+   -3. Increased Expert Regularization:
+       - Improves sparse model fine-tuning and multi-task training, enhancing stability and efficiency.
+   -4. Model Evaluation Aspects:
+       - Step-Based Scaling:
+         Investigates performance improvement with increased training steps.
+         Switch Transformers show superior performance over time, indicating efficiency for long-term, large-scale training.
+   -5. Time-Based Scaling:
+       - Analyzes scaling in terms of actual computational time for real-world applicability.
+       - Demonstrates remarkable efficiency, delivering enhanced results within a shorter timeframe compared to dense models.
+   -6. Comparison with Dense Models:
+       - Illustrates efficiency gains and performance improvements compared to larger, dense models.
+       - Switch Transformers scale more efficiently and provide improved performance metrics.
+   -7. Application in Lower Compute Regimes:
+       - Discusses applicability in scenarios with lower computational resources.
+       - Maintains high performance even in lower compute environments, showcasing versatility.
+  -8. Switch Transformer vs. Shazeer et al. (2017) Model: 
+      - Sparse vs. Dense Routing:
+        Switch Transformer employs sparser routing (each token to one expert), reducing computational complexity.
+        Shazeer et al.'s model uses denser routing (multiple experts for a given input).
+      - Scalability and Model Size:
+        Switch Transformer designed for scalability to trillions of parameters with efficient sparse routing.
+        Shazeer et al.'s model lacks the same scalability focus.
+      - Improved Training Techniques:
+        Switch Transformer introduces selective precision training and modified initialization absent in Shazeer et al.'s model.
+      - Focus on Single Expert Selection:
+        Switch Transformer focuses on selecting a single expert per token for streamlined computation.
+        Shazeer et al.'s model allows for engaging multiple experts for a single input.
+   -9. Different Applications and Focus:
+       - Switch Transformer geared towards very large-scale models and datasets, emphasizing efficient scaling and resource management.
+
+## No-Token-Left-Behind
+1. Expert Overflow:
+   In situations where the number of tokens sent to an expert exceeds its capacity, a protocol similar to Lepikhin et al. (2020) is followed.
+   The protocol involves passing the token's representation to the next layer without processing it through a residual connection.
+2. Rerouting Overflowing Tokens:
+   The "No-Token-Left-Behind" approach iteratively reroutes any tokens initially sent to an overflowing expert.
+   This aims to minimize token dropping during training and inference.
+3. Performance and Stability Hypothesis:
+   The authors hypothesize that rerouting tokens could enhance performance and stabilize training.
+   However, empirical observations did not show significant benefits, with a suspicion that changing token-expert associations might degrade performance.
+4. Additional Approach: Auxiliary Load Balancing Loss
+   The paper introduces an "auxiliary load balancing loss" to address token dropping and expert overflow related to loss.
+   The loss encourages a balanced distribution of tokens across all experts during training.
+   The goal is to promote uniform routing of tokens across experts, achieving an even distribution of load.
+   Loss Function Formula:
+        Loss = a.N ∑[f_i . P_i] (sum from i=1 to N) 
+        N: Number of experts, f_i: fraction of tokens routed to expert i, P_i: expert capacity proportion
+   The loss aims to minimize deviations from a uniform distribution, ensuring better distribution of tokens across experts.
+5. Summary:
+   The "No-Token-Left-Behind" approach improves expert capacity utilization by rerouting tokens from overflowing experts.
+   Empirical observations did not strongly support the hypothesis of enhanced performance from rerouting tokens.
+  The auxiliary load balancing loss contributes to even token distribution across experts, mitigating token-dropping issues.
