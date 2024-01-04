@@ -1,0 +1,60 @@
+## Background:
+1. Causal Reasoning in Humans:
+   Considered a hallmark of human intelligence.
+   Humans intuitively make cause-and-effect connections from a young age.
+2. Advances in LLMs:
+   GPT-3 and ChatGPT have demonstrated breakthroughs in AI capabilities.
+   Trained on vast datasets of online text to predict sequences of words.
+   Generate human-like text on demand.
+
+## Types of Causal Reasoning Tasks and LLM Performance:
+1. Covariance-Based Causal Reasoning:
+   -1. Description: 
+       Relies on data analysis to estimate cause-effect relationships between variables.
+       Focuses on estimating cause-effect relationships between variables using data analysis.
+   -2. LLM Performance:
+       Achieved 97% accuracy in determining causal relationships between variable pairs.
+       Competently learned full causal graphs encoding hypothetical relationships.
+   -3. Limitations: 
+       Made basic errors, indicating some limitations in robust causal reasoning.
+2. Logic-Based Causal Reasoning:
+   -1. Description: 
+       Emphasizes logic-based causality, using counterfactual analysis and domain knowledge.
+   -2. LLM Performance:
+       Major improvements in answering "what if" style questions.
+       GPT-4 reached 92% accuracy on a benchmark dataset, comparable to humans.
+   -3. Limitations: 
+       Struggled with more complex logical inconsistencies, showing brittleness in reasoning.
+3. Type-Level Causal Reasoning:
+   -1. Description: 
+       Focuses on general relationships between variables, as in causal discovery and effect estimation.
+   -2. LLM Performance:
+       High performance on type causality tasks, inferring likely connections between variables based on meanings.
+   -3. Limitations: 
+       Sensitivity to prompt wording implies limitations in robust logical generalization.
+4. Actual Causal Reasoning:
+   -1. Description: 
+       Involves identifying causes behind specific events, relying on real-world knowledge and common sense.
+   -2. LLM Performance:
+       Showed promise in extracting key causal components from free-form stories.
+   -3. Limitations: 
+       Lagged behind humans in complex reasoning involving social norms, intentions, and human factors.
+
+## Future Implications and Conclusions:
+-1. Research Findings:
+    LLMs fall short of human-level causal reasoning.
+    Surprising competence suggests a promising new frontier for causality research and applications.
+-2. Potential Applications:
+    LLMs, with careful prompting, could transform how people leverage causal information in various fields.
+    Combining natural language capabilities with formal causal analysis methods may enhance AI systems.
+-3. Open Questions:
+    Major open questions remain about the nature and limitations of LLMs' causal reasoning powers.
+
+## Future Outlook:
+Deeper Causal Thinking Skills:
+   Unlocking deeper causal thinking skills in AI has profound implications.
+   Moves us closer to artificial general intelligence resembling human reasoning.
+   Impacts the development of smarter, more helpful, and transparent machine learning systems.
+
+LLMs have made strides in causal reasoning, there are still challenges and limitations. 
+Ongoing research and careful integration with formal methods could contribute to the development of more advanced and trustworthy AI systems
