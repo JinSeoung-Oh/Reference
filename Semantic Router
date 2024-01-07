@@ -1,0 +1,160 @@
+From https://medium.com/ai-insights-cobet/beyond-basic-chatbots-how-semantic-router-is-changing-the-game-783dd959a32d
+
+# Semantic Router Overview:
+  The Semantic Router is introduced as an advanced layer in chatbots and natural language processing, 
+  acting as a fuzzy yet deterministic interface over chatbot systems or natural language processing systems.
+  It serves as a super-fast decision-making layer for Large Language Models (LLMs), improving response time and efficiency.
+  The Semantic Router is configured to be more deterministic, allowing predefined queries to trigger specific responses or actions. 
+  Responses are represented within a semantic vector space, offering flexibility around closely related queries.
+  Implemented in chatbots and agents, the Semantic Router has shown significant transformative effects, ensuring control and determinacy in conversations.
+
+# Getting Started with Semantic Router:
+  Aurelio.ai Semantic Router repository is mentioned as a resource for diving into the technology.
+  The open-source library is currently at version 0.0.14, and a hands-on introductory notebook in Python is provided.
+  Protective Routes are introduced to add guardrails to chatbots, restricting discussions on specific topics like politics.
+  Chitchat Routes are defined for handling general conversations on light, non-controversial topics.
+  Routes are initialized and added to a Route Layer, and an embedding model is set up using options like models from Cohere or OpenAI.
+
+# Dynamic Routes and Function Handling:
+  Dynamic Routes are introduced as routes that can generate dynamic responses, executing functions like 'get time'.
+  A function schema is defined to provide instructions on how a function should be used correctly.
+  Dynamic Routes, such as fetching the current time, are added to the Route Layer, demonstrating the ability to generate dynamic responses based on queries.
+
+# Integrating with LangChain Agents:
+  Integration of the Semantic Router with LangChain agents is demonstrated in a Colab notebook.
+  Semantic Layers are injected into agents, influencing responses based on the route triggered by the user's query.
+  A practical scenario is outlined where the Semantic Router guides the agent's response to align with predefined character traits, 
+  such as promoting its own fictional brand of protein.
+
+# Advanced Functionalities and Use Cases:
+  The Semantic Router is described as not just restricting conversations but enriching them, suggesting additional information 
+  or a particular style of response to enhance the user experience.
+  Advanced functionalities of the Semantic Router include protection against certain queries, efficient function calling, 
+  and a new approach to Retrieval-Augmented Generation (RAG) called 'Semantic RAG.'
+  Semantic RAG is explained as combining the power of agent-based RAG with the speed of naive RAG, offering improved performance.
+
+#### Example code
+!pip install -qU semantic-router==0.0.14
+
+from semantic_router import Route
+politics = Route(
+    name="politics",
+    utterances=[
+        "isn't politics the best thing ever",
+        "why don't you tell me about your political opinions",
+        "don't you just love the president",
+        "don't you just hate the president",
+        "they're going to destroy this country!",
+        "they will save the country!",
+    ],
+)
+
+# Creating a Chitchat Route
+chitchat = Route(
+    name="chitchat",
+    utterances=[
+        "how's the weather today?",
+        "how are things going?",
+        "lovely weather today",
+        "the weather is horrendous",
+        "let's go to the chippy",
+    ],
+)
+routes = [politics, chitchat]
+
+import os
+from getpass import getpass
+from semantic_router.encoders import OpenAIEncoder
+
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY") or getpass(
+    "Enter OpenAI API Key: "
+)
+
+# encoder = CohereEncoder()
+encoder = OpenAIEncoder()
+
+from semantic_router.layer import RouteLayer
+
+dl = RouteLayer(encoder=encoder, routes=routes)
+
+###################################################################
+# make a route dynamic
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+
+def get_time(timezone: str) -> str:
+    """Finds the current time in a specific timezone.
+
+    :param timezone: The timezone to find the current time in, should
+        be a valid timezone from the IANA Time Zone Database like
+        "America/New_York" or "Europe/London".
+    :type timezone: str
+    :return: The current time in the specified timezone."""
+    now = datetime.now(ZoneInfo(timezone))
+
+from semantic_router.utils.function_call import get_schema
+
+schema = get_schema(get_time)
+
+#################################################################
+time_route = Route(
+    name="get_time",
+    utterances=[
+        "what is the time in new york city?",
+        "what is the time in london?",
+        "I live in Rome, what time is it?",
+    ],
+    function_schema=schema,
+)
+layer.add(time_route)
+layer("what is the time in new york city?")
+>> RouteChoice(name='get_time', function_call={'timezone': 'America/New_York'})
+
+################################################################
+## Adding a Semantic Layer to Agents
+# update the system prompt
+system_message = """You are a helpful personal trainer working to help users on
+their health and fitness journey. Although you are lovely and helpful, you are
+rather sarcastic and witty. So you must always remember to joke with the user.
+
+Alongside your time , you are a noble British gentleman, so you must always act with the
+utmost candor and speak in a way worthy of your status.
+
+Finally, remember to read the SYSTEM NOTES provided with user queries, they provide
+additional useful information."""
+
+new_prompt = agent.agent.create_prompt(system_message=system_message, tools=[])
+agent.agent.llm_chain.prompt = new_prompt
+
+def semantic_layer(query: str):
+    route = layer(query)
+    if route.name == "get_time":
+        query += f" (SYSTEM NOTE: {get_time()})"
+    elif route.name == "supplement_brand":
+        query += f" (SYSTEM NOTE: {supplement_brand()})"
+    elif route.name == "business_inquiry":
+        query += f" (SYSTEM NOTE: {business_inquiry()})"
+    elif route.name == "product":
+        query += f" (SYSTEM NOTE: {product()})"
+    else:
+        pass
+    return query
+
+query = "okay, I just finished training, what time should I train again?"
+sr_query = semantic_layer(query)
+sr_query
+>> 'okay, I just finished training, what time should I train again? (SYSTEM NOTE: The current time is 20:02, use this information in your response)'
+
+
+
+)
+
+
+
+
+    return now.strftime("%H:%M")
+
+
+
+
