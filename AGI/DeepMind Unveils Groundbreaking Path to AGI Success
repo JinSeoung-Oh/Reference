@@ -1,0 +1,30 @@
+From https://medium.com/predict/deepmind-unveils-groundbreaking-path-to-agi-success-ed7f55c1ef52
+
+A detailed overview of DeepMind's recent work on Artificial General Intelligence (AGI), 
+including their analysis of AGI definitions, criteria for assessment, and the introduction of matrices for measuring performance, 
+generality, autonomy, and risk in AI systems
+
+1. DeepMind's Analysis of AGI Definitions:
+   DeepMind scrutinizes nine different AGI definitions, including the Turing Test, consciousness measures, 
+   economic measures, and task-related capabilities.
+   Passing the Turing Test alone is deemed insufficient for AGI, and determining consciousness attributes remains challenging.
+   DeepMind proposes six criteria for assessing AGI, focusing on capabilities, generality, performance, 
+   cognitive tasks, and real-world value.
+
+2. AI Impact Tour by VentureBeat:
+   Organized by VentureBeat, the AI Impact Tour is a series of events bringing together the enterprise AI community 
+   for networking and insights.
+   Key aspects include networking opportunities, insights into AI research and applications, 
+   city-wise tours, and a focus on transformative technology.
+
+3. AGI Matrix for Measuring Performance and Generality:
+   DeepMind introduces the AGI Matrix, a framework for evaluating the depth and breadth of intelligence in AI systems.
+   It distinguishes between narrow AI (specific tasks) and general AI (broader capabilities).
+   Current language models are classified as Level 1 General AI, with existing systems like AlphaZero considered superhuman narrow AI.
+   The AGI Matrix rates systems based on their performance across five levels.
+
+4. Assessing Autonomy and Risk in AI Systems:
+   Evaluation of autonomy in AI systems ranges from Level 0 (controlled entirely by humans) to Level 5 (fully autonomous).
+   Risks associated with autonomy vary and include deskilling, industry disruption, manipulation, and misalignment with human values.
+   Understanding autonomy levels helps anticipate the impact on industries and society, 
+   facilitating the development of safeguards to mitigate risks.
