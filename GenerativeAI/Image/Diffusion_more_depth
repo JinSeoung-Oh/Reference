@@ -1,0 +1,157 @@
+From https://pub.towardsai.net/unlocking-the-mysteries-of-diffusion-models-an-in-depth-exploration-aa02d2e44963
+
+In this article, the diffusion model, upon which algorithms like Midjourney, Stable Diffusion, DALL-E, and others are based, is explained in detail. 
+The explanation covers the technical details of how the model works, starting from intuition and progressing to the sampling process, neural network architecture, 
+training of the diffusion model, controlling its output, and speeding up the sampling process.
+
+1. The Intuition Behind Stable Diffusion:
+   Assumes a dataset of game character images for training.
+   A neural network is used to generate more game characters by following the diffusion model process.
+   Different levels of noise are added to the images to emphasize finer details or general outlines.
+   The noising process is inspired by physics, akin to an ink drop diffusing in water.
+   The neural network learns at each level of noise: keeping details if clear, suggesting details if likely, suggesting general details for outlines, and suggesting outlines if unclear.
+
+2. Sampling Technique:
+   At inference time, a noise sample is input into the trained neural network, which predicts noise.
+   The predicted noise is subtracted from the original noise sample to obtain a sprite-like image.
+   Multiple steps are often required to get high-quality samples.
+   Noise is added back at each step to stabilize the neural network and prevent collapse.
+
+3. Neural Network:
+   The diffusion model uses a UNet architecture, known for image segmentation.
+   The UNet predicts noise and takes input as an image, producing noise of the same size.
+   Time and context embeddings are used to control the generation process.
+
+4. Diffusion Model Training:
+   The neural network aims to predict noise and learns the distribution of noise and game character likeness.
+   Training involves adding noise to training images, having the neural network predict that noise, and computing the loss by comparing predicted and true noise.
+   Random sampling of time steps during training helps stabilize the process.
+
+5. Controlling the Diffusion Model Output:
+   Text embeddings are used to provide context during training.
+   Embeddings capture semantic meaning, and vector arithmetic with embeddings can control generation.
+   Context can be diverse, such as text descriptions or different categories.
+
+6. Speeding Up the Sampling Process:
+   A new sampling method, Denoising Diffusion Implicit Models (DDIM), is introduced as over 10 times more efficient than DDPM (Denoising Diffusion Probabilistic Models).
+   DDIM is faster because it can skip time steps and refine predictions with a denoising process.
+
+## Why noise is important in Diffusion model?
+  Noise is a crucial component in the diffusion model, and its importance lies in the training process and the generation of diverse and realistic images. 
+
+1. Training Stability:
+   During training, the neural network learns to predict noise added to the training images. 
+   This process helps stabilize the training by introducing variability and preventing the neural network from simply memorizing the training data.
+   The addition of noise ensures that the neural network does not overfit to specific details in the training images 
+   but learns to capture the general features and characteristics.
+
+2. Diversity in Image Generation:
+   The diffusion model aims to generate diverse images that go beyond the examples seen during training. 
+   By training the neural network to predict noise, the model learns to generalize and generate variations of the input images.
+   The noise introduces randomness, leading to different possible outcomes in the generated images, 
+   making the model more creative and capable of producing a wide range of outputs.
+
+3. Controlling Image Details:
+   Different levels of noise correspond to different levels of image details. 
+   The diffusion model uses noise at various intensities to control the amount of detail in the generated images.
+   By manipulating the intensity of the added noise, the model can emphasize finer details, suggest general outlines, 
+   or create entirely new variations of the input, allowing for controlled image synthesis.
+
+4. Imitating Real-world Processes:
+   The noising process in the diffusion model is inspired by real-world physical processes, such as the diffusion of ink in water. 
+   This abstraction allows the model to capture the essence of how details can become less distinct over time.
+   Introducing noise reflects the uncertainty and variability present in the real world, contributing to the model's ability 
+   to generate images that exhibit natural-looking imperfections.
+
+5. Handling Unknown Inputs:
+   The diffusion model aims to generate images based on text prompts, and noise helps the model handle scenarios where the input is unclear or unfamiliar.
+   The model can adapt to different levels of noise in the input, providing a mechanism to generate plausible images 
+   even when the input prompt is ambiguous or lacks specific details.
+
+In summary, noise in the diffusion model serves as a training mechanism to stabilize the learning process, 
+enables the generation of diverse images, controls the level of detail in the generated outputs, imitates real-world processes, 
+and allows the model to handle a variety of inputs. It plays a fundamental role in achieving the model's goals of creativity, generalization, and realistic image synthesis.
+
+## What is baisic thory of Diffuion?
+The foundation theory of diffusion in the context of diffusion models, especially in the generation of images, is rooted in the principles 
+of stochastic processes and statistical mechanics. The diffusion process is inspired by real-world phenomena like the spread of substances,
+such as ink, in a medium like water. Here are the foundational theories and concepts associated with diffusion models:
+
+1. Stochastic Processes:
+   Diffusion models are based on stochastic processes, which involve the random movement or spreading of particles over time. 
+   In the case of image generation, this randomness is captured by the addition of noise to an initial image.
+
+2. Markov Chains:
+   Diffusion models often leverage Markov chains, which are mathematical systems that model a sequence of events where the probability 
+   of each event depends only on the state attained in the previous event. The generation of images in diffusion models can be conceptualized as a Markov chain process.
+
+3. Brownian Motion:
+   Brownian motion is a type of stochastic process that describes the random movement of particles suspended in a fluid 
+   (like the motion of pollen in water). In diffusion models, the addition of noise to images mimics the concept of Brownian motion, introducing randomness and variability.
+
+4. Entropy and Information Theory:
+   The diffusion model incorporates concepts from information theory, particularly entropy. Entropy measures the uncertainty or randomness in a system. 
+   The addition of noise and the diffusion process contribute to increasing entropy, allowing the model to explore a wide range of possibilities during image generation.
+
+5. Statistical Mechanics:
+   Diffusion models draw inspiration from statistical mechanics, a branch of physics that applies statistical methods to understand 
+   the behavior of a large number of particles. The diffusion of noise in the generation process can be likened to the statistical behavior of particles in a physical system.
+
+6. Denoising:
+   The training phase of diffusion models involves denoising, where the neural network learns to predict and subtract noise added to images. 
+   This denoising process is guided by principles from signal processing and statistical estimation, contributing to the foundation of diffusion-based image synthesis.
+
+7. Generative Models:
+   Diffusion models belong to the family of generative models, aiming to capture the underlying probability distribution of a dataset. 
+   The foundation lies in learning a generative process that can produce realistic samples from the modeled distribution.
+
+In summary, the foundation theory of diffusion in these models encompasses stochastic processes, Markov chains, Brownian motion, entropy, 
+statistical mechanics, denoising principles, and the broader framework of generative models. 
+These concepts collectively form the theoretical basis for understanding how diffusion models generate diverse and realistic images 
+through the controlled addition and removal of noise in a probabilistic manner.
+
+
+## Why diffusion model adapt noise? 
+The use of noise in diffusion models serves several critical purposes, and it is an intentional and fundamental aspect of the model's design. 
+Here are some key reasons why noise is incorporated into diffusion models:
+
+1. Exploration of Possibilities:
+   Noise introduces randomness into the generation process. 
+   By adding noise at different levels or stages, the model explores a broad range of possibilities during the generation of images. 
+   This exploration helps the model capture diverse and creative variations in the generated content.
+
+2. Stochasticity and Realism:
+   Real-world processes often involve inherent stochasticity (randomness). 
+   By incorporating noise, diffusion models mimic the natural variability observed in real-world data. 
+   This stochastic nature contributes to generating more realistic and visually diverse images.
+
+3. Information Theory and Entropy:
+   Noise addition increases the entropy of the system. In information theory, entropy measures the uncertainty or randomness in a system. 
+   Higher entropy allows the model to explore and generate a larger space of potential images, leading to more expressive and varied outputs.
+
+4. Training for Denoising:
+   The training process of diffusion models involves training a neural network to denoise images. 
+   By deliberately adding noise to input images and tasking the neural network with predicting and removing this noise, 
+   the model learns to understand and represent the underlying structure of the data. 
+   This training approach contributes to the model's ability to generate high-quality images during the inference phase.
+
+5. Controlled Image Synthesis:
+   Noise provides a mechanism for controlling the synthesis of images. 
+   Different levels of noise correspond to different stages in the generation process. 
+   This controlled synthesis allows the model to emphasize finer details or general outlines based on the intensity of noise at each stage.
+
+6. Generative Diversity:
+   The addition of noise promotes diversity in generated samples. 
+   Since the model is exposed to a range of noisy inputs during training, it learns to generate diverse outputs 
+   by adapting to variations in the data distribution. This is crucial for creating generative models that can produce a wide array of plausible samples.
+
+7. Markov Chain Process:
+   The diffusion process in these models can be conceptualized as a Markov chain, where each step is dependent on the previous one. 
+   The addition and removal of noise at each step contribute to the iterative refinement of the generated images, creating a coherent and visually appealing final output.
+
+In summary, the deliberate use of noise in diffusion models is a strategic choice to enhance exploration, introduce stochasticity, 
+align with information theory principles, facilitate denoising training, enable controlled synthesis, promote generative diversity, 
+and support the Markov chain-like progression of the diffusion process. These factors collectively contribute to the effectiveness 
+and creativity of diffusion models in image synthesis tasks.
+
+
