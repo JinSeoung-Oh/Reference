@@ -1,0 +1,55 @@
+From https://jrodthoughts.medium.com/inside-calm-google-deepminds-unique-method-to-augment-llms-with-other-llms-92cb9526e66c
+
+Knowledge augmentation is one of the most crucial topics in applications based on Large Language Models (LLMs). 
+Over the past few months, there has been a proliferation of augmentation techniques such as retrieve-augmented-generation (RAG) 
+that attempt to expand LLM knowledge with access to external tools or data. 
+However, can we augment LLMs with other LLMs? This seems like an area worth exploring and is the subject of a new paper by Google DeepMind.
+
+The idea of augmenting LLMs with LLMs ties directly into the area of model composition. 
+The key principle to explore is whether it’s possible to combine a general-purpose anchor model with a specialized model to create new abilities. 
+For example, could the code understanding ability of one model be merged with the language generation skill of another to facilitate code-to-text generation? 
+Typically, the solution involves additional training or fine-tuning of the anchor model using the data from the specialized model. 
+However, this approach can be computationally expensive and sometimes impractical due to data privacy concerns and organizational limits.
+
+To overcome these challenges, Google DeepMind has proposed a new method called Composition to Augment Language Models (CALM) for model composition. 
+This approach does not alter the fundamental structure of the models. 
+Instead, it involves working with an anchor model and one or more augmenting models without modifying their core algorithms. 
+Additionally, this method only requires a minimal amount of data that represents the combined capabilities of the models involved,
+such as the integration of code generation with advanced logical reasoning. 
+This innovative approach not only conserves resources but also maintains the integrity and individual strengths of each model.
+
+## The CALM Architecture
+   CALM introduces a very clever architecture for composing LLMs in a highly effective way. 
+   Unlike simpler methods of combining models, CALM introduces a minimal number of trainable parameters to work 
+   with the intermediate layers of both the anchor and augmenting models. This method allows for a more effective integration, 
+   enabling the performance of new, complex tasks that neither model could achieve independently. 
+   Importantly, this process preserves the individual strengths of each model.
+
+   CALM aims to expand the capabilities of a primary LLM by integrating it with specialized augmenting models, 
+   each with unique abilities. For example, it can work with models that specialize in key-value mapping, low-resource languages, or coding. 
+   During this process, the core structures of these models remain unchanged. 
+   CALM simply adds a few parameters that learn from the layer representations of the models. 
+   This approach has shown remarkable results, such as enabling arithmetic operations on key-value pairs, a task beyond the reach of either model alone.
+
+   CALM focuses on the interaction between a chosen set of layers of two target models. 
+   Their methodology involves the introduction of two specific sets of additional parameters to these layers. 
+   The first set consists of linear transformations. 
+   These transformations are responsible for adapting the layer representations from the first to match the dimensionality of the representations in the second model. 
+   This ensures that the data from both models is compatible, facilitating a smoother integration of the two models.
+
+   Image Credit: Google DeepMind 
+   The second set comprises cross-attention layers. These layers are designed to create a dynamic interaction between the models. 
+   By implementing these cross-attention layers, CALM enables the models to effectively share and process information, enhancing their combined output. 
+   This sophisticated integration through linear transformations and cross-attention layers is a key component of the CALM framework, 
+   allowing for an efficient and harmonious blend of the distinct capabilities of each model.
+
+  The CALM framework is particularly effective in scenarios where there’s a need to leverage specialized knowledge stored in different models. 
+  For instance, a foundational LLM can be augmented with models containing proprietary data or expertise, 
+  enhancing its capabilities in areas like reasoning, world knowledge, and language generation in specific domains. 
+  What makes CALM stand out is its ability to merge distinct knowledge from multiple models without the need to update the individual models. 
+  This integration is achieved through a few trainable cross-attention parameters. 
+  Google DeepMind’s experiments with CALM have consistently shown that it effectively utilizes the strengths of both models, 
+  leading to significant improvements in the anchor model’s performance in various challenging tasks, including translation 
+  for low-resource languages, reasoning, and code explanation and generation.
+
+
