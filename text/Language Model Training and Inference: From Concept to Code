@@ -1,0 +1,102 @@
+From https://towardsdatascience.com/language-model-training-and-inference-from-concept-to-code-483cf9b305ef
+
+1. Fundamental Concepts:
+   -1. Tokenization:
+       A token is a word or sub-word within a text sequence.
+       Tokenization involves breaking raw text into discrete tokens using a tokenizer.
+       The vocabulary is a fixed-size set of tokens known by the language model.
+   -2. Token Embeddings:
+       Token embeddings are obtained by looking up embeddings for each token in an embedding layer.
+       Positional embeddings are added to represent the position of each token within a sequence.
+   -3. Context Window:
+       Language models have a context window limiting the number of tokens processed.
+       Positional embeddings allow transformers to use token positions as relevant features.
+
+2. Language Model Pretraining:
+   -1. Objective - Next Token Prediction:
+       Language models are pretrained by sampling text and predicting the next word.
+       Self-supervised objective without requiring explicit labels.
+       Ground truth next token is implicitly present in the corpus.
+
+   -2. Decoder-Only Transformer:
+       Token embeddings are passed into a decoder-only transformer during pretraining.
+       Output vectors for each token are generated, enabling next token prediction.
+       Causal self-attention ensures each token only considers those before it in the sequence.
+
+   -3.  Predicting Tokens Across a Sequence:
+        Next token prediction is performed for every token in a sequence during pretraining. 
+        Loss is aggregated over all tokens in a sequence.
+
+3. Autoregressive Inference Process:
+   -1. Generating Text:
+       Inference involves an autoregressive process based on next token prediction.
+       Starting with an initial input sequence or prefix, the model predicts the next token.
+       The predicted token is added to the input sequence, and the process is repeated.
+
+4. Key Considerations:
+   -1. Transformer Architecture:
+       Understanding the transformer architecture, especially the decoder-only variant.
+
+   -2. Self-Attention:
+       Recognizing the importance of self-attention and its variant, multi-headed causal self-attention.
+
+   -3. PyTorch and Distributed Training:
+       The overview involves code written in PyTorch and uses distributed training techniques.
+
+   -4. Automatic Mixed Precision (AMP) Training:
+       Selectively adjusting precision within the neural net during training for efficiency.
+
+   -5. Deep Learning Basics:
+       A baseline understanding of neural networks is assumed, with a recommendation for additional learning resources.
+
+5. Model Architecture (Decoder-Only Transformer):
+   -1. Model Configuration:
+       Configuration data class specifies hyperparameters.
+       Configurations correspond to the smallest model architecture explored in the GPT-2 paper.
+
+   -2. Single Block:
+       A single decoder-only transformer block consists of multi-headed causal self-attention and a feed-forward neural network.
+       Feed-forward network is two-layered with normalization, residual connections, and weight tying.
+
+   -3. Model Definition:
+       The language model contains token and positional embedding layers.
+       1024 positional embeddings for a specified context length.
+       12 transformer blocks in total.
+       Additional components include dropout, LayerNorm, and a linear classification head for next token prediction.
+
+6. Next Token Prediction (Forward Pass):
+   -1. Forward Pass:
+       Forward pass takes input and target tensors during training.
+       Constructs positional and token embeddings.
+       Passes through transformer blocks, applying dropout and LayerNorm.
+       Linear layer lm_head is used for next token prediction.
+       CrossEntropy loss is applied to train the model.
+
+   -2. Inference:
+       For generating text during inference, the autoregressive process is employed.
+       Forward pass is similar to training but with no target tensor.
+       Logits are scaled, optional Top-K sampling is applied, and softmax is used for probability distribution.
+       Next token is sampled from the distribution.
+
+7. Training Process (NanoGPT Training):
+   -1. Distributed Training Setup:
+       Distributed training using either a single GPU or distributed data parallel (DDP) approach.
+       Rank assigned to each process to coordinate communication.
+
+   -2. Gradient Accumulation:
+       Gradient accumulation is used to simulate a larger batch size when hardware constraints limit the batch size.
+
+   -3. Fully Sharded Data Parallel (FSDP) Training:
+       For larger models that may not fit in the memory of a single device, fully sharded data parallel training is 
+       considered as an alternative to DDP.
+
+   -4. Data Loading:
+       Data is loaded from separate training and validation files.
+       Random chunks with the size of the context window are used.
+
+   -5. Learning Rate Schedule:
+       A learning rate schedule is adopted, including a warm-up period and a cosine decay period.
+
+   -6. Training Loop:
+       The training loop involves iterating over mini-batches, computing gradients, and updating model weights.
+       Components like gradient clipping and loss scaling are incorporated, related to automatic mixed precision (AMP) training.
