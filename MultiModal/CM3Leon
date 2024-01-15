@@ -1,0 +1,35 @@
+From https://artgor.medium.com/paper-review-scaling-autoregressive-multi-modal-models-pretraining-and-instruction-tuning-37d6a9cbf968
+
+CM3Leon is capable of generating both text and images and achieves state-of-the-art results 
+in text-to-image generation with significantly less compute than similar models
+
+## CM3Leon Overview:
+   1. Architecture:
+      - CM3Leon is built on the CM3 multi-modal architecture.
+      - It uses a decoder-only transformer architecture.
+      - Various adjustments were made to the model architecture, including removing bias terms, dropout, 
+        and learnable parameters for layer norms.
+      - The sequence length was increased to 4096 from 2048.
+      - Metaseq2 was used for training.
+   2. Data and Pretraining:
+      - Licensed images from Shutterstock are used for text-to-image generation to address ethical concerns.
+      - Images and text are tokenized separately using custom tokenizers.
+      - Dense retriever and retrieval strategies are employed during pretraining, focusing on relevance, modality, and diversity.
+      - Query dropout is implemented to encourage diversity.
+      - Retrieval documents are added to the training context.
+   3. Objective Function:
+      - CM3 objective transforms multi-modal tasks into text prediction tasks, enabling the model to handle both image and text generation tasks.
+      - Emphasis on image-caption pair loss during training.
+   4. Text-to-Image Results:
+      - CM3Leon achieves state-of-the-art results in text-to-image generation with 5x less compute than similar models.
+      - Zero-shot MS-COCO FID of 4.88.
+      - Four decoding techniques are discussed, including temperatured sampling, TopP sampling, Classifier Free Guidance, and Contrastive Decoding TopK (CD-K).
+   5. Supervised Fine-Tuning:
+      - Distinct CFG values are used for image and text during decoding in tasks such as text-guided image editing and image-image-grounded generation.
+      - The model surpasses previous state-of-the-art models in various vision-language tasks.
+
+Conclusion:
+   CM3Leon demonstrates significant advancements in multi-modal language models, particularly in text-to-image generation. 
+   It achieves impressive results with efficient computation, maintains flexibility in bi-directional generation, and exhibits controllability in various tasks.
+   The paper addresses ethical concerns related to image ownership and attribution by using licensed images. 
+   Additionally, supervised fine-tuning further enhances the model's performance in vision-language tasks.
