@@ -1,0 +1,73 @@
+https://medium.com/@fireworks.ai/fireattention-serving-open-source-models-4x-faster-than-vllm-by-quantizing-with-no-tradeoffs-a29a85ad28d0
+
+## Introduction:
+Fireworks AI introduces the Fireworks LLM Serving Stack, aiming to enhance the efficiency of serving for Mixture of Experts (MoE) models, 
+specifically focusing on the Mixtral model. The goal is to achieve a significantly more efficient serving with minimal impact on model quality.
+
+## Key Points:
+1. Mixtral and Fireworks AI:
+   -1. Training Scale: Mixtral is the first open-source model trained on trillions of tokens with support for Mixture of Experts (MoE).
+   -2. Hosting Platform: Fireworks AI, the first platform to host Mixtral, even before its public release.
+
+2. Objectives:
+   -1. Efficiency Improvement: The primary goal is to develop a more efficient serving for MoE models, specifically Mixtral.
+   -2. Fireworks LLM Serving Stack: Introduced as a solution, utilizing FP16 and FP8-based FireAttention as the core component, 
+       promising a 4x speedup compared to other open-source alternatives.
+3. Setup:
+   -1. Use Case Focus: The post focuses on a typical use case with a prompt length of 1K and generating 50 tokens, covering the long prompt, 
+       short generation scenario.
+   -2. Quality Metric: MMLU (Mixtral Mean Language Understanding) metric is used for assessing language understanding with a test dataset.
+
+4. FireAttention:
+   -1. Custom CUDA Kernel: FireAttention is a custom CUDA kernel optimized for Multi-Query Attention models, especially MoE models like Mixtral.
+   -2. FP16 and FP8 Support: Optimized for FP16 and FP8 support in new hardware, particularly H100 GPUs.
+
+5. Quality Analysis:
+   -1. Half-Precision (FP16): Running the model in half-precision can leave performance on the table, and integer quantization methods 
+       do not provide significant speed-ups.
+   -2. FP8 Implementation: Fireworks AI introduces an FP8 implementation, running 3 experts per token, showing promising results 
+       with a small base model quality impact.
+
+6. Performance Analysis:
+   -1. Comparison with vLLM: Fireworks FP16 Mixtral model implementation is deemed superior to vLLM. 
+       The FP8 implementation in Fireworks significantly improves over the already efficient FP16 implementation.
+   -2. Benefits of FP8: FP8 provides a 2x improvement in effective requests/second due to model size reduction, memory bandwidth, and FLOPs speed-ups.
+
+## Conclusions:
+Superiority of Fireworks LLM Stack: Fireworks FP16 Mixtral model implementation outperforms vLLM, 
+and the FP8 implementation offers a significant improvement over FP16.
+Efficient Deployment: FP8, by reducing the model size, allows for more efficient deployment,
+resulting in a 2x improvement in effective requests/second.
+No One-Size-Fits-All: Different configurations of both vLLM and Fireworks LLM service show strengths in different setups.
+Fireworks FireAttention FP8: Considered the best tradeoff for LLM serving in terms of accuracy and performance.
+
+## SO, What is FireAttention?
+"FireAttention" is described as a custom CUDA kernel optimized for Multi-Query Attention models, 
+particularly designed for models utilizing a Mixture of Experts (MoE) architecture, with Mixtral being one such model
+
+1. Optimization for MoE Models: FireAttention is specifically optimized for models that employ a Mixture of Experts architecture, 
+                                such as Mixtral. MoE models utilize a combination of multiple expert networks to handle different aspects of the input data.
+
+2. CUDA Kernel: FireAttention is implemented as a custom CUDA kernel. CUDA (Compute Unified Device Architecture) is a parallel computing platform 
+                and application programming interface model created by NVIDIA for utilizing their Graphics Processing Units (GPUs) for general-purpose processing.
+
+3. FP16 and FP8 Support: FireAttention is designed to support both FP16 (half-precision) and FP8 (8-bit floating-point) formats. 
+                         These formats are lower precision compared to the traditional FP32 (single-precision) but can offer performance benefits,  
+                         especially on modern GPUs.
+
+4. Optimized for New Hardware (H100): The kernel is specifically optimized for new hardware, notably mentioning H100 GPUs. 
+                                      The H100 is likely a reference to NVIDIA's GPU architecture, and the optimization suggests that FireAttention 
+                                      is tailored to take advantage of the features and capabilities of this hardware.
+
+5. Memory Bandwidth Limit: FireAttention is mentioned to run close to the hardware memory bandwidth limit during generation for various batch sizes and sequence lengths.
+                           This indicates that the kernel is designed to efficiently utilize the available memory bandwidth, a crucial aspect for performance.
+
+6. Integrated into Fireworks LLM Serving Stack: FireAttention is a core part of the Fireworks proprietary LLM (Large Language Model) serving stack. 
+                                                This stack includes CUDA kernels optimized for both FP16 and FP8. The integration into the serving stack suggests that 
+                                                FireAttention plays a central role in the efficient serving of MoE models like Mixtral.
+
+In summary, FireAttention is a custom CUDA kernel specifically crafted for MoE models, providing optimized support for lower-precision formats (FP16 and FP8) and designed 
+to run efficiently on modern GPU hardware, with a focus on memory bandwidth utilization during generation. 
+It is a key component of the Fireworks LLM serving stack, contributing to the acceleration of models like Mixtral with a focus on both performance and precision.
+
+
