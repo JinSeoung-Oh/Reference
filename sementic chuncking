@@ -1,0 +1,215 @@
+From https://ai.gopubby.com/unleashing-the-power-of-semantic-chunking-a-journey-with-llamaindex-767e3499ca73
+
+1. Defining Semantic Chunking:
+   Semantic chunking, also referred to as splitting, involves breaking down extensive textual data into smaller, more manageable segments. 
+   In the multi-modal landscape, this concept extends beyond text to encompass images as well. 
+   In this tutorial, we’ll delve into the 5 Levels of Text Splitting, exploring various strategies, including the intriguing integration with LlamaIndex.
+
+2. The Levels of Text Splitting:
+    - Level 1: Character Splitting — A Simple Beginning
+      At the foundational level, we encounter character splitting. This involves dividing text into static character chunks,
+      a straightforward yet limited approach. The emphasis here is on simplicity, with the chunks being of fixed sizes, irrespective of content or structure.
+
+      Pros: Easy and Simple Cons: Rigid, Doesn’t Consider Text Structure
+
+      Key Concepts to Grasp:
+      Chunk Size: The number of characters in each chunk.
+      Chunk Overlap: The sequential chunks’ overlapping amount, preventing the inadvertent separation of contextual information.
+                     While character splitting might not be the ideal choice for applications, it serves as a stepping stone to understanding the basics of semantic chunking.
+  
+    - Level 2: Recursive Character Text Splitting — Navigating the Labyrinth of Separators
+      Moving beyond the simplicity of character splitting, we delve into the realm of recursive character text splitting. 
+      Here, the process becomes more sophisticated, relying on a recursive approach based on a defined list of separators. 
+      These separators act as guides, assisting in the creation of dynamic chunks that adapt to the nuances of the text.
+
+      Pros: Improved Adaptability, Dynamic Chunking Cons: Complexity Increases
+
+      Exploring the Depths:
+      In this level, understanding the recursive nature of the process is crucial. Imagine the text as a labyrinth, 
+      and the separators as markers guiding the recursive exploration. 
+      It’s an intricate dance that allows for more nuanced segmentation, enhancing the model’s ability to capture context.
+
+    - Level 3: Document Specific Splitting — Tailoring for Diversity
+      Text doesn’t come in a one-size-fits-all package. Document-specific splitting recognizes this, offering various chunking methods tailored to 
+      different document types, whether it’s a PDF, Python script, or Markdown file. 
+      This level ensures that your chunking strategy aligns with the unique structures of diverse documents.
+
+      Pros: Customization for Document Types, Enhanced Relevance Cons: Requires Document Type Knowledge
+
+      Crafting the Strategy:
+      Imagine having a toolkit with different approaches for handling distinct document formats.
+      It’s akin to having a versatile set of keys that unlock the potential of semantic chunking in various domains.
+
+     - Level 4: Semantic Splitting — Walking the Embedding Path
+       Stepping into the realm of semantic splitting, the focus shifts to embedding walk-based chunking. 
+       This involves a more profound understanding of the context within the chunks. 
+       It’s not just about characters or separators; it’s about embedding the essence of meaning within each segment, creating a web of interconnected understanding.
+
+       Pros: Contextual Depth, Enhanced Semantic Grasp Cons: Computational Intensity Increases
+
+       The Art of Embedding:
+       Think of this level as an art form. Each chunk becomes a canvas, and the embedding walk is the brushstroke that paints a richer, 
+       more intricate picture of the text’s semantic landscape.
+
+     - Level 5: Agentic Splitting — Text Liberation with Agent-Like Systems
+       At the summit of text splitting innovation, we encounter agentic splitting. This experimental method envisions text segmentation through an agent-like system. 
+       It’s a revolutionary approach that becomes especially valuable if you anticipate a trend towards zero token cost.
+
+       Pros: Adaptive, Futuristic Approach Cons: Requires Experimentation and Testing
+
+3. The Future of Text Liberation:
+   Envision an agent navigating through your text, dynamically adapting to its nuances. 
+   This level hints at a future where the text is not just segmented but liberated, allowing for unparalleled adaptability and efficiency.
+
+
+4. Empowering Chunking Excellence with LlamaIndex:
+   -Innovative Indexing: LlamaIndex, armed with cutting-edge capabilities, transforms the efficiency of semantic chunking, introducing alternative representations and indexing for raw text.
+   -Derivative Forms: The integration goes beyond enhancement, offering derivative forms that enrich the process, elevating retrieval and indexing functionalities.
+   -Strategic Evaluation for Success: Rigorously assess chunking strategies using frameworks like LangChain Evals, Llama Index Evals, and RAGAS Evals.
+                                     Testing is paramount for optimal performance.
+   -The Chunking Commandment: Amid technical intricacies, uphold the Chunking Commandment — transform data into a retrievable format, adding lasting value to your application.
+   
+   In essence, LlamaIndex integration is a strategic move towards unlocking the full potential of semantic chunking, seamlessly blending innovation and practicality.
+
+5. Implementation example
+-1. Step 1: Install Libraries
+    !pip install llama_index html2text trulens_eval sentence-transformers
+    !CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip install  llama-cpp-python --no-cache-dir
+
+-2. Step II: Import Libraries
+import os
+
+import logging
+import sys
+import torch
+import numpy as np
+
+#Setup  OPEN API Key
+os.environ["OPENAI_API_KEY"] = ""
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
+
+from llama_index import VectorStoreIndex, SimpleDirectoryReader, ServiceContext
+from llama_index.llms import HuggingFaceLLM
+from llama_index.llms import LlamaCPP
+from llama_index.llms.llama_utils import messages_to_prompt, completion_to_prompt
+from llama_index.llama_pack import download_llama_pack
+from llama_index.response.notebook_utils import display_source_node
+
+from semantic_chunking_pack.base import SemanticChunker
+from llama_index.embeddings import HuggingFaceEmbedding
+from llama_index.node_parser import SentenceSplitter
+from llama_index.embeddings import OpenAIEmbedding
+from llama_index.indices.postprocessor import SentenceTransformerRerank 
+
+-3. Step III: Download Data
+!wget 'https://raw.githubusercontent.com/run-llama/llama_index/main/docs/examples/data/paul_graham/paul_graham_essay.txt' -O 'pg_essay.txt'
+
+-4. Step IV: Custom LLM
+llm = LlamaCPP(
+    # You can pass in the URL to a GGML model to download it automatically
+    model_url='https://huggingface.co/TheBloke/zephyr-7B-alpha-GGUF/resolve/main/zephyr-7b-alpha.Q5_K_M.gguf',
+    # optionally, you can set the path to a pre-downloaded model instead of model_url
+    model_path=None,
+    temperature=0.1,
+    max_new_tokens=256,
+    # llama2 has a context window of 4096 tokens, but we set it lower to allow for some wiggle room
+    context_window=3900,
+    # kwargs to pass to __call__()
+    generate_kwargs={},
+    # kwargs to pass to __init__()
+    # set to at least 1 to use GPU
+    model_kwargs={"n_gpu_layers": -1},
+    # transform inputs into Llama2 format
+    messages_to_prompt=messages_to_prompt,
+    completion_to_prompt=completion_to_prompt,
+    verbose=True,
+)
+
+#Download Semantic Chunking Package
+download_llama_pack(
+    "SemanticChunkingQueryEnginePack",
+    "./semantic_chunking_pack",
+    skip_load=True,
+    # leave the below line commented out if using the notebook on main
+    # llama_hub_url="https://raw.githubusercontent.com/run-llama/llama-hub/jerry/add_semantic_chunker/llama_hub"
+)
+
+-5. Step V: Initialize different dependencies
+# load documents
+documents = SimpleDirectoryReader(input_files=["/content/data/pg_essay.txt"]).load_data()
+
+
+# intilaize our custom embeddings
+embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+
+splitter = SemanticChunker(
+    buffer_size=1, breakpoint_percentile_threshold=95, embed_model=embed_model
+)
+
+# also baseline splitter
+base_splitter = SentenceSplitter(chunk_size=512)
+
+# Initialize the reranker
+rerank = SentenceTransformerRerank(
+    model="cross-encoder/ms-marco-MiniLM-L-12-v2", top_n=3 )
+
+service_context = ServiceContext.from_defaults(
+    chunk_size=512,
+    llm=llm,
+    embed_model=embed_model
+)
+nodes = splitter.get_nodes_from_documents(documents)
+###
+print(nodes[1].get_content())
+
+-6. Step VI: Vectorize content
+vector_index = VectorStoreIndex(nodes,service_context=service_context)
+query_engine = vector_index.as_query_engine(node_postprocessors=[rerank])
+
+base_vector_index = VectorStoreIndex(base_nodes, service_context=service_context)
+base_query_engine = base_vector_index.as_query_engine(node_postprocessors=[rerank])
+response = query_engine.query(
+    "Tell me about the author's programming journey through childhood to college"
+)
+## 
+print(str(response))
+
+-7. Step VII: Truelens Evaluation
+# Initiate Trulens
+from trulens_eval import Feedback, Tru, TruLlama
+from trulens_eval.feedback import Groundedness
+from trulens_eval.feedback.provider.openai import OpenAI
+
+tru = Tru()
+
+# Initialize provider class
+openai = OpenAI()
+
+grounded = Groundedness(groundedness_provider=OpenAI())
+
+# Define a groundedness feedback function
+f_groundedness = Feedback(grounded.groundedness_measure_with_cot_reasons).on(
+    TruLlama.select_source_nodes().node.text.collect()
+    ).on_output(
+    ).aggregate(grounded.grounded_statements_aggregator)
+
+# Question/answer relevance between overall question and answer.
+f_qa_relevance = Feedback(openai.relevance).on_input_output()
+
+# Question/statement relevance between question and each context chunk.
+f_qs_relevance = Feedback(openai.qs_relevance).on_input().on(
+    TruLlama.select_source_nodes().node.text
+    ).aggregate(np.mean)
+tru_query_engine_recorder = TruLlama(query_engine,
+    app_id='LlamaIndex_App1',
+    feedbacks=[f_groundedness, f_qa_relevance, f_qs_relevance])
+
+# or as context manager
+with tru_query_engine_recorder as recording:
+    query_engine.query("Tell me about the author's programming journey through childhood to college")
+
+tru.run_dashboard()
+
+
