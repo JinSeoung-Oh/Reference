@@ -1,0 +1,39 @@
+From https://medium.com/tensor-labs/taking-your-rag-pipelines-to-a-next-level-langgraphs-0e7addda0405
+
+## LangGraph is a new addition to the LangChain framework, which itself is designed to simplify the creation of applications using large language models. 
+   LangGraph enhances this framework by introducing a library that facilitates the creation of cyclical graphs, 
+   providing a more dynamic and iterative approach to program development.
+
+1. Introduction and Purpose:
+   LangGraph is introduced as a library within LangChain.
+   It's designed to enhance the framework by introducing the ability to create cyclical graphs.
+   The goal is to make the development of complex programs, especially agent runtimes, more efficient.
+
+2. Setting Up LangGraph:
+   LangGraph starts with a concept called "StateGraph," acting as the brain of the operation.
+   The StateGraph keeps track of the necessary information.
+   Nodes, representing specific tasks, are added to the StateGraph, and edges connect these nodes.
+
+3. Working with LangGraph:
+   LangGraph operates by creating a network of interconnected nodes that represent different tasks or stations in the program.
+   The analogy of a train network is used, where data (trains) moves from one station to another, sometimes choosing different tracks based on signals.
+
+4. Enhancements to LangChain's AgentExecutor:
+   LangGraph offers an upgraded version of LangChain's AgentExecutor, providing a more advanced control room for fine-tuning program behavior.
+
+5. Customization and Flexibility:
+   LangGraph is described as a set of building blocks that can be put together in basic ways.
+   It offers flexibility, allowing developers to customize and arrange the building blocks to meet specific program requirements.
+
+6. Comparison with Traditional RAG Pipelines:
+   The article compares LangGraph-enhanced RAG pipelines with traditional ones.
+   Traditional RAG pipelines operate linearly, while LangGraph introduces iterative and evaluative capabilities.
+   LangGraph allows the system to reassess and refine its search strategy based on the relevance of retrieved documents, 
+   providing a more adaptive and intelligent approach.
+
+7. Final Thoughts:
+   LangGraph is presented as a revolutionary addition to RAG pipelines, bringing cognitive iteration and evaluation into the process.
+   It elevates RAG pipelines from sequential processes to intelligent, adaptive systems capable of continuous learning and refinement.
+
+In summary, LangGraph is a powerful extension to the LangChain framework, offering the ability to create cyclical graphs 
+and introducing a more flexible and adaptive approach to program development, especially in the context of RAG pipelines.
