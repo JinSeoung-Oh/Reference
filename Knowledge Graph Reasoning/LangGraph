@@ -37,3 +37,48 @@ From https://medium.com/tensor-labs/taking-your-rag-pipelines-to-a-next-level-la
 
 In summary, LangGraph is a powerful extension to the LangChain framework, offering the ability to create cyclical graphs 
 and introducing a more flexible and adaptive approach to program development, especially in the context of RAG pipelines.
+
+## Example code
+from langgraph import LangGraph
+
+while not success:
+    data = fetch_info(query)
+    if data_is_good(data):
+        success = True
+    else:
+        query = make_query_smarter()
+from langgraph import StateGraph
+
+# Set up your 'brain'
+class MyState:
+    def __init__(self):
+        self.memory = {}
+
+state = MyState()
+graph = StateGraph(state)
+
+# Add stations and connect them
+graph.add_node("station1", task1)
+graph.add_node("station2", task2)
+graph.add_edge("station1", "station2")
+
+# Start the network
+network = graph.compile()
+
+# Traditional RAG Pipeline
+query = "What is the tallest mountain?"
+documents = retrieve_documents(query)
+response = generate_response(query, documents)
+
+# LangGraph-Enhanced RAG Pipeline
+query = "What is the tallest mountain?"
+satisfactory = False
+
+while not satisfactory:
+    documents = retrieve_documents(query)
+    if evaluate_relevance(documents):
+        satisfactory = True
+    else:
+        query = refine_query(query)
+
+response = generate_response(query, documents)
