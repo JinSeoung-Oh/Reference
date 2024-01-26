@@ -1,0 +1,39 @@
+From https://ai.plainenglish.io/towards-hybrid-reasoning-assimilating-structure-into-subsymbolic-systems-05cf9d34d13d
+
+## Overview
+   The provided text discusses the challenges associated with querying complex knowledge graphs (KGs) and
+   proposes a hybrid workflow to augment large language models (LLMs) with external knowledge graphs. 
+   The challenges identified include scale, noise, incompleteness, sparsity, and difficulty in query formulation. 
+   The proposed workflow involves leveraging an agent system with cyclical graphs, emphasizing the critical role of asynchrony, 
+   blending symbolic and subsymbolic information, and incorporating joint vector embeddings and graph schema priors. 
+   The text concludes with an idealized form of the workflow, outlining phases such as analyzing reasoning tasks, 
+   decomposing into modular tools, initializing multi-pronged queries, propagating intermediate results, recursive re-planning, LLM assimilation, and evaluation/explanation.
+
+
+1. Challenges of Querying Complex KGs:
+   - Scale: Real-world knowledge graphs are massive, making reasoning over the full graph intractable.
+   - Noise: Automatically constructed knowledge graphs suffer from inaccuracies due to error-prone pipelines.
+   - Incompleteness: Knowledge graphs are often incomplete, missing important concepts and relationships.
+   - Sparsity: Real-world graphs often have a power-law distribution with sparse connectivity.
+   - Query Formulation Difficulty: Mapping natural language questions to formal graph query languages is challenging.
+
+2. Proposed Hybrid Workflow:
+  - Cyclical Graphs: The use of cyclical graphs allows for recursion, feedback loops, and repeated querying.
+  - Asynchrony: Asynchronous workflows are crucial for efficiency, scalability, and faster response times.
+
+3. Blending Symbolic and Subsymbolic:
+   - Joint Vector Embeddings: Combining symbolic ontology elements with neural text token embeddings.
+   - Graph Schema Priors: Encoding symbolic graph schemas into the LLM architecture.
+   - Differentiable Programming: Representing program logic as differentiable operations for end-to-end tuning.
+   - Reasoning Shortcuts: Storing curated symbolic rules as shortcuts for efficient reasoning.
+
+4. Coordinating Orchestration in Idealized Form:
+   An idealized workflow is proposed for assimilating structured knowledge into language models.
+   Phases include analyzing reasoning tasks, decomposing into modular tools, initializing multi-pronged queries, 
+   propagating intermediate results, recursive re-planning, LLM assimilation, and evaluation/explanation.
+  The workflow aims for concurrent evidence collection, dynamic re-evaluation, and real-time assimilation at scale.
+
+5. Conclusion:
+   The text highlights the complexities in querying large knowledge graphs and suggests a comprehensive approach to augment LLMs with external knowledge. 
+   The proposed workflow addresses challenges through cyclical graphs, asynchrony, and blending symbolic and subsymbolic information, 
+   providing an idealized blueprint for effective assimilation of structured knowledge into language models.
