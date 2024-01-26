@@ -1,0 +1,185 @@
+From https://levelup.gitconnected.com/how-to-orchestrate-the-conversation-between-multiple-agents-in-autogen-07512058c062
+
+########################################
+1. From System Message to Description
+
+assistant = autogen.AssistantAgent(
+    name="assistant",
+    system_message="You are a helpful assistant.",
+    llm_config={
+        "timeout": 600,
+        "seed": 42,
+        "config_list": config_list,
+    },
+    description="This is a helpful assistant",
+)
+
+-- If you leave the description empty, the orchestrator (GroupChatManager) will still use thesystem_message for conversation orchestration
+
+########################################
+
+2. GroupChat Experiment (example)
+
+In this group chat, we aim to create an automated conversation workflow that generates custom travel plans and insurance packages 
+for given locations and dates. 
+
+1) The system includes several AI agents:
+   Weather reporter, who provides the weather conditions based on the locations and dates. 
+   As the function calling feature is not related to today’s topic so we ask the assistant to use its training knowledge to provide the historical data.
+   Activity agent, who provides recommendations for travel activities based on the location and weather conditions.
+   Travel advisor, who generates a travel itinerary including every day’s activities.
+   Insurance agent, who recommends insurance options tailored to the planned activities and potential risks.
+
+To be more specific, the sequence of the speaking should be designed to follow Weather reporter -> Activity agent -> Travel advisor -> Insurance agent.
+
+#######################################
+3. Without Description
+pip install pyautogen
+
+import autogen
+
+config_list = [
+    {
+        'model': 'gpt-3.5-turbo-1106',
+        'api_key': 'sk-OpenAI_API_Key',
+    }
+    ]
+
+llm_config = {"config_list": config_list, "seed": 52}
+
+user_proxy = autogen.UserProxyAgent(
+   name="User_proxy",
+   system_message="A human admin.",
+   is_termination_msg=lambda msg: "TERMINATE" in msg["content"],
+   code_execution_config={"last_n_messages": 2, "work_dir": "groupchat"},
+   human_input_mode="TERMINATE"
+)
+
+# definying each agent
+weather_reporter = autogen.AssistantAgent(
+    name="Weather_reporter",
+    system_message="""You are a weather reporter who provides weather 
+    overall status based on the dates and location user provided.
+    Using historical data is OK.
+    Make your response short.""",
+    llm_config=llm_config,
+)
+activity_agent = autogen.AssistantAgent(
+    name="activity_agent",
+    system_message="""You are an activity agent who recommends 
+    activities considering the weather situation from weather_reporter.
+    Don't ask questions. Make your response short.""",
+    llm_config=llm_config,
+)
+insure_agent = autogen.AssistantAgent(
+    name="Insure_agent",
+    system_message="""You are an Insure agent who gives 
+    the short insurance items based on the travel plan. 
+    Don't ask questions. Make your response short.""",
+    llm_config=llm_config,
+)
+travel_advisor = autogen.AssistantAgent(
+    name="Travel_advisor",
+    system_message="""After activities recommendation generated 
+    by activity_agent, You generate a concise travel plan 
+    by consolidating the activities.
+    """,
+    llm_config=llm_config,
+)
+
+groupchat = autogen.GroupChat(agents=[user_proxy,  travel_advisor, activity_agent, weather_reporter,insure_agent], messages=[], max_round=8)
+manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config)
+
+user_proxy.initiate_chat(manager, message="Give me a travel advise to Bohol Island in Sept.")
+
+
+## With Description
+# In definying each agent part
+weather_reporter = autogen.AssistantAgent(
+    name="Weather_reporter",
+    system_message="""You are a weather reporter who provides weather 
+    overall status based on the dates and location user provided.
+    Using historical data is OK.
+    Make your response short.""",
+    llm_config=llm_config,
+    description="""This agent is reponsible for providing weather 
+    overall status based on the dates and location user provided.
+    """
+)
+activity_agent = autogen.AssistantAgent(
+    name="activity_agent",
+    system_message="""You are an activity agent who recommends 
+    activities considering the weather situation from weather_reporter.
+    Don't ask questions. Make your response short.""",
+    llm_config=llm_config,
+    description="""This agent is responsible for actitivies 
+    recommendation considering the weather situation from weather_reporter.
+    """,
+)
+insure_agent = autogen.AssistantAgent(
+    name="Insure_agent",
+    system_message="""You are an Insure agent who gives 
+    the short insurance items based on the travel plan. 
+    Don't ask questions. Make your response short.""",
+    llm_config=llm_config,
+    description="""This agent is responsible for giving the short 
+    insurance items based on the travel plan.
+    """,
+)
+travel_advisor = autogen.AssistantAgent(
+    name="Travel_advisor",
+    system_message="""After activities recommendation generated 
+    by activity_agent, You generate a concise travel plan 
+    by consolidating the activities.
+    """,
+    llm_config=llm_config,
+    description="""After activities recommendation generated by activity_agent,
+    this agent is responsible for making travel plan by consolidating 
+    the activities.
+    """,
+)
+
+## Extensions
+Setting the speaker_selection_method field to value “round_robin” in the group chat object which iterates the speaking in the same order
+- setting speaking order
+
+groupchat = autogen.GroupChat(agents=[user_proxy, weather_reporter, 
+   activity_agent, travel_advisor,insure_agent], messages=[], max_round=8
+    speaker_selection_method=“round_robin”)
+
+user_proxy = autogen.UserProxyAgent(
+   name="User_proxy",
+   system_message="A human admin.",
+   is_termination_msg=lambda msg: "TERMINATE" in msg["content"],
+   code_execution_config={"last_n_messages": 2, "work_dir": "groupchat"},
+   human_input_mode="ALWAYS"
+)
+
+insure_agent = autogen.AssistantAgent(
+    name="Insure_agent",
+    system_message="""You are an Insure agent who gives 
+    the short insurance items based on the travel plan. 
+    Don't ask questions. Make your response short.""",
+    llm_config=llm_config,
+    description="""This agent is responsible for giving the short 
+    insurance items based on the travel plan.
+    The insurance items must be sent to user_proxy for human review.
+    """,
+)
+
+travel_advisor = autogen.AssistantAgent(
+    name="Travel_advisor",
+    system_message="""After activities recommendation generated 
+    by activity_agent, You generate a concise travel plan 
+    by consolidating the activities.
+    """,
+    llm_config=llm_config,
+    description="""
+    This agent should generate at least two versions of travel plan:
+    1. After activities recommendation generated by activity_agent,
+    this agent is responsible for making travel plan by consolidating 
+    the activities.
+    2. After the user_proxy approves insurance items generated by insure_agent, 
+    this agent should generate an updated travel plan by including the original plan and insurance content. 
+    """,
+)
