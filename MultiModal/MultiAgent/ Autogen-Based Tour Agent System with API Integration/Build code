@@ -1,0 +1,280 @@
+From https://levelup.gitconnected.com/harnessing-the-power-of-autogen-multi-agent-systems-via-api-integration-edb0b9651608
+
+## Step 1. Set Autogen config
+config_list = [{
+    'model': 'gpt-3.5-turbo-1106',
+    'api_key': os.getenv("OPENAI_API_KEY"),
+}]
+
+## Step 2. Assistant Agents
+tour_agent = AssistantAgent(
+    "tour_agent",
+    human_input_mode="NEVER",
+    llm_config={
+        "config_list": config_list,
+        "cache_seed": None
+    },
+    system_message="You are a Tour Agent who helps users plan a trip based on user requirements. 
+    You can get help from the Location Researcher to research and find details about a certain location, 
+    attractions, restaurants, accommodation, etc. You use those details a answer user questions, create trip itineraries, 
+    make recommendations with practical logistics according to the user's requirements. 
+    Report the final answer when you have finalized it. Add TERMINATE to the end of this report."
+)       
+
+location_researcher = AssistantAgent(
+    "location_researcher",
+    human_input_mode="NEVER",
+    system_message="You are the location researcher who is helping the Tour Agent plan a trip according to user requirements.
+    You can use the `search_google_maps` function to retrieve details about a certain location, attractions, restaurants, 
+    accommodation, etc. for your research. You process results from these functions and present your findings
+    to the Tour Agent to help them with itinerary and trip planning.",
+    llm_config={
+        "config_list": config_list,
+        "cache_seed": None,
+        "functions": [
+            SEARCH_GOOGLE_MAPS_SCHEMA,
+        ]
+    },
+    function_map={
+        "search_google_maps": search_google_maps
+    }
+)
+
+## Step 3. User Proxy
+def terminate_agent_at_reply(
+        recipient: Agent,
+        messages: Optional[List[Dict]] = None,
+        sender: Optional[Agent] = None,
+        config: Optional[Any] = None,
+) -> Tuple[bool, Union[str, None]]:
+    return True, None
+
+user_proxy = UserProxyAgent(
+    "user_proxy",
+    is_termination_msg=lambda x: "TERMINATE" in x.get("content", ""),
+    human_input_mode="NEVER",
+    code_execution_config=False
+)
+
+user_proxy.register_reply([Agent, None], terminate_agent_at_reply)
+
+## Step 4. Group chat
+group_chat = GroupChat(
+    agents=[self.user_proxy, self.location_researcher, self.tour_agent],
+    messages=[],
+    allow_repeat_speaker=False,
+    max_round=20
+)
+
+group_chat_manager = GroupChatManager(
+    self.group_chat,
+    is_termination_msg=lambda x: "TERMINATE" in x.get("content", ""),
+    llm_config={
+        "config_list": config_list,
+        "cache_seed": None
+    }
+)
+
+############################################
+import os
+from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager, Agent
+from typing import Optional, List, Dict, Any, Union, Callable, Literal, Tuple
+from dotenv import load_dotenv
+from functions import search_google_maps, SEARCH_GOOGLE_MAPS_SCHEMA
+
+load_dotenv()
+
+config_list = [{
+    'model': 'gpt-3.5-turbo-1106',
+    'api_key': os.getenv("OPENAI_API_KEY"),
+}]
+
+
+class AgentGroup:
+
+    def __init__(self):
+        self.user_proxy = UserProxyAgent(
+            "user_proxy",
+            is_termination_msg=lambda x: "TERMINATE" in x.get("content", ""),
+            human_input_mode="NEVER",
+            code_execution_config=False
+        )
+        self.user_proxy.register_reply([Agent, None], AgentGroup.terminate_agent_at_reply)
+
+        self.location_researcher = AssistantAgent(
+            "location_researcher",
+            human_input_mode="NEVER",
+            system_message="You are the location researcher who is helping the Tour Agent plan a trip according to user requirements. You can use the `search_google_maps` function to retrieve details about a certain location, attractions, restaurants, accommodation, etc. for your research. You process results from these functions and present your findings to the Tour Agent to help them with itinerary and trip planning.",
+            llm_config={
+                "config_list": config_list,
+                "cache_seed": None,
+                "functions": [
+                    SEARCH_GOOGLE_MAPS_SCHEMA,
+                ]
+            },
+            function_map={
+                "search_google_maps": search_google_maps
+            }
+        )
+
+        self.tour_agent = AssistantAgent(
+            "tour_agent",
+            human_input_mode="NEVER",
+            llm_config={
+                "config_list": config_list,
+                "cache_seed": None
+            },
+            system_message="You are a Tour Agent who helps users plan a trip based on user requirements. You can get help from the Location Researcher to research and find details about a certain location, attractions, restaurants, accommodation, etc. You use those details a answer user questions, create trip itineraries, make recommendations with practical logistics according to the user's requirements. Report the final answer when you have finalized it. Add TERMINATE to the end of this report."
+        )
+
+        self.group_chat = GroupChat(
+            agents=[self.user_proxy, self.location_researcher, self.tour_agent],
+            messages=[],
+            allow_repeat_speaker=False,
+            max_round=20
+        )
+
+        self.group_chat_manager = GroupChatManager(
+            self.group_chat,
+            is_termination_msg=lambda x: "TERMINATE" in x.get("content", ""),
+            llm_config={
+                "config_list": config_list,
+                "cache_seed": None
+            }
+        )
+
+    def process_user_message(self, message: str) -> str:
+        self.user_proxy.initiate_chat(self.group_chat_manager, message=message, clear_history=False)
+        return self._find_last_non_empty_message()
+
+    def _find_last_non_empty_message(self) -> str:
+        conversation = self.tour_agent.chat_messages[self.group_chat_manager]
+        for i in range(len(conversation) - 1, -1, -1):
+            if conversation[i].get("role") == "assistant":
+                reply = conversation[i].get("content", "").strip()
+                reply = reply.replace("TERMINATE", "")
+                if reply:
+                    return reply
+        return "No reply received"
+
+    @staticmethod
+    def terminate_agent_at_reply(
+            recipient: Agent,
+            messages: Optional[List[Dict]] = None,
+            sender: Optional[Agent] = None,
+            config: Optional[Any] = None,
+    ) -> Tuple[bool, Union[str, None]]:
+        return True, None
+
+### API endpoint
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Dict
+from agent_group import AgentGroup
+
+
+class ChatRequest(BaseModel):
+    session_id: str
+    message: str
+
+
+app = FastAPI()
+sessions: Dict[str, AgentGroup] = {}
+
+
+@app.post("/chat")
+def chat(request: ChatRequest):
+    session_id = request.session_id
+    message = request.message
+    if session_id not in sessions.keys():
+        sessions[session_id] = AgentGroup()
+    agent_group = sessions[session_id]
+    reply = agent_group.process_user_message(message)
+    return {"reply": reply, "status": "success"}
+
+### Function calls
+import os
+from serpapi import GoogleSearch
+from dotenv import load_dotenv
+from typing import Dict
+
+load_dotenv()
+
+SEARCH_GOOGLE_MAPS_SCHEMA = {
+    "name": "search_google_maps",
+    "description": "Search google maps using Google Maps API",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "A concise search query for searching places on Google Maps"
+            }
+        },
+        "required": ["query"]
+    }
+}
+
+
+def search_google_maps(query):
+    params = {
+        "engine": "google_maps",
+        "q": query,
+        "type": "search",
+        "api_key": os.getenv("SERP_API_KEY")
+    }
+
+    results = _search(params)
+    results = results["local_results"]
+    top_results = results[:10] if len(results) > 10 else results
+    data = []
+    for place in top_results:
+        data.append(_populate_place_data(place["place_id"]))
+    return data
+
+
+def _populate_place_data(place_id: str):
+    params = {
+        "engine": "google_maps",
+        "type": "place",
+        "place_id": place_id,
+        "api_key": os.getenv("SERP_API_KEY")
+    }
+
+    data = _search(params)
+    return _prepare_place_data(data["place_results"])
+
+
+def _prepare_place_data(place: Dict):
+    return {
+        "name": place.get("title"),
+        "rating": place.get("rating"),
+        "price": place.get("price"),
+        "type": place.get("type"),
+        "address": place.get("address"),
+        "phone": place.get("phone"),
+        "website": place.get("website"),
+        "description": place.get("description"),
+        "operating_hours": place.get("operating_hours"),
+        "amenities": place.get("amenities"),
+        "service_options": place.get("service_options")
+    }
+
+
+def _search(params: Dict[str, str]):
+    search = GoogleSearch(params)
+    results = search.get_dict()
+    return results
+
+
+## Modify the speaker selection prompt of the group chat
+Autogen GroupChat class contains a select_speaker_msg method that you can override to specify 
+how the speaker selection should be managed.
+
+def select_speaker_msg(self, agents: List[Agent]) -> str:
+        """Return the system message for selecting the next speaker. This is always the *first* message in the context."""
+        return f"""You are in a role play game. The following roles are available:
+{self._participant_roles(agents)}.
+
+Read the following conversation.
+Then select the next role from {[agent.name for agent in agents]} to play. Only return the role."""
