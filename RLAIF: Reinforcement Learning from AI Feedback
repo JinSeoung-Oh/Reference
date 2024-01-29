@@ -1,0 +1,28 @@
+From https://towardsdatascience.com/rlaif-reinforcement-learning-from-ai-feedback-d7dbdae8f093
+
+The drastic improvement in large language model (LLM) quality is attributed to advancements in the alignment process, 
+particularly through finetuning techniques like supervised fine-tuning (SFT) and reinforcement learning from human feedback (RLHF). 
+RLHF involves training a language model based on human-provided preferences, 
+but it requires a large amount of human preference labels, making it expensive and time-consuming.
+
+Recent research has explored automating the collection of human preferences for RLHF using AI,
+leading to a new technique known as reinforcement learning from AI feedback (RLAIF).
+RLAIF involves training a language model to be helpful and harmless by leveraging AI-provided feedback 
+for collecting harmful preference data instead of relying solely on human annotators.
+
+The process involves training a reward model over pairs of model responses, 
+where one response is preferred over the other based on human or AI feedback. 
+RLAIF has been applied to tasks like text summarization, and the results indicate that 
+it can produce comparable improvements to RLHF without depending solely on human annotators.
+
+The key components of RLAIF include:
+1. Automating Preference Labels: Using AI-generated feedback, specifically from an off-the-shelf large language model.
+2. Preamble and Few-Shot Examples: Including instructions and optional examples to guide the model in generating preference labels.
+3. Advanced Prompting Techniques: Such as few-shot prompting, chain of thought prompting,
+   and self-consistency to enhance the quality of AI-generated preference labels.
+4. Soft Preference Labels: Using log probabilities and softmax to create a "soft" preference distribution for more nuanced feedback.
+
+The approach of automating the RLHF process with AI feedback has shown promising results in terms of scalability, 
+efficiency, and alignment quality. It involves training language models that are both helpful and harmless, 
+addressing the trade-off between these two objectives. The research suggests that RLAIF is a viable alternative to RLHF,
+making the alignment process more accessible and effective for large language models.
