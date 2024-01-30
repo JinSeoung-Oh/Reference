@@ -1,0 +1,31 @@
+From https://artgor.medium.com/paper-review-lumiere-a-space-time-diffusion-model-for-video-generation-9b83076b03c7
+
+Lumiere, a novel text-to-video diffusion model. Lumiere stands out for its ability to synthesize videos with realistic, diverse, and coherent motion
+
+1. Model Architecture
+   Lumiere employs a Space-Time U-Net (STUnet) architecture, which performs both spatial and temporal downsampling and upsampling in a single pass. 
+  This approach helps maintain global temporal consistency and differs from traditional models that create keyframes and then add details.
+
+2. Diffusion Probabilistic Models
+   Lumiere uses Diffusion Probabilistic Models for video generation, approximating a data distribution 
+   through denoising steps, starting from Gaussian noise and gradually refining it.
+
+3. Base Model and Super-Resolution
+   The framework includes a base model for generating low-resolution video clips and 
+   a spatial super-resolution model for upscaling to high resolution.
+
+4. Temporal Attention
+   The STUnet incorporates temporal blocks with spatial resizing modules, temporal convolutions, and attention. 
+   Temporal attention is used at the coarsest resolution to manage computational demands.
+
+5. Multidiffusion for Super-Resolution
+   Lumiere uses Multidiffusion to handle memory constraints and avoid temporal artifacts during spatial super-resolution. 
+   This involves splitting the video into overlapping segments, processing each with Single Shot Reconstruction (SSR), and then combining them.
+
+6. Applications: Lumiere has various applications, including:
+   -1. Stylized Generation: Using a technique inspired by GAN-based interpolation, Lumiere blends T2I weights with original weights 
+       to achieve distinct motion characteristics in generated videos, such as watercolor painting or line drawing styles.
+   -2. Conditional Generation: Lumiere can generate videos based on additional input signals, such as a noisy video, a conditioning video or image, 
+       or a binary mask. Applications include Image-to-Video, inpainting, and cinemagraphs.
+
+Overall, Lumiere achieves state-of-the-art results in text-to-video generation and is adaptable for content creation and video editing tasks.
