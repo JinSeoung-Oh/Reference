@@ -1,0 +1,78 @@
+From https://jrodthoughts.medium.com/inside-sglang-lmsys-new-framework-for-super-fast-llm-inference-77e67b8933ce
+
+Blog: https://lmsys.org/blog/2024-01-17-sglang/
+Paper:https://arxiv.org/abs/2312.07104
+Code:https://github.com/sgl-project/sglang
+
+The introduction of SGLang by Berkeley University seems to address several critical challenges in programming Large Language Models (LLMs) 
+and aims to enhance the efficiency and performance of LLM applications. 
+
+1. Structured Generation Language for LLMs (SGLang):
+   SGLang is a domain-specific language integrated within Python, providing a structured approach to interact with and control LLM programs.
+   It offers a combination of high-level primitives, allowing developers to compose complex LLM applications efficiently.
+
+2. Backend - LMSys:
+   LMSys introduces RadixAttention, a technique for efficiently reusing Key-Value (KV) cache across multiple LLM generation calls.
+   RadixAttention addresses the challenge of caching in LLM programs, minimizing repeated calculations and improving efficiency.
+
+3. Frontend - Domain-Specific Language:
+   SGLang's frontend features a domain-specific language embedded in Python.
+   The language can operate in either interpreter or compiler mode, providing flexibility for developers.
+
+4. Challenges and Improvements:
+   SGLang tackles challenges in LLM programming, such as caching, batching, sharing, parallelism, and compilation.
+   It aims to enhance the capabilities of LLM applications by providing more efficient ways to handle complex tasks and interactions.
+
+5. Interpreter and Compiler:
+   SGLang programs can be executed through an interpreter, treating prompts as asynchronous streams. 
+   This enables concurrent execution of Python code without waiting for LLM generation to complete.
+   The compiler transforms SGLang programs into computational graphs, offering optimization opportunities. Nodes represent primitive operators, and edges denote dependencies.
+
+6. Radix Attention Optimization:
+   A crucial optimization in SGLang involves Radix Attention for KV cache reuse.
+   The approach allows prompts with identical prefixes to share intermediate KV cache, reducing redundant memory and computation.
+
+7. Benchmark Results:
+   SGLang has been evaluated across various benchmarks, demonstrating remarkable results 
+   in few-shot in-context learning tasks, reasoning tasks, and latency in agent tasks.
+   The benchmarks highlight the speed and efficiency of SGLang in comparison to other approaches.
+
+8. Efficient Memory Usage:
+   SGLang employs a radix tree structure for managing the mapping between token sequences and their corresponding KV cache tensors.
+   This structure minimizes memory usage and efficiently handles the flow of multiple requests, especially in scenarios with GPU memory limitations.
+
+In summary, SGLang appears to be a promising project that prioritizes performance and optimization for LLM applications, 
+offering a new perspective beyond higher-level frameworks. Its focus on addressing challenges like caching, batching, and parallelism, 
+coupled with impressive benchmark results, makes it a noteworthy development in the field of LLM programming
+
+### RadixAttention --> Have to check https://lmsys.org/blog/2024-01-17-sglang/ (Find figure 4)
+1. Automatic KV Cache Reuse:
+   RadixAttention addresses the common practice of discarding the KV cache after completing a generation request.
+   Instead, it retains both the prompts and generation results in a radix tree, facilitating automatic KV cache reuse during runtime.
+
+2. Radix Tree Data Structure:
+   RadixAttention leverages a radix tree, a space-efficient alternative to a trie, for managing the mapping between sequences of tokens 
+   (keys) and their corresponding KV cache tensors (values).
+   Unlike traditional trees, radix tree edges can be labeled with sequences of elements, providing a more efficient structure for handling token sequences.
+
+3. Efficient Prefix Search, Insertion, and Eviction:
+   The radix tree enables efficient operations such as prefix search and insertion, crucial for managing the mapping between token sequences and KV cache tensors.
+   The implementation of a Least Recently Used (LRU) eviction policy ensures that the system can intelligently manage 
+   cache space by evicting leaf nodes based on their usage history.
+
+4. Cache-Aware Scheduling Policy:
+   Complementing the LRU eviction policy, RadixAttention incorporates a cache-aware scheduling policy to enhance the cache hit rate.
+   This suggests that the system intelligently schedules tasks, taking into consideration the current state of the cache, 
+   to optimize the reuse of stored information.
+
+5. Paged Layout on GPU:
+   KV cache tensors are stored on the GPU in a paged layout, with each page corresponding to one token.
+   This layout is designed to efficiently utilize GPU memory, considering the inherent limitations in terms of capacity.
+
+6. Compatibility with Existing Techniques:
+   RadixAttention is designed to be compatible with existing techniques such as continuous batching and paged attention.
+   This compatibility allows for seamless integration with established optimization methods, enhancing the overall efficiency of the LLM system.
+
+7. Extension to Multi-Modal Models:
+   The adaptability of RadixAttention is highlighted by its ease of extension to handle image tokens in the context of multi-modal models.
+   This flexibility broadens the applicability of RadixAttention beyond text-based scenarios.
