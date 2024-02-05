@@ -1,0 +1,44 @@
+From https://medium.com/enterprise-rag/advanced-rag-and-the-3-types-of-recursive-retrieval-cdd0fa52e1ba
+
+Systems aim to autonomously explore unstructured data and enhance their knowledge base over time.
+
+1. Recursive Retrieval Overview
+   -1. Recursive retrieval involves applying a query across smaller chunks of a corpus, with intermediate results recursively 
+       fed into the next steps, and aggregation used to combine outputs.
+   -2. The process includes continuously scanning for relevant sentences and paragraphs, retrieving them, and examining 
+       the answer for references to other concepts, pages, or information.
+
+2. Implications of Recursive Retrieval
+   -1. Provides consistent and exhaustive retrieval of core ideas for future reference.
+   -2. Enables multi-hop retrieval across multiple documents.
+   -3. Links increased unstructured data input to a tangible increase in the accuracy of Language Model (LLM).
+
+3. Multi-Hop Retrieval and Knowledge Graphs
+   In a multi-hop retrieval context, the seed node and relationships are generated automatically by the LLM in response to a query.
+   Knowledge graphs can be created iteratively and 'just-in-time' to a specific question, acting as a second brain within a RAG pipeline.
+
+4. Classification of Recursive Retrieval
+   -1. Page-Based Recursive Retrieval
+   -2. Information-Centric Recursive Retrieval
+   -3. Concept-Centric Recursive Retrieval
+
+ 4-1. Page-Based Recursive Retrieval
+      -1. Involves tracking and diving deeper into subsequent pages referenced during information retrieval. 
+      -2. Useful for structured documents like technical manuals in manufacturing industries.
+
+ 4-2. Information-Centric Recursive Retrieval
+      -1. Involves fixing a seed node/concept and allowing the LLM to discover key relationships with other concepts/entities.
+      -2. Knowledge graph expands iteratively over time, focusing on a defined area of interest.
+
+ 4-3. Concept-Centric Recursive Retrieval
+      -1. Recursive retrieval exercise for retrieving concepts.
+      -2. Top-level nodes and N+2 nodes are decided by the LLM based on potential relevance to the question.
+
+5. Technical Difficulties and Solutions
+  -1. Controlling the LLM to ensure relevance to the question is addressed through good prompting and multi-agent construction.
+  -2. Understanding when the right answer is reached is tackled with prompt engineering or expert qualitative feedback.
+
+6. Pre-Processing Work for Search Process
+   -1. Mapping relevant concepts beforehand in a contextual dictionary helps in understanding when the retrieval process is complete.
+
+The iterative knowledge graph is emphasized as a valuable tool for storing structured information, enabling reuse for future related or adjacent queries.
