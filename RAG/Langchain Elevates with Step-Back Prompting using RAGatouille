@@ -1,0 +1,244 @@
+From https://ai.gopubby.com/langchain-elevates-with-step-back-prompting-using-ragatouille-b433e6f200ea
+
+The integration of Step-Back Prompting and Langchain presents a groundbreaking advancement in the field of natural language processing,
+redefining the way language models comprehend and respond. The collaborative approach of these two technologies signifies a paradigm shift, 
+promising a future characterized by nuanced understanding and elevated performance.
+
+
+1. Step-Back Prompting Defined
+   Step-Back Prompting is a pioneering technique inspired by human problem-solving strategies.
+   It guides language models to pose higher-level, abstract questions before delving into detailed reasoning.
+   Emulates the human tendency to abstract information, enhancing understanding of complex tasks.
+
+2. Langchain Overview
+   Langchain is a cutting-edge language processing platform designed for dynamic language understanding and generation.
+   The platform's architecture enables seamless integration with innovative techniques, positioning it as a forefront player in language processing technologies.
+
+3. Advantages of Step-Back Prompting over Chain of Thoughts
+   -1. Paradigm Shift: Departure from the traditional Chain of Thoughts method.
+   -2. Nonlinear Progression and Abstraction: Encourages nonlinear progression and abstract thinking for better understanding.
+   -3. Mitigation of Errors: Excels in reducing errors during intermediate reasoning steps.
+   -4. Human-Inspired Approach: Draws inspiration from human problem-solving, enhancing model performance.
+   -5. Coherence in Complex Reasoning Tasks: Maintains coherence, especially in tasks requiring intricate reasoning.
+
+4. Integration of Step-Back Prompting with Langchain
+   -1. Revolutionary Integration: The collaboration signifies a groundbreaking shift in language processing capabilities.
+   -2. Elevated Understanding: Incorporating Step-Back Prompting elevates language models to new heights of comprehension and reasoning.
+   -3. Seamless Synergy: Langchain's adaptability synergizes seamlessly with Step-Back Prompting, transcending conventional language processing boundaries.
+   -4. Enriched Capabilities: The integration equips Langchain to tackle complex tasks involving intricate details, 
+                              fostering a transformative approach to language processing.
+   -5. Powerhouse Performance: Step-Back Prompting guides models through abstraction and reasoning, making Langchain a powerhouse for multi-step reasoning, 
+                               knowledge-intensive question answering, and domain-specific tasks.
+   -6. Human-Like Cognitive Skills: The collaborative approach aligns with human-like cognitive skills, reflecting a trailblazing solution in natural language processing.
+5. Conclusion:
+   The collaboration between Step-Back Prompting and Langchain represents a revolutionary paradigm in language processing.
+   This transformative approach not only enhances performance but also mirrors human-like cognitive skills.
+   The integration sets new standards in language understanding and generation, offering a trailblazing solution that goes beyond conventional boundaries.
+   In essence, the combined power of Step-Back Prompting and Langchain opens up new possibilities for the future of natural language processing, 
+   promising a symphony of words and ideas where inspiration and innovation converge.
+
+## Implementation  - After implement below code, change that.
+! pip install -U -qq "transformers>=4.35.0" accelerate langchain faiss-cpu chromadb ragatouille "autoawq>=0.1.6" unidic_lite
+
+# Build VectorDB
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import WebBaseLoader
+from langchain_community.vectorstores import Chroma
+import torch
+from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+import os
+ 
+os.environ["OPENAI_API_KEY"] = ""
+device = "cuda" if torch.cuda.is_available() else "cpu"
+ 
+# Load blog post
+loader = WebBaseLoader("https://lilianweng.github.io/posts/2023-06-23-agent/")
+data = loader.load()
+ 
+# Split
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=0)
+splits = text_splitter.split_documents(data)
+ 
+# VectorDB
+embedding = HuggingFaceEmbeddings(
+    model_name="intfloat/multilingual-e5-large",
+    model_kwargs={"device": device},
+)
+
+vectorstore = Chroma.from_documents(documents=splits, embedding=embedding)
+
+# ragatouille/colbert implmentation
+RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
+
+# Importing the ContextualCompressionRetriever from the Langchain library
+from langchain.retrievers import ContextualCompressionRetriever
+
+# Retrieving 10 similar documents from the FAISS vector store
+base_retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
+
+# Creating a retriever that calculates similarity using JaColBERT
+# based on the results from the above retriever and retrieves the top 3
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=RAG.as_langchain_document_compressor(k=3),
+    base_retriever=base_retriever,
+)
+
+# Testing the retrieval
+compressed_docs = compression_retriever.get_relevant_documents(
+    "What treatment does this contract give to intellectual property rights?"
+)
+
+compressed_docs
+
+#Output
+[Document(page_content='capability working in practice. The collection of tool APIs can be provided by other developers (as', metadata={'description': 'Building agents with LLM (large language model) as its core controller is a cool concept. Several proof-of-concepts demos, such as AutoGPT, GPT-Engineer and BabyAGI, serve as inspiring examples. The potentiality of LLM extends beyond generating well-written copies, stories, essays and programs; it can be framed as a powerful general problem solver.\nAgent System Overview In a LLM-powered autonomous agent system, LLM functions as the agent’s brain, complemented by several key components:', 'language': 'en', 'source': 'https://lilianweng.github.io/posts/2023-06-23-agent/', 'title': "LLM Powered Autonomous Agents | Lil'Log", 'relevance_score': 6.71875}),
+ Document(page_content='exploration. Only binary reward is assigned. The source policies are trained with A3C for "dark"', metadata={'description': 'Building agents with LLM (large language model) as its core controller is a cool concept. Several proof-of-concepts demos, such as AutoGPT, GPT-Engineer and BabyAGI, serve as inspiring examples. The potentiality of LLM extends beyond generating well-written copies, stories, essays and programs; it can be framed as a powerful general problem solver.\nAgent System Overview In a LLM-powered autonomous agent system, LLM functions as the agent’s brain, complemented by several key components:', 'language': 'en', 'source': 'https://lilianweng.github.io/posts/2023-06-23-agent/', 'title': "LLM Powered Autonomous Agents | Lil'Log", 'relevance_score': 6.38671875}),
+ Document(page_content='be a combination of task-specific discrete actions and the language space. The former enables LLM', metadata={'description': 'Building agents with LLM (large language model) as its core controller is a cool concept. Several proof-of-concepts demos, such as AutoGPT, GPT-Engineer and BabyAGI, serve as inspiring examples. The potentiality of LLM extends beyond generating well-written copies, stories, essays and programs; it can be framed as a powerful general problem solver.\nAgent System Overview In a LLM-powered autonomous agent system, LLM functions as the agent’s brain, complemented by several key components:', 'language': 'en', 'source': 'https://lilianweng.github.io/posts/2023-06-23-agent/', 'title': "LLM Powered Autonomous Agents | Lil'Log", 'relevance_score': 5.4453125})]
+
+# Build generator
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers_chat import ChatHuggingFaceModel
+
+
+model_name_or_path = "TheBloke/openchat-3.5-0106-AWQ"
+
+tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+generator = AutoModelForCausalLM.from_pretrained(
+    model_name_or_path,
+    low_cpu_mem_usage=True,
+    device_map="cuda:0"
+)
+
+# Question Gen Chain for Step-back 
+from langchain.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
+from langchain.schema.output_parser import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+
+# Few Shot Examples
+examples = [
+     {
+         "input": "Could the members of The Police perform lawful arrests?",
+         "output": "what can the members of The Police do?",
+     },
+     {
+         "input": "Jan Sindel’s was born in what country?",
+         "output": "what is Jan Sindel’s personal history?",
+     },
+ ]
+# We now transform these to example messages
+example_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("human", "{input}"),
+        ("ai", "{output}"),
+    ]
+)
+few_shot_prompt = FewShotChatMessagePromptTemplate(
+    example_prompt=example_prompt,
+    examples=examples,
+)
+
+prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "You are an expert at world knowledge. Your task is to step back "
+            "and paraphrase a question to a more generic step-back question, which "
+            "is easier to answer. Here are a few examples:",
+        ),
+        # Few shot examples
+        few_shot_prompt,
+        # New question
+        ("user", "{question}"),
+        ("ai", ""),
+    ]
+)
+
+gen_model = ChatHuggingFaceModel(
+    generator=generator,
+    tokenizer=tokenizer,
+    human_message_template="GPT4 Correct User: {}<|end_of_turn|>",
+    ai_message_template="GPT4 Correct Assistant: {}",
+    repetition_penalty=1.2,
+    temperature=0.1,
+    max_new_tokens=1024,
+)
+
+rerank_retriever = ContextualCompressionRetriever(
+    base_retriever=vectorstore.as_retriever(search_kwargs={"k": 15}),
+    base_compressor=RAG.as_langchain_document_compressor(k=5),
+)
+
+chain2 = (
+    prompt
+    | gen_model
+    | StrOutputParser()
+)
+
+
+chain2.invoke({"question":"In this contract, how are intellectual property rights treated?"})
+
+#Output
+\nWhat are the terms and conditions regarding intellectual property rights in this contract?
+
+
+from langchain.prompts import ChatPromptTemplate
+from langchain.prompts.chat import (
+   AIMessagePromptTemplate,
+   HumanMessagePromptTemplate,
+)
+
+retriever  = ContextualCompressionRetriever(
+    base_retriever=vectorstore.as_retriever(search_kwargs={"k": 15}),
+    base_compressor=RAG.as_langchain_document_compressor(k=5),
+)
+
+response_prompt_template = """You are an expert of world knowledge. I am going to ask you a question. Your response should be comprehensive and not contradicted with the following context if they are relevant. Otherwise, ignore them if they are not relevant.
+
+{normal_context}
+{step_back_context}
+
+Original Question: {question}
+Answer:"""
+
+response_prompt = ChatPromptTemplate.from_messages(
+   [
+       HumanMessagePromptTemplate.from_template(response_prompt_template),
+       AIMessagePromptTemplate.from_template(""),
+   ]
+)
+
+chat_model = ChatHuggingFaceModel(
+   generator=generator,
+   tokenizer=tokenizer,
+   human_message_template="GPT4 Correct User: {}",
+   ai_message_template="GPT4 Correct Assistant: {}",
+   repetition_penalty=1.2,
+   temperature=0.1,
+   max_new_tokens=1024,
+)
+
+chain = (
+   {
+       # Extract relevant context from the original question
+       "normal_context": RunnableLambda(lambda x: x["question"]) | retriever,
+       # Extract relevant context from the step-back question
+       "step_back_context": chain2 | retriever,
+       # Set the original question
+       "question": lambda x: x["question"],
+   }
+   | response_prompt
+   | chat_model
+   | StrOutputParser()
+)
+
+for s in chain.stream({"question":"What Task Decomposition that work in 2022"}):
+            print(s, end="", flush=True)
+
+#Output
+Task decomposition is a process of breaking down complex tasks into smaller, manageable subtasks. This approach is particularly useful in the context of large language models (LLMs) like GPT-4, which can be used to solve a wide range of problems by breaking them down into simpler steps.
+
+In 2022, task decomposition was widely used in the development of LLM-powered autonomous agents. These agents use LLMs as their core controllers, with the LLM functioning as the agent's brain, complemented by several key components. Task decomposition is an essential part of the agent system, as it allows the agent to break down large tasks into smaller, manageable subgoals.
+
+For example, in the development of AutoGPT, GPT-Engineer, and BabyAGI, task decomposition was used to break down complex tasks into smaller steps that could be executed by the LLM. This approach allowed the LLM to generate well-written copies, stories, essays, and programs, as well as solve general problems.
+
+In summary, task decomposition is a crucial technique in the development of LLM-powered autonomous agents, and it was widely used in 2022 to break down complex tasks into smaller, manageable subtasks that could be executed by the LLM. This approach has the potential to revolutionize the way we approach problem-solving and automation.
