@@ -43,12 +43,42 @@ with UTMs playing a crucial role in generating training data for acquiring unive
 ** What is SI(Solomonoff's theory of inductive inference)
 From https://en.wikipedia.org/wiki/Solomonoff%27s_theory_of_inductive_inference#External_links
 
-Solomonoff's theory of inductive inference is a mathematical theory of induction introduced by Ray Solomonoff, 
-based on probability theory and theoretical computer science. 
-In essence, Solomonoff's induction derives the posterior probability of any computable theory, 
-given a sequence of observed data. 
-This posterior probability is derived from Bayes' rule and some universal prior, 
-that is, a prior that assigns a positive probability to any computable theory
+Solomonoff's theory of inductive inference, also known as Solomonoff Induction (SI), 
+is a mathematical theory of prediction and learning proposed by the American mathematician and computer scientist Ray Solomonoff in 1964. 
+It's a fundamental framework for addressing the problem of generalizing from past observations to make predictions about future events or data.
+
+At its core, Solomonoff Induction aims to formalize the concept of Occam's razor, which states that among 
+competing hypotheses that explain observed data equally well, the simplest one should be preferred. 
+However, Solomonoff's approach goes beyond Occam's razor by providing a rigorous mathematical foundation for universal inference.
+
+1. Universal Prior
+   Solomonoff's theory starts with the assumption that there exists a universal Turing machine (UTM), 
+   a hypothetical computing device capable of simulating any other Turing machine. 
+   The set of all possible programs for this UTM forms a universal prior distribution over computable sequences.
+   This prior assigns probabilities to all possible hypotheses or programs based on their simplicity.
+
+2. Universal Probability Distribution
+   Solomonoff proposed a universal probability distribution that assigns probabilities to sequences of symbols 
+   based on their Kolmogorov complexity, which is the length of the shortest program that can generate the sequence. 
+   This distribution represents the likelihood of observing any given sequence, with simpler sequences being more probable.
+
+3. Predictive Inference
+   Given a sequence of observed data, Solomonoff Induction aims to predict future data by combining 
+   the observed data with the universal prior distribution. It assigns probabilities to future sequences 
+   based on their simplicity relative to all possible explanations encoded in the prior.
+
+4. Bayesian Updating
+   As new data is observed, Solomonoff Induction updates its predictions using Bayesian inference, adjusting the probabilities assigned
+   to different hypotheses based on the observed evidence. This updating process balances the prior beliefs encoded in the universal prior with the evidence provided by the data.
+
+5. Convergence Properties
+   Solomonoff showed that under certain conditions, his approach converges to the true underlying data-generating process
+   as more data is observed. This convergence property suggests that Solomonoff Induction provides an optimal method for prediction and learning in a universal sense.
+
+Overall, Solomonoff's theory of inductive inference provides a formal framework for universal prediction and learning based on the principles of simplicity, 
+computational universality, and Bayesian inference. 
+While computationally impractical due to its reliance on unbounded computation and Kolmogorov complexity, 
+it serves as a theoretical foundation for understanding the fundamental limits of inference and learning.
 
 
 
