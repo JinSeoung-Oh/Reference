@@ -1,0 +1,38 @@
+UPAR (Understand, Plan, Act, Reflect) for enhancing the reliability and interpretability of Large Language Models (LLMs)
+inspired by Immanuel Kant's model of cognition. 
+
+UPAR integrates Kantian philosophical principles into LLMs to emulate innate human reasoning abilities. 
+The framework consists of four phases: Understand, Plan, Act, and Reflect, each serving a specific purpose in guiding LLM responses.
+
+1. Understand
+   This phase involves analyzing input queries or situations to construct a structured contextual model. 
+   It aims to distill salient signals from raw perceptions and construct grounded situation models from observations.
+
+2. Plan
+   The planning phase outlines logical trajectories for solution search based on the distilled understanding. 
+   It focuses on strategizing principled pathways to reinforce coherence in reasoning.
+
+3. Act
+  In the acting phase, the planned response generation process is executed to manifest grounded, supported conclusions 
+  rather than unstructured narratives. This phase aligns with the outlined reasoning approach.
+
+4. Reflect
+   The reflecting phase reviews the end-to-end process, critiques generated conclusions and supporting inferences, 
+   and refines them iteratively. This recursive analysis embodies introspection and enables continual improvement alignment.
+
+The UPAR framework aims to move LLMs from unstructured inference towards architecturally-guided reasoning, 
+improving transparency and trust in emergent intelligence. By engraving architectural layers from Kantian epistemology, 
+UPAR reinforces empirical grounding, logical coherence, and introspective refinement within LLM reasoning.
+
+Additionally, the article discusses augmenting LLMs with external knowledge through retrieval-augmented generation via knowledge graphs. 
+Knowledge graphs serve as a methodology for contextual assimilation of external concepts to resolve unfamiliar queries.
+An LLM compiler framework is proposed to orchestrate efficient, parallel entity retrieval from knowledge subgraphs, 
+mitigating distraction and improving assimilation efficiency.
+
+Furthermore, integrating critiquing capabilities into the UPAR framework enhances transparency and accelerates iterative improvement. 
+The CritiquingLLM model enables automatically generating explanatory critiques evaluating the quality of generated text across UPAR phases, 
+fostering a self-critical intelligence through structured introspection.
+
+Overall, the synthesis of ontological scaffolding, controlled augmentation, 
+and intrinsic critiquing in the UPAR framework aims to impart systematic transparency and reliability to LLMs, 
+bridging the gap between emergent and established intelligence.
