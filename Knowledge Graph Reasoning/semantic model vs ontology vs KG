@@ -1,0 +1,33 @@
+The hierarchy and relationship between semantic models, ontologies, and knowledge graphs, aiming 
+to provide clarity and establish a common understanding of these terms within the field.
+
+1. Ontologies:
+   -1. Defined as formal descriptions of concepts and relationships within a domain, ontologies serve as structural 
+       frameworks for organizing information and knowledge representation.
+   -2. Object Role Modeling (ORM) diagrams are used to represent ontologies, capturing formal relationships 
+       between entities and explicit data constraints.
+   -3. ORM is suitable for knowledge graph ontologies due to its ability to capture constraints and diagram core graph concepts.
+   -4. Ontologies are not tied to specific implementation paradigms and can be realized as knowledge graphs 
+       using various technologies such as RDF, LPG, Relational Knowledge Graph (RKG), etc.
+
+2. Semantic Models:
+   -1. Semantic models organize data to reflect the basic meaning of data items and their relationships.
+   -2. They represent the largest scale representation of a domain, capturing business terms, relationships, and data semantics.
+   -3. Semantic models serve as dictionaries of the domain, providing vocabulary that ontologies can utilize.
+   -4. Each ontology within a semantic model represents a subset of the domain and follows the semantics defined by the semantic model.
+   -5. Semantic models facilitate understanding and communication across different parts of an enterprise, 
+       enabling separate domains to speak a common language.
+
+3. Knowledge Graphs:
+   -1. Knowledge graphs are not explicitly defined in the text, but they are mentioned as the implementation of ontologies.
+   -2. They are compared to buildings, where the ontology serves as the architectural plan guiding the construction of the knowledge graph.
+   -3. Knowledge graphs should adhere to the complete description provided by the ontology, ensuring that the graph accurately represents the domain.
+   -4. Flexible ontologies are agnostic to implementation choices, allowing knowledge graphs to adapt and extend 
+       with the data they ingest without disrupting decision-making processes.
+
+Overall, the text emphasizes the importance of clear definitions and understanding of semantic models, ontologies, and knowledge graphs 
+in order to facilitate effective communication and knowledge representation within organizations.
+
+
+
+
