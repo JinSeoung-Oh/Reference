@@ -1,0 +1,41 @@
+From https://chat.openai.com/c/18a435ee-11ed-41a8-9394-f7000c45af42
+
+Nomic-embed-text-v1 represents a significant advancement in the field of natural language processing (NLP), 
+particularly in the realm of text embedding models. 
+This model addresses critical limitations faced by existing models,
+such as the constraint on context length and the lack of accessibility due to closed-source implementations.
+
+The key contributions of nomic-embed-text-v1 are its reproducibility, 
+open-source nature, and capability to handle extensive context lengths of up to 8192 in English. 
+Its performance surpasses that of established models like OpenAI Ada-002 and 
+OpenAI text-embedding-3-small across both short and long-context tasks.
+
+The training methodology behind nomic-embed-text-v1 is detailed in the technical report. 
+It involves adapting the BERT architecture to accommodate lengthy sequences 
+through various modifications and optimizations:
+
+1. Rotary positional embeddings
+   Replace absolute positional embeddings with rotary positional embeddings to support longer sequences.
+2. SwiGLU activation
+   Implement SwiGLU activation instead of GeLU for improved performance.
+3. Flash Attention
+   Incorporate Flash Attention mechanism to enhance attention mechanisms.
+4. Dropout settings
+   Set Dropout to 0 to prevent overfitting.
+5. Vocabulary size adjustment
+   Ensure the vocabulary size is a multiple of 64 for optimization purposes.
+
+The training process includes phases such as Masked Language Modeling pretraining, 
+Unsupervised Contrastive Pretraining, and Supervised Contrastive Fine-tuning. 
+These phases leverage diverse datasets, including BooksCorpus, Wikipedia dumps, 
+and publicly available data collections, totaling 470 million pairs from 29 datasets.
+
+Empirical evaluation of nomic-bert-2048 and nomic-embed-text-v1 demonstrates their superiority 
+over existing models on various benchmarks such as GLUE, MTEB, Jina’s Long Context Benchmark, 
+and LoCo. Notably, nomic-embed-text-v1 consistently outperforms jina-embeddings-v2-base-en 
+and text-embedding-ada-002, particularly in long-context assessments.
+
+Overall, the introduction of nomic-embed-text-v1 represents a significant milestone 
+in the development of text embedding models, offering improved performance, reproducibility, 
+and accessibility for NLP applications requiring handling of extensive context lengths.
+
