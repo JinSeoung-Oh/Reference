@@ -1,0 +1,23 @@
+From https://jrodthoughts.medium.com/meet-self-discover-google-deepminds-new-method-for-llm-reasoning-4f3fdc547926
+
+The text provided is an article discussing a recent research paper by Google DeepMind on a novel reasoning technique called SELF-DISCOVER, 
+developed for large language models (LLMs). This method aims to enhance the problem-solving capabilities of LLMs by mimicking the human reasoning process. 
+DeepMind's approach to SELF-DISCOVER is inspired by human problem-solving strategies such as step-by-step problem-solving, 
+decomposition-based prompting, and step-back prompting. 
+It addresses the limitations of existing reasoning methods by tailoring the reasoning process to the specific demands of each task.
+
+# SELF-DISCOVER operates in two fundamental stages:
+
+Stage 1: In this stage, the LLM generates a task-specific reasoning structure, which is described using natural language terms 
+         like "breakdown into subtasks" and "critical thinking." This process involves selecting, adapting, and implementing a coherent reasoning framework 
+         using a structured data format (JSON) for interpretability and generation quality.
+
+Stage 2: The LLM applies the reasoning structure generated in Stage 1 to solve individual task instances.
+
+SELF-DISCOVER has shown promising results in enhancing the reasoning abilities of cutting-edge language models like PaLM 2-L and GPT-4 across various reasoning tasks, 
+including BBH, T4D, and MATH. 
+It significantly outperformed traditional methods such as chain-of-thought (CoT) and Plan-and-Solve (PS) in performance, demonstrating the effectiveness of its approach.
+
+The article concludes that SELF-DISCOVER represents a significant step forward in the application of artificial intelligence to complex reasoning tasks. 
+By tailoring the reasoning process to the specific demands of each task and applying a structured reasoning process,
+SELF-DISCOVER achieves higher accuracy and provides a more intuitive and logical path to solving problems, similar to the approach a human expert might take.
