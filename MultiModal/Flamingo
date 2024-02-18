@@ -1,0 +1,97 @@
+From https://towardsdatascience.com/flamingo-intuitively-and-exhaustively-explained-bf745611238b
+
+1. Multimodal Modeling Before Flamingo
+  "Vision-Language modeling" is often associated with multimodal modeling. Multimodal modeling is an umbrella term for any machine learning model 
+  that deals with multiple "modalities," which are different types of data like text, images, tables, and audio. 
+  Vision-language modeling, a popular form of multimodality, involves models that can perform tasks requiring simultaneous understanding of both images and text.
+
+2. Challenges Before Flamingo
+   Before Flamingo, models were highly specialized for specific multimodal tasks.
+   -1. KAT was the state of the art on the OKVQA dataset.
+   -2. "A Good Embedding Is All You Need?" was the state of the art on VQAv2.
+   -3. SimVLM was the state of the art on COCO.
+   -4. VIOLET was the state of the art on MSVDQA.
+   These models performed well on their respective datasets but did not generalize well to real-world situations or other similar tasks on similar datasets.
+
+3. The Evolution from CLIP
+   CLIP was a landmark paper that tackled the problem of highly specialized performance not scaling well to real-world situations. 
+   CLIP, while only focusing on images, bridged the gap between robust image understanding and text understanding and generative ability of language models.
+
+4. Key Precursors to Flamingo
+   Two key modeling strategies are inherited by Flamingo: CLIP (for image understanding) and Decoder Transformers (for text understanding and generation).
+   
+   -1. CLIP
+       CLIP employed a strategy called "contrastive learning" to create a general-purpose image classifier that could be used without further training. 
+       Contrastive learning re-framed the problem of image classification by focusing on "closeness" rather than "label association." 
+       This approach enabled CLIP to learn the general meaning of images and place similar images and text together in a high-dimensional space.
+
+   -2. Decoder-Only Transformers
+       Decoder-only transformers, like GPT, are big stacks of blocks where each block refines a representation of the input text. 
+       Attention mechanisms are used to combine the representation of multiple words to create a highly contextualized representation. 
+       These mechanisms use "Query," "Key," and "Value" inputs to filter other inputs and predict the next output word by word.
+
+5. Flamingo consists of four key components
+   -1. Vision Encoder
+       The Vision Encoder in Flamingo is responsible for re-representing images into their general meaning, similar to how CLIP works. 
+       It is a CLIP-style image encoder that distills the images into abstract, information-dense representations that are easy for language models (LM) to interpret.
+   -2. Perceiver Resampler
+       The Perceiver Resampler is designed to combine the information from a variable number of images into a fixed number of features. 
+       This allows the model to handle both images and videos in a flexible and robust way. It compresses an arbitrarily long video into a fixed set of descriptive tokens.
+   -3. Gated Cross Attention
+       Gated Cross Attention is an essential component of Flamingo, which allows it to slowly learn to inject image information 
+       into the language model throughout the training process. 
+       It helps Flamingo interweave the content from the Perceiver Resampler into a language model so that the model can converse about the images and text robustly and flexibly.
+
+6. Detail about Perceiver Resampler
+   The Preceiver Resampler is a critical component in Flamingo that's responsible for handling sequences of images or videos. 
+   Conceptually, it acts as a filter that takes in a fixed length of predefined tokens and uses input images extracted from a video 
+   or a sequence of images to filter those tokens. This allows Flamingo to encode an arbitrary sequence of images into a fixed size, 
+   thus providing a consistent input format for the model regardless of the number of images or frames in the original sequence.
+
+   Here's how the Preceiver Resampler works in more detail
+   -1. Flattening the Features
+       The input sequence of images or video frames is passed through a vision encoder that summarizes the content of each image in a way 
+       that's easy for machine learning systems to interpret. These features are then flattened along the spatial and time dimensions to 
+       form a two-dimensional matrix of shape [T * S, d], where T is the number of images or frames, S is the number of spatial grids, and d is the length of the feature vectors.
+
+   -2. Creating the Key and Value
+       Before passing the flattened features into the attention mechanism, they are concatenated with a set of learned tokens to construct the "key" and "value" inputs. 
+       The "query" is simply the learned tokens. This allows the attention mechanism to filter a fixed number of tokens from the variable sequence of images.
+
+   -3. Running Through the Attention Mechanism
+       The Key and Query are multiplied together to construct the attention matrix, which is then multiplied by the Value to construct the final output. 
+       This process allows the attention mechanism to extract relevant information from all the images or frames into a fixed number of output tokens, 
+       regardless of the input sequence length.
+
+   -4. Constructing the Final Output
+       After the attention mechanism, a "skip" connection is applied, which adds the learned tokens from before the attention mechanism to the output. 
+       This allows some older and simpler information to be present in the final output. The output of the skip connection is then passed through a feed-forward neural network, 
+       followed by another skip connection. This entire process can be repeated multiple times, allowing complex operations to be done incrementally over numerous layers.
+   Overall, the Preceiver Resampler allows Flamingo to handle sequences of images or videos in a flexible and efficient way, 
+   encoding them into a fixed-size representation that can be used as input to the language model component of Flamingo.
+   This ensures that Flamingo can generate accurate and relevant textual outputs based on multimodal inputs consisting of both images and text.
+
+7. Detail about Gated Cross Attention
+  The gated cross attention mechanism in the Flamingo architecture serves to incrementally introduce visual information to the pre-trained language model (LLM). 
+  In the context of cross attention, a set of learnable tokens derived from the perceiver resampler is used as the key and value, 
+  while tokens from within the LLM are used as the query. As a result, both the language and image information are abstractly represented in the final output.
+
+  One issue to consider is that this sudden introduction of visual information might overwhelm the LLM, which has been finely tuned to work with text only. 
+  To prevent this, Flamingo incorporates a tanh gating mechanism that gradually allows more or less visual information to pass through the cross attention. 
+  Initially, the tanh gate is set to 0, meaning no visual information is introduced, thus allowing the LLM to focus solely on text processing.
+  As training progresses, the value of the gate increases, leading to more visual information being introduced into the LLM's processing pipeline.
+  By the end of training, the tanh gate will be set to 1, resulting in full exposure to visual information.
+
+  Furthermore, a skip connection is applied after the cross attention, allowing simpler, pre-existing information from the LLM 
+  to be present alongside the newly introduced visual information. 
+  Following the skip connection, a feedforward network is applied to transform the combined language and image data to align with the LLM's requirements for further processing.
+
+  To summarize, the gated cross attention mechanism allows Flamingo to incorporate visual information gradually into the LLM's processing pipeline, 
+  preventing the overwhelming introduction of visual information and ensuring smooth integration with the existing text processing capabilities of the LLM.
+
+
+
+
+
+
+
