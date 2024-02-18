@@ -1,0 +1,111 @@
+From https://ai.plainenglish.io/turbocharging-agentic-reasoning-over-knowledge-bases-d52d67339ebd
+
+Enhancing the capabilities of Large Language Models (LLMs) by combining structured knowledge bases, 
+guided search processes, and optimized parallel tool queries. 
+
+1. Challenge 
+   LLMs often struggle with generating logical and factual responses, instead relying on pattern recognition over their training data.
+
+2. Opportunity
+   Structured knowledge bases, like Wikidata and ConceptNet, provide factual grounding that LLMs lack. 
+   However, integrating this knowledge base into LLMs' reasoning capabilities is not straightforward and often results in fact lookups limited by the scope of user queries.
+
+3. Retrieval-Augmented Thought Process
+   Retrieval-Augmented Thought Process (RATP) introduces an iterative approach to generating responses by treating the thought generation process as a search problem, 
+   using Monte Carlo Tree Search (MCTS) to guide the exploration. This approach allows for recursive, evidence-based thought generation.
+   
+   Key strengths of RATP include:
+    1. Interpretability — The thought trajectory is transparent, allowing diagnosis of failures
+    2. Accuracy — Guided search often corrects initial LLM guesses by integrating retrieval
+   However, the purely tree-based search scope limits efficiency and complexity of possible workflows.
+###################################################
+class Thought:
+    def __init__(self, text, is_leaf=False):
+        self.text = text
+        self.is_leaf = is_leaf 
+        self.children = []
+        self.parents = []
+        self.uct = UCT()
+        
+    def is_terminal(self):
+        # Check if thought is terminal
+        return False
+    
+class UCT:
+    def __init__(self):
+        self.total = 0
+        self.count = 0
+        
+    def update(self, score):
+        self.total += score
+        self.count += 1
+        
+    @property
+    def value(self):
+        if self.count == 0:
+            return float("inf")
+        return self.total / self.count
+    
+def selection(thought):
+    if thought.is_leaf:
+        return thought
+    else:
+        return max(thought.children, key=lambda t: t.uct.value)
+    
+def expansion(thought, documents):
+    r = random.random()
+    if r > p_doc:
+        if len(documents) == 0:
+            documents = retrieve_docs(thought)
+        nthought = generate(thought, documents.pop(0))
+        thought.children.append(nthought)
+    else:
+        pthought = sample_thoughts(1) 
+        nthought = generate(thought, pthought)
+        thought.children.append(nthought)
+        pthought.children.append(nthought)
+    return nthought
+
+def simulation(thought):
+    return score(thought)
+
+def backpropagation(thought, score):
+    for p in thought.parents:
+        p.uct.update(score) 
+        backpropagation(p, score)
+        
+def run():
+    thoughts = [Thought(query)]
+    documents = []
+    
+    while not thoughts[-1].is_terminal():
+        s_thought = selection(thoughts[0])
+        n_thought = expansion(s_thought, documents)
+        score = simulation(n_thought)
+        backpropagation(n_thought, score)
+        thoughts.append(n_thought)
+#####################################################
+
+4. Improvements
+   The use of agent-based architectures, like LangGraph, provides a way to tightly couple the grounding from structured knowledge bases with the generative prowess of LLMs. 
+   This way, multi-step reasoning workflows can be enabled, where models can recursively adapt lines of inquiry and incrementally build understanding.
+
+5. Efficiency and Scalability
+   The LangGraph runtime provides flexible constructs to create cyclic stateful workflows via customizable nodes and edges. 
+   This approach is both efficient and scalable, providing substantial efficiency improvements through parallel scheduling, guided search pruning,
+   and recursive refinement of cyclic graphs.
+
+6. Applicability
+  Such an approach is particularly useful in high-stakes domains like healthcare, finance, and transportation, 
+  where decisions need to be made based on verifiable facts rather than spur-of-the-moment text generations.
+
+7. Future Directions
+   The integration of structured knowledge bases with LLMs opens up possibilities for more advanced, transparent, and scalable analysis routines aided by AI. 
+   As models continue to grow in size and complexity, the need for such integrated approaches becomes more apparent.
+
+Overall, the approach outlined in the text provides a promising framework for enhancing the reasoning capabilities of LLMs 
+by leveraging the strengths of both structured knowledge bases and guided search processes.
+
+
+
+
