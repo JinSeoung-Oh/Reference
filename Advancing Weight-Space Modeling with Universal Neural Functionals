@@ -1,0 +1,36 @@
+From https://medium.com/syncedreview/deepmind-stanford-us-unfs-advancing-weight-space-modeling-with-universal-neural-functionals-d685a75023e2
+& https://arxiv.org/pdf/2402.05232.pdf
+
+In recent machine learning developments, the focus on weight-space features like weights, gradients, or sparsity masks of neural networks has been pivotal. 
+However, extending these advancements to more complex architectures has been challenging 
+due to intricate permutation symmetries of weight spaces compounded by recurrent or residual connections.
+
+In a new paper titled "Universal Neural Functionals", a research team from Google DeepMind and Stanford University introduces a groundbreaking algorithm
+called universal neural functionals (UNFs). This algorithm autonomously constructs permutation-equivariant models for any weight space, 
+offering a versatile solution to the architectural constraints encountered in prior works. 
+The researchers also showcase the applicability of UNFs by seamlessly integrating them into existing learned optimizer designs, 
+revealing promising enhancements over previous methodologies when optimizing compact image classifiers and language models.
+
+The core assertion made by the team is around the preservation of equivariance under composition,
+coupled with the inherent permutation equivariance of pointwise non-linearities. 
+This foundational premise underscores the feasibility of constructing deep equivariant models provided an equivariant linear layer is available. 
+Additionally, combining equivariant layers with an invariant pooling operation facilitates the creation of deep invariant models, 
+further expanding the scope of applications.
+
+The proposed algorithm operates by automatically establishing a foundation for permutation-equivariant maps between arbitrary rank tensors. 
+Each basis function is realized through straightforward array operations, 
+ensuring compatibility with modern deep learning frameworks and enabling efficient computation.
+
+The construction of universal neural functionals involves stacking multiple layers interleaved with pointwise non-linearities, 
+thereby forming a deep, permutation-equivariant model capable of processing weights. To devise a permutation-invariant model, 
+an invariant pooling layer is appended after the equivariant layers, ensuring robustness across different permutations.
+
+In their empirical evaluation, the researchers contrast the performance of UNFs against prior methods across two categories of weight-space tasks: 
+predicting the generalization of recurrent sequence-to-sequence models and training learned optimizers for diverse architectures and datasets. 
+The results unequivocally demonstrate the efficacy of UNFs in tasks involving the manipulation of weights and gradients in various domains, 
+including convolutional image classifiers, recurrent sequence-to-sequence models, and Transformer language models. 
+Particularly noteworthy are the promising enhancements observed over existing learned optimizer designs in small-scale experiments.
+
+In summary, the introduction of universal neural functionals represents a significant stride in the advancement of weight-space modeling, 
+offering a versatile and effective framework for addressing permutation symmetries in neural network architectures. 
+Through its automated construction of permutation-equivariant models, UNFs stand poised to facilitate further breakthroughs in machine learning research and applications.
