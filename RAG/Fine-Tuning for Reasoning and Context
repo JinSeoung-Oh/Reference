@@ -1,0 +1,31 @@
+From https://ai.plainenglish.io/fine-tuning-for-reasoning-and-context-the-key-to-better-rag-systems-530fa86d637c
+
+Retrieval-augmented generation (RAG) is a technique used in developing question answering systems 
+that can retrieve information from external sources and use it to generate responses. 
+It combines the strengths of retrieval-based and generation-based models, enabling it to generalize well across various questions and domains.
+
+However, as RAG systems advance, they face certain limitations:
+
+1. Reasoning Abilities
+   More complex questions require reasoning beyond simple text matching. RAG systems need to understand multifaceted questions, 
+   identify relevant information, and perform multi-step inferences to arrive at answers. Current RAG systems often have limited reasoning abilities, 
+   restricting the types of questions they can handle.
+
+2. Context Usage
+   RAG systems rely on contextual information from various documents to generate responses. 
+   However, encoding and reasoning over extensive contexts is challenging. 
+   Current approaches often fail to use retrieved context optimally, limiting the expansion of knowledge.
+
+To address these limitations, recent innovations have focused on specialized language model fine-tuning:
+
+1. Reinforced Fine-Tuning (ReFT) is a technique that uses reinforcement learning to explore multiple reasoning paths for problem-solving. 
+   It helps language models generalize better and understand diverse reasoning approaches.
+
+2. Reasoning on Graphs (RoG) is another approach that uses structured knowledge graphs to improve reasoning capabilities. 
+   It teaches language models to traverse graphs and derive non-explicit solutions.
+
+3. Long Context Fine-Tuning focuses on enhancing models' ability to reason over long document contexts. 
+   It enables models to encode larger volumes of external information and make coherent inferences.
+
+These specialized fine-tuning techniques have shown promising results in overcoming reasoning and context limitations, 
+making RAG systems more capable of handling complex questions in real-world applications.
