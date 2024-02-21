@@ -1,0 +1,57 @@
+From https://ai.meta.com/blog/v-jepa-yann-lecun-ai-model-video-joint-embedding-predictive-architecture/
+
+## What is V-JEPA?
+V-JEPA is a machine learning model developed by Meta (formerly known as Facebook) that is designed to learn from video data in a self-supervised manner. 
+It is part of the broader Joint Embedding Predictive Architectures (JEPA) framework, 
+which aims to build advanced machine intelligence that can learn more like humans do, 
+by forming internal models of the world around them to learn, adapt, and forge plans efficiently in the service of completing complex tasks.
+
+## How it works? <-- check it
+
+1. Non-Generative Model
+   V-JEPA is a non-generative model, which means it does not generate new data samples but instead learns to predict missing 
+   or masked parts of a video in an abstract representation space. 
+   It operates in this abstract space, making predictions without directly dealing with pixel-level details.
+
+2. Self-Supervised Learning
+   V-JEPA is trained entirely with unlabeled data. It learns by predicting the masked or missing parts of the video and is 
+   later adapted to a specific task using labeled data. This approach is more efficient than traditional models 
+   that require labeled data for both pre-training and adaptation.
+
+3. Masking Methodology
+   To train V-JEPA, a large portion of the video is masked, and the model is asked to predict what's missing. 
+   This masking is done both spatially (masking portions of the video frame) and temporally (masking portions of the video over time).
+   This forces the model to learn and develop an understanding of the scene.
+
+4. Abstract Representation Space
+   V-JEPA operates in an abstract representation space, allowing it to focus on higher-level conceptual information of the video 
+   without being bogged down by pixel-level details. For example, instead of focusing on the minute movements of each individual leaf on a tree, 
+   it can focus on the higher-level concept of a tree.
+
+5. Frozen Evaluation
+   After pre-training, V-JEPA is not further updated. Instead, it is adapted to new tasks by training a small specialized layer or network on top of it. 
+   This makes the adaptation process more efficient and quick.
+
+Overall, V-JEPA's approach to video understanding and learning makes it highly efficient in terms of both training and adaptation,
+while also providing the capability to generalize across tasks without requiring significant changes to the model.
+
+## Summary of Web page
+
+The "V" in "V-JEPA" stands for "video," indicating that V-JEPA is focused on learning from video data. However, V-JEPA only currently accounts for the visual content of videos. 
+Meta is considering incorporating audio along with the visuals in future iterations of the model to make it more multimodal.
+This would enable the model to learn from both visual and auditory information, potentially leading to a more comprehensive understanding of the content in videos.
+
+Furthermore, V-JEPA has been successful in understanding fine-grained object interactions and distinguishing detailed object-to-object interactions that happen over time. 
+However, this success has been limited to relatively short time scales, up to about 10 seconds.
+Meta aims to explore the model's ability to make predictions over longer time horizons, which could potentially open up new applications and use cases for the model.
+
+In addition, Meta is considering how to leverage V-JEPA's capabilities for planning and sequential decision-making. 
+While V-JEPA currently serves as an early physical world model, providing conceptual understanding of the contents of video streams, 
+there is potential to extend its functionality to include planning and decision-making based on that understanding. 
+This could lead to more advanced applications, such as embodied AI and contextual AI assistants for augmented reality (AR) glasses.
+
+Overall, V-JEPA is still a research model, and Meta is actively exploring various future applications and extensions of the model. 
+The release of V-JEPA under the Creative Commons BY-NC license reflects Meta's commitment to responsible open science and collaboration with the research community.
+
+
+
