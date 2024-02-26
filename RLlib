@@ -1,0 +1,74 @@
+From https://www.toolify.ai/ai-news/unlock-deep-hierarchical-multiagent-reinforcement-learning-with-rllib-390602
+From https://docs.ray.io/en/latest/rllib/index.html
+
+RLlib is an open-source reinforcement learning library developed by OpenAI. 
+It provides a flexible and scalable framework for training and evaluating reinforcement learning models. 
+RLlib integrates with popular deep learning libraries such as TensorFlow and PyTorch, enabling users to leverage deep neural networks for effective learning.
+
+RLlib offers various features and abstractions, including support for multi-agent and hierarchical reinforcement learning.
+It provides pre-built trainers and algorithms for different types of problems, making it easier to get started with reinforcement learning.
+RLlib also includes tools for hyperparameter tuning, allowing users to find the optimal configuration for their models.
+
+The need for RLlib arises from a lack of practical guidance and application-specific examples in existing resources for reinforcement learning. 
+RLlib aims to address this by providing a user-friendly framework with comprehensive documentation, tutorials, and example code. 
+This helps minimize the learning curve and enables users to quickly apply reinforcement learning to their specific problems.
+
+To start using RLlib, you need to set up the environment and define the necessary components such as the action space, 
+observation space, reward function, and RLlib trainer. Once the environment is set up, you can train 
+the model using RLlib's built-in trainers and evaluate its performance. RLlib supports major deep learning frameworks 
+such as TensorFlow and PyTorch, allowing users to choose the one that best suits their needs.
+
+Overall, RLlib provides a powerful and easy-to-use framework for reinforcement learning, making it accessible to both beginners and experienced practitioners. 
+It offers a range of features and advanced concepts, enabling users to tackle complex problems and achieve superior results in various domains.
+
+###### Ray with RLilb
+! pip install "ray[rllib]" tensorflow torch
+
+from ray.rllib.algorithms.ppo import PPOConfig
+
+config = (  # 1. Configure the algorithm,
+    PPOConfig()
+    .environment("Taxi-v3")
+    .rollouts(num_rollout_workers=2)
+    .framework("torch")
+    .training(model={"fcnet_hiddens": [64, 64]})
+    .evaluation(evaluation_num_workers=1)
+)
+
+algo = config.build()  # 2. build the algorithm,
+
+for _ in range(5):
+    print(algo.train())  # 3. train it,
+
+algo.evaluate()  # 4. and evaluate it.
+
+### Feature
+1. The most popular deep-learning frameworks: PyTorch and TensorFlow (tf1.x/2.x static-graph/eager/traced).
+2. Highly distributed learning: Our RLlib algorithms (such as our “PPO” or “IMPALA”) allow you to set the num_workers config parameter,
+   such that your workloads can run on 100s of CPUs/nodes thus parallelizing and speeding up learning.
+3. Multi-agent RL (MARL): Convert your (custom) gym.Envs into a multi-agent one via a few simple steps and start training your agents in any of the following fashions:
+   1) Cooperative with shared or separate policies and/or value functions.
+   2) Adversarial scenarios using self-play and league-based training.
+   3) Independent learning of neutral/co-existing agents.
+4. External simulators: Don’t have your simulation running as a gym.Env in python? No problem! RLlib supports an external environment API and comes with a pluggable, 
+   off-the-shelve client/ server setup that allows you to run 100s of independent simulators on the “outside” (e.g. a Windows cloud) connecting
+   to a central RLlib Policy-Server that learns and serves actions. Alternatively, actions can be computed on the client side to save on network traffic.
+5. Offline RL and imitation learning/behavior cloning: You don’t have a simulator for your particular problem, 
+   but tons of historic data recorded by a legacy (maybe non-RL/ML) system? This branch of reinforcement learning is for you!
+   RLlib’s comes with several offline RL algorithms (CQL, MARWIL, and DQfD), allowing you to either purely behavior-clone 
+   your existing system or learn how to further improve over it.
+
+
+#### Centralized vs Decentralized Training for Multi Agent Reinforcement Learning
+1. Decentralized Training:
+   In decentralized training, each agent collects its own set of experiences during the episodes and learns independently from those experiences.
+   Agents maintain their own critics (value functions) and policies, which are updated based on their own experiences.
+   There is no sharing of experiences or learning updates between agents.
+   This approach is suitable when agents have distinct roles or objectives and should learn independently without coordination.
+2. Centralized Training:
+   In centralized training, agents share the collected experiences and learn from them together.
+   All agents within a specific agent group (as defined by `AgentGroups`) share the same critic (value function) and policy.
+   The critic is updated based on the collective experiences of all agents in the group, allowing them to learn from a shared knowledge base.  
+   Policies are shared among agents to promote coordination and collaboration.
+   This approach is useful when agents need to coordinate their actions and learn from a common perspective, such as in cooperative tasks 
+   or when there is a need for centralized decision-making.
