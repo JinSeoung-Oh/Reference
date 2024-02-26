@@ -1,0 +1,26 @@
+From https://medium.com/superteams-ai-blog/a-technical-deep-dive-into-stable-diffusion-3-f6e60e4b14e9
+
+Stability AI has introduced Stable Diffusion 3, an advanced text-to-image model that excels in generating high-quality images from text prompts. 
+This model is equipped with a variety of parameters, ranging from 800 million to 8 billion, 
+offering scalability and quality tailored to different creative needs. 
+Stable Diffusion 3 combines the diffusion transformer architecture with flow matching, ensuring top-notch performance and safety throughout its development and deployment stages.
+
+1. Diffusion Transformer (DiT) Architecture:
+   Combines the strengths of diffusion models and transformer-based architectures.
+   Uses a stack of transformer layers augmented to incorporate the diffusion process.
+   Processes images in patches, employing adaptive layer normalization for improved training stability.
+   Trained using maximum likelihood estimation or variational inference, with added techniques like exponential moving average of model weights.
+
+2. Flow Matching (FM) Framework:
+   Designed for Continuous Normalizing Flow (CNF) models, providing an alternative to simulation-heavy training.
+   Employs conditional constructions, probability paths, and vector fields for efficient high-dimensional data processing.
+   Offers a simulation-free approach to training, utilizing gradient-based optimization and the Conditional Flow Matching (CFM) objective.
+   Demonstrates superior performance in image datasets, achieving state-of-the-art results in terms of negative log-likelihood, sample quality, and training efficiency.
+
+3. Integration and Potential:
+   The fusion of DiT and FM in Stable Diffusion 3 presents a promising approach in text-to-image generation.
+   Expected to yield more coherent, contextually relevant, and visually appealing outputs.
+   Enhances image fidelity, enabling the generation of complex, multi-subject images based on nuanced textual descriptions.
+
+Overall, Stable Diffusion 3 sets a new standard for text-to-image generation, combining cutting-edge architecture with advanced training methods 
+for optimal performance and creativity.
