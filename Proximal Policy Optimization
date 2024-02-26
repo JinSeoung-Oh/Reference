@@ -1,0 +1,27 @@
+From : https://towardsdatascience.com/proximal-policy-optimization-ppo-the-key-to-llm-alignment-923aa13143d4
+
+Proximal Policy Optimization (PPO) is an algorithm for reinforcement learning that builds on the ideas of the Trust Region Policy Optimization (TRPO) 
+algorithm but simplifies its implementation and extends its applicability to a wider range of problems. T
+he core of PPO is a modified objective function that is optimized through multiple iterations, allowing for more efficient training.
+
+PPO reformulates the TRPO update rule and uses a "clipped" surrogate objective function to constrain policy updates, 
+ensuring they are not too large. This method is simpler and computationally cheaper than the TRPO approach, 
+which directly constrains the policy updates through a KL divergence constraint.
+
+PPO's "clipped" surrogate objective function incorporates a trade-off between large policy updates that improve performance 
+and small policy updates that maintain stability. By computing the minimum of the clipped and unclipped surrogate objective functions,
+PPO only ignores excessive changes to the probability ratio if they worsen the objective. 
+This approach makes the algorithm more stable and adaptable to different problem setups.
+
+In practice, PPO operates as an on-policy algorithm, collecting data from the environment and performing several epochs of optimization over the sampled data. 
+This process allows PPO to learn more efficiently from the available data compared to TRPO, which only performs a single update each time new data is collected.
+
+The benefits of PPO over TRPO include
+1. Simplified implementation: PPO is easier to implement due to its simpler update rule and lack of complex constraints.
+2. Improved data efficiency: PPO's multiple epochs of optimization improve data efficiency compared to TRPO.
+3. Enhanced applicability: PPO can be used in a wider range of problem setups due to its simplicity and flexibility.
+
+In the language modeling space, PPO has been used for reinforcement learning from human feedback (RLHF),
+a framework that aligns the model's outputs with human expectations. PPO's simplicity and efficiency make it a popular choice for this application.
+
+Overall, PPO offers a simpler and more efficient alternative to TRPO, making it a valuable tool for reinforcement learning across a variety of applications.
