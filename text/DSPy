@@ -1,0 +1,40 @@
+From https://towardsdatascience.com/intro-to-dspy-goodbye-prompting-hello-programming-4ca1c6ce3eb9
+
+DSPy, an acronym for "Declarative Self-improving Language Programs (in Python)," 
+is a framework designed to aid the creation of natural language processing applications. 
+Developed by researchers at Stanford NLP, 
+this framework focuses on leveraging large language models (LLMs) and ""shifts the emphasis from prompt manipulation towards a more structured programming approach.""
+
+Here are some key points about DSPy:
+
+Foundations of DSPy:
+
+DSPy moves away from manual prompt tuning to a more systematic approach by using signatures, modules, teleprompters, and the DSPy compiler.
+It aims to solve the fragility problem in LM-based applications, making them more robust and efficient.
+The framework draws inspiration from PyTorch, mirroring its general-purpose layer composition approach in building applications with LLMs.
+
+Components of DSPy:
+
+1. Signatures: Abstracting prompts and fine-tuning, signatures define what a transformation does rather than how to prompt the LLM to do it. 
+               These signatures are used to bootstrap examples for each signature.
+2. Modules: DSPy includes modules that apply prompting, fine-tuning, augmentation, and reasoning techniques. 
+            These modules are templated and parameterized to adapt DSPy signatures to various tasks.
+3. Teleprompters: Acting as optimizers, teleprompters are used to learn to bootstrap and select effective prompts for DSPy program modules.
+4. DSPy Compiler: The compiler traces the program internally and then optimizes it using an optimizer (teleprompter) to maximize 
+                  a given metric (quality or cost) for a specific task. For LLMs, it constructs high-quality few-shot prompts, while for smaller LMs, it trains automatic fine-tunes.
+
+Workflow with DSPy:
+
+1. Collect Data: Gather examples of inputs and outputs of the program, which are used to optimize the pipeline.
+2. Write DSPy Program: Define program logic using signatures and modules, focusing on information flow among components to solve the task.
+3. Define Validation Logic: Define logic to optimize the program for a validation metric using an optimizer (teleprompter).
+4. Compile DSPy Program: The DSPy compiler optimizes the program by taking into account the training data, program, optimizer, and validation metric.
+5. Iterate: Continuously improve the data, program, or validation logic until satisfied with the pipeline's performance.
+6. Comparison with other frameworks: DSPy distinguishes itself from frameworks like LangChain and LlamaIndex by offering a more systematic 
+                                     and programming-based approach to LM-based applications. Instead of dealing with manual prompt engineering or fine-tuning, 
+                                     developers can simply re-compile the program to optimize it for new changes in data or LM, 
+                                     reducing the effort needed to obtain a high-performing pipeline.
+
+In summary, DSPy aims to make the creation and optimization of LM-based applications more structured and efficient byabstracting prompts
+and fine-tuning and automating the process using teleprompters and the DSPy compiler. 
+This systematic approach, coupled with the flexibility of PyTorch-inspired general-purpose layer composition, enables developers to create robust and efficient applications with LLMs.
