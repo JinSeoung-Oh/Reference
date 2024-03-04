@@ -1,0 +1,25 @@
+From https://medium.com/syncedreview/nvidias-nemotron-4-15b-dominates-multilingual-domain-defeating-4-larger-rivals-82ba51c58383
+From https://arxiv.org/abs/2402.16819
+
+In a new paper titled "Nemotron-4 15B Technical Report," an NVIDIA research team introduces Nemotron-4 15B, 
+a language model comprised of 15 billion parameters. 
+This model sets itself apart with unparalleled multilingual capabilities among models of similar size, 
+having been trained on an extensive corpus of 8 trillion text tokens.
+
+Nemotron-4 employs a standard decoder-only Transformer architecture with causal attention masks, 
+consisting of 3.2 billion embedding parameters and 12.5 billion non-embedding parameters. 
+It incorporates innovative techniques such as Rotary Position Embeddings, the SentencePiece tokenizer, 
+squared ReLU activations in MLP layers, no bias terms, dropout rate of 0, and untied input-output embeddings.
+The model also utilizes Grouped Query Attention to enhance inference speed and reduce memory footprint.
+
+The training process involved utilizing 384 DGX H100 nodes, each equipped with 8 H100 80GB SXM5 GPUs based on the NVIDIA Hopper architecture. 
+A combination of 8-way tensor parallelism and data parallelism, along with a distributed optimizer,
+was employed to shard the optimizer state over data-parallel replicas.
+
+Nemotron-4 15B achieves exceptional downstream accuracies across various domains, including English, code, and multilingual evaluations. 
+Notably, it surpasses models over four times larger and those explicitly tailored for multilingual tasks,
+establishing itself as the leader in multilingual capabilities among models of similar scale.
+
+In summary, Nemotron-4 15B demonstrates unmatched multilingual performance among general-purpose language models at its scale,
+even surpassing specialized models in the multilingual domain.
+Its success underscores the potential for large language models to be pre-trained on extensive token corpora, yielding remarkable outcomes.
