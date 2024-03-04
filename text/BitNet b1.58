@@ -1,0 +1,27 @@
+From https://medium.com/syncedreview/embracing-the-era-of-1-bit-llms-microsoft-ucass-bitnet-b1-58-redefines-efficiency-7ba5c722be2b
+
+In a recent paper titled "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits," 
+researchers from Microsoft Research and the University of Chinese Academy of Sciences present BitNet b1.58, a new version of 1-bit LLMs.
+This variant builds on the BitNet architecture, which replaces nn.Linear with BitLinear in a Transformer model, 
+resulting in a ternary parameter space of {-1, 0, 1}. The inclusion of 0 increases the binary system representation to 1.58 bits.
+
+BitNet b1.58 showcases several improvements over its predecessor:
+
+1. Quantization Function
+   The research team introduces an absmean quantization function, offering ease of implementation and system-level optimization
+   without significant performance impacts.
+
+2. LLaMA-alike Components
+   BitNet b1.58 incorporates components from the LLaMA framework, like RMSNorm, SwiGLU, and rotary embedding,
+   eliminating biases to ensure seamless integration into open-source software.
+
+Comparative evaluations against FP16 LLaMA LLMs show that BitNet b1.58 begins to match full-precision performance at a model size of 3B, 
+with 2.71 times faster performance and 3.55 times less GPU memory usage. 
+It retains the innovative computation paradigm of minimal multiplication operations while improving efficiency in memory consumption, throughput, and latency.
+
+BitNet b1.58 introduces two key enhancements
+1. Explicit support for feature filtering via 0 inclusion
+2. Performance parity with FP16 baselines in both perplexity and end-task results starting from a 3B model size.
+
+Overall, BitNet b1.58 presents a novel scaling law and training framework for high-performance, cost-effective LLMs, 
+laying the groundwork for specialized hardware optimized for 1-bit LLMs.
