@@ -28,5 +28,40 @@ Overall, Sora is a groundbreaking AI model with a wide range of capabilities, in
 Its development marks a significant milestone in the field of AI and opens up new possibilities for future research and development.
 
 
+#################################################################################################################################################################
+From https://ai.gopubby.com/open-source-sora-has-arrived-training-your-own-sora-model-16bdbc126c0d
+
+** Prior knowledge ** 
+The Vision Transformer stands out as a significant advancement in video generation models, particularly compared to previous methods like the 3D UNet.
+
+1. Global Understanding of Video
+   Unlike the 3D UNet, where the transformer operates within the UNet and lacks a holistic view of the video, 
+   the Vision Transformer allows transformers to globally dominate video generation. 
+   This means that transformers can consider the entire video as a sequence, similar to how language models process text.
+
+2. Sequence Representation
+   The Vision Transformer represents a video as a sequence of tokens, similar to how language models tokenize text. 
+   Each token represents a small piece of the video data.
+
+3. Transformer Application
+   Once the video is encoded into a token sequence, the Vision Transformer applies multiple layers of transformers to process and understand the video data. 
+   This mechanism aligns well with the principles of language models, making it straightforward and effective.
+
+4. Simplicity and Scalability
+   The design of the Vision Transformer is simple yet powerful, aligning with OpenAI's approach of favoring simplicity and scalability over complex and fancy methods. 
+   By focusing on scaling with vast amounts of training data rather than intricate model structures, the Vision Transformer achieves impressive results.
+
+5. Enhanced Learning Capabilities
+   Compared to previous methods like the 3D UNet, the Vision Transformer allows for greater focus on learning patterns of motion imagery. 
+   This enables the model to handle greater movement amplitude and longer video lengths, addressing challenges faced by previous video generation models.
+
+Overall, the Vision Transformer represents a significant leap forward in video generation models,
+offering a simple yet effective approach that aligns with the principles of language models while addressing key limitations of previous methods. 
+Its ability to globally understand videos and efficiently learn motion patterns contributes to its outstanding performance in video generation tasks.
+
+** Training Your Open-Source SORA Alternative **
+See : https://github.com/lyogavin/train_your_own_sora 
+!! Due to its large scale, training Latte requires an A100 or H100 with 80GB of memory.
+
 
 
