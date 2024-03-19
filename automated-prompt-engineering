@@ -1,0 +1,40 @@
+From https://towardsdatascience.com/automated-prompt-engineering-78678c6371b9
+
+Have to testing below : 
+###############################################################################################
+prompt_improvement_prompt = """
+
+# Context # 
+
+You are given an original prompt.
+
+The original prompt was used to generate some example responses. For each response, feedback was provided on how to improve the desired response.
+
+Your task is to review all the feedback and then return an improved prompt that addresses the feedback, making it better at generating responses when prompted against the GPT language model.
+
+# Guidelines # 
+
+- The original prompt will contain placeholders within double curly brackets. These are values for input that you will see in the examples.
+- The improved prompt should not exceed 200 words
+- Just return the improved prompt and nothing else before and after. Remember to include the same placeholders with double curly brackets.
+- When generating the improved prompt, refrain from writing the entire prompt as one paragraph. Instead, you should use a combination of task descriptions, guidelines (in point form), and other sections to the prompt as appropriate.
+- The guidelines should be in point form, and should not be a repetition of the task. The guidelines should also be distinct from one another.
+- The improved prompt should be written in normal English that is best understood by the language model.
+- Based on the feedback provided, you must rephrase the desired behavior of the response into `must`, imperative statements, instead of `should` suggestive statements.
+- Improvements made to the prompt should not be overly specific to one single example.
+
+# Details # 
+
+The original prompt is:
+```
+{original_prompt}
+```
+
+These are the examples that were provided and the feedback for each:
+```
+{examples}
+```
+
+The improved prompt is:
+```
+"""
