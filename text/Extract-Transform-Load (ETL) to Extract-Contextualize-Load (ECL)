@@ -1,0 +1,35 @@
+From https://medium.com/enterprise-rag/improving-llm-information-retrieval-etl-to-ecl-extract-contextualize-load-12a4ac259faa
+
+In the realm of Large Language Models (LLMs), the traditional Extract-Transform-Load (ETL) data processing paradigm is undergoing
+a significant shift towards Extract-Contextualize-Load (ECL) semantic processes. 
+This shift is driven by the transformative capabilities of LLMs, which excel at understanding and processing unstructured data through semantic interpretation.
+
+## ETL Process
+1. Data Extraction --> Loading into Knowledge Graphs --> Contextualization (With Transformer)
+
+## The ECL process entails several key steps:
+1. Data Extraction
+   Similar to ETL, data is extracted from diverse sources. However, in ECL, there is a heightened emphasis on unstructured data, 
+   which may include textual information from documents, images, or other media.
+
+2. Contextualization (With Transformer)
+   Unlike traditional ETL processes, which primarily focus on transforming data into a structured format,
+   ECL involves contextualizing the extracted data. This step is crucial for LLMs, as it involves extracting semantically meaningful information 
+   and embedding it within a contextual framework. Contextualization ensures that the data retains its original meaning and relevance within 
+   the broader context of the information space.
+
+3. Loading into Knowledge Graphs
+   Once contextualized, the data is loaded into structured knowledge graphs. 
+   These knowledge graphs serve as semantic repositories that organize and interconnect the contextualized data.
+   By structuring the data in this manner, LLMs can efficiently navigate and analyze the information, enabling more sophisticated data processing tasks.
+
+The transition from ETL to ECL represents a paradigm shift in data processing methodologies. 
+Unlike traditional ETL workflows, which focus on transforming structured data into a usable format, 
+ECL emphasizes the semantic understanding of unstructured data. This shift is driven by the capabilities of LLMs, 
+which excel at processing natural language and understanding complex contextual relationships.
+
+In practical terms, the adoption of ECL processes enables organizations to leverage unstructured data more effectively. 
+By contextualizing and structuring unstructured data into knowledge graphs, 
+businesses can unlock valuable insights and facilitate more advanced data analytics tasks. 
+Furthermore, ECL workflows align closely with the capabilities of LLMs, 
+allowing organizations to harness the full potential of these advanced language models in their data processing pipelines.
