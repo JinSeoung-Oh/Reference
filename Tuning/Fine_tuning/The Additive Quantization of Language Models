@@ -1,4 +1,4 @@
-## The Additive Quantization of Language Models(AQLM)
+## The Additive Quantization of Language Models(AQLM) - From https://towardsdatascience.com/the-aqlm-quantization-algorithm-explained-8cf33e4a783e
 
 The Additive Quantization of Language Models (AQLM) introduces a novel approach to post-training quantization (PTQ) for large language models,
 focusing solely on quantizing weights to reduce memory footprint while maintaining accuracy. 
@@ -13,6 +13,8 @@ focusing solely on quantizing weights to reduce memory footprint while maintaini
    AQLM claims to push the Pareto frontier of the tradeoff between model accuracy and memory footprint below 3 bits per parameter for the first time.
 
 3. Benefits of Model Quantization
+   PTQ methods fall into two categories: those that quantize just the model weights, and those that quantize both weights and activations. 
+   AQLM falls into the first category, only quantizing weights.
    Quantizing model weights reduces hardware requirements, enables larger batch sizes, decreases decoding latency, and improves compute-to-memory access ratio.
 
 4. Multi-Codebook Quantization (MCQ)
