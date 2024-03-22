@@ -1,0 +1,78 @@
+## The Additive Quantization of Language Models(AQLM)
+
+The Additive Quantization of Language Models (AQLM) introduces a novel approach to post-training quantization (PTQ) for large language models,
+focusing solely on quantizing weights to reduce memory footprint while maintaining accuracy. 
+
+1. Introduction of AQLM
+   AQLM is a recent quantization algorithm designed specifically for language models.
+   It's integrated into popular libraries like HuggingFace Transformers and PEFT.
+
+2. AQLM Performance
+   AQLM sets a new state-of-the-art for 2-bit-per-parameter quantization, outperforming other methods at this range.
+   It achieves smaller benchmark improvements for 3-bit and 4-bit ranges.
+   AQLM claims to push the Pareto frontier of the tradeoff between model accuracy and memory footprint below 3 bits per parameter for the first time.
+
+3. Benefits of Model Quantization
+   Quantizing model weights reduces hardware requirements, enables larger batch sizes, decreases decoding latency, and improves compute-to-memory access ratio.
+
+4. Multi-Codebook Quantization (MCQ)
+   AQLM employs MCQ, originally used for efficient nearest neighbor search, to compress weight matrices.
+   MCQ splits weight vectors into subgroups and approximates them using learned codewords.
+
+5. Memory Footprint of AQLM-Quantized Models
+   The average number of bits per parameter depends on codebooks, scaling factors, and code vectors.
+   AQLM provides flexibility in configuring parameters like group size, number of codebooks, and codebook size.
+
+6. Key AQLM Quantization Parameters
+   Parameters like group size, number of codebooks, and codebook size affect model performance and latency.
+   Larger values improve accuracy but increase latency, showing a latency-accuracy tradeoff.
+
+7. AQLM Quantization Procedure
+   AQLM quantization involves learning codebooks, scaling factors, and codes for each linear layer in a transformer decoder block.
+   It's a two-step process involving learning codes followed by fine-tuning parameters.
+
+8. Pareto Optimality
+   AQLM claims to push the Pareto frontier below 3 bits per weight, indicating that existing sub-3-bit quantized models were not Pareto optimal.
+   The Pareto frontier represents the optimal tradeoff between model accuracy and memory footprint.
+
+Overall, AQLM represents a significant advancement in PTQ techniques for language models, 
+offering improved compression while maintaining competitive accuracy levels.
+
+## How to apply AQLM on LLM
+Applying AQLM (Additive Quantization of Language Models) on a Large Language Model (LLM) involves several steps, 
+including preparing the model for quantization, learning codebooks and scaling factors, quantizing the weights, 
+and fine-tuning the quantized model. 
+
+1. Preparation
+   Before quantization, ensure you have a trained LLM model that you want to quantize.
+   Prepare calibration data for quantization. This typically involves using a subset of your training data to calibrate the quantization parameters.
+
+2. Learning Codebooks and Scaling Factors
+   AQLM quantization involves learning codebooks and scaling factors for each linear layer in the Transformer decoder block of the LLM.
+   The codebooks are sets of codewords used to approximate the weight vectors.
+   Scaling factors are learned to adjust the magnitude of the quantized weights.
+
+3. Quantizing Weights
+   Once codebooks and scaling factors are learned, the weights of the LLM are quantized.
+   This involves approximating weight vectors using the learned codewords from the codebooks.
+   Each weight vector is divided into subgroups, and each subgroup is approximated using codewords.
+
+4. Fine-Tuning
+   After quantizing the weights, the quantized model undergoes fine-tuning.
+   This fine-tuning step adjusts the non-quantized parameters, such as normalization layer scales and biases, to optimize model performance.
+   It also involves joint optimization of parameters across layers to account for interactions between quantization errors.
+
+5. Evaluation
+   Evaluate the performance of the quantized model using validation datasets.
+   Measure metrics such as perplexity or accuracy to assess the impact of quantization on model performance.
+
+6. Iterative Optimization
+   Iterate on the quantization process, adjusting hyperparameters such as group size, number of codebooks, 
+   and codebook size to optimize model performance while minimizing memory footprint.
+
+7. Deployment
+   Once satisfied with the quantized model's performance, deploy it for inference.
+   The quantized model can be used for various applications such as text generation, language understanding, or any other task the LLM was trained for.
+
+By following these steps, you can effectively apply AQLM to quantize a Large Language Model,
+reducing its memory footprint while maintaining competitive performance for inference tasks.
