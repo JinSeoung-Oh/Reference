@@ -1,4 +1,4 @@
-## From https://docs.llamaindex.ai/en/stable/examples/param_optimizer/param_optimizer.html
+## From https://docs.llamaindex.ai/en/stable/examples/param_optimizer/param_optimizer/#wip-hyperparameter-optimization-for-rag
 
 %pip install llama-index-llms-openai
 %pip install llama-index-embeddings-openai
@@ -86,6 +86,7 @@ def _build_index(chunk_size, docs):
         )
     return index
 
+
 def _get_eval_batch_runner():
     evaluator_s = SemanticSimilarityEvaluator(embed_model=OpenAIEmbedding())
     eval_batch_runner = BatchEvalRunner(
@@ -169,7 +170,6 @@ fixed_param_dict = {
     "ref_response_strs": ref_response_strs[:10],
 }
 
-
 ### Run ParamTuner (default) ###
 from llama_index.experimental.param_tuner import ParamTuner
 
@@ -188,6 +188,7 @@ print(f"Score: {best_result.score}")
 print(f"Top-k: {best_top_k}")
 print(f"Chunk size: {best_chunk_size}")
 
+# adjust test_idx for additional testing
 test_idx = 6
 p = results.run_results[test_idx].params
 (results.run_results[test_idx].score, p["top_k"], p["chunk_size"])
@@ -220,12 +221,14 @@ param_tuner = RayTuneParamTuner(
 results = param_tuner.tune()
 results.best_run_result.params.keys()
 results.best_idx
+
 best_result = results.best_run_result
 
 best_top_k = results.best_run_result.params["top_k"]
 best_chunk_size = results.best_run_result.params["chunk_size"]
 print(f"Score: {best_result.score}")
 print(f"Top-k: {best_top_k}")
+print(f"Chunk size: {best_chunk_size}")
 print(f"Chunk size: {best_chunk_size}")
 
 
