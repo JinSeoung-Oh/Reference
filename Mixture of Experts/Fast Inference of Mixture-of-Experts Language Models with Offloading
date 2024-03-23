@@ -1,0 +1,47 @@
+From https://arxiv.org/abs/2312.17238
+From https://medium.com/@aipapers/fast-inference-of-transformer-mixture-of-experts-llms-with-offloading-c23815e57b9b
+See : https://github.com/dvmazur/mixtral-offloading
+
+Motivation
+1. Large Language Models (LLMs) like GPT-3 and GPT-4 have driven significant advances in AI.
+2. Despite their success, the increasing size of these models necessitates improvements in efficiency, particularly concerning memory usage.
+3. Mixture of Experts (MoE) Improves LLMs Efficiency:
+   MoE, a technique where different parts of the model specialize in handling specific inputs, has shown promise in enhancing efficiency.
+   It optimizes compute efficiency by employing a subset of experts for each input, reducing computational costs.
+  
+4. Mixture of Experts on Limited Memory Hardware:
+   While MoE enhances compute efficiency, its architecture presents challenges due to its large memory footprint.
+
+To address this, researchers introduce offloading techniques to run MoE models efficiently on hardware with limited memory, 
+making them accessible on platforms like Google Colab.
+
+1. MoE Architecture Overview:
+   MoE involves routers directing tokens to specific experts for processing, with different experts handling different tokens.
+   Input prompts are processed in parallel, while token generation involves sequential processing, necessitating specialized offloading methods.
+
+2. MoE Offloading:
+   Offloading involves loading only necessary expert weights into memory to optimize memory usage.  
+   It includes two phases: input prompt encoding and token generation, where experts are loaded layer by layer based on activation patterns.
+
+3. Offloading Includes Only The Experts Weights:
+   Offloading focuses on selectively loading the weights of individual experts into GPU memory, rather than loading the entire MoE model.
+   This approach optimizes memory usage by prioritizing the most significant components of the model, namely the weights of the experts.
+   Other components such as routers and self-attention blocks remain constant in GPU memory, as they occupy relatively less space.
+   By dynamically loading and unloading expert weights based on model execution needs, memory usage is minimized, 
+   allowing efficient utilization of computational resources, particularly on hardware with limited memory resources.
+
+4. Experts LRU Cache:
+  The Least Recently Used (LRU) cache improves efficiency by loading only activated experts, reducing load times by reusing cached experts.
+  Speculative loading further accelerates the model by predicting and loading experts based on previous layer outputs.
+
+5. Speculative Experts Loading:
+   Involves predicting which experts will be activated in subsequent layers based on the output of the preceding layer.
+   This prediction is made while the current layer is processing, allowing for parallel loading of experts.
+   Speculative loading enhances efficiency by reducing wait times for loading experts, improving overall model performance.
+
+6. Evaluation and Optimization:
+   Various quantization methods are explored to find an optimal balance between model size and performance.
+   Chosen settings offer smaller model sizes while maintaining performance.
+   Offloading methods significantly improve inference speed, particularly on low-tier GPUs.
+
+
