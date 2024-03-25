@@ -1,0 +1,34 @@
+Mixtral 8x7B, a novel language model developed by Mistral AI, 
+has gained considerable attention for its sparse Mixtures of Experts architecture, 
+as headlines proclaim its transformative impact on machine learning.
+Despite the unconventional release strategy via a simple Twitter post, 
+Mistral AI's approach has sparked significant interest and discussion, including memes about the unique launch method.
+
+Published alongside the release, the research paper "Mixtral of Experts" (Jiang et al., 2024) provides deeper insights into the model's workings. 
+It traces the historical context of sparse Mixtures of Experts (MoE) models back to early 90s research, 
+highlighting breakthroughs such as top-k routing, initially introduced in the 2017 paper by Shazeer et al.
+, and further advanced by the Switch Transformer (Fedus et al., 2022).
+
+Mixtral 8x7B adopts a 32-block Transformer architecture, integrating 8 experts per block using top-k routing with k=2. 
+This configuration yields a model with 47B parameters, of which only 13B are active at any given time due to top-2 routing, 
+balancing large capacity with efficient training.
+
+In benchmark evaluations across diverse domains, Mixtral 8x7B demonstrates competitive performance, 
+even outperforming larger models in certain instances. 
+Notably, its multilingual performance surpasses that of the 70B Llama 2 model across several languages.
+Moreover, a fine-tuned version, Mixtral-Instruct, exhibits superior performance in human evaluations compared to other models, 
+establishing itself as a leading open-weights model.
+
+Comparison with the Switch Transformer reveals differences in routing strategies, 
+expert count, and parallelism utilization. However, an intriguing finding is the surprising lack of semantic expert specialization 
+observed in Mixtral 8x7B. Unlike previous models,
+which exhibited clear semantic specialization, Mixtral's experts appear to specialize more on syntax than semantics, 
+particularly evident in domains like Math and coding.
+
+The absence of semantic expert specialization raises questions about the model's training data, 
+hardware configurations, and hyperparameter choices, underscoring the importance of thorough scientific documentation. 
+While Mixtral's success in surpassing dense models with fewer parameters is noteworthy, 
+it adds little novelty beyond existing research, emphasizing the importance of efficiency in sparse LLMs.
+
+Nevertheless, Mixtral's open-source nature distinguishes it from its competitors, 
+offering wider accessibility and enabling experimentation compared to proprietary models like the Switch Transformer.
