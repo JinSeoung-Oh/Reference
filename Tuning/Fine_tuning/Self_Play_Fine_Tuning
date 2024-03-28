@@ -1,0 +1,40 @@
+# https://medium.com/gitconnected/self-play-fine-tuning-spin-ai-can-get-better-all-by-itself-b685c2837aa2
+## SPIN (Self-Play Fine-Tuning), designed to enhance large language models (LLMs) efficiently without the need 
+##  for substantial volumes of human-annotated data or feedback from advanced models, which are often required by existing techniques.
+
+## SPIN utilizes a self-play mechanism, allowing an LLM to improve itself by playing against its previous iterations, 
+## without needing additional human-annotated preference data than the SFT dataset itself. 
+## Specifically, the LLM generates its own training data from its previous iterations, refining its policy by discerning 
+## these self-generated responses from the original SFT data.
+
+## The core mechanism of SPIN is based on a two-player game setup between instances of the LLM. 
+## Player one, the main player, is the new LLM to be learned in the current iteration. 
+## Its objective is to distinguish between the responses of its opponent, the old LLM from the previous iteration,
+## and the human-annotated responses in the training data. Concurrently, the opponent player strives to generate
+## responses indistinguishable from those of humans.
+
+## Key details behind the SPIN method include:
+
+## Two roles - Opponent and Main Player: The LM takes on two roles during training:
+## Opponent: Generates synthetic responses based on prompts from a dataset.
+## Main Player: Trains to differentiate between these synthetic responses and the ground truth responses.
+## Iterative Training Process: The process involves multiple iterations where the model in the main player role is trained against 
+## its own outputs (synthetic responses) generated in the opponent role from the previous iteration.
+## Low-Rank Adaptation (LoRA) (Optional, skip for full parameter training): To make this training process efficient,
+## we utilize LoRA, a parameter-efficient fine-tuning method that adds trainable low-rank matrices to certain layers of the LM. 
+## This approach drastically reduces the number of parameters that need fine-tuning, facilitating rapid adaptation.
+## Adapting to New Roles: After each training iteration, the roles switch — the updated model becomes the new opponent for the next iteration.
+## In this way, SPIN allows the model to elevate itself without any external data or evaluations beyond the initial training set. 
+## The self-play mechanism provides the competitive environment for self-improvement.
+
+## Additionally, the document provides details on the implementation of SPIN, including model setup, LoRA configuration,
+## training procedure, specialized loss function, parameter-efficient training with LoRA, and considerations for memory efficiency, 
+## iterative role switching, dataset, and loss function selection.
+
+
+
+
+
+
+
+
