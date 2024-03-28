@@ -1,0 +1,15 @@
+From https://github.com/pytorch/torchtune
+
+1. Easy-to-use fine-tuning native PyTorch library for creating, fine-tuning, and experimenting with LLMs.
+2. Native PyTorch implementation of popular LLMs
+3. Support for various checkpoint formats including HF format checkpoints
+4. Providing training recipes for widely-used fine-tuning techniques through reference benchmarks and comprehensive accuracy checks
+5. Model evaluation using the EleutherAI evaluation harness
+6. Integration with HuggingFace datasets for training
+7. Support for distributed training using PyTorch Distributed's FSDP
+8. YAML configuration for easy setup of training runs
+
+"""
+[Scheduled] Support for low-precision dtype and quantization techniques with TorchAO
+[Scheduled] Support for integration with various inference engines.
+"""
