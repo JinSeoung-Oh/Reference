@@ -1,3 +1,4 @@
+"""
 From https://medium.com/towards-artificial-intelligence/grouped-query-attention-gqa-explained-5f3dbbfe013b
 
 ## What is GQA
@@ -103,4 +104,36 @@ specifically targeting the key-value cache associated with attention computation
 It achieves this by reducing the number of key-value heads while maintaining a balance between memory efficiency and the quality of attention computations, 
 making it a suitable choice for large language models like Llama 2.
 
+"""
 
+# From https://medium.com/@maxshapp/grouped-query-attention-gqa-explained-with-code-e56ee2a1df5a
+
+import torch
+from einops import rearrange,einsum
+import torch.nn.functional as F
+
+# shapes: (batch_size, seq_len, num_heads, head_dim)
+query = torch.randn(1, 256, 8, 64)
+key = torch.randn(1, 256, 2, 64)
+value = torch.randn(1, 256, 2, 64)
+
+num_head_groups = query.shape[2] // key.shape[2]
+scale = query.size(-1) ** 0.5
+
+#Swap seq_len with num_head to accelerate computations
+#Have to check below line
+query = rearrange(query, "b n h d -> b h n d")
+key = rearrange(key, "b s h d -> b h s d")
+value = rearrange(value, "b s h d -> b h s d")
+
+#Split query num_heads in groups by introducing additioanl 'g' dimension
+query = rearrange(query, "b (h g) n d -> b g h n d", g=num_head_groups)
+
+# g stands for the number of groups
+# h stands for the hidden dim
+# n and s are equal and stands for sequence length
+ 
+scores = einsum(query, key, "b g h n d, b h s d -> b h n s")
+attention = F.softmax(scores/scale, dim=1)
+out = einsum(attention, value, "b h n s, b h s d -> b h n d")
+out = rearrange(out, "b h n d -> b n h d")
