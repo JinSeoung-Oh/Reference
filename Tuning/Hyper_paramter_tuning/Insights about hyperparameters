@@ -1,0 +1,23 @@
+From https://medium.com/defactoblog/explainability-of-the-features-no-of-the-hyperparameters-ad797918155f
+
+1. Learning rate: Learning rate is crucial, as indicated by Shapley values, and higher values lead to quicker convergence but may miss optimal results. 
+                  Lower learning rates are favored for better performance, even though it requires more iterations. 
+                  It interacts significantly with the number of estimators.
+
+2. Max depth: Controls the maximum depth of each tree, with too high values leading to overfitting and too low values leading to underfitting.
+
+3. Colsample_by_tree: Determines the ratio of features to sample for each new tree. 
+                      Lower sampling rates work better with lower learning rates, promoting stability in learning from each additional tree.
+
+4. N_estimators: The number of trees in boosting algorithm, where more trees generally lead to better performance.
+                 Interacts significantly with learning rate; higher learning rates are better with fewer estimators,
+                 and lower learning rates are favored with more estimators.
+
+5. Subsample: The ratio of training data to sample before training a tree. Its impact varies with datasets, 
+              with higher subsampling favored in one dataset and the opposite in another. Interaction with learning rate is notable.
+
+6. Min_child_weight: Controls instance weight needed in a child, affecting split and overfitting. 
+                     Its importance varies with datasets, and high values consistently decrease performance in the Titanic dataset.
+
+7. Gamma: Represents the minimum loss reduction needed to split a tree, which seems to be less impactful across both datasets. 
+          It could potentially be dropped to reduce the search space for optimal solutions.
