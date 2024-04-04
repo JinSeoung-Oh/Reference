@@ -25,7 +25,7 @@ The integration of RAFT with LlamaIndex offers numerous advantages:
 
 import os
 
-## Have to check RAFTDatasetPack
+## Have to check RAFTDatasetPack -> https://github.com/run-llama/llama_index/blob/f03db8da9301e2a1f2a1783338464bec7e7a859e/llama-index-packs/llama-index-packs-raft-dataset/llama_index/packs/raft_dataset/base.py#L27
 from llama_index.packs.raft_dataset import RAFTDatasetPack
 
 os.environ["OPENAI_API_KEY"] = "<YOUR OPENAI API KEY>"
