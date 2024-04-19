@@ -1,1 +1,36 @@
 From https://arxiv.org/abs/2404.07143
+From https://medium.com/towards-artificial-intelligence/infinite-context-window-406324c4e706
+
+
+In the pursuit of extending the context window of large language models (LLMs), Google's recent paper,
+Infini-attention, presents a groundbreaking solution. 
+The "context window" refers to the number of words sent to an LLM simultaneously, 
+crucial for understanding questions comprehensively. 
+However, as the context increases, 
+LLM performance typically declines due to information overload.
+
+The attention mechanism, a key component of LLMs, enables understanding word relationships within a context.
+However, as context expands, computational complexity rises because each word must be compared with all others. 
+Infini-attention addresses this challenge by dividing attention calculation into two parts: 
+
+1. one for local information (nearby words)
+2. long-range relations (distant words).
+
+******************************************************************************************
+"A significant advancement of Infini-attention is its transformation of computational cost
+from quadratic to linear concerning sequence length. 
+It segments text and calculates local attention within these segments, 
+compressing information from past segments into memory states. 
+This compressed memory efficiently integrates long-range context into local calculations, enhancing scalability and data processing density."
+******************************************************************************************
+
+By storing historical context in compressed form, 
+Infini-attention retrieves relevant information quickly when needed, 
+ensuring distant but pertinent details are considered in every step. 
+After processing each segment, the model updates memory states, 
+incorporating new data and discarding less pertinent information to optimize memory efficiency and performance.
+
+Infini-attention achieves a balance between context depth and computational efficiency, 
+crucial for tasks involving large volumes of text or where historical context influences decisions. 
+Remarkably, it performs better with increased context, contrasting with typical LLM behavior. 
+This breakthrough promises better LLM performance with extensive context, potentially reducing human workload.
