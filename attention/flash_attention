@@ -1,0 +1,47 @@
+From https://medium.com/towards-artificial-intelligence/unveiling-flashattention-2-498ec05cbd5a
+From https://medium.com/towards-artificial-intelligence/understanding-flash-attention-and-flash-attention-2-the-path-to-scale-the-context-lenght-of-26b9f88b99ff
+
+FlashAttention (FA) - Version 1:
+
+1. Introduction of FlashAttention:
+   FlashAttention is introduced as a mechanism for increasing the context length of LLMs while minimizing memory usage and computational overhead.
+2. Tiling Technique:
+   FlashAttention divides input tensors (query, key, value) into smaller blocks, reducing the need for extensive memory reads and writes.
+   Each block is processed individually, optimizing memory usage and computational efficiency.
+3. Recomputation Strategy:
+   Intermediate matrices, such as attention scores (S) and the product of attention scores and values (P), 
+   are recomputed as needed during the backward pass.
+   This strategy minimizes memory consumption and allows for more efficient computation.
+4. Parallelization:
+   FlashAttention optimizes parallelization across batch size, number of heads, and sequence length.
+   Each attention head is processed by a dedicated thread block, ensuring efficient utilization of GPU computational resources.
+5. Memory Read/Write Reduction:
+   FlashAttention reduces memory reads and writes by shuttling blocks of input tensors between GPU memory (HBM) and cache memory (SRAM).
+   This reduction in memory operations leads to significant speed improvements.
+6. Backward Pass Optimization:
+   During the backward pass, FlashAttention optimizes the parallelization strategy by assigning each worker 
+   a block of columns within the attention matrix.
+   This approach facilitates efficient gradient aggregation, enhancing the overall performance of the model.
+
+FlashAttention-2 (FA-2):
+
+1. Refinement of Non-Matmul FLOPs:
+   FA-2 focuses on minimizing non-matrix multiplication (Non-Matmul) floating-point operations (FLOPs) within the algorithm.
+   This adjustment is significant in the context of modern GPUs, which feature specialized compute units like Nvidia’s Tensor Cores.
+2. Revisiting Online Softmax Technique:
+   FA-2 revisits the online softmax technique used in FlashAttention to streamline rescaling operations, bound-checking, and causal masking.
+   The goal is to enhance computational efficiency while preserving the output's integrity.
+3. Extended Support for Head Dimensions:
+   FA-2 extends support for head dimensions up to 256, accommodating a broader range of models 
+   such as GPT-J, CodeGen, CodeGen2, and StableDiffusion 1.x.
+   This expansion enables these models to leverage FA-2 for improved speed and memory efficiency.
+4. Introduction of Multi-Query Attention (MQA) and Grouped-Query Attention (GQA):
+   FA-2 introduces support for specialized attention variants, including MQA and GQA.
+   These variants allow multiple heads of the query to simultaneously attend to the same head of key and value, 
+   reducing the KV cache size during inference and increasing throughput.
+   
+In summary, FlashAttention and FlashAttention-2 revolutionize attention 
+computation in LLMs by optimizing memory usage, computational efficiency, and parallelization strategies.
+These techniques represent significant advancements in the field of natural language processing, enabling the scaling of context length 
+in large language models.
+
