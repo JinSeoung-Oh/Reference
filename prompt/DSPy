@@ -38,3 +38,6 @@ Workflow with DSPy:
 In summary, DSPy aims to make the creation and optimization of LM-based applications more structured and efficient byabstracting prompts
 and fine-tuning and automating the process using teleprompters and the DSPy compiler. 
 This systematic approach, coupled with the flexibility of PyTorch-inspired general-purpose layer composition, enables developers to create robust and efficient applications with LLMs.
+
+
+## Usage Example : https://generativeai.pub/evaluating-dspy-does-it-meet-the-hype-in-complex-scenarios-902fb478b2f3
