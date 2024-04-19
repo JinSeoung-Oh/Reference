@@ -1,0 +1,33 @@
+"""
+From https://medium.com/@aipapers/reft-representation-finetuning-for-language-models-4e804753e886
+
+The post explores a recent research paper proposing a new method for fine-tuning Large Language Models (LLMs), 
+which balances parameter count and performance effectively.
+
+1. ReFT
+   Representation Fine-Tuning (ReFT), particularly LoReFT, as a promising alternative to PEFT. 
+   LoReFT requires significantly fewer parameters compared to LoRA, yet achieves remarkable results,
+   as illustrated in the provided figures. 
+   Impressively, LoReFT outperforms other methods in various tasks while training a minimal number of weights, showcasing its efficiency.
+
+2. Explaining the idea of ReFT
+   ReFT focuses on editing original representations obtained from pre-trained Transformer models, 
+   unlike traditional PEFT methods that add additional weights. By directly manipulating these representations, ReFT aims for enhanced performance.
+
+3. ReFT High-level Architecture
+   Interventions in ReFT are employed to edit the original representations. 
+   These interventions, represented by components like Phi, P, and L, are applied 
+   before passing the representations to the next layer, allowing targeted adjustments for specific tasks.
+
+4. What is LoReFT?
+   LoReFT, a specific ReFT method, stands for Low-rank Linear Subspace ReFT. 
+   It defines a function to edit representations using matrices and vectors. 
+   During training, parameters like W, R, and b are optimized to modify the representations effectively.
+
+5. LoReFT Hyperparameters
+   With LoReFT, interventions are trained for the prefix and suffix of tokens, while leaving middle tokens unchanged. 
+   The size of the prefix and suffix, along with other intervention parameters, are configurable hyperparameters.
+
+In summary, ReFT, particularly LoReFT, offers a promising approach to fine-tuning LLMs, 
+achieving impressive results with reduced parameter count, thus making fine-tuning more accessible and efficient.
+"""
