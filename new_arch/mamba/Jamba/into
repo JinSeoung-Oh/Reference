@@ -1,0 +1,29 @@
+From https://pub.towardsai.net/inside-jamba-mamba-transformers-and-moes-together-to-power-a-new-form-of-llms-a74b08281b67
+Jamba, a groundbreaking model from AI21 Labs, merges Transformer and state space model (SSM) layers 
+alongside a Mixture of Experts (MoE) component, creating a versatile architecture known as the Jamba block.
+This innovation addresses the limitations of traditional Transformers, 
+notably high memory usage and decreased processing speed with larger text inputs.
+
+Key to Jamba's success is its hybrid design, which optimizes memory usage, 
+processing speed, and output quality. 
+By incorporating MoE, only a fraction of the model's parameters are active at any given time,
+significantly reducing memory demands. 
+Additionally, substituting some Transformer layers with Mamba layers diminishes the size of the key-value (KV) cache,
+leading to remarkable efficiency gains.
+Jamba maintains a smaller KV cache even when processing extensive text inputs,
+demonstrating its superiority over traditional Transformers.
+
+The Jamba block integrates both Mamba and attention mechanisms followed by multi-layer perceptrons (MLPs),
+offering flexibility in adjusting the attention to Mamba layer ratio.
+Furthermore, some MLPs can be swapped for MoE layers, enhancing model capacity while minimizing computation overhead. 
+This modular design empowers Jamba to strike a balance between computational efficiency and memory usage by adapting the mix of its core components.
+
+Jamba's performance across various benchmarks is impressive, showcasing remarkable efficiency, throughput, and cost-effectiveness. 
+Operating on a single 80GB GPU, Jamba supports extended context lengths compared to existing models.
+Its superior throughput is evident in scenarios involving both small and large text batches, outperforming competitors like Mixtral. 
+Moreover, Jamba's efficiency allows processing up to 140,000 tokens on a single GPU, 
+making advanced text processing more accessible across diverse applications.
+
+In conclusion, Jamba represents a significant architectural innovation in generative AI, 
+combining Transformer, SSMs, and MoEs to potentially set the standard for future large language models. 
+This advancement underscores AI21's commitment to pushing the boundaries of AI research.
