@@ -1,0 +1,88 @@
+From https://medium.com/autonomous-agents/enhancing-llms-reasoning-through-jepa-a-comprehensive-mathematical-deep-dive-301ec9c4d6f2
+
+1) Strengths of JEPA?
+
+JEPA is not generative in the traditional sense; instead of directly generating predictions of outputs from inputs, 
+it focuses on capturing the dependencies between input and output pairs.
+This is done without the need to explicitly generate every detail of the output, 
+which can be highly advantageous for computational efficiency.
+
+1. Predictive Modeling
+   JEPA predicts the representation of an output y from the representation of an input x, 
+   using a learned model that minimizes prediction error in representation space.
+
+2. Energy Function
+   The core of JEPA is an energy function, Ew​(x,y,z), which quantifies the prediction error. 
+   This function is dependent on a set of parameters w, 
+   and it attempts to find the most probable representation of y given x by minimizing the energy over a latent variable z.
+
+3. Latent Variables
+   JEPA employs latent variables to account for uncertainty and the multiplicity of valid outputs that could correspond to a single input. 
+   These latent variables represent factors not directly observed but that can be inferred from the input data.
+
+4. Training Methodology
+   JEPA would likely be trained using self-supervised learning (SSL) techniques, 
+   focusing on pattern completion and prediction of future states, which are special cases of pattern completion.
+
+5. Integration with LLMs
+   JEPA could be integrated with Large Language Models (LLMs) to enhance their predictive capabilities. 
+   By predicting the representation of y from x in a high-dimensional space, 
+   JEPA could theoretically help LLMs achieve a more nuanced understanding of the data they process.
+
+JEPA’s aims to equip AI models with a more refined toolset for prediction, reasoning, and understanding,
+potentially leading to improvements in the fields of natural language processing, computer vision, 
+and other areas where predictive modeling is crucial.
+
+2) Weakness of JEPA?
+While JEPA offers significant advantages, such as computational efficiency and refined predictive capabilities, 
+it also introduces certain complexities and potential limitations
+
+1. Mathematical Complexity
+   The intricate mathematical foundations of JEPA, including advanced concepts from statistics, 
+   machine learning, and optimization, may pose challenges in understanding, implementation, and scaling.
+
+2. Optimization Challenges
+   The complex optimization problems integral to JEPA, involving high-dimensional spaces and latent variables, 
+   might be computationally demanding and difficult to solve efficiently.
+
+3. Integration Complexity
+   Harmoniously integrating JEPA with existing LLM architectures like GPT-4 could be challenging, 
+   requiring significant modifications to the LLMs and potentially impacting their existing efficiencies and capabilities.
+
+4. Uniqueness of Solutions
+   The system of partial differential equations (PDEs) used in JEPA’s optimization process may be underdetermined, 
+   potentially leading to non-unique solutions, which can complicate the model’s predictive capabilities.
+
+JEPA represents a promising step towards enhancing the reasoning and predictive abilities of LLMs, 
+its implementation and integration with existing models bring forth challenges related to mathematical complexity, 
+computational demands, and optimization difficulties.
+
+3) Dissecting JEPA’s Mathematical Foundations
+Have to check article : https://medium.com/autonomous-agents/enhancing-llms-reasoning-through-jepa-a-comprehensive-mathematical-deep-dive-301ec9c4d6f2
+
+1. An energy function, Ew​(x,y,z), which quantifies the prediction error
+   The foundational energy function Ew​ is merely the starting point for a series of complex mathematical 
+   interactions that dictate the architecture’s predictive capabilities.
+
+2. The optimization process
+   The optimization process aims to find θ, ϕ, and z that minimize Ew​. This involves solving a complex optimization problem
+   that may be expressed as a Lagrangian, incorporating constraints from the data distribution
+
+3. The training of JEPA
+   The training of JEPA may involve higher-order optimization methods, 
+   where the second-order derivatives are considered to ensure convergence in complex landscapes
+
+4. Variational approximation (??????? --> Check why it needed)
+   Given the high dimensionality of z and the potential for multi-modal distributions, 
+   we might also introduce a variational approximation to the intractable posterior p(z∣x,y;θ), leading to a variational lower bound
+   This inequality is often used in variational inference, specifically in the derivation of the Evidence Lower Bound (ELBO), which 
+   serves as an objective function in variational Bayes methods. 
+   The ELBO is maximized to approximate the true posterior distribution in probabilistic models
+
+5. The resulting optimization
+   The resulting optimization challenge is to maximize this lower bound, 
+   which can be reformulated as a stochastic optimization problem using reparameterization tricks for continuous latent variables
+
+
+
+
