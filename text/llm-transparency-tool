@@ -1,0 +1,9 @@
+https://medium.com/syncedreview/unveiling-the-black-box-metas-lm-transparency-tool-deciphers-transformer-language-models-0d3ae5fef85a
+
+https://github.com/facebookresearch/llm-transparency-tool
+
+1. Visualizes the “important” part of the prediction process along with importances of model components at varying levels of granularity;
+2. allows interpreting representations and updates coming from model components;
+3. enables analyzing large models where it is crucial to know what to inspect;
+4. allows interactive exploration via a UI;
+5. is highly efficient.
