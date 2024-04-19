@@ -1,5 +1,7 @@
 From https://medium.com/autonomous-agents/enhancing-llms-reasoning-through-jepa-a-comprehensive-mathematical-deep-dive-301ec9c4d6f2
 
+End "Dissecting JEPA’s Mathematical Foundations" section
+
 1) Strengths of JEPA?
 
 JEPA is not generative in the traditional sense; instead of directly generating predictions of outputs from inputs, 
