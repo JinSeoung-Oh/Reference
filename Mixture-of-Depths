@@ -1,0 +1,24 @@
+# From https://medium.com/@ignacio.de.gregorio.noblejas/mixture-of-depths-a-dazzling-new-ai-breakthrough-be958fc629b2
+
+The research paper "Mixture-of-Depths (MoD)" by Google Deepmind introduces a groundbreaking approach to AI models, 
+addressing a fundamental issue in current models: 
+
+the uniform allocation of compute resources regardless of task complexity. 
+Unlike humans who allocate effort based on task difficulty, existing models treat all tasks equally.
+MoD models aim to rectify this by dynamically assigning compute resources to each prediction, mirroring human cognition.
+
+Transformers, such as ChatGPT, are central to this discussion. 
+These models process input sequences and generate output sequences using a series of Transformer blocks.
+Each block consists of a multi-head attention layer and a feedforward layer, enabling the model to capture nuanced relationships between words. 
+However, the standard attention mechanism in Transformers is computationally expensive and potentially unnecessary for all word-to-word interactions.
+
+MoD introduces a solution to this problem by implementing a routing mechanism. 
+"" Before each Transformer block, tokens are fed into a router, which assigns weights to determine their importance for that block."" 
+This weight dictates whether a token undergoes the attention process or is bypassed, reducing unnecessary computations. 
+Notably, this routing process is learned during training, enabling the model to predict the relevance of each word dynamically.
+
+The significance of MoD lies in its ability to drastically reduce computational requirements while improving model performance.
+By allowing models to allocate compute resources based on task complexity, 
+MoD opens the door to creating smarter and more efficient AI models. 
+Moreover, its applicability to various Transformer-based architectures suggests broad potential across the AI landscape. 
+Through controlled routing of compute resources, MoD offers a promising pathway towards more effective and resource-efficient AI systems.
