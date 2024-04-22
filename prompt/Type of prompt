@@ -1,0 +1,62 @@
+# From https://medium.com/@kate.ruksha/prompt-engineering-classification-of-techniques-and-prompt-tuning-6d4247b9b64c
+
+Prompt Engineering
+
+Common principle 
+1. 명확하게 해야 할 일을 명시 (쓰기, 요약, 정보 추출)
+2. 해서는 안 되는 것 말고 무엇을 해야 하는지에 대한  것을 넣습니다.
+3. 구체적이어야 함 (예: "몇 문장 안에" 대신 "2-3 문장 안에”)
+4. 프롬프트를 구조화하기 위해 태그 또는 구분 기호를 추가
+5. 필요한 경우 구조화된 출력 (JSON, HTML)을 요청
+6. 조건이 충족되었는지 모델에게 확인하도록 요청 (예: "답을 모를 경우 '정보 없음'이라고 하십시오").
+7. 모델에게 먼저 설명하고 그런 다음 답변을 제공하도록 요청 -> Example을 주는 것
+
+* Single Prompt Techniques
+    * Zero-Shot
+        * 자연어 Instructions을 이용하는 가장 간단한 prompt 기술
+            * Prompt
+                * 다음 글을 긍정, 중립, 부정으로 분류해줘 
+            * Response
+                * 중립
+    * Few-Shot
+        * Few-shot 학습의 아이디어는 모델에게 비슷한 작업을 올바른 답변과 함께 보여주는 것
+            * Prompt
+                * This is awesome! // Positive
+                * This is bad! // Negative
+                * It’s okay // Neutral
+                * What a horrible show
+            * Response
+                * Negative
+    * Chain of Thought
+        * Chain-of-Thought 프롬프팅은 중간 추론 단계를 통해 복잡한 추론 능력을 가능하게 함. 이 기술은 모델이 각 단계를 반복하고 추론할 수 있도록 하는 것을 목표
+            * Few-Shot-CoT
+                * Q-A-Q-Response 구조
+            * Zero-Shot-CoT
+                * Q-A(Let’s think step by step)-Response 구조
+    * Program Aided Language
+        * 설명을 코드와 함께 자연어로 확장하는 접근 방식
+            * Input
+                * Q: Roger has 5 tennis balls. He buys 2 more cans of tennis balls. Each can has 3 tennis balls. How many tennis balls does he have now? 
+                * A: Roger started with 5 tennis balls. tennis_balls = 5 2 cans of 3 tennis balls each is bought_balls = 2 * 3 tennis balls. The answer is answer = tennis_balls + bought_balls 
+                * Q: The bakers at the Beverly Hills Bakery baked 200 loaves of bread on Monday morning. They sold 93 loaves in the morning and 39 loaves in the afternoon. A grocery store returned 6 unsold loaves. How many loaves of bread did they have left?
+            * Output 
+                * A: The bakers started with 200 loaves loaves_baked = 200 They sold 93 in the morning and 39 in the afternoon loaves_sold_morning = 93 loaves_sold_afternoon = 39 The grocery store returned 6 loaves. loaves_returned = 6 The answer is answer = loaves_baked - loaves_sold_morning - loaves_sold_afternoon + loaves_returned >>> print(answer)
+* Multiple Prompt Techniques
+    * Voting
+        * 하나의 Prompt에 대해서 여러개의 LLM Response을 가져온 다음, LLM Responses들 중에서 최적을 답을 투표해서 답을 리턴하는 방법
+            * Self Consistency
+    * Divide and conquer
+        *  복잡한 작업을 몇 가지 프롬프트로 분할하여 수행하는 방법
+            * Directional Stimulus Prompting
+            * Generated Knowledge prompting 
+            * Prompt Chaining
+            * Least to Most prompting
+            * Chain-of-Table prompting
+    * Self-evaluation
+        * 프레임워크에 출력이 지시 사항을 충족하는지 확인하는 단계를 포함하는 것을 의미
+            * Tree of Thoughts (ToT)
+            * Reflexion
+* LLM frameworks with external tools
+    * 외부 툴 및 DB와 연결해서 prompting을 하는 방식을 의미
+        * Retrieval-Augmented Generation (RAG)
+        * ReAct
