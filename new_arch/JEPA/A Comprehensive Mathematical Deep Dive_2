@@ -1,2 +1,58 @@
 # From https://medium.com/autonomous-agents/enhancing-llms-reasoning-through-jepa-a-comprehensive-mathematical-deep-dive-301ec9c4d6f2
 # Start "Enriching LLMs with Energy-Based Frameworks" section
+# Have to check equation and explain it from https://medium.com/autonomous-agents/enhancing-llms-reasoning-through-jepa-a-comprehensive-mathematical-deep-dive-301ec9c4d6f2
+
+* Enriching LLMs with Energy-Based Frameworks
+The integration of energy-based frameworks into Large Language Models (LLMs) revolutionizes their attention mechanisms, 
+offering a mathematically intricate approach to refining the model’s focus on various parts of the input data. 
+This involves a comprehensive energy-based attention function, which integrates both intrinsic node energies and interaction energies between nodes.
+
+1. Energy-Based Attention Function
+   The energy function E_attn​(x) combines the intrinsic energies of nodes with interaction energies
+
+2. Gradient of Energy Function
+   The evolution of the attention scores is governed by the gradient of the energy function
+   Gradient descent approach ensures that the attention scores adapt to minimize the total energy of the system.
+
+3. Stochastic Dynamics for Attention Refinement
+   Introducing stochastic elements can add robustness
+
+4. Boltzmann Distribution for Attention Allocation
+   The probability distribution over attention states can be modeled using a Boltzmann distribution
+
+5. Regularization and Sparsity
+   To enforce sparsity in the attention mechanism, a regularization term R(x) can be added
+
+6. Dynamic Attention Weight Adjustment
+   The attention weights themselves can be dynamically adjusted through an optimization process
+   Incorporating these advanced mathematical constructs into LLMs enriches their attention mechanisms,
+   allowing for a more nuanced and adaptive processing of input data. 
+   This approach mirrors natural attention processes and offers potential improvements in the model’s ability to discern 
+   and focus on the most pertinent information within large and complex datasets
+
+* Advanced Training Regimes and Optimization Techniques
+  The augmentation of LLMs with JEPA’s architecture necessitates the harmonization of intricate mathematical structures, 
+  each contributing to the robustness and adaptability of the resulting model
+
+1. Loss Function Formulation in High-Dimensional Spaces
+   The loss function, L, is an intricate amalgamation of terms that encompass data fidelity, model complexity, 
+   and robustness against distributional shifts. It is articulated through an advanced functional analysis framework
+
+2. Refined Gradient Descent in Manifold Spaces
+   Gradient descent is refined with a Riemannian framework, accounting for the complex geometry inherent in the high-dimensional parameter spaces of LLMs
+
+3. Second-Order Methods and Hessian-Free Optimization
+   Incorporating second-order curvature information, we adopt a Hessian-free regime that utilizes Krylov subspace methods for efficient inversion
+
+4. Stochastic Optimization with Variance Reduction
+   To refine the stochastic optimization process, we incorporate sophisticated variance reduction strategies that leverage historical gradients within a trust-region framework
+
+* Regularization and Bayesian Optimization
+  Beyond conventional regularization, implement spectral filters and Bayesian nonparametrics to impose complex, data-driven priors on the parameter distribution
+  This optimization problem formulation is typical in machine learning and statistical modeling, where the objective is to find the best model parameters 
+  that not only fit the data well (as captured by the loss function) but also satisfy certain regularization criteria
+
+### 
+Read this sectiom from web --> Integration of JEPA with LLMs: A Harmonious Confluence
+
+
