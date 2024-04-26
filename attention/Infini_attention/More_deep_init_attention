@@ -1,0 +1,31 @@
+From https://ai.plainenglish.io/infini-attention-toward-infinite-context-llms-637ddcc75902
+
+Infini-attention seeks to overcome the challenge of forgetting previous data in long sequences, 
+offering a solution through compressive memory and linear attention.
+Compressive memory stores summarized past segments, 
+which are accessed more efficiently through linear attention,
+preventing exponential growth in computation and memory demands. 
+This approach contrasts with standard attention mechanisms,
+which suffer from quadratic increases in cost and memory with sequence length.
+
+Infini-attention combines standard dot-product attention for the current segment with linear attention 
+for accessing past memory. 
+Linear attention allows for subquadratic retrieval,
+providing a compressed yet accessible summary of past information. 
+Despite potential information loss, Infini-attention yields promising results,
+including nearly 100% retrieval rates in certain tasks.
+
+Importantly, Infini-attention implementation requires minimal adjustments to existing models 
+and can be incorporated through fine-tuning,
+enabling rapid enhancements such as the 10-fold context-window increase seen in Gemini 1.5. 
+However, the scalability of compressed memory remains a subject of analysis, 
+as fixed-sized memory may lead to forgetting important details over time.
+
+Overall, Infini-attention signifies a convergence of Transformer and recurrent models,
+potentially revolutionizing AI systems' ability to scale to vast amounts of memory,
+and hinting at the enduring relevance of Transformers in AI research.
+
+
+
+
+
