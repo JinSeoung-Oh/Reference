@@ -1,0 +1,50 @@
+# From https://ai.plainenglish.io/llama3-explained-f3667580168c
+# https://llama.meta.com/docs/get-started/
+
+LLAMA3 stands out as a significant advancement in open-source large language models (LLMs), 
+offering several key features that set it apart from its predecessors:
+
+1. Improved Performance
+   LLAMA3 delivers superior performance, both in terms of processing speed and the accuracy and relevance of its outputs. 
+   This enhancement is crucial for applications requiring high levels of understanding and responsiveness, such as interactive chatbots,
+   complex data analysis, and real-time language translation.
+
+2. Enhanced Reasoning and Coding Abilities
+   LLAMA3 exhibits advanced reasoning capabilities, allowing it to handle complex queries and provide detailed,
+   contextually appropriate responses. It also excels in coding tasks, understanding and generating code snippets effectively,
+   which is valuable for developers and programmers.
+
+3. Extended Context Window
+   LLAMA3 features an extended context window of 8,192 tokens, compared to LLAMA2's 4,096 tokens. 
+   This upgrade allows the model to consider larger blocks of text at once, 
+   leading to better understanding and coherence in longer conversations or documents.
+
+4. Focus on Data Quality
+   LLAMA3's enhancements are underpinned by a focus on data quality. Meta has expanded the training dataset and ensured 
+   it is of the highest quality through careful curation and quality assurance processes.
+
+5. Model Alignment Intuition
+   LLAMA3 is trained to prioritize useful and correct answers through preference rankings, 
+   improving its ability to select the correct answer from its reasoning pathways.
+
+6. Efficient Tokenizer
+   LLAMA3 utilizes an efficient tokenizer that condenses similar types of information into fewer tokens, 
+   enhancing the model's overall efficiency and reducing training times.
+
+7. Group Query Attention (GQA)
+   LLAMA3 employs GQA to improve how the model focuses on different parts of input data, 
+   making it more efficient and capable of capturing nuanced relationships within the data.
+
+8. LLM System Approach
+   LLAMA3 is part of an integrated LLM system, which includes various components tailored to specific applications and goals. 
+   This holistic approach ensures robustness, efficiency, and real-world applicability.
+
+In addition, LLAMA3 is expected to undergo further enhancements in the future, including longer context length, improved performance,
+a 400 billion parameter model, and support for multilingual and multimodal capabilities. 
+These developments will significantly broaden LLAMA3's applicability across different domains and make it one of the most powerful open-source LLMs available.
+
+
+
+
+
+
