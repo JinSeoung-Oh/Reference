@@ -1,0 +1,28 @@
+From https://medium.com/@alcarazanthony1/the-missing-information-guided-framework-in-rag-42a4ee4e9d88
+
+1. MIGRES (Missing Information Guided Retrieve-Extraction-Solving):
+   MIGRES focuses on retrieval-augmented generation by identifying missing information needed to answer a query. 
+   It prompts the language model (LLM) to summarize this missing information, formulates targeted queries for retrieval, 
+   and extracts relevant information from external sources. The iterative process continues until the LLM can comprehensively answer the query, 
+   minimizing the need for complex multi-hop retrieval.
+
+2. Adaptive-RAG (Adaptive Retrieval-Augmented Generation):
+   Adaptive-RAG adapts retrieval strategies based on query complexity. It classifies queries into three levels ('A', 'B', 'C') 
+   and selects appropriate strategies accordingly. For simple queries, the LLM generates answers directly; 
+   for single-hop queries, it integrates retrieved information; for multi-hop queries, it employs iterative retrieval and reasoning. 
+   This approach optimizes resource allocation based on query complexity.
+
+3. DRAGIN (Dynamic Retrieval Augmented Generation based on the real-time Information Needs of Large Language Models):
+   DRAGIN dynamically triggers retrieval based on real-time information needs during generation. 
+   It includes two components: Real-time Information Needs Detection (RIND) and Query Formulation based on Self-attention (QFS). 
+   RIND analyzes uncertainty, importance, and semantic significance to trigger retrieval, while QFS formulates effective queries 
+   using self-attention mechanism. This ensures timely retrieval of relevant information to support generation.
+
+These methodologies, when integrated, offer a comprehensive solution for optimizing retrieval in knowledge-intensive generation tasks,
+balancing efficiency, accuracy, and adaptability.
+
+
+
+
+
+
