@@ -1,22 +1,50 @@
 From https://medium.com/@alcarazanthony1/the-missing-information-guided-framework-in-rag-42a4ee4e9d88
 
 1. MIGRES (Missing Information Guided Retrieve-Extraction-Solving):
-   MIGRES focuses on retrieval-augmented generation by identifying missing information needed to answer a query. 
-   It prompts the language model (LLM) to summarize this missing information, formulates targeted queries for retrieval, 
-   and extracts relevant information from external sources. The iterative process continues until the LLM can comprehensively answer the query, 
-   minimizing the need for complex multi-hop retrieval.
+   MIGRES presents a new perspective on retrieval-augmented generation. This methodology focuses on clearly identifying the missing information 
+   needed to answer a given query. Unlike traditional approaches that rely solely on the initial query or retrieved context,
+   MIGRES leverages the language model's ability to reason about its own knowledge gaps.
+
+   MIGRES instructs the language model (LLM) to summarize the missing information in order to generate precise and focused retrieval queries. 
+   This summary of missing information drives MIGRES's iterative retrieval process.
+
+   Based on the identified missing information, MIGRES designs specific single-step queries to retrieve complementary information
+   from external knowledge sources. These queries are tailored to fill the identified knowledge gaps.
+
+   The retrieval process is followed by information extraction. At this stage, MIGRES directs the LLM to extract relevant and useful sentences
+   from the retrieved content. 
+   The extracted information is then integrated into the LLM's input, and the process iterates until the LLM can comprehensively answer the original query.
+   By focusing on filling specific knowledge gaps, MIGRES enables efficient and focused retrieval,
+   minimizing the need for indiscriminate or complex multi-step retrieval strategies.
 
 2. Adaptive-RAG (Adaptive Retrieval-Augmented Generation):
-   Adaptive-RAG adapts retrieval strategies based on query complexity. It classifies queries into three levels ('A', 'B', 'C') 
-   and selects appropriate strategies accordingly. For simple queries, the LLM generates answers directly; 
-   for single-hop queries, it integrates retrieved information; for multi-hop queries, it employs iterative retrieval and reasoning. 
-   This approach optimizes resource allocation based on query complexity.
+   Adaptive-RAG provides a complementary approach by adjusting retrieval strategies based on the predicted complexity of the input query.
+   At the core of Adaptive-RAG is a query complexity classifier, which categorizes queries into three levels: 'A', 'B', and 'C'.
+
+   Level 'A': Simple queries answerable by the LLM alone. 
+   Level 'B': Queries requiring single-step retrieval from the knowledge base.
+   Level 'C': Complex queries necessitating multi-step retrieval and reasoning.
+
+   During inference, Adaptive-RAG dynamically selects the most appropriate strategy based on the predicted complexity level. 
+   For each level, it triggers the corresponding retrieval process: direct generation for 'A', single-step retrieval for 'B', 
+   and multi-step retrieval for 'C'. This adaptive approach optimizes resource allocation based on query complexity.
 
 3. DRAGIN (Dynamic Retrieval Augmented Generation based on the real-time Information Needs of Large Language Models):
-   DRAGIN dynamically triggers retrieval based on real-time information needs during generation. 
-   It includes two components: Real-time Information Needs Detection (RIND) and Query Formulation based on Self-attention (QFS). 
-   RIND analyzes uncertainty, importance, and semantic significance to trigger retrieval, while QFS formulates effective queries 
-   using self-attention mechanism. This ensures timely retrieval of relevant information to support generation.
+   Complementing Adaptive-RAG's query complexity-based approach, DRAGIN introduces a dynamic and context-aware method 
+   for determining when and what to retrieve during generation.
+
+   DRAGIN comprises two innovative components:
+
+   -1. Real-time Information Needs Detection (RIND)
+       RIND determines the optimal timing to trigger the retrieval module during generation by analyzing the LLM's real-time information needs.
+       It quantifies uncertainty, importance, and semantic significance to compute a score for each token.
+       If the score exceeds a predefined threshold, the retrieval module is triggered.
+
+   -2. Query Formulation based on Self-attention (QFS)
+       After triggering the retrieval module, DRAGIN employs the QFS component to formulate 
+       effective queries for retrieving relevant knowledge from external sources. Unlike existing approaches, 
+       QFS utilizes the self-attention mechanism to consider the entire context, ensuring the query accurately reflects 
+       the LLM's real-time information requirements.
 
 These methodologies, when integrated, offer a comprehensive solution for optimizing retrieval in knowledge-intensive generation tasks,
 balancing efficiency, accuracy, and adaptability.
