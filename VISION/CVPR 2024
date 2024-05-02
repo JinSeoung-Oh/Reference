@@ -1,0 +1,36 @@
+From https://medium.com/voxel51/cvpr-2024-survival-guide-five-vision-language-papers-you-dont-want-to-miss-e06a67fa826a
+
+1. VisDiff
+   VisDiff offers a solution to the time-consuming task of manually comparing image sets. 
+   It automates the process by generating natural language descriptions of differences between sets,
+   aiding in understanding model behaviors and dataset analyses. 
+   The tool's two-stage methodology involves generating captions for images and then re-ranking candidate descriptions using the CLIP model,
+   focusing on accurately differentiating the two sets.
+
+2. CLAP
+   CLAP addresses the challenge of adapting large vision-language models to new tasks using only a few labeled samples. 
+   It introduces CLass-Adaptive linear Probe, reducing the need for extensive hyperparameter tuning. 
+   This method offers a practical solution for few-shot adaptation, 
+   consistently outperforming state-of-the-art efficient transfer learning approaches across various datasets and scenarios.
+
+3. CLoT
+   CLoT enhances large language models' creative problem-solving abilities by introducing the Creative Leap-of-Thought (CLoT) paradigm.
+   Leveraging the Oogiri-GO dataset, it trains models to generate humorous and creative responses, showcasing out-of-the-box thinking. 
+   The paradigm involves instruction tuning and self-refinement, prompting models to explore parallels between unrelated concepts, 
+   thus generating high-quality creative data.
+
+4. Alpha-CLIP
+   Alpha-CLIP improves the focus of image recognition systems by introducing an alpha channel layer.
+   This allows for better control over the focus on specific areas of image contents while maintaining overall visual recognition ability. 
+   The model maintains the original CLIP model's visual recognition ability while providing precise control over focusing on specific image regions,
+   resulting in superior performance across various tasks.
+
+5. mPLUG-Owl2
+   mPLUG-Owl2 integrates different modalities within a single multimodal large Language Model to enhance performance across various
+   tasks without task-specific fine-tuning. Its modularized network design promotes modality collaboration, 
+   showcasing improvements in both pure-text and multimodal scenarios. 
+   The model demonstrates adaptability and proficiency in multimodal instruction comprehension and generation,
+   achieving state-of-the-art results on various benchmarks.
+
+These advancements highlight the ongoing innovation and progress in the fields of computer vision and natural language processing, 
+offering practical solutions to complex challenges and paving the way for future developments.
