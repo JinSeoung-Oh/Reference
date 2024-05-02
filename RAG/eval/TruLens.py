@@ -1,3 +1,10 @@
+"""
+Answer Relevance: Assesses how well the Answer responds to the Question, ensuring helpfulness and relevance.
+Context Relevance: Evaluate the relevance of the Context to the Question, providing the basis for LLM answers.
+Groundedness: Examines whether the Answer aligns with the facts presented in the Context.
+Ground Truth: Compares the Answer with manually labeled Ground Truth to ensure accuracy.
+"""
+
 import numpy as np
 from trulens_eval import Tru, Feedback, TruLlama
 from trulens_eval.feedback.provider.openai import OpenAI
