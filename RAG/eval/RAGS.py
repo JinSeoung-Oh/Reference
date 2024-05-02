@@ -1,3 +1,15 @@
+"""
+Faithfulness: Evaluate the consistency between the Question and Context.
+Answer Relevance: Assesses the consistency between the Answer and Question.
+Context Precision: Checks whether Ground Truth ranks high in Context.
+Context Recall: Evaluate the consistency between Ground Truth and Context.
+Context Entities Recall: Assesses the consistency between entities in Ground Truth and Context.
+Context Relevancy: Evaluate the consistency between Question and Context.
+Answer Semantic Similarity: Assesses the semantic similarity between Answer and Ground Truth.
+Answer Correctness: Evaluate the correctness of Answer relative to Ground Truth.
+Aspect Critique: Includes evaluations of other aspects, like harmfulness, correctness, etc.
+"""
+
 import os
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_KEY"
 dir_path = "YOUR_DIR_PATH"
