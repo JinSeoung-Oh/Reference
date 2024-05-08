@@ -1,0 +1,49 @@
+# https://huggingface.co/blog/evaluation-structured-outputs
+
+The experiments conducted by the Leaderboards and Evals research team at Hugging Face revealed 
+the significant impact of prompt format on the performance of language models (LLMs). 
+Even small changes in the prompt format led to considerable variations in model performance, 
+highlighting the sensitivity of evaluation to format changes. This sensitivity poses challenges for fair and consistent model comparison and evaluation.
+
+The team explored different prompt formats for a well-known task, MMLU, using various models and computed scores using log-probability evaluation.
+They observed wide performance variations across different prompt formats, with models experiencing performance fluctuations of around 10 points. 
+In some extreme cases, such as Qwen1.5-7B, accuracy dropped significantly due to prompt variations.
+
+The experiments also demonstrated that prompt format changes could affect model ranking, 
+impacting the perception of model superiority. 
+Additionally, varying the order of few-shot examples before the prompt affected model scores, further complicating evaluation.
+
+To address these challenges, the team proposed structured generation as a potential solution.
+Structured generation involves constraining the output of an LLM to follow a specific structure using regular expressions or context-free grammars.
+Initial experiments showed that structured generation reduced variance in model performance across prompt changes and improved consistency in model ranking.
+
+Further experiments explored the impact of varying both the number and order of few-shot examples in the prompt.
+Results indicated that structured generation consistently outperformed unstructured generation across different models and tasks, 
+leading to higher accuracy and reduced variance in model performance.
+
+Overall, structured generation shows promise in improving the consistency and fairness of model evaluation. 
+Future research will explore its application across more models and tasks to validate its effectiveness further.
+
+########## What is structured generation? #############
+In this context, structured generation refers to a technique used to guide the output of language models (LLMs)
+by imposing a specific structure or format on the generated text.
+Structured generation involves constraining the output of an LLM to adhere to predefined rules, such as regular expressions or context-free grammars.
+
+For example, in the experiments described, structured generation was achieved by defining regular expressions that specify 
+the desired structure of the generated text. 
+This structure could include requirements such as the model providing a certain type of information within a specified character range,
+followed by a particular format for presenting the answer.
+
+By imposing such constraints on the output, structured generation aims to ensure that the generated text
+meets certain criteria or follows a particular format consistently. 
+This approach can be beneficial in tasks where output consistency and adherence to specific formatting conventions are essential, 
+such as question-answering or generating structured data formats like JSON.
+
+In the experiments discussed, structured generation was found to reduce variance in model performance across different prompt formats,
+leading to more consistent evaluation results.
+
+
+
+
+
+
