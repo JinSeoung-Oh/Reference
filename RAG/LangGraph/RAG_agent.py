@@ -1,5 +1,3 @@
-## From https://medium.com/the-ai-forum/build-a-reliable-rag-agent-using-langgraph-2694d55995cd
-
 ! pip install -U langchain-nomic langchain_community tiktoken langchainhub chromadb langchain langgraph tavily-python gpt4all fastembed langchain-groq 
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
