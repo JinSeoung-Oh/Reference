@@ -1,0 +1,43 @@
+# From https://medium.com/gitconnected/kolmogorov-arnold-networks-might-change-ai-as-we-know-it-forever-8b6ffdfe9eae
+# From https://kindxiaoming.github.io/pykan/
+# From https://github.com/KindXiaoming/pykan
+
+The KAN (Kolmogorov-Arnold Neural Network) architecture is a novel approach inspired by the Kolmogorov-Arnold representation theorem.
+This architecture offers a unique way of representing and learning complex multivariate functions. 
+
+1. Basic Structure
+   At its core, the KAN architecture resembles the Kolmogorov-Arnold representation theorem equation, consisting of two layers.
+   The first layer applies a set of univariate functions to transform each input.
+   The second layer aggregates these transformed inputs to generate the final prediction.
+   
+2. Expansion for Real-World Functions
+   While the basic form comprises two layers, KANs are expanded to handle complex real-world functions.
+   This expansion involves incorporating multiple layers, similar to Multi-Layer Perceptrons (MLPs), where each layer's output serves as the input to the next layer.
+   
+3. Unique Edge Functions
+   In KANs, the traditional weight parameters associated with edges are replaced by learnable univariable functions.
+   These functions are parameterized using B-Spline, a mathematical tool that enables the flexible manipulation of local curve segments without affecting the overall curve.
+   
+4. Node Operations
+   Unlike MLPs, where nodes typically apply activation functions, nodes in KANs solely perform the summation of incoming signals.
+   This simplifies the architecture by eliminating the need for activation functions at the node level.
+   
+5. Differentiability and Training
+   All operations within the KAN architecture are designed to be differentiable.
+   This allows for the use of backpropagation with conventional loss functions during training.
+   The differentiability ensures that the network can be trained effectively using gradient-based optimization methods.
+   
+6. Parameter Efficiency
+   KANs exhibit higher parameter efficiency compared to MLPs.
+   By replacing weight matrices with learnable univariable functions, KANs achieve similar or superior performance with fewer parameters.
+   
+7. Interpretability
+   KANs offer high interpretability, allowing easy interaction with humans.
+   The replacement of weight matrices with learnable functions enables individual examination of how input features are transformed at each step of the training process.
+
+In essence, the KAN neural network architecture provides a novel framework for representing and learning complex functions efficiently and effectively.
+Its unique design, incorporating learnable univariate functions and simplified node operations, offers advantages in parameter efficiency,
+interpretability, and scalability over traditional MLPs.
+
+
+
