@@ -1,0 +1,21 @@
+## From https://medium.com/@florian_algo/main-stages-of-auto-regressive-decoding-for-llm-inference-915d6e0a4418
+
+Two primary stages of auto-regressive decoding for Large Language Model (LLM) inference:
+
+1. Prefill Stage
+   During this stage, the LLM processes the input prompt to compute and cache intermediate states (keys and values) for each Transformer layer.
+   These cached values, known as the key-value cache (KV cache), are essential for generating the initial token.
+
+2. Decoding Stage
+   In this sequential stage, the LLM generates output tokens one by one, utilizing the previously generated token
+   to produce the next one until a stopping condition is met. The KV cache is used to avoid recalculating intermediate states for each token.
+
+Key points include:
+
+1. The prefill stage is highly parallelized and efficient, utilizing GPU capabilities for matrix operations.
+2. The decoding stage updates the KV cache and computes the output of each layer sequentially.
+3. Dividing the process into two stages minimizes unnecessary computation, as the prefill stage only requires caching once,    
+   while the decoding stage focuses on updating and looking up the cache.
+4. The article emphasizes the importance of efficient caching mechanisms in improving LLM inference performance.
+5. The division into two stages allows for more streamlined and efficient inference, optimizing computational resources and improving overall performance. 
+   Additionally, the article invites feedback and corrections from readers to ensure accuracy and completeness.
