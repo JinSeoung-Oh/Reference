@@ -1,0 +1,22 @@
+# https://www.kaggle.com/discussions/general/497383
+# https://arxiv.org/pdf/2403.07691
+
+ORPO (Odds Ratio Preference Optimization) is an innovative fine-tuning technique 
+that integrates standard supervised fine-tuning and preference alignment stages into a unified process, 
+thus saving computational resources and training time.
+
+Empirical data demonstrate ORPO's superiority over competing alignment algorithms across various model sizes and benchmarks.
+ORPO revolutionizes the typical pipeline for aligning and training Large Language Models 
+(LLMs) for Reinforcement Learning with Human Feedback (RLHF).
+It operates by combining supervised fine-tuning and alignment into a single goal, resulting in unprecedented results with simplicity and efficiency.
+
+The method involves creating a paired preference dataset (selected/rejected), 
+which comprises instances where one response is preferred over another, and ensuring the exclusion of situations 
+where the chosen and rejected responses are identical or one is empty.
+
+A pre-trained LLM, such as Llama-2 or Mistral, is then selected, and the base model is trained directly on the preference dataset
+using the ORPO objective, eliminating the need for an additional supervised fine-tuning step.
+Key takeaways include ORPO's model-free and memory-friendly nature, providing a seamless training experience.
+Instruction tuning and preference alignment are critical for modifying LLMs to suit specific activities.
+ORPO fine-tuning significantly enhances the base model's performance across all benchmarks.
+The rise of high-quality open-weight models underscores the importance of fine-tuning for achieving optimal performance in particular use cases.
