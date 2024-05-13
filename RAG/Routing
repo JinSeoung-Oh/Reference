@@ -1,0 +1,124 @@
+## from https://towardsdatascience.com/routing-in-rag-driven-applications-a685460a7220
+
+Routing in Retrieval Augmented Generation (RAG) applications, where the control flow is directed based on the intent of the user's query. 
+Here's a breakdown of key points and different types of routers:
+
+Need for Routing:
+1. Routers are essential in RAG applications to direct the flow of a user's query based on its intent, 
+   which could come from various data sources and require different types of interactions.
+2. The diverse data sources may include reports, documents, images, databases, and third-party systems, each requiring specific handling.
+
+Routing Strategies:
+
+1. Routers are akin to If/Else statements used to guide the control flow of queries.
+2. They make decisions based on natural language input, which poses challenges due to the non-deterministic nature of language understanding.
+3. Routing decisions often rely on machine learning algorithms or Large Language Models (LLMs).
+
+Types of Natural Language Routers:
+
+1. LLM Routers: Utilize LLMs to select a route based on the query.
+   - LLM Completion Router: Returns a single word describing the query's intent, which is used to control the application flow.
+   - LLM Function Calling Router: Selects a route based on function calls within the LLM.
+
+"""
+# Example of Natural Language Routers 
+from langchain_anthropic import ChatAnthropic
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import PromptTemplate
+
+# Set up the LLM Chain to return a single word based on the query,
+# and based on a list of words we provide to it in the prompt template
+llm_completion_select_route_chain = (
+        PromptTemplate.from_template("""
+Given the user question below, classify it as either
+being about `LangChain`, `Anthropic`, or `Other`.
+
+Do not respond with more than one word.
+
+<question>
+{question}
+</question>
+
+Classification:"""
+                                     )
+        | ChatAnthropic(model_name="claude-3-haiku")
+        | StrOutputParser()
+)
+
+
+# We setup an IF/Else condition to route the query to the correct chain 
+# based on the LLM completion call above
+def route_to_chain(route_name):
+    if "anthropic" == route_name.lower():
+        return anthropic_chain
+    elif "langchain" == route_name.lower():
+        return langchain_chain
+    else:
+        return general_chain
+
+...
+
+# Later on in the application, we can use the response from the LLM
+# completion chain to control (i.e route) the flow of the application 
+# to the correct chain via the route_to_chain method we created
+route_name = llm_completion_select_route_chain.invoke(user_query)
+chain = route_to_chain(route_name)
+chain.invoke(user_query)
+"""
+
+2. Semantic Router: Leverages embeddings and similarity searches to match queries with predefined routes.
+   - Zero Shot Classification Router: Employs a Zero-Shot Classification model to assign labels to text queries.
+   - Language Classification Router: Identifies the language of the query to route it appropriately.
+   - Keyword Router: Matches keywords between the query and predefined routes to select a route.
+   - Logical Routers: Use logic checks against variables to determine routing, without analyzing natural language intent.
+
+"""
+# Example of semantic_router
+from semantic_router import Route
+
+# we could use this as a guide for our chatbot to avoid political
+# conversations
+politics = Route(
+    name="politics",
+    utterances=[
+        "isn't politics the best thing ever",
+        "why don't you tell me about your political opinions",
+        "don't you just love the president",
+        "they're going to destroy this country!",
+        "they will save the country!",
+    ],
+)
+
+# this could be used as an indicator to our chatbot to switch to a more
+# conversational prompt
+chitchat = Route(
+    name="chitchat",
+    utterances=[
+        "how's the weather today?",
+        "how are things going?",
+        "lovely weather today",
+        "the weather is horrendous",
+        "let's go to the chippy",
+    ],
+)
+
+# we place both of our decisions together into single list
+routes = [politics, chitchat]
+
+encoder = OpenAIEncoder()
+
+from semantic_router.layer import RouteLayer
+
+route_layer = RouteLayer(encoder=encoder, routes=routes)
+
+route_layer("don't you love politics?").name
+# -> 'politics'
+"""
+
+Comparison with Agents:
+
+While routers and agents share similarities in routing tasks, routers primarily focus on directing tasks to the correct 
+place based on predefined rules, while agents handle more complex logic and processing related to the tasks.
+
+Overall, effective routing is crucial for creating powerful and versatile RAG applications 
+that can efficiently handle diverse user queries and data sources.
