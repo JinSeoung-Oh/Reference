@@ -1,0 +1,60 @@
+# From https://towardsdatascience.com/kolmogorov-arnold-networks-the-latest-advance-in-neural-networks-simply-explained-f083cf994a85
+
+The Kolmogorov-Arnold Network (KAN) sounds like a fascinating innovation in the realm of neural networks. 
+Its departure from the traditional Multi-Layer Perceptron (MLP) architecture by employing B-splines 
+for representing non-linearities offers a promising alternative.
+Interpretability: One of the major challenges with deep learning models, particularly MLPs, is their lack of interpretability. The KAN architecture addresses this by employing B-splines, which offer a more transparent representation of the learned functions. This could be immensely valuable in domains where understanding the model's decision-making process is critical, such as healthcare or finance.
+
+1. Parameter Efficiency
+   By eschewing weight matrices and biases in favor of 1-dimensional non-linearities fitted to the data, KANs aim to achieve better parameter efficiency. 
+   This could lead to more compact models that are easier to train and deploy, especially in resource-constrained environments like edge devices or mobile applications.
+
+2. Generalization and Overfitting
+   The claim that KANs offer better generalizability and are less prone to overfitting compared to MLPs is intriguing. 
+   If substantiated, this could address a longstanding issue in deep learning, where models often struggle to generalize well to unseen data, 
+   particularly in scenarios with limited training samples.
+
+3. Training and Optimization
+   The use of LBFGS as a second-order optimization method for training KANs is notable. 
+   While first-order methods like Adam are commonly used in deep learning, second-order methods offer potential advantages in terms of convergence speed and robustness.
+
+4. Flakiness and Hyperparameters
+   It's important to acknowledge the inherent flakiness associated with novel architectures like KANs. 
+   The sensitivity to hyperparameters and the potential for divergent results underscore the need for rigorous experimentation and tuning. 
+   As the field matures, best practices for parameter selection and optimization will likely emerge.
+
+5. Comparison with Symbolic Regression
+   The comparison with symbolic regression, particularly the PySR library, is illuminating.
+   While both approaches aim to infer functional forms from data, KANs appear to offer advantages in terms of stability and reproducibility. 
+   However, further empirical evaluation and benchmarking against established methods will be necessary to fully assess their efficacy.
+
+Overall, the emergence of KANs represents an exciting development in the field of neural network architecture. 
+By challenging conventional wisdom and exploring new paradigms, researchers have the opportunity to push the boundaries of 
+what is possible in machine learning and artificial intelligence.
+
+** B-splines
+B-splines play a central role in the Kolmogorov-Arnold Network (KAN) architecture and are instrumental in its unique approach to representing non-linearities.
+
+1. Local Representation
+   B-splines offer a local representation of non-linear functions, meaning that adjustments to one part of the curve do not significantly affect other parts. 
+   This property is valuable in capturing complex relationships within the data while maintaining stability and smoothness.
+
+2. Smoothness and Continuity
+   Unlike higher-order polynomials, which can become overly wiggly and lack smoothness, B-splines ensure both smoothness and continuity. 
+   By interpolating between data points using piecewise polynomials, B-splines provide a more stable and visually appealing representation.
+
+3. Noise Tolerance
+   In machine learning applications, where data may contain noise or outliers, B-splines offer robustness by not necessarily passing through every data point. 
+   This allows the model to focus on capturing the underlying trends and patterns in the data without being overly sensitive to noise.
+
+4. Expressiveness and Flexibility
+   Despite their local nature, B-splines are highly expressive and can approximate a wide range of functions. 
+   By combining multiple B-splines, KANs can construct complex functions that accurately represent the underlying data distribution while remaining interpretable.
+
+5. Parameter Efficiency
+   B-splines provide a parameter-efficient way to represent non-linearities compared to traditional MLP architectures, 
+  which rely on weight matrices and biases. This can lead to more compact models with fewer parameters, making them easier to train and interpret.
+
+Overall, B-splines serve as the backbone of the KAN architecture, enabling it to achieve its goals of interpretability, parameter efficiency, and improved generalization. 
+Their unique properties make them well-suited for applications where understanding the learned model and capturing complex relationships in the data are paramount.
+
