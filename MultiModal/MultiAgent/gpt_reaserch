@@ -1,0 +1,21 @@
+# From https://medium.com/@assafelovic/how-to-build-the-ultimate-ai-automation-with-multi-agent-collaboration-ed61a1ea8f3b
+# Check https://pypi.org/project/gpt-researcher/
+
+The text discusses the rapid evolution of AI agent development, particularly focusing on the advancements seen since the release of GPT Researcher.
+It highlights the transition from simple prompting methods to more complex agent workflows. 
+Andrew Ng emphasizes the significance of AI agent workflows for driving substantial progress in AI, possibly surpassing even the next generation of foundation models.
+
+LangGraph is introduced as a tool for creating agent and multi-agent flows, offering controllability and flexibility in designing custom agents. 
+The article explains the architecture of an autonomous research agent team utilizing LangGraph, 
+consisting of various specialized agents such as Chief Editor, GPT Researcher, Editor, Reviewer, Reviser, Writer, and Publisher.
+
+It details the workflow of the research process, including stages like planning, data collection, review, writing, and publication,
+and how LangGraph facilitates the coordination of these tasks. The concept of state management in LangGraph is highlighted,
+enabling dynamic responses based on the evolving context of the interaction.
+
+The article also discusses the implementation of a parallelization technique within LangGraph to handle multiple research tasks simultaneously, 
+ensuring efficiency and consistency in the final data report. 
+Additionally, it provides insights into initializing the graph and defining conditional edges for managing parallel workflows effectively.
+
+Lastly, it outlines the next steps for optimizing AI experiences, such as incorporating human intervention for enhanced quality and support for researching 
+both web and local data sources. It also emphasizes the importance of improving the quality of retrieved sources and ensuring the final report follows an optimal storyline.
