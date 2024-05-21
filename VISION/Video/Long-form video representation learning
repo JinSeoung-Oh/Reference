@@ -1,0 +1,81 @@
+# From https://towardsdatascience.com/long-form-video-representation-learning-part-1-video-as-graphs-c55b609d9100
+
+Part 1: Video as graphs <-- interesting...
+
+1. Problem Recognition and Goal
+   -1. Existing Limitations
+     Traditional video architectures face computation and memory bottlenecks after processing only a few seconds of video content.
+   -2. Objective
+     The goal is to develop a model capable of efficiently running on long videos and accurately understanding them over extended durations.
+
+2. Need for Long-Form Reasoning
+   -1. Success of Image-Based Models
+     After the significant success of image understanding tasks with deep learning models such as CNNs and Transformers, 
+     extending these capabilities to video understanding became the natural next step.
+   -2. Requirements
+     Developing effective video understanding models requires two key components
+     - Large-scale video datasets
+     - Efficient learnable backbones for video feature extraction.
+   -3. Challenges
+     Creating fine-grained and consistent annotations for videos is challenging, leading to the easier approach of annotating at the whole video level. 
+     Consequently, many models use sampled frames instead of processing all frames to manage memory constraints.
+
+3. Limitations of Existing Models
+   -1. Current Approach
+     Most models take short video clips as input, make predictions, and apply temporal smoothing, rather than analyzing the video in its entirety.
+   -2. Spatial Shortcut Phenomenon
+     These models often rely on spatial context and background information rather than learning to reason over long temporal sequences. 
+     This limits their performance on tasks requiring actual temporal reasoning, such as action forecasting, video question-answering, and episodic memory tasks.
+
+4. Proposed Approach: Spatio-Temporal Graphs Learning (SPELL)
+   -1. Graph Representation
+     The method proposes converting a video into a temporal graph where each frame is a node. 
+     Edges between nodes represent temporal or spatial relationships.
+   -2. Handling Long Videos
+     This approach enables the model to process long videos by constructing sparse graphs, thereby avoiding memory and computation bottlenecks.
+
+5. Applications
+   -1. Video Summarization
+     - Framework
+       The proposed framework, VideoSAGE, converts a video into a graph where nodes represent frames. 
+       By imposing sparsity, only pairs of nodes within a specified temporal distance are connected.
+     - Task
+       Video summarization is formulated as a binary node classification problem to determine which frames should be included in the summary.
+     - Results
+       Experiments on SumMe and TVSum datasets demonstrate the model's effectiveness and efficiency compared to state-of-the-art methods.
+
+6. Action Segmentation
+   - Approach
+     This problem is also posed as a node classification task in a sparse graph. Using a Graph Attention Network (GAT) layer,
+     the model refines frame-level action predictions.
+   - Results
+     On the 50-Salads dataset, the model shows improved performance for action segmentation tasks.
+
+7. Active Speaker Detection:
+   - Graph Construction
+     The framework constructs a multimodal graph from audio-visual input, with nodes representing individuals in frames and edges representing their interactions.
+   - Task
+     The active speaker detection task is formulated as a binary node classification problem.
+  - Results
+    On the AVA-ActiveSpeaker dataset, the model outperforms previous state-of-the-art approaches with significantly lower hardware resource requirements.
+
+8. Additional Insights:
+   - Graph Construction
+     The graphs are designed to be sparse yet capable of modeling long-term dependencies, reducing memory and computation needs.
+   - Temporal Context
+     The method can reason over extended temporal windows, significantly longer than those used in transformer-based models,
+     providing better performance with lower computational costs.
+   - Open Source Library
+     The GraVi-T library supports various video understanding applications, including active speaker detection, action detection, 
+     temporal segmentation, and video summarization.
+
+9. Conclusion
+   This approach addresses the limitations of traditional video models by enabling long-form reasoning through spatio-temporal graph representations. 
+   This method enhances the model's ability to understand videos over extended periods, improving performance in various tasks such as action forecasting,
+   video question-answering, and episodic memory tasks.
+
+
+
+
+
+
