@@ -1,0 +1,70 @@
+## From https://ai.plainenglish.io/top-9-open-source-text-to-speech-tts-models-7ac572cfc7d4
+
+## What is TTS (Text-to-Speech)?
+   A computer program that converts written text into spoken words.
+   Uses natural language processing to understand the text and convert it into speech that sounds like a person talking.
+   Used in smartphone assistants, GPS navigation, and tools that help people with disabilities.
+
+
+# Open-Source TTS Engines:
+
+1. MaryTTS:
+   - Adaptability: Modular design allows for building custom TTS systems and creating new voices using recordings.
+   - Components:
+        Markup Language Parser: Deciphers special codes in the text, providing instructions for the system.
+        Processor: Prepares the parsed text for conversion into speech instructions.
+        Synthesizer: Generates the actual spoken output, adding natural-sounding qualities like pitch and emphasis.
+
+2. eSpeak:
+   - Pros:
+      User-friendly.
+      Supports many languages and voices.
+      Compact size.
+      Compatible with various operating systems (Windows, Linux, macOS, Android).
+   - Cons:
+      Lacks advanced features and customization options.
+      Written in C, which might require programming knowledge for advanced use.
+
+3. Festival:
+   Developed by the University of Edinburgh.
+   - Features:
+       Comprehensive framework for building and experimenting with speech synthesis systems.
+       Valuable for researchers and those interested in learning about TTS.
+       Uses a structure resembling a tree with connected nodes, each representing different elements contributing to the final spoken output.
+
+4. Mimic:
+   Developed by Mycroft AI.
+   - Approaches:
+       Mimic 1: Builds upon the well-established Festival Speech Synthesis System.
+       Mimic 2: Uses deep neural networks for voice synthesis, resulting in more realistic speech. 
+   - Pros:
+       Generates natural-sounding speech.
+       Supports various languages.
+   - Cons:
+       Limited documentation available.
+
+5. Mozilla TTS:
+   Utilizes deep learning, specifically sequence-to-sequence models, for natural and human-like speech generation.
+   - Advantages:
+       Analyzes and replicates the complexities of human speech patterns more accurately.
+       Smoother, more nuanced, and less robotic speech output.
+       Open-source and free, fostering collaboration and innovation.
+
+6. Tacotron 2:
+   Developed by NVIDIA, this is a neural network model architecture for generating natural speech.
+   - Pros:
+       Synthesize speech using raw transcripts without additional prosody information.
+   - Cons:
+       Requires some technical knowledge to implement.
+
+7. GTTS (Google Text-to-Speech):
+   Offers a simple interface for Python users.
+   Not actively maintained by Google, but still useful for basic needs with decent language support.
+
+8. NVidia NeMo TTS:
+   Leverages deep learning for high-quality speech generation.
+   Backed by NVIDIA, indicating robust support.
+   - Cons:
+       Might have steeper setup requirements due to its use of deep learning models.
+
+
