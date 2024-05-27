@@ -1,0 +1,28 @@
+## From https://medium.com/@bnjmn_marie/supra-turn-a-transformer-model-into-an-rnn-model-392d85160925
+
+Attention-free models such as Mamba and RWKV are much more efficient for inference. 
+However, they also have a reputation for being extremely difficult to train.
+For instance, for The Salt, I explored and trained Jamba, which is a hybrid model using Mamba, and found that it learns extremely slowly during fine-tuning:
+
+Jamba: The New Hybrid Transformer/Mamba
+Faster and better than the transformer but more difficult to train
+thesalt.substack.com
+
+With Scalable UPtraining for Recurrent Attention (SUPRA), training attention-free models is much simpler. 
+SUPRA doesn’t pre-train a model from scratch but relies on a transformer model to initialize the training.
+
+
+SUPRA turns the model into an RNN and “up-trains” it on new tokens. 
+The authors of SUPRA applied the technique to Mistral 7B to turn it into an RNN followed by up-training on 100B tokens. 
+The resulting model significantly outperforms RWKV-5, an attention-free model trained on many more tokens.
+
+
+They released a Mistral RNN made with SUPRA on the Hugging Face Hub:
+
+TRI-ML/mistral-supra
+The code to turn a Transformer model into an RNN is available here:
+
+GitHub: TRI-ML/linear_open_lm
+The method is described in this paper:
+
+Linearizing Large Language Models
