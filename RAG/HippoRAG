@@ -1,0 +1,82 @@
+## From https://github.com/OSU-NLP-Group/HippoRAG
+## https://arxiv.org/abs/2405.14831
+
+The mammalian brain is capable of storing a large amount of information, 
+and large language models (LLMs) can also store a significant amount of knowledge within their parameters. 
+However, unlike the brain, LLMs struggle to continuously integrate new experiences without losing previously acquired knowledge.
+One proposed solution to this problem is retrieval-augmented generation (RAG). 
+RAG acts as an external memory that allows the model to retrieve new information even after its training period has ended.
+
+However, RAG has limitations. It retrieves chunks of text as context for the model,
+but this method is inefficient for integrating knowledge, especially when the new information spans multiple passages. 
+Each chunk has precise boundaries, and important information may be scattered across different chunks. 
+This issue is particularly critical in fields like medicine, law, and science, where comprehensive integration of dispersed information is necessary.
+Multi-step processes can partly address this, involving the retrieval of documents and conducting reasoning across them.
+
+To address these limitations, researchers at Stanford proposed HippoRAG, inspired by the human brain's memory system.
+In the human brain, the neocortex represents current concepts, while the hippocampus acts as an index, connecting these concepts. 
+The hippocampus encodes sequences of events and links them, facilitating inferential associations across different experiences.
+
+HippoRAG applies this concept by using a knowledge graph (KG) as an artificial hippocampal index. 
+This allows for reasoning over the KG, identifying relevant subgraphs. The authors used instruction-tuned LLMs to extract KG triples, 
+which are entities and relationships extracted from the text. 
+Dense fine-tuned encoders help create additional edges between similar but not identical entities, enhancing reasoning.
+
+During retrieval, salient entities (query-named entities) are extracted from the query. 
+Retrieval encoders compute the similarity between query nodes and KG nodes. 
+Personalized PageRank (PPR) is then used to rank these nodes based on their relevance to the query.
+This method allows the system to find and integrate necessary information from the corpus, providing context for the LLM.
+
+The researchers tested HippoRAG on multi-hop reasoning tasks, where multiple steps are needed to answer a question. 
+They compared HippoRAG to other retrieval methods, using GPT-3.5 for entity and relationship extraction and ColBERT for node similarity calculations. 
+HippoRAG outperformed single-step retrieval approaches and demonstrated better multi-step retrieval performance,
+translating to improved performance in downstream tasks like question answering.
+
+Ablation studies highlighted the importance of LLM flexibility for entity and relationship extraction.
+Interestingly, the smaller LLaMA 8B model outperformed the larger 70B version in this task, contrary to typical expectations.
+
+The authors also found that HippoRAG efficiently answered path-finding multi-hop questions,
+which require identifying connections between entities across multiple paths. This approach leverages the KG to explore and find optimal paths,
+ensuring comprehensive information retrieval.
+
+While HippoRAG addresses some limitations of RAG, it still has areas for improvement.
+The use of off-the-shelf components without additional training introduces errors, which could be mitigated through fine-tuning. 
+Additionally, improving the graph search algorithm, potentially replacing PPR with a more sophisticated KG embedding search,
+could enhance performance. Future developments might include hybrid systems that combine the strengths of RAG and KG 
+for more effective information retrieval and reasoning.
+
+##################################################################################################################
+The HippoRAG system is designed to enhance the retrieval-augmented generation (RAG) systems 
+by mimicking the way mammalian brains manage long-term memory.
+Here’s a detailed explanation of how HippoRAG incorporates principles from neurobiology to improve LLMs:
+
+1. Human Long-Term Memory Components
+   The model draws inspiration from three key components of human long-term memory
+   the neocortex, the hippocampus, and the parahippocampal regions (PHR).
+
+   - Neocortex: In the HippoRAG system, the LLM serves as the neocortex, responsible for processing and understanding the information.
+   - Hippocampus: The knowledge graph (KG) functions as the artificial hippocampus, indexing and linking memory units.
+   - Parahippocampal Regions (PHR): These are simulated by retrieval encoders that handle the detection of synonymy and ensure the connections 
+                                    between related concepts.
+
+2. Offline Indexing: 
+   The system processes passages into KG triples (subject-predicate-object relationships) and integrates them into the hippocampal index.
+   The PHR identifies synonymous relationships between entities, enhancing the interconnectedness of the knowledge stored.
+
+3. Online Retrieval: 
+   When a query is presented, named entities are extracted and encoded. 
+   The retrieval process involves finding nodes in the KG with the highest similarity to these entities using cosine similarity. 
+   The Personalized PageRank (PPR) algorithm is then applied to distribute probabilities across the KG nodes,
+   prioritizing those most relevant to the query.
+
+4. Node Specificity: 
+   To improve the retrieval process, HippoRAG introduces the concept of node specificity, which is analogous to the inverse document frequency (IDF) 
+   in traditional information retrieval. This helps the system focus on more informative nodes by modulating their probabilities during retrieval.
+
+5. Multi-Hop Reasoning:
+   The system is evaluated using benchmarks that require multi-hop reasoning, where answers depend on integrating information across multiple passages. 
+   HippoRAG has shown superior performance in these tasks compared to other retrieval methods,
+   demonstrating its effectiveness in handling complex queries.
+
+In summary, HippoRAG enhances RAG systems by creating a more interconnected and contextually aware retrieval process, 
+inspired by the structure and function of human memory.
