@@ -1,0 +1,57 @@
+## From https://medium.com/@sammokhtari/bonito-generating-instruction-tuning-datasets-for-seamless-learning-f57aca21cc39
+
+1. Introduction to Bonito
+   -1. Purpose
+       Bonito helps convert regular text into specialized training exercises for language models, allowing these models
+       to adapt to specific needs without prior training on the data.
+   -2. Traditional Methods
+       Typically involve time-consuming annotation or self-supervision, requiring extensive training.
+   -3. Bonito's Approach
+       Automates the creation of instruction tuning datasets through conditional task generation, converting unannotated text into task-specific training datasets.
+
+2. How Bonito Works
+   -1. Open-Source Model
+       Bonito is an open-source model designed for conditional task generation.
+   -2. Meta-Templates
+       Uses meta-templates from existing datasets like P3 to generate synthetic tasks for specialized domains.
+   -3. CTGA Dataset
+       Trained on the CTGA (Conditional Task Generation with Attributes) dataset, containing 1.65 million examples derived from P3 templates.
+   -4. Training Process
+       Bonito fine-tunes the Mistral-7B model on the CTGA dataset by optimizing cross-entropy loss over output tokens.
+
+3. Experiment Setup and Results
+   -1. Target Tasks
+       Yes-No Question Answering (YNQA), Extractive Question Answering (ExQA), and Natural Language Inference (NLI).
+   -2. Datasets Used
+       PubMedQA, Privacy Policy QA, SquadShifts (NYT, Amazon, Reddit), Contract-NLI, and Vitamin C.
+   -3. Baselines
+       Compared against zero-shot and self-supervised baseline (TAPT). Zero-shot baseline prompts the model without unannotated text, 
+       while TAPT continues pretraining on unannotated text.
+   -4. Models Adapted
+       Mistral-7B, Llama 2 7B, Mistral-7B-Instruct-v0.2, and Mistral-7BP3.
+   -5. Fine-Tuning
+       Language models fine-tuned on supervision sources, TAPT, and Bonito.
+
+4. Key Findings
+   -1. Performance Improvement
+       Bonito significantly outperformed zero-shot and TAPT baselines. 
+       It improved zero-shot performance by an average of 37.7 F1 points across Mistral-7B and Llama 2.
+   -2. Instruction Tuning
+       Enhanced instruction-tuned models by an average of 22.1 F1 points. TAPT reduced average performance by 0.8 F1 points.
+   -3. Domain Knowledge Impact
+       Further training on synthetic instructions improved task-specialized models, showing the benefit of unannotated text in specialized domains.
+   -4. Training Dataset Size
+       Performance generally improved with more training steps, although smaller training steps showed fluctuations.
+
+5. Analysis and Insights
+   -1. Domain Knowledge
+       Models benefit from domain-specific synthetic instructions, enhancing performance in specialized tasks.
+   -2. Training Size
+       Larger datasets and more training steps typically lead to better performance.
+   -3. Versatility
+       Bonito’s impact extends to various datasets and task types, highlighting its flexibility and effectiveness.
+
+6. Conclusion
+   Bonito offers a transformative approach to creating specialized training datasets, enabling language models to adapt to specific tasks efficiently.
+   By automating instruction tuning dataset generation, it significantly enhances performance across various models and tasks, 
+   outperforming traditional methods and baselines.
