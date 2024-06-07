@@ -1,0 +1,83 @@
+## From https://machine-learning-made-simple.medium.com/revolutionizing-ai-embeddings-with-geometry-5cf00f8817d3
+
+1. Current Research Flaws in LLM Development
+   -1. Increased Computational Costs
+       Many current developments improve performance at the cost of significantly increased computational resources for training and inference.
+   -2. Fragility
+       These improvements are often less stable than expected, failing to provide consistent performance enhancements across different tasks and benchmarks.
+   -3. Lack of Innovation
+       A focus on minor tweaks for the sake of publication results in incremental improvements rather than addressing fundamental issues, 
+       leading to the perception that LLMs are hitting a developmental wall.
+
+2. Exploring Angular Embeddings (AE)
+   Angular Embeddings (AE) introduce a novel approach to improving embeddings by focusing on angles rather than magnitudes.
+   This method can reduce dimensionality more effectively and is robust to outliers.
+
+3. Importance of Embeddings in NLP
+   -1. Efficiency
+       Reducing dimensionality lowers computational costs.
+   -2. Generalization
+       Embeddings help models handle unseen data by capturing structural similarities.
+   -3. Improved Performance
+       High-quality embeddings lead to breakthroughs in various NLP tasks.
+
+4. Challenges with Current Embeddings:
+   -1. Sensitivity to Outliers: Traditional methods are highly susceptible to noise and erroneous data.
+   -2. Limited Relation Modeling: Current embeddings struggle to capture complex relationships in unstructured text.
+   -3. Inconsistency: Similarity and dissimilarity comparisons vary across domains, disrupting global rankings.
+   -4. Computational Cost: Sophisticated representations require expensive training processes.
+########################################################################################################################
+5. Next-Generation Embeddings
+   -1. Complex Geometry
+       The complex plane offers a richer space to capture nuanced relationships and handle outliers. 
+       This is particularly useful for addressing issues like saturation zones in cosine similarity.
+   -2. Orthogonality
+       Ensuring embedding dimensions are independent of each other allows each dimension to represent distinct features, 
+       avoiding unintended correlations and improving representation of complex relationships.
+   -3. Contrastive Learning
+       Encourages similar examples to have similar embeddings and distinct embeddings for dissimilar examples, leveraging negative samples for better representation.
+
+6. Applications and Techniques
+   -1. Angular Embeddings (AE)
+       Utilizes complex domain quadratic criteria for robust ordering, sensitive to small errors but robust to large outliers. 
+       AE represents pairwise comparisons as complex numbers within the unit circle, capturing both the size of differences and the confidence in those comparisons.
+   -2. RotatE Model
+       Uses rotations in complex vector space for knowledge graph embeddings. This method captures relationships by rotating head entity embeddings 
+       to obtain tail entity embeddings, allowing efficient representation of relational patterns.
+
+7. Complex Embeddings Benefits
+   -1. Increased Representational Capacity: Complex numbers have both real and imaginary components, allowing more expressive embeddings.
+   -2. Complex Geometry: Unique geometry of complex spaces enables faster convergence and avoids local minima, improving training efficiency.
+   -3. Robust Features: Complex embeddings capture more robust features, enhancing the overall robustness of the model.
+
+8. Optimizing Angles
+   -1. Cosine Similarity Limitation
+       Saturation zones in cosine similarity hinder the learning of subtle semantic distinctions due to vanishing gradients during optimization.
+   -2. AnglE Approach
+       Focuses on optimizing angle differences in complex space, mitigating the negative impact of cosine similarity's saturation zones. 
+       By dividing text embeddings into real and imaginary parts and computing angle differences, AnglE enhances learning and performance.
+
+9. Performance Improvements
+   -1. AnglE-BERT and AnglE-LLaMA
+       These models consistently outperform baseline models like SimCSE-BERT and SimCSE-LLaMA, showing significant improvements in text embedding tasks.
+       AnglE's optimization of angle differences results in better performance, achieving higher scores in semantic textual similarity tasks.
+
+10. Summary of Publications
+    -1. AnglE-optimized Text Embeddings:
+        Focuses on optimizing angles in complex space to improve text embeddings.
+    -2. RotatE
+        Uses relational rotations in complex space for knowledge graph embeddings.
+    -3. Angular Embedding: A Robust Quadratic Criterion
+        Proposes a robust quadratic criterion for embeddings in the complex domain, capturing pairwise comparisons more effectively.
+    -4. A New Angular Robust Principal Component Analysis
+        Introduces an approach for robust PCA using angular embeddings, enhancing the robustness and accuracy of data representations.
+
+These innovations demonstrate significant potential for enhancing the robustness, efficiency, 
+and performance of embeddings in both language models and knowledge graphs, 
+addressing fundamental challenges in current embedding methods.
+
+
+
+
+
+
