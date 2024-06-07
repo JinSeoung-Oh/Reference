@@ -1,0 +1,44 @@
+## From https://medium.com/aiguys/yolov10-object-detection-king-is-back-739eaaab134d
+
+1. YOLO Network Structure
+   YOLO networks consist of three main parts
+   -1. Backbone: Acts as a feature extractor using classification models.
+   -2. Neck: Aggregates feature maps from different stages of the backbone.
+   -3. Head: Detects object regions but does not identify specific objects. It includes two-stage and one-stage detectors, 
+           further divided into anchor-based and anchor-free detectors.
+
+2. YOLOv10 Goals
+   YOLOv10 aims to enhance performance and efficiency by:
+   -1. Eliminating NMS, introducing consistent dual assignments for NMS-free training, achieving competitive performance and low inference latency.
+   -2. Holistically optimizing YOLO components for efficiency and accuracy, reducing computational overhead and enhancing capability.
+
+3. Removing Non-Maximum Suppression (NMS)
+   NMS involves selecting the proposal with the highest confidence, removing overlapping proposals based on an Intersection over Union (IOU) threshold, 
+   and repeating the process. This process adds overhead, particularly in real-time settings. 
+   YOLOv10 eliminates NMS, instead using dual label assignments combining one-to-one and one-to-many assignments for better supervision and accuracy.
+
+4. Spatial-Channel Decoupled Downsampling
+   Standard convolutional neural networks (CNNs) like VGG16 scale features across spatial dimensions and channels, but YOLOv10 decouples these operations
+   to reduce computational cost and retain more information. It uses pointwise convolution for channel modulation and depthwise convolution for spatial downsampling, 
+   resulting in significant efficiency improvements.
+
+5. Rank-Guided Block Design
+   YOLOv10 analyzes redundancy in different stages of the network, suggesting that using the same block design throughout is suboptimal. 
+   It introduces a rank-guided block design scheme, employing a compact inverted block (CIB) structure to decrease complexity in redundant stages,
+   enhancing efficiency without compromising performance.
+
+6. Lightweight Classification Head
+   The classification head determines object classes and calculates probabilities, while the regression head predicts bounding box coordinates and confidence scores. 
+   YOLOv10 reduces the overhead of the classification head, using a lightweight architecture that maintains performance.
+
+7. Accuracy-Driven Model Design
+   YOLOv10 uses large-kernel depthwise convolutions in deep stages to enhance the receptive field and model capability,
+   employing structural reparameterization to optimize without inference overhead. Large-kernel convolutions are only used for small-model scales 
+   to balance efficiency and performance.
+
+8. Partial Self-Attention (PSA)
+   YOLOv10 incorporates an efficient partial self-attention (PSA) module, partitioning features into two parts and applying self-attention to one part 
+   to reduce computational complexity. This enhances global representation learning with low computational costs, improving overall model performance.
+
+9. Results
+   YOLOv10 shows significant improvements in latency and performance, demonstrating the effectiveness of its design and optimization strategies.
