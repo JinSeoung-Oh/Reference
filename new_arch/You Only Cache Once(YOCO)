@@ -1,0 +1,72 @@
+## https://medium.com/towards-data-science/understanding-you-only-cache-once-89bf29f21c1d
+
+# Understanding YOCO Architecture for Large Language Models
+The "You Only Cache Once: Decoder-Decoder Architectures for Language Models" (YOCO) paper presents a novel approach 
+to improve the efficiency and performance of large language models (LLMs) through a memory-efficient architecture. 
+Here's a detailed breakdown of the key concepts and components involved in this architecture.
+
+1. Key-Value (KV) Cache
+   -1. Transformer Architecture Basicc
+       - Key, Value, and Query Vectors
+         In transformer models, these vectors are crucial for the attention mechanism, allowing the model to focus 
+         on relevant parts of the input data to generate predictions.
+       - Attention Mechanism
+         This involves computing an attention pattern by multiplying the query vector of the current token with the key vectors of previous tokens,
+         normalizing the result, and then using this pattern to weight the value vectors for updating the token's embedding.
+
+   -2. KV Cache
+       - Caching Mechanism
+         Since keys and values do not change during decoding, they are cached to reduce computational overhead. 
+         This caching allows the model to reuse previously computed keys and values, improving efficiency.
+
+2. YOCO Architecture
+   -1. Layer Arrangement
+       - Two Halves of the Model
+         The model is divided into two halves. The first half uses a specific type of attention to generate the KV cache, 
+         while the second half uses this cache exclusively for generating output token embeddings.
+       - Efficient Self-Attention (ESA)
+         Used in the first half of the model to achieve constant inference memory, independent of input length.
+
+3. Efficient Self-Attention and Self-Decoder
+   -1. ESA Implementation
+       - Layer Normalization (LN)
+         Uses Root Mean Square Norm (RMSNorm)
+       - SwiGLU Activation
+         An activation function designed to conditionally pass through different amounts of information, 
+         enhancing the model's ability to process data efficiently.
+
+   -2. Two ESA Methods
+       - Gated Retention ESA
+         Recurrent Formulation: Removes the softmax function to allow for a recurrent formulation, enhancing memory efficiency.
+         Exponential Decay and Masking: Uses a scalar (Θ) to create exponential decay and a matrix (D) for causal masking.
+       - Sliding Window ESA
+         Limited Attention Window: Restricts attention to a constant number of tokens (C), reducing the complexity of the KV cache.
+
+4. Cross-Attention and Cross-Decoder
+   -1. Second Half of the Model
+       - Global KV Cache
+         Created from the first half of the model, this cache is used to generate the next tokens in the sequence.
+       - Cross-Attention Mechanism
+         Similar to self-attention but uses embeddings from different corpuses to generate new token embeddings.
+
+5. Memory and Inference Efficiency
+   -1. Memory Complexity
+       - Transformer Models
+         Memory complexity is dependent on the input sequence length (N), the number of layers (L),
+         and the hidden dimensions (D), resulting in O(L * N * D) complexity.
+       - YOCO Models
+         By splitting the model, YOCO achieves O(N + L) * D memory complexity, 
+         significantly reducing memory usage for large input sequences.
+ 
+   -2. Inference Efficiency
+       - Prefilling Stage
+         YOCO's parallelizable self-decoder and reduced computation requirements in the first half 
+         make the prefilling stage much faster than traditional transformers.
+       - Generation Stage
+         Reduced GPU memory changes and efficient use of the KV cache enhance throughput during the generation stage.
+
+6. Conclusion
+   The YOCO architecture offers a significant advancement in the efficiency of large language models by optimizing both memory usage 
+   and computational speed. By introducing methods like Efficient Self-Attention and leveraging a split architecture,
+   YOCO improves the performance of LLMs, making them more cost-effective and practical for large-scale applications.
+
