@@ -1,0 +1,49 @@
+## Have to Check this example - https://github.com/lakshmanok/lakblogs/tree/main/bridge_bidding_advisor
+## From https://towardsdatascience.com/building-an-ai-assistant-with-dspy-2e1e749a1a95
+
+1. Developing an AI Assistant with DSPy
+   -1. Concept of an AI Assistant
+       An AI assistant is a computer program designed to help humans with tasks by proactively streamlining workflows.
+       Unlike chatbots, which serve as a fallback for difficult-to-find functionalities or customer support,
+       AI assistants operate behind the scenes, enhancing user productivity by automating and simplifying processes.
+
+   -2. Typical tasks for an AI assistant include:
+       Retrieving Information: Fetching relevant data, such as company policies.
+       Extracting Information: Parsing documents to extract necessary details.
+       Filling Out Forms: Using textual analysis to complete forms or checklists.
+       Making Function Calls: Gathering parameters and executing functions on behalf of the user.
+       Identifying Errors and Risks: Highlighting potential issues and risks.
+
+   -3. Use Case: Bridge Bidding Assistant
+       To demonstrate DSPy's capabilities, we’ll build an AI assistant for the card game bridge. 
+       Despite the complexity and jargon associated with bridge, the core concepts can be applied to various industry problems 
+       and backoffice processes. This example focuses on a non-confidential domain, making it ideal for illustration.
+
+2. Agent Framework for AI Assistants
+   -1. Structure and Function
+       The AI assistant operates by leveraging a network of backend services, each specialized for different tasks 
+       and invoked via agents built with language models. This structure allows for decoupling and specialization, 
+       similar to microservices in software engineering. The AI assistant, acting as a fluent and coherent LLM, 
+       knows what needs to be done and delegates tasks to specialized agents.
+
+   -2. Agents' Capabilities
+       Reasoning: Using chain-of-thought reasoning to process tasks.
+       Searching: Employing Retrieval-Augmented Generation (RAG) to find information.
+       Non-Textual Work: Extracting parameters for backend function calls.
+
+2. Example Workflow for the Bridge Bidding Assistant
+   -1. Query Handling
+       The user asks, "What is Stayman?" The AI assistant interprets the query and identifies the necessary backend services to invoke.
+   -2. Backend Services
+       Agents perform specific tasks such as retrieving information about the Stayman convention,
+       extracting relevant details, and presenting them to the user.
+   -3. Output Delivery
+       The AI assistant collates the information and provides a coherent response to the user.
+
+3. Benefits of Using DSPy
+   -1. Eliminates Prompt Engineering
+       The framework handles the creation and tuning of prompts, freeing developers from this tedious task.
+   -2. Data-Driven Tuning
+       Pipelines can be adjusted based on data, ensuring a more reliable and consistent performance.
+   -3. LLM-Agnostic Development
+       The system works independently of the specific language models used, allowing flexibility and adaptability.
