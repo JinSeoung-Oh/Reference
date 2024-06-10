@@ -1,0 +1,66 @@
+## From https://arxiv.org/html/2405.13817v1 
+
+Thermodynamic Natural Gradient Descent (TNGD) aims to optimize neural network training by leveraging thermodynamic properties of analog systems. 
+It combines the computational efficiency of analog systems with the precision of digital systems,
+addressing the computational overhead of second-order optimization methods like Natural Gradient Descent (NGD).
+
+1. How It Works
+   -1. Hybrid Digital-Analog Loop
+       - Digital Component
+         A digital computer (e.g., a GPU) handles discrete calculations like gradients and Fisher information matrices at specific intervals.
+       - Analog Component
+         An analog thermodynamic computer operates in equilibrium to exploit its thermodynamic properties for continuous, low-energy computation.
+   -2. Steps in the Process
+       - Initialization
+         The digital system initializes variables and computes initial gradients and curvature matrices.
+       - Analog Computation
+         The analog system processes these values continuously, updating the system state while maintaining equilibrium.
+       - Iteration
+         The digital system periodically recalculates gradients and curvature matrices, feeding this information back into the analog system.
+       - Convergence
+         This hybrid approach ensures faster convergence rates and maintains computational efficiency, making second-order optimization feasible for large-scale neural network training.
+
+2. Detailed Equations
+   -1. Natural Gradient Descent
+       NGD updates parameters by considering the geometry of the parameter space, involving the Fisher information matrix 
+       𝐹(𝜃):
+       𝜃 ← 𝜃 − 𝜂𝐹(𝜃)^−1 ∇𝐿(𝜃)
+       where 𝜂 is the learning rate and ∇𝐿(𝜃) is the gradient of the loss function 𝐿.
+
+3. Thermodynamic Analog Component
+   -1. Thermodynamic Analog Component
+       The thermodynamic analog component exploits equilibrium dynamics to efficiently approximate the inverse 
+       Fisher information matrix and other second-order quantities. This component utilizes the natural 
+       thermodynamic properties of physical systems to perform computations that would be computationally expensive 
+       in purely digital environments.
+
+   -2. Main Role
+       - Equilibrium Dynamics
+         The analog system uses its natural tendency towards equilibrium to handle complex calculations efficiently.
+       - Continuous Computation
+         Provides continuous, low-energy computation, facilitating the approximation of second-order information 
+         without direct matrix inversion.
+       - Synergy with Digital Systems
+         Works in tandem with digital systems to periodically update and refine calculations, 
+         ensuring efficient and accurate optimization.
+
+4. Practical and Theoretical Implications
+   -1. Practical Implications
+       - Enhanced Training Efficiency
+         Reduces computational overhead associated with second-order methods, making them practical 
+         for large-scale neural network training.
+       - Better Convergence
+         Achieves faster and more reliable convergence, beneficial for complex models and large datasets.
+
+   -2. Theoretical Implications
+       - New Research Avenues
+         Integrating thermodynamic properties into optimization algorithms opens new research fields in 
+         analog computing and hybrid computational models.
+       - Improved Understanding of Optimization Dynamics
+         Utilizing analog systems’ unique characteristics provides deeper insights into optimization processes, 
+         enabling the development of more efficient algorithms.
+
+5. Conclusion
+   Thermodynamic Natural Gradient Descent represents a significant advancement by merging digital systems' computational
+   power with analog thermodynamic processes' efficiency. This hybrid approach enhances neural network training 
+   performance and scalability, paving the way for innovative research in hybrid computing systems.
