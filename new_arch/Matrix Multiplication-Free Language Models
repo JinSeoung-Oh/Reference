@@ -1,0 +1,62 @@
+## From https://medium.com/syncedreview/matrix-multiplication-free-language-models-maintain-top-tier-performance-at-billion-parameter-38378fba5733
+## From https://arxiv.org/pdf/2406.02528
+
+The paper "Scalable MatMul-free Language Modeling" by Rui-Jie Zhu et al. 
+introduces a novel approach that eliminates matrix multiplication (MatMul) operations to enhance efficiency and scalability in large language models. 
+This approach leverages Binary Neural Networks (BNNs) and introduces a key component called BiNet.
+
+1. Key Components and How It Work
+   -1. BiNet Architecture
+       - Binary Neural Networks (BNNs)
+         BiNet utilizes BNNs to replace traditional floating-point operations with binary operations, 
+         significantly reducing computational complexity and memory usage.
+       - Alternating Quantization
+         This method alternates between quantizing weights and activations to binary values, reducing the need for traditional MatMul operations.
+
+   -2. MatMul-free Mechanism
+       - Binary Matrix Operations
+         The model uses binary matrix operations, eliminating conventional MatMul, resulting in faster and more efficient computations.
+       - Low-bitwidth Arithmetic
+         Employs low-bitwidth arithmetic operations to further reduce computational overhead.
+
+   -3. Performance and Efficiency
+       - Scalability
+         BiNet scales up to 2.7 billion parameters, achieving comparable performance to state-of-the-art Transformers 
+         while significantly reducing memory and computational requirements.
+       - Memory Reduction
+         Training memory usage is reduced by up to 61%, and inference memory consumption is more than 10x lower.
+
+   -4. GPU-efficient Implementation
+       - Optimized Kernels
+         Custom GPU kernels handle binary operations and sparse matrix manipulations, ensuring substantial memory and speed efficiency gains.
+       - Implementation Benefits
+         Allows efficient model operation on standard GPU hardware, reducing training and inference times.
+
+   -5. Custom Hardware Implementation
+       - FPGA Solution
+         The authors designed a custom FPGA (Field-Programmable Gate Array) solution, demonstrating the model’s capability to operate at a power consumption 
+         of just 13W, showcasing its potential for brain-like efficiency.
+
+2. Role of BiNet
+   BiNet is central to this approach, serving as the backbone that enables the MatMul-free architecture. 
+   By using BNNs, BiNet significantly reduces the computational and memory demands traditionally associated with matrix multiplications. 
+   This enables the model to achieve high performance while being more efficient and scalable.
+
+3. Why It's Called MatMul-free
+   The term "MatMul-free" highlights the model's avoidance of traditional matrix multiplication operations,
+   instead relying on binary matrix operations and low-bitwidth arithmetic.
+   This innovation reduces computational overhead and enhances scalability.
+   ** More detail have to see the papper and search for BiNet **
+
+4. Advantages of the MatMul-free Approach
+   -1. Reduced Computational Load
+       Eliminating MatMul operations decreases the computational load.
+   -2. Enhanced Scalability
+       The model scales effectively to billions of parameters without typical memory constraints.
+   -3. Energy Efficiency
+       Custom hardware implementations like the FPGA solution demonstrate the model's potential for highly energy-efficient operation.
+
+5. Conclusion
+   The Scalable MatMul-free Language Modeling approach, exemplified by BiNet, represents a significant advancement in language modeling. 
+   By avoiding matrix multiplication, BiNet achieves greater efficiency, scalability, and energy savings while maintaining high performance.
+   This approach opens new possibilities for deploying large language models in resource-constrained environments.
