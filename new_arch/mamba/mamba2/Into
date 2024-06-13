@@ -1,0 +1,38 @@
+## From https://vidrihmarko.medium.com/mamba-2-is-out-can-it-replace-transformers-6cfb3372ea39
+
+mamba2 install : !pip install mamba-ssm
+
+1. What’s Mamba-2?
+   Mamba-2 is a state space model architecture showing promising performance on information-dense data, like language models. 
+   It’s designed to perform better than older models, including transformers, which are widely used in AI.
+
+2. Key Features of Mamba-2
+   Core Innovation: Structured State Space Duality (SSD)
+   - The main innovation in Mamba-2 is called Structured State Space Duality (SSD). 
+     This combines two advanced techniques, making computations easier and faster. 
+     It also allows the model to work more efficiently with hardware like GPUs and TPUs.
+
+
+3. Performance Improvements
+   Mamba-2 is 50% faster in training compared to Mamba-1. It can handle larger and more complex tasks, especially those involving lots of data. 
+   For example, in tasks that require recalling multiple pieces of information at once, Mamba-2 performs significantly better.
+
+
+4. Architectural Changes
+   Mamba-2 introduces a new way of generating parameters, which makes it easier to scale up the model and use it on more powerful hardware. 
+   This new method also keeps memory usage efficient and speeds up computations.
+
+
+5. How Does It Perform?
+   In tests, Mamba-2 shows better scaling and faster training times compared to Mamba-1. Pretrained models, ranging from 130 million to 2.8 billion parameters, are available. 
+   These models were trained on large datasets like Pile and SlimPajama. The performance remains consistent across different tasks, with only minor differences due to evaluation noise.
+
+
+## Specifications
+   State Size: Increased from 16 (in Mamba-1) to 64–256 in Mamba-2.
+   Training Speed: 50% faster than Mamba-1.
+   Model Scale: Available in sizes from 130 million to 2.8 billion parameters.
+   Datasets: Trained on Pile and SlimPajama.
+   Evaluation Tasks: Includes multi-query associative recall (MQAR) and various zero-shot evaluations.
+
+
