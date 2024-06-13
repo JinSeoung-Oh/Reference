@@ -1,0 +1,66 @@
+## From https://towardsdatascience.com/tiny-time-mixers-ttm-a-powerful-zero-shot-forecasting-model-by-ibm-576b0e0af583
+
+# Following the latest research on Large Language Models (LLMs), two main approaches are evident
+  1. First Approach
+     Researchers focus on building the largest possible models. 
+     Pretraining on next-word prediction is crucial for enhancing performance, with millions of dollars invested in this process.
+
+   2. Second Approach
+      Researchers use techniques like quantization to create smaller and faster models while maintaining strong general performance.
+
+   However, interesting things happen when smaller models outperform much larger ones on certain tasks. 
+   For instance, Llama 3–8B outperformed the larger Llama 2–70B on the MMLU task!
+
+   Tiny Time Mixers (TTM)[1], introduced by IBM, follows the second approach. 
+   It’s a lightweight model that outperforms larger SOTA models, including MOIRAI, on the M4 dataset. Plus, it’s open-source!
+
+
+# Enter Tiny Time Mixer (TTM)
+  TTM is a lightweight, MLP-based foundation time-series (TS) model (≤1M parameters) that excels in zero-shot forecasting, even outperforming larger SOTA models.
+
+# Key characteristics of TTM
+  1. Non-Transformer Architecture
+     TTM is extremely fast because there’s no attention mechanism—it only uses fully connected neural network layers.
+  2. TSMixer Foundation
+     TTM leverages TSMixer[2] (IBM’s breakthrough time-series model) in its architecture.
+  3. Rich Inputs
+     Capable of multivariate forecasting, TTM accepts extra channels, exogenous variables, and known future inputs, enhancing its forecasting versatility.
+  4. Fast and Powerful
+     TTM was pretrained on 244M samples of the Monash dataset, using 6 A100 GPUs in less than 8 hours.
+  5. Superior Zero-Shot Forecasting
+     TTM is pretrained and can readily be used for zero-shot forecasting, surpassing larger SOTA models on unseen data.
+
+# Important Notes:
+  1. Note 1
+     There’s a similar model by Google, also called TSMixer, which was published a few months later! Interestingly, 
+     Google’s TSMixer is also an MLP-based model and achieves significant performance! In this article, we will only refer to IBM’s TSMixer
+  2. Note 2
+     IBM’s TSMixer (on which TTM is based) applies softmax after a linear projection to calculate importance weights, 
+     which are then multiplied with hidden vectors to upscale or downscale each feature. 
+     The authors call this operation Gated Attention—but it’s typically not a traditional multi-head attention with queries, keys, values, and multiple heads. 
+     Therefore, neither TSMixer nor TTM, which uses TSMixer, are characterized as Transformer-based models.
+
+# TTM Innovations
+  1. TTM introduces several groundbreaking features
+     -1. Multi-Level Modeling
+         TTM is first pretrained in a channel-independent way (univariate sequences) and uses cross-channel mixing during finetuning to learn multivariate dependencies.
+     -2. Adaptive Patching
+         Instead of using a single patch length, TTM learns various patch lengths across different layers. Since each time series performs optimally at a specific patch length,
+         adaptive patches help the model generalize better across diverse data.
+     -3. Resolution Prefix Tuning
+         Different frequencies (e.g., weekly, daily data) are challenging for foundation time-series models. 
+         TTM uses an extra embedding layer to encode time-series frequency—enabling the model to condition its predictions accurately based on the signal’s frequency.
+
+# Tiny Time Mixers — Architecture
+   TSMixer is a precursor to TTM. TSMixer is a solid model but cannot be used as a foundation model or handle external variables.
+   TTM uses TSMixer as a building block, and by introducing new features, the authors created a non-Transformer model that generalizes on unseen data.
+
+# Pretraining
+  During pretraining, the model is trained with univariate time-series only.
+  First, we normalize per individual time-series. The final outputs at the end are reverse-normalized (a standard practice).
+  Patching, a widely successful technique in time-series, is also used here. Univariate sequences are split into n patches of size pl.
+  The TTM backbone module applies Adaptive Patching and projects the patches from size p to hf. The TTM backbone is the heart of TTM, and we’ll explain it later in detail.
+  The TTM decoder has the same architecture as the TTM backbone but is much smaller, with 80% fewer parameters.
+  The Forecast linear head contains one fully connected layer and produces the final forecasts (which are then reverse-normalized).
+  MSE loss is calculated over the forecast horizon fl.
+ the future values of time-series are known (y3 and y4 in Figure 3, green color), they are used to guide the predictions of the target variables (y1 and y2 in Figure 4, purple color).
