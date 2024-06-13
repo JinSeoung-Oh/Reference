@@ -1,0 +1,47 @@
+## From https://www.together.ai/blog/dragonfly-v1
+
+# Key Announcements
+  -1. Launch of Dragonfly Architecture
+      A breakthrough vision-language architecture that enhances fine-grained visual understanding and reasoning about image regions.
+
+# Model Releases:
+  -1. Llama-3-8b-Dragonfly-v1: A general-domain model trained on 5.5 million image-instruction pairs.
+  -2. Llama-3-8b-Dragonfly-Med-v1: Finetuned on an additional 1.4 million biomedical image-instruction data.
+
+# Performance
+  -1. Visual Question Answering and Image Captioning
+      - Dragonfly shows promising performance on general vision-language benchmarks.
+  -2. Medical Image Processing
+      - Dragonfly-Med outperforms Med-Gemini on multiple medical imaging tasks, excelling in high-resolution medical data.
+
+# Image Embedding Strategies
+  -1. Multi-resolution Visual Encoding
+      - Processes images at low, medium, and high resolutions.
+      - Each image, depending on its resolution, is divided into sub-images and encoded into visual tokens projected into a language space.
+  -2. Zoom-in Patch Selection
+      - For high-resolution images, Dragonfly uses a strategy to select high-resolution sub-images that provide the most significant visual information.
+      - Compares summary embeddings of medium and high-resolution sub-images to select the most semantically relevant patches.
+
+# Case Studies
+  -1. General Domain
+      - Example 1: Description of a skateboarder performing a trick in a vibrant skatepark.
+      - Example 2: Diagram illustrating photosynthesis in plants and the associated solar body.
+
+  -2. Medical Domain
+      - Example 1: Detailed radiology note based on a chest X-ray.
+      - Example 2: Description of an abdominal CT scan and a spleen affected by chronic myelogenous leukemia.
+
+# Benchmark Performance
+  -1. Vision-Language Benchmarks
+      - Dragonfly demonstrated competitive performance on AI2D, ScienceQA, MMMU, MMVet, and POPE benchmarks.
+  -2. Medical Data Benchmarks
+      - Dragonfly-Med achieved state-of-the-art performance on VQA-RAD, SLAKE, and Path-VQA datasets.
+
+# Conclusion and Future Directions
+  -1. Extracting Fine-grained Visual Information
+      - Dragonfly efficiently extracts detailed visual information from image regions.
+  -2. Open Source Multimodal Research
+      - The release of Dragonfly aims to encourage the research community to explore multimodal research and apply AI to real-world problems.
+  -3. Future Research
+      - Plans include exploring new architectures, better visual encoding strategies, and comprehensive studies on data mixtures to benefit broader scientific fields.
+
