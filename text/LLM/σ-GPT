@@ -1,0 +1,51 @@
+From https://artgor.medium.com/paper-review-%CF%83-gpts-a-new-approach-to-autoregressive-models-069bdd2bb596
+
+# Autoregressive Models and Flexible Sampling
+  Autoregressive models, such as GPT, typically generate sequences from left to right. 
+  However, this isn’t a necessity. By incorporating positional encoding for outputs, the generation order can be modulated per sample, 
+  allowing for flexible sampling and conditioning on arbitrary subsets of tokens. 
+  This method supports dynamic multi-token sampling using a rejection strategy, thus reducing the number of model evaluations required.
+
+# σ-GPT: Shuffled Autoregressive Model
+  σ-GPT, or Shuffled Autoregressive GPT, is a novel model that shuffles sequences randomly during training. 
+  This approach requires the model to predict the next token based on previously observed tokens in a shuffled order, 
+  rather than a fixed left-to-right sequence. 
+  The training process employs standard cross-entropy loss and a double positional encoding, with no further modifications to the model or training pipelines.
+
+# How σ-GPT Works
+  -1. Random Shuffling
+      - During training, the sequence order is shuffled randomly, and the model must learn to predict the next token based on the shuffled context.
+  -2. Double Positional Encoding
+      - Each token in a sequence contains information about its value, its current position, and the position of the next token in the shuffled sequence. 
+        This double positional encoding is implemented using standard sinusoidal positional encoding for both input and output tokens.
+  -3. Token Generation
+      During inference, σ-GPT can generate tokens in any order. By evaluating candidate sequences in different orders, 
+      it accepts multiple tokens in one pass, improving efficiency, especially on GPUs using an adapted KV-caching mechanism.
+  -4. Double Positional Encodings
+      To accommodate sequences in any order, each token must be aware of its position and the next token's position in the shuffled sequence.
+      Each token thus has information about its value, current position, and the next token’s position in the shuffled sequence. 
+      This requires a double positional encoding, implemented using standard sinusoidal positional encoding for both inputs and outputs.
+
+# Conditional Probabilities and Infilling
+  The proposed method enables conditional density estimation across the entire sequence, allowing predictions based on any known subsequence. 
+  By prompting the model with a known part and decoding the remaining tokens in parallel, it overcomes the limitations of traditional left-to-right autoregressive models. 
+  It also supports infilling by decoding the remaining parts of a signal, either auto-regressively or in bursts.
+
+# Token-based Rejection Sampling
+  Autoregressive generation is slow due to its sequential nature. σ-GPT allows for parallel sampling at every position by generating tokens in any order. 
+  This method evaluates candidate sequences in different orders, accepting multiple tokens in one pass, which is efficient on GPUs using an adapted KV-caching mechanism.
+  When conditioned on partially completed sequences, the model outputs compatible distributions, rejecting incoherent tokens. 
+  This dynamic rejection sampling algorithm generates multiple samples simultaneously and adapts to data statistics without extra hyper-parameters.
+
+# Other Orders
+  The double positional encoding scheme allows training and evaluating models in any order. 
+  Randomized orders during training enable conditional density estimation, infilling, and burst sampling during inference. 
+  The scheme also supports deterministic orders, such as a 'fractal' order, which starts in the middle of the sequence and recursively visits all positions.
+  Although this deterministic order might make training more challenging due to lack of locality information, 
+  in theory, the modeling and decoding order should not matter for perfect models due to the chain rule of probability.
+
+# Denoising Diffusion Models  
+  Denoising diffusion models generate sequences in a few steps by reversing a diffusion process applied to the data.
+  This process can be either continuous or discrete, with this work using a discrete uniform diffusion process as a baseline. For a fair comparison,
+  both σ-GPT and the diffusion model use the same transformer architecture but differ in training objectives. Unlike σ-GPT, 
+  diffusion models require a fixed number of steps for sequence generation and do not natively support conditional density estimation or infilling.
