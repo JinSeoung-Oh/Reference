@@ -1,0 +1,21 @@
+## From https://generativeai.pub/google-reveals-veo-its-new-most-capable-ai-video-generator-a40154064a6f
+
+# Veo: Google's Advanced Video Generation Model
+  1. Key Features
+     -1. High-Quality Videos
+         Generates 1080p videos over one minute long, understanding cinematic terms like time-lapses and aerial shots.
+     -2. Video Editing
+         Adds objects to existing videos and converts reference images into videos matching the image style.
+     -3. Consistency
+         Uses advanced diffusion transformers to reduce common AI video issues like flickering and disappearing objects, producing natural-looking videos.
+     -4. Creative Control
+         Competes with OpenAI’s Sora, offering unprecedented creative control for users.
+  2. Usability
+     -1. Safety Measures
+         Includes safety filters and SynthID watermarking to address privacy, copyright, and bias concerns.
+     -2 .Accessibility
+        Partners with filmmakers to democratize storytelling, enabling both professionals and amateurs to create and share stories.
+
+Conclusion
+Veo aims to harmonize AI technology with human creativity, potentially revolutionizing the filmmaking industry.
+
