@@ -1,0 +1,35 @@
+## https://medium.com/@black_51980/embodiment-in-virtual-humans-and-robots-82aa3637d503
+
+1. Embodiment in AI
+   Embodiment is critical for both robots and virtual humans. 
+   It involves connecting an AI's "brain" to a "body" that interacts with the world, grounding AI in a 3D environment.
+
+2. SMPL Model
+   SMPL is a 3D model representing human shape and movement, essential for creating virtual humans. 
+   It encodes human body shape, pose, facial expressions, and movements in a compact form of about 100 parameters.
+
+3. Virtual Humans as Robots
+   Virtual humans are akin to robots in a virtual world, perceiving, understanding, planning, and executing actions. 
+   Key differences include the need for human-like motion and flexible physics modeling in virtual environments, 
+   unlike physical robots.
+
+4. Universal Humanoid
+   SMPL serves as a universal language for human behavior, enabling translation of various data forms into human movements. 
+   This facilitates retargeting human movements to new virtual characters or physical robots.
+
+5. AMASS Dataset
+   AMASS is a large collection of 3D human movement data in SMPL format, used extensively for training AI models
+   to understand and generate human motion. It supports various applications, 
+   including generating movements from text or speech.
+
+6. Learning from Humans
+   AMASS data is used to train both virtual humans and robots. Robust methods exist for estimating SMPL from video, 
+   enabling robots to learn from human demonstrations encoded in SMPL format.
+
+7. SMPL as Latent Space
+   SMPL acts as a compact, interpretable latent space in machine learning, efficiently representing human body shape and pose. 
+   This minimal representation is achieved through a biomechanically accurate model.
+
+Conclusion 
+Embodiment extends beyond physical robots to virtual humans, with SMPL acting as a "virtual robot" 
+and a universal language for human movement, facilitating the transfer of human behaviors to various embodiments.
