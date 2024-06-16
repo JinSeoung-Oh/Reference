@@ -1,0 +1,60 @@
+## https://medium.com/syncedreview/microsofts-vall-e-2-first-time-human-parity-in-zero-shot-text-to-speech-achieved-d4bd5c997a65
+
+# Overview
+  The field of speech synthesis has seen remarkable advancements over the past decade, 
+  primarily fueled by neural networks and end-to-end modeling techniques. 
+  A notable milestone was reached last year when Microsoft introduced VALL-E, 
+  a neural codec language model capable of producing high-quality, personalized speech from
+  just a 3-second recording of an unseen speaker. 
+  This model outperformed existing zero-shot text-to-speech (TTS) systems at that time.
+
+  Building on this foundation, Microsoft researchers recently unveiled VALL-E 2,
+  as detailed in their paper "VALL-E 2: Neural Codec Language Models are Human Parity Zero-Shot 
+  Text to Speech Synthesizers." 
+  VALL-E 2 represents a significant leap forward in zero-shot TTS synthesis,
+  achieving human parity for the first time. This model employs advanced techniques 
+  in neural codec language modeling and introduces key innovations: repetition-aware sampling and grouped code modeling.
+
+# Key Innovations in VALL-E 2
+  1. Repetition-Aware Sampling
+     - Problem Addressed
+       The original VALL-E model used random sampling, which could lead to instability 
+       and infinite loops during the decoding process.
+     - Solution
+       Repetition-aware sampling adaptively chooses between random sampling and nucleus sampling
+       for each time step token prediction based on the token repetition in the decoding history. 
+       This approach enhances decoding stability and prevents the infinite loop issue.
+  2. Grouped Code Modeling
+     - Problem Addressed
+       Traditional autoregressive (AR) modeling faces challenges with long context modeling and 
+       slow inference due to long sequence lengths.
+     - Solution
+       Grouped code modeling divides codec codes into groups, each modeled in a single frame during the AR process. 
+       This method reduces sequence length, accelerates inference, and improves performance by effectively managing long context dependencies.
+
+# Simplified Data Requirements and Scalability
+  VALL-E 2 simplifies the training process by requiring only simple utterance-wise speech-transcription pair data.
+  This reduction in data complexity facilitates easier data collection and processing, thereby enhancing the model's scalability potential.
+
+# Performance Evaluation
+  Experiments on well-known datasets such as LibriSpeech and VCTK demonstrate VALL-E 2's superior performance over previous systems.
+  The model excels in terms of
+  
+  1. Speech Robustness
+     Maintains high-quality output across various speech conditions.
+  2. Naturalness
+     Produces speech that sounds natural and human-like.
+  3. Speaker Similarity
+     Accurately mimics the speaker's voice characteristics even with minimal input data.
+
+# Achieving Human Parity
+  VALL-E 2 is the first model to reach human parity on benchmarks like LibriSpeech and VCTK,
+  consistently generating high-quality speech, even for complex sentences and those with repetitive phrases. 
+  This breakthrough indicates that VALL-E 2 can effectively synthesize speech 
+  that is indistinguishable from human speech to a typical listener.
+
+# Conclusion
+  VALL-E 2's advancements in neural codec language modeling, including repetition-aware sampling and grouped code modeling,
+  mark a significant step forward in TTS technology. By achieving human parity and simplifying data requirements, 
+  VALL-E 2 sets a new standard for zero-shot TTS systems, paving the way for more scalable and
+  robust speech synthesis applications in the future.
