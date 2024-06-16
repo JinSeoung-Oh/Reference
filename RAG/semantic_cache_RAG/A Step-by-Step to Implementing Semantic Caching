@@ -1,0 +1,70 @@
+- From https://chatgpt.com/c/6882fdaa-4fa5-420f-8fdb-f04799ca630d
+
+## Introduction
+   Generative AI, a transformative subset of artificial intelligence, is increasingly recognized 
+   for its potential across numerous sectors. 
+   Google Cloud Platform (GCP) is committed to democratizing generative AI by providing accessible foundational models, 
+   scalable infrastructure, and comprehensive tools for tuning, deployment, and maintenance.
+   One critical term that frequently emerges in the context of generative AI and large language models (LLMs) is ‘semantic caching.’
+
+   Semantic caching addresses significant challenges developers face with LLMs, particularly latency and cost. 
+   By caching responses to semantically similar queries, it reduces redundant API calls, 
+   thereby enhancing user experience and cutting operational costs.
+
+## Understanding Semantic Caching
+   Semantic caching interprets the meaning behind queries, enabling it to provide precomputed responses for semantically similar inputs.
+   This differs from traditional caching, which relies on exact matches. By storing semantic representations, 
+   query resolution is sped up, improving response times and resource utilization.
+
+  # Benefits of Semantic Caching
+    - Speed: Faster response times by retrieving precomputed answers for semantically similar queries.
+    - Cost Efficiency: Reduces redundant API calls, cutting costs associated with LLM usage.
+    - Scalability: Handles larger query volumes, preventing performance bottlenecks.
+    - Throughput: Increases the system's ability to process queries efficiently, crucial for high-throughput applications.
+
+## Implementation Scenario: Document Question Answering System
+   Consider a GenAI application gaining significant traction, processing numerous API calls daily. 
+   Users often pose similar queries, leading to redundant token processing and increased costs. 
+   Implementing semantic caching can mitigate these issues.
+
+   Example:
+   - Without Caching: Retrieval time ~6504 ms.
+   - With Semantic Caching: Retrieval time ~1919 ms (3.4x improvement).
+   - Exact Match Queries: Retrieval time ~53 ms (123x improvement).
+
+## Architecture and Workflow
+   - Data Preprocessing
+     - 1. Dataset: Quarterly reports from Alphabet, Amazon, and Microsoft (Q1 2021 to Q4 2023).
+     - 2. Document Processing: Using Google Cloud’s DocumentAI to extract and clean text and table data from PDF reports.
+   - Semantic Indexing
+     - 1. Encoding Documents: Use Vertex AI’s text embedding API to encode processed pages.
+     - 2. Creating Semantic Index: Use Vertex AI Vector Search to index these embeddings.
+   - Standard Caching
+     - 1. Memorystore Setup: Use Google Cloud Memorystore for storing exact match question-answer pairs.
+     - 2. Populating Cache: Insert question-answer pairs from the dataset into Memorystore.
+   - End-to-End Workflow
+     -1 Exact Match
+        Hash the incoming query.
+        Check if the hash exists in the standard cache.
+        If found, retrieve the answer directly from the cache.
+     - 2. Semantic Match:
+          Encode the incoming question using the text embedding model.
+          Match against the semantic index to find similar questions.
+          Check the standard cache for the matching question’s answer.
+          If not found, perform a native semantic search on the document index.
+          Generate the answer using Gemini 1.0 Pro if no match is found in the cache.
+          Store the new question-answer pair in the semantic index and the standard cache.
+
+## Enhancements and Additional Considerations
+   1. Lexical/Syntactical Similarity: Implement a normalization step to capture minor query variations, enhancing exact match accuracy.  
+   2. Entity Extraction: Use LLMs to ensure accuracy for numeric and time-related queries.
+   3. Efficient Caching: Hash both questions and answers to avoid duplicate storage.
+   4. Threshold Optimization: Dynamically determine the confidence threshold through pre-warm exercises.
+   5. Cache Management: Use TTL (time-to-live) settings to optimize cache memory usage and manage billions of queries efficiently.
+
+## Conclusion
+   Semantic caching, integrated with GCP’s suite of AI services, offers a robust solution for improving the efficiency and scalability 
+   of generative AI applications. By reducing latency, cutting costs, and enhancing query processing capabilities,
+   semantic caching ensures an optimal user experience and efficient resource utilization. 
+   Implementing this strategy in a document question-answering system demonstrates its practical benefits, 
+   setting the stage for broader adoption in various AI-driven applications.
