@@ -1,4 +1,5 @@
 # From https://towardsdatascience.com/kolmogorov-arnold-networks-the-latest-advance-in-neural-networks-simply-explained-f083cf994a85
+# https://pub.towardsai.net/unpacking-kolmogorov-arnold-networks-84ff98463370
 
 The Kolmogorov-Arnold Network (KAN) sounds like a fascinating innovation in the realm of neural networks. 
 Its departure from the traditional Multi-Layer Perceptron (MLP) architecture by employing B-splines 
