@@ -1,0 +1,59 @@
+## https://artgor.medium.com/paper-review-samba-simple-hybrid-state-space-models-for-efficient-unlimited-context-language-69a00d4a3822
+
+1. Overview
+   Samba is a novel architecture designed to model sequences with infinite context length, 
+   "combining the Mamba selective State Space Model (SSM) with Sliding Window Attention (SWA)."
+   It efficiently compresses sequences into recurrent hidden states while maintaining precise memory recall through attention mechanisms. 
+   With 3.8 billion parameters and training on 3.2 trillion tokens, Samba outperforms state-of-the-art models in various benchmarks 
+   and significantly improves token prediction up to 1 million context length. It achieves higher throughput and speedup compared to traditional Transformers for long sequences.
+
+2. Components
+   -1. Mamba
+      - Structure: Utilizes selective state spaces with input-dependent gating.
+      - Process:
+        1) Expands the input sequence using a learnable projection matrix.
+        2) Applies Short Convolution, Depthwise Convolution, and SiLU activation.
+        3) Computes a selective gate through a low-rank projection and Softplus activation.
+        4) Performs recurrent inference in an expanded state space, combining previous states with current inputs.
+        5) Produces final output using a gating mechanism similar to the Gated Linear Unit (GLU).
+     - Function: Captures time-dependent semantics and focuses on relevant inputs, memorizing important information over the long term.
+
+   -2. Sliding Window Attention (SWA)
+       -1. Purpose: Addresses non-Markovian dependencies in sequences.
+       -2. Mechanism:
+           1) Operates on a window size of 2048, sliding over the input sequence.
+           2) Maintains linear computational complexity relative to sequence length.
+           3) Applies RoPE (Rotary Positional Embeddings) within the window for precise memory recall.
+           4) Uses FlashAttention 2 for efficient self-attention implementation.
+       -3. Efficiency: Chosen window size ensures similar training speed to Mamba’s selective parallel scan.
+
+3. Performance and Experiments:
+   -1. Benchmark Performance
+       Outperforms models like Llama 2, Mistral, Mamba, Gemma, and TFM++.
+       Achieves highest average scores on various benchmarks, including an 18.1% higher accuracy on GSM8K compared to TFM++.
+       Excels in commonsense reasoning, language understanding, TruthfulQA, and code generation.
+
+   -2. Context Length Extrapolation
+       Achieves 3.73× higher throughput in prompt processing for 128K length prompts compared to Llama-3.
+       Maintains linear processing time relative to sequence length.
+       Demonstrates superior long-range retrieval ability, achieving near-perfect performance early in training compared to Mistral.
+       
+   -3. Long-Context Understanding
+       Evaluated on long-context summarization tasks (GovReport, SQuALITY) and short-context benchmarks (MMLU, GSM8K, HumanEval).
+       Outperforms Phi-3-mini-4k-instruct on both short and long-context tasks.
+
+4. Architectural Insights
+   -1. Attention and Linear Recurrence
+       - Combines attention layers with recurrent structures effectively.
+       - Specializes attention layers for global integration in upper and lower layers and precise retrieval in middle layers, enhancing downstream performance.
+
+   -2. Efficiency and Optimization
+       - The optimal training sequence length is 4096 with a window size of 2048.
+       - Full attention leads to exploding perplexity at longer context lengths.
+       - Mamba's low-rank information capture allows fewer attention heads, focusing on information retrieval.
+       - Short Convolution (SC) operator enhances linear recurrent models, although its effectiveness varies across different architectures.
+
+5. Conclusion
+   Samba’s hybrid architecture, integrating Mamba and SWA, offers a robust solution for handling sequences with infinite context length. 
+   Its efficient design and superior performance across benchmarks make it a significant advancement in sequence modeling. 
+   Future research may further explore the SC operator's effectiveness in language modeling and its integration into hybrid models.
