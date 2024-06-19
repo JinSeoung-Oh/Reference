@@ -1,0 +1,35 @@
+# https://medium.com/syncedreview/stanford-cz-biohubs-textgrad-transforming-ai-optimization-with-textual-feedback-0daa308e3e5c
+# https://github.com/zou-group/textgrad
+# https://arxiv.org/abs/2406.07496
+
+AI is experiencing a transformative shift with significant advancements driven by the integration of multiple large language models (LLMs) and other complex components.
+Consequently, developing systematic and automated optimization methods 
+for these compound AI systems has become a critical challenge and is essential for harnessing AI’s full potential. 
+In response to this need, a research team from Stanford University and Chan Zuckerberg Biohub has introduced TEXTGRAD in their new paper,
+"TextGrad: Automatic 'Differentiation' via Text." 
+TEXTGRAD is a robust framework that performs automatic differentiation through text.
+In this system, LLMs generate comprehensive, natural language suggestions to optimize variables in computation graphs, 
+which can range from code snippets to molecular structures.
+
+# TEXTGRAD is founded on three core principles
+  -1. It is a versatile and high-performance framework, not tailored to a specific application domain.
+  -2. It is user-friendly, mimicking PyTorch abstractions to facilitate knowledge transfer.
+  -3. It is fully open-source.
+
+Within the TEXTGRAD framework, differentiation and gradients serve as metaphors for the textual feedback from LLMs. 
+Each AI system is represented as a computation graph, where variables are the inputs and outputs of complex (and potentially non-differentiable) functions.
+The system provides 'textual gradients' — informative and interpretable natural language feedback — that suggest how variables should be adjusted to enhance the system. 
+These gradients propagate through various functions, including LLM API calls, simulators, or external numerical solvers.
+
+# The research team demonstrated TEXTGRAD’s optimization capabilities across diverse domains, including:
+  - Coding: They enhanced solutions to challenging coding problems from LeetCode, achieving a 20% performance improvement over GPT-4o and the best existing methods.
+  - Problem Solving: By refining solutions at test-time, they improved GPT-4o’s zero-shot performance on the Google-Proof Question Answering benchmark from 51% to 55%.
+  - Reasoning: They optimized prompts to elevate GPT-3.5’s performance, bringing it close to GPT-4 levels in various reasoning tasks.
+  - Chemistry: They designed new small molecules with desirable drug-like properties and in silico binding affinity to drug targets.
+  - Medicine: They optimized radiation treatment plans for prostate cancer patients to achieve targeted dosages while minimizing side effects.
+
+Through TEXTGRAD, the team achieved state-of-the-art results in code optimization and PhD-level question answering, enhanced prompts, and provided proof-of-concept results
+in scientific applications such as molecule development and treatment plan optimization.
+
+In summary, TEXTGRAD merges the reasoning capabilities of LLMs with the decomposable efficiency of backpropagation,
+creating a comprehensive framework for optimizing AI systems across various domains.
