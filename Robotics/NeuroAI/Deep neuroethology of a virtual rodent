@@ -1,0 +1,96 @@
+# https://ar5iv.labs.arxiv.org/html/1911.09451
+
+1.Introduction
+  The paper explores the intersection of neuroscience and machine learning through the development of a virtual rodent capable of performing various motor tasks.
+  This approach aims to provide insights into both artificial and biological neural systems.
+
+2. Virtual Rodent Design
+   -1. Sensory Inputs
+       - Proprioceptive Information
+         Internal joint angles, angular velocities, positions, and velocities of tendons, egocentric vectors from the pelvis to head and paws,
+         vestibular-like orientation vector, touch sensors, and egocentric acceleration.
+       - Visual Inputs
+         Egocentric RGB-camera input simulated as if from a head-mounted camera (not real)
+
+3. Tasks and Training
+   -1. Tasks
+       - Gaps Run: Jump over gaps in a corridor with rewards for maintaining target velocity.
+       - Maze Forage: Collect blue orbs in a maze with sparse rewards.
+       - Bowl Escape: Escape a bowl-shaped region by traversing hilly terrain with distance-based rewards.
+       - Two-Tap: Touch an orb twice with precise timing, with rewards for accuracy.
+   -2. Training Methodology
+       - Network Architecture: Uses a residual network for visual inputs and a multi-layer perceptron for proprioceptive inputs, processed by LSTM modules to produce actions.
+       - Reinforcement Learning: Uses IMPALA-style setup for actor-critic DeepRL with off-policy correction via V-trace.
+       - Kickstarting: To handle the more challenging "escape" task, a weak coefficient kickstarting method is employed.
+
+4. Principle of Operation
+   The principle involves using deep reinforcement learning to train a neural network that controls a virtual rodent performing various tasks. 
+   The neural network processes proprioceptive and visual inputs, encodes them into features, and generates appropriate motor actions. 
+   This process mimics biological neural mechanisms, providing a model to study neural control and behavior in a controlled, virtual environment.
+
+5. Hugging Face Simulation Framework
+   The authors used the Hugging Face simulation framework to develop and test their virtual rodent model. 
+   This framework facilitated the integration of deep reinforcement learning algorithms and the simulation of complex environments.
+
+6. Analysis of Neural and Behavioral Data  <-- Have to read more detail this part
+   -1. Behavioral Analysis
+       - 1) Behavioral Repertoire
+            The virtual rodent exhibits behaviors like rearing, jumping, running, climbing, and spinning, analyzed across multiple timescales.
+       - 2) Behavioral Features
+            These are described using kinematics on fast (5-25 Hz), intermediate (1-25 Hz), and slow (0.3-5 Hz) timescales.
+       - 3) tSNE Embedding
+            Used to map behavioral features, showing segregation of behaviors in different regions. 
+            This embedding produces a behavioral map where similar behaviors are clustered together.
+
+   -2. Neural Network Analysis
+       - 1) Representational Similarity Analysis (RSA)
+            This technique is used to study how behaviors are encoded in neural networks. 
+            RSA provides a global measure of how well different features are encoded in layers of a neural network.
+       - 2) Core vs. Policy Layers
+            Policy layers primarily encoded fast timescale kinematics, suggesting they are more involved in immediate motor actions.
+            Core layers encoded slower behavioral features, likely representing contextual and reward-related information.
+       - 3) Hierarchical Encoding
+            In networks trained with multiple policy layers, different layers encoded behavioral features at different timescales. 
+            The first policy layer showed stronger encoding of slow behavioral features, while the last policy layer focused on fast behavioral features.
+
+   -3. Neural Activity Patterns
+       The analysis of neural activity patterns in the virtual rodent's neural network provides insights into how different network layers contribute to behavior generation
+       -1) Distinct Timescales
+           - Core Units
+             These units fluctuated over longer timescales (1-10 seconds), likely representing contextual variables and rewards. 
+             This slower fluctuation suggests that core units handle more abstract aspects of behavior and environment.
+           - Policy Units
+             These units were active over shorter, subsecond timescales, encoding immediate motor and behavioral features. 
+             This fast activity is crucial for precise control of movements.
+
+       -2) Feature Encoding
+           - Core Layers
+             Showed stronger encoding of slow behavioral features, reflecting the rodent's context and broader task goals.
+           - Policy Layers
+             Encoded fast kinematics, suggesting involvement in the execution of immediate motor actions. 
+             Policy layers displayed a hierarchy of behavioral abstraction, with different layers encoding features at different timescales. 
+             The last policy layer focused more on fast features, while the first policy layer encoded slower features.
+
+      -3) Representational Similarity Analysis (RSA)
+          -1) RSA was used to compare the encoding of behavioral features across different network layers. 
+              It involved computing similarity matrices that quantify the response similarity of neural populations to various stimuli.
+          -2) CKA Index
+              The Centered Kernel Alignment (CKA) index was used to measure the similarity between neural activity patterns and behavioral features.
+              This analysis revealed that policy layers had greater information about fast timescale kinematics, while core layers encoded slower features more robustly.
+
+      -4) Hierarchy of Behavioral Abstraction
+          In networks with multiple policy layers, representations were distributed across different timescales, showing a hierarchy. 
+          The deepest layers (closest to the motor output) focused on fast, precise motor actions, while shallower layers encoded more abstract, slower features.
+
+      -5) Activity Patterns Across Tasks
+          The virtual rodent's neural network exhibited different activity patterns depending on the task. 
+          This task-specific encoding suggests that the network adapted its internal representations to optimize performance across diverse motor tasks.
+
+7. Contributions of the Paper
+   Integration of Neuroscience and AI: Demonstrates how virtual environments and reinforcement learning can be used to study complex behaviors and neural representations.
+   Behavioral Flexibility: Shows how a single neural network can adapt to and solve multiple tasks, providing insights into the flexibility of neural control systems. 
+   Neural Representation Analysis: Provides a detailed analysis of how different network layers encode and generate motor behaviors, offering parallels to biological neural networks.
+
+8. Conclusion
+   The study presents a novel approach to understanding motor control and neural representation by leveraging virtual environments and deep reinforcement learning. 
+   It bridges the gap between artificial and biological neural systems, offering a framework for future research in neuroethology and AI.
