@@ -1,0 +1,66 @@
+## https://medium.com/@manuelescobar-dev/memory-requirements-for-llm-training-and-inference-97e4ab08091b
+## https://github.com/manuelescobar-dev/LLM-System-Requirements
+## https://llm-system-requirements.streamlit.app/
+
+
+# Summary of LLM System Requirements for Local Use
+Large Language Models (LLMs) are computationally demanding, 
+often containing billions of parameters and being trained on terabytes of data. 
+Despite advances in computational power and optimization techniques,
+they remain largely inaccessible due to high computational costs. 
+Training GPT-4, for example, is estimated to cost around $100 million.
+
+However, open-source models like Llama 3 have made LLMs more accessible. 
+These models come in various sizes, with smaller variants even suitable for mobile applications.
+While fine-tuning large models still requires substantial resources, costs have decreased, 
+enabling local usage by tech enthusiasts.
+
+1. General Rule of Thumb
+   -1. Inference Memory Requirement: Number of Parameters * Precision (usually 2 or 4 Bytes)
+   -2. Training Memory Requirement: 4-6 times the inference resources
+
+2. Inference Memory Requirements
+   Performing inference requires memory for loading model weights, KV cache, and activations.
+
+   -1. Total Inference Memory = Model Size + KV Cache + Activations
+   -2. Model Size: Number of Parameters * Precision
+       -1) Precision:
+           - 4 Bytes: FP32
+           - 2 Bytes: FP16
+           - 1 Byte: int8
+           - 0.5 Bytes: int4
+   -3. KV Cache
+       2 * Batch Size * Sequence Length * Number of Layers * Hidden Size * Precision
+   -4. Activation Memory
+       Batch Size * Sequence Length * Hidden Size * (34 + (5 * Sequence Length * Number of Attention Heads) / Hidden Size)
+
+3. Optimization Techniques:
+   -1. Quantization: Reducing precision to lower memory usage.
+   -2. PagedAttention: Managing memory more efficiently.
+   -3. Sequence-Parallelism: Splitting sequence processing to reduce memory load.
+   -4. Activation Recomputation: Recomputing activations during the backward pass to save memory.
+
+4. Training Memory Requirements
+   Training requires additional resources due to optimizer and gradient states.
+   -1. Total Training Memory = Model Size + KV Cache + Activations + (Optimizer States + Gradients) * Number of Trainable Parameters
+   -2. Optimizer States:
+       - AdamW (2 states): 8 Bytes per parameter
+       - Quantized AdamW: 2 Bytes per parameter
+       - SGD (1 state): 4 Bytes per parameter
+   -3. Gradients: 4 Bytes per parameter
+
+5. Optimization Techniques:
+  -1. Alternative Optimizers: Using more memory-efficient optimization algorithms (e.g., NVIDIA/apex, Adafactor).
+  -2. Paged Optimizers: Managing optimizer state memory more efficiently.
+  -3.  Gradient Accumulation: Accumulating gradients over multiple steps to reduce memory footprint.
+  -4. Gradient Checkpointing: Saving memory by recomputing parts of the model during backpropagation.
+
+6. Fine-Tuning
+   Fine-tuning requires additional memory for calculating optimizer and gradient states. 
+   Parameter Efficient Fine-Tuning (PEFT) techniques, such as LoRA and QLoRA, 
+   are used to reduce the number of trainable parameters.
+
+7. Conclusion
+   Estimating memory requirements for running an LLM can be complex due to various frameworks, models, and optimization techniques. 
+   This guide provides a starting point for estimating the memory needed for LLM inference and training.
+   The actual memory usage may vary depending on specific setups and frameworks used.
