@@ -1,0 +1,115 @@
+# From https://medium.com/yandex/yafsdp-a-tool-for-faster-llm-training-and-optimized-gpu-utilization-is-no-632b7539f5b3
+
+1. Introduction to YaFSDP Method
+   YaFSDP is a newly open-sourced tool designed to accelerate the training of large language models (LLMs).
+   The article discusses organizing LLM training on clusters, exploring alternative methods (ZeRO, FSDP), and detailing how YaFSDP differs.
+
+2. Challenges in Distributed Training with Multiple GPUs
+   Training on a single GPU involves forward pass, backpropagation, and optimizer updates.
+   Distributed training on multiple GPUs (e.g., Distributed Data Parallelism) increases batch size by processing chunks on each GPU.
+   Synchronization is needed using all_reduce to average gradients among GPUs.
+   Communication overhead and memory duplication are significant issues, leading to inefficiencies.
+
+3. Memory and Communication Issues
+   all_reduce operations double the data sent compared to network parameters.
+   LLMs like Llama 70B require massive memory (over 1 TB) for weights, gradients, and optimizer states, 
+   which exceeds GPU memory capacities.
+   These redundancies and communication requirements severely slow down training.
+
+4. Existing Methods
+   -1. ZeRO (Zero Redundancy Optimizer)
+       Published by Microsoft’s DeepSpeed in 2019.
+       Fully partitions weights, gradients, and optimizer states across GPUs.
+       Uses asynchronous gathering of parameters.
+      Significant memory optimization but has communication inefficiencies and many bugs.
+
+    -2. FSDP (Fully Sharded Data Parallelism)
+        Integrated with Torch, actively supported.
+        Shards layers into FlatParameters, improving communication efficiency.
+        More user-friendly and supports dynamic graphs.
+        Issues include dynamic memory allocation and the "give-way effect" causing communication delays.
+
+5. YaFSDP Method
+   Aims to optimize memory consumption and improve communication efficiency without slowing down processes.
+   -1. Memory Optimization
+       Activation checkpointing reduces memory load but increases training time.
+       YaFSDP reduces memory usage by storing activations efficiently and avoiding excessive recomputation.
+   -2. Buffer Management
+       Allocates buffers in advance for intermediate weights and gradients to control memory consumption.
+       Ensures weights from different layers use the same memory, optimizing usage.
+   -3. Communication and Computation Setup
+       Uses CUDA streams for concurrent operations, ensuring weights are gathered before passes start.
+       Implements forward_pre_hook and forward_hook for efficient forward passes.
+       Ensures gradient calculations are complete before backward passes begin using backward_pre_hook and backward_hook.
+
+6. Addressing "Give-Way Effect"
+   Separates processing for RMSNorm/LayerNorm to avoid duplicate operations.
+   Replaces "pre-divide" with "post-divide" in reduce_scatter, minimizing downtime in computations.
+
+7. Restrictions
+   Peak performance is achieved only if layers alternate correctly in buffer usage.
+   Only one group of weights with a large number of parameters can be optimized by the optimizer.
+
+The YaFSDP method offers significant improvements in training efficiency for LLMs by addressing memory and communication bottlenecks, 
+though it requires careful implementation to achieve optimal results.
+
+##### The principle behind how YaFSDP achieves these optimizations <-- Check this
+1. Memory Optimization
+   -1. Sharding of Layers Instead of Individual Parameters
+       Similar to FSDP, YaFSDP shards entire layers rather than individual parameters. 
+       This reduces the overhead of managing many small shards and allows for more efficient communication.
+
+   -2. Efficient Buffer Management
+       YaFSDP allocates large buffers in advance for storing intermediate weights and gradients. 
+       This pre-allocation reduces the memory management overhead and avoids fragmentation.
+       Two buffers are used alternately for odd and even layers, ensuring that the memory is reused efficiently.
+
+    -3. Activation Checkpointing
+        By storing activations only at key points (between transformer blocks) and recomputing them during backward passes,
+        activation checkpointing significantly reduces memory usage. This is especially important for models
+        with large activations like Llama 70B.
+        YaFSDP aims to free up as much memory as possible to minimize the need for activation checkpointing, thus saving training time.
+
+2. Communication Efficiency
+   -1. Using CUDA Streams for Concurrent Operations
+       YaFSDP employs separate CUDA streams for computation and communication. 
+       This allows overlapping of communication operations with computation,
+       ensuring that neither process idles while waiting for the other to complete.
+       Events are used to synchronize these streams, ensuring that data dependencies are respected without unnecessary waiting.
+
+   -2. Asynchronous Communication Operations:
+       Communications such as all_gather and reduce_scatter are performed asynchronously.
+       If communications are faster than computations, they do not interfere with the computational process, 
+       thus maintaining overall efficiency.
+
+   -3. Avoiding the "Give-Way Effect"
+       By grouping similar operations and minimizing the number of preparatory computations in the communication stream,
+       YaFSDP reduces the downtime caused by small operations running in parallel with the main computation stream.
+
+3. Implementation Details
+   -1. Pre-allocated Buffers
+       Intermediate weights and gradients are stored in pre-allocated buffers, which are used cyclically by alternating layers. 
+       This reduces memory overhead and ensures that the GPU memory is used more efficiently.
+
+   -2. Event Synchronization
+       Events are used to synchronize the computation and communication streams. For instance, before starting a forward pass on a layer, 
+       YaFSDP ensures that the required weights are gathered in the buffer. Similarly, before starting a backward pass,
+       it ensures that the necessary gradients are reduced and scattered.
+ 
+   -3. Custom Hooks for Synchronization
+       Custom forward_pre_hook and backward_pre_hook are used to manage the synchronization between computation and communication,
+       ensuring that data is ready when needed and freeing up resources as soon as possible.
+
+4. Key Takeaways
+   -1. Memory Efficiency
+       By sharding layers and pre-allocating buffers, YaFSDP reduces the memory footprint and avoids unnecessary memory duplication.
+   -2. Communication Efficiency
+       Using asynchronous operations and CUDA streams, YaFSDP overlaps communication with computation, 
+       reducing idle times and improving overall throughput.
+   -3. Synchronization
+       Events and custom hooks ensure that all necessary data is available exactly when needed, 
+       avoiding delays and ensuring smooth execution of both forward and backward passes.
+
+In summary, YaFSDP improves memory consumption and communication efficiency by carefully managing memory allocation, 
+overlapping communication with computation, and ensuring precise synchronization of data movements.
+This allows for faster and more efficient training of large language models on distributed GPU clusters.
