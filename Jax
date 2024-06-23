@@ -1,0 +1,33 @@
+# from https://medium.com/@hghcomphys/why-you-should-learn-jax-a-molecular-dynamics-showcase-f7e79b58be01 <-- show this for python code
+
+JAX, developed by Google, offers several key features that make it 
+an attractive choice for scientific computing and machine learning
+
+1. Accelerated Linear Algebra (XLA Compiler)
+   JAX leverages XLA to optimize matrix operations by compiling code into highly optimized kernels. 
+   This leads to significant performance improvements through techniques like operation fusion and memory layout optimization.
+
+2. Just-in-Time (JIT) Compilation
+   JAX uses JIT compilation to execute code at runtime, resulting in faster execution by compiling multiple operations together.
+   This is particularly beneficial in deep learning where large, repetitive computations are common.
+
+3. Automatic Differentiation
+   JAX supports automatic differentiation through its grad() function, which can differentiate through Python and NumPy functions,
+   including loops and branches. This simplifies the implementation of backpropagation in neural networks.
+
+4. Vectorization with vmap
+   JAX's vmap() function vectorizes operations, enabling batch processing of data for improved performance and memory efficiency. 
+   This is useful for tasks that involve repeated operations on large datasets.
+
+5. Parallelization with pmap
+   JAX supports parallel computation across multiple devices using pmap(). 
+   This feature allows for efficient scaling of computations, distributing workloads across available hardware resources.
+
+6. Pure Functions and Haiku
+   JAX emphasizes the use of pure functions, which are functions without side effects. 
+   Haiku, a neural network library built on JAX, transforms impure functions into pure ones, 
+   facilitating automatic differentiation and other advanced transformations.
+
+7. Ease of Use
+   JAX is designed to be user-friendly, with an API similar to NumPy, making it accessible to users familiar with 
+   Python's scientific computing ecosystem.
