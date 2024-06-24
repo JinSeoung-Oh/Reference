@@ -1,0 +1,28 @@
+Nvidia has announced the release of Nemotron-4–340B, the largest open-source large language model (LLM) to date.
+Available in three versions—Base, Reward, and Instruct—this model is designed to aid researchers and developers in creating their own LLMs as part of a synthetic data generation pipeline.
+It is an advanced version of Nemotron-4–340B-Base, specifically optimized for English-based single and multi-turn chat applications, and supports a context length of up to 4,096 tokens.
+
+The base model was initially trained on a massive corpus of 9 trillion tokens, encompassing a wide variety of English texts, over 50 natural languages, 
+and more than 40 programming languages. The Nemotron-4–340B-Instruct model underwent further refinement through several alignment steps, 
+including Supervised Fine-tuning (SFT), Direct Preference Optimization (DPO), and Reward-aware Preference Optimization (RPO), 
+a proprietary alignment technique. During the alignment process, approximately 20,000 human-annotated data points were utilized,
+while a data generation pipeline synthesized over 98% of the data used for supervised fine-tuning and preference fine-tuning (DPO & RPO).
+
+As a result, the model is finely tuned for human chat preferences, excels in mathematical reasoning, coding, 
+and instruction-following, and is capable of generating high-quality synthetic data for various applications.
+
+# According to the NVIDIA Open Model License
+  1. Models are available for commercial use.
+  2. You are permitted to create and distribute derivative models.
+  3. NVIDIA does not claim ownership of any outputs generated using the models or derivative models.
+
+The following table shows how Nematron 4 compares to its closest open-source rivals in a range of standard reasoning benchmarks. Bold figures indicate the best scores.
+
+Users can access the Nemotron 4 340B model through Nvidia NIM or LM Studio. Creating an account on Nvidia NIM provides access to many useful models.
+
+After testing the Nemotron 4 340B model with various logic, math, programming, and reasoning questions, 
+it was found to provide highly accurate and detailed answers to most questions. It excelled particularly in solving mathematical problems, 
+generating programming code, and responding to real-life scenario questions. The model correctly answered 6 out of 7 questions, 
+demonstrating very impressive performance compared to other available open-source models.
+
+In conclusion, Nemotron is an extremely capable model, slightly ahead of the recent Qwen 2 model but still a bit behind the Llama 70B and GPT-4 based models.
