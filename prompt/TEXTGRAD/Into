@@ -1,0 +1,51 @@
+## From https://medium.com/aiguys/textgrad-controlling-llm-behavior-via-text-2a82e2073d10
+
+Researchers from Stanford have introduced TextGrad, a framework that implements automatic "differentiation" via text,
+building on their previous work with DSPy. 
+TextGrad enhances components of AI systems by backpropagating textual feedback from large language models
+(LLMs) to optimize variables in computation graphs, applicable to tasks such as code generation, 
+molecule optimization, and radiotherapy treatment planning.
+
+1. Key Concepts
+   -1. DSPy
+       -1) Framework for optimizing LM prompts and weights.
+       -2) Separates program flow from parameters (prompts and weights).
+       -3) Introduces LM-driven algorithms to tune prompts and weights based on a target metric.
+       -4) Improves reliability and performance of models like GPT-3.5, GPT-4, T5-base, and Llama2-13b.
+
+    -2. Understanding AutoGrad in PyTorch
+        -1) Forward Pass: Neural network makes predictions, computes loss function.
+        -2) Recording Operations: Operations on tensors are recorded in a directed acyclic graph (DAG).
+        -3) Backward Pass: Computes gradients of the loss function with respect to each tensor.
+        -4) Gradient Update: Uses gradients to update neural network parameters to minimize loss.
+
+    -3. TextGrad
+        -1) Autograd engine for textual gradients, backpropagating text feedback from LLMs.
+        -2) Uses two LLMs: a teacher LLM (critiques and improves prompts) and a student LLM.
+        -3) If a task is too difficult for the teacher LLM, the pipeline fails.
+
+2. Prompt Optimization
+   -1) Natural Language Gradients
+       - Act like numerical gradients but in semantic space.
+       - Feedback from LLMs highlights deficiencies in current prompts.
+
+   -2) Prompt Editing
+       - Adjusts prompts based on natural language gradients.
+       - Modifies prompts to address issues identified by gradients.
+
+   -3) Beam Search and Bandit Selection
+       - Evaluates multiple candidate prompts.
+       - Uses strategies to select the most effective prompts efficiently.
+
+3. How TextGrad Works
+   -1. System Overview: Generates predictions using a prompt and evaluates them.
+   -2. Gradient Computation
+       - Feedback is collected on predictions and prompts.
+       - Textual gradients provide feedback on improving prompts.
+   -3. Textual Gradient Descent (TGD)
+       - Uses feedback to optimize variables, similar to gradient descent in numerical optimization.
+       - Can handle complex, non-differentiable objective functions specified in natural language.
+
+TextGrad extends the concept of prompt optimization to various domains, treating instructions or demonstrations as variables to optimize.
+It shows effectiveness across diverse applications, demonstrating the potential for LLMs to provide detailed,
+natural language feedback for improving AI systems.
