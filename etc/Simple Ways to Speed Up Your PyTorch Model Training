@@ -1,0 +1,100 @@
+From https://towardsdatascience.com/simple-ways-to-speed-up-your-pytorch-model-training-9c9d4899313d
+
+Optimizing Machine Learning Model Training: Techniques and Tools
+
+## Introduction
+   Optimizing the speed and efficiency of machine learning model training is crucial for quicker experimentation, iteration, and resource utilization.
+   Faster training leads to faster development cycles and reduced computational costs.
+
+1. Containerization for Reproducibility
+   Containerization, using tools like Docker, ensures consistent environments across different stages of development, debugging, and deployment. 
+   This approach minimizes discrepancies that may arise from different library versions or hardware setups.
+
+   -Benefits
+     -1. Consistency: Docker containers encapsulate the environment, ensuring the same setup is used everywhere.
+     -2. Reproducibility: Makes it easier to reproduce results and debug issues that might occur on different machines.
+     -3. Ease of Use: Pre-built images, like those from NVIDIA NGC, come with essential libraries like CUDA and PyTorch pre-installed.
+
+   Example:
+   You can start with pre-built Docker images from NVIDIA that include GPU-accelerated libraries and frameworks: like NVIDIA NGC
+
+2. Profiling with PyTorch Profiler
+   Before optimization, profiling helps identify the parts of your code that are the most time-consuming.
+
+   - Using PyTorch Profiler:
+     -1. Record CPU and CUDA operations and memory consumption.
+     -2. Analyze traces with TensorBoard for detailed insights.
+
+   Code Example:
+   #############################################
+   import torch.autograd.profiler as profiler
+
+   with profiler.profile(
+     activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+     on_trace_ready=torch.profiler.tensorboard_trace_handler('./logs'),
+   ) as prof:
+     train(args)
+   This code profiles training operations and logs them for visualization in TensorBoard.
+   #############################################
+
+3. Optimizing Data Loading
+   Efficient data loading is critical since GPU idleness during data loading leads to resource under-utilization.
+
+   - Strategies
+     -1. Parallel Data Loading: Use multiple workers in PyTorch's DataLoader to load data in parallel.
+     -2. Background Processing: Process data in the background to overlap with GPU computation.
+
+   Example:
+   #############################################
+   from torch.utils.data import DataLoader
+
+   data_loader = DataLoader(dataset, batch_size=32, num_workers=4)
+   #############################################
+   
+4. Managing Memory with CUDA Caching Allocator
+   PyTorch’s CUDA caching allocator helps manage GPU memory efficiently, reducing the overhead of frequent memory allocations and deallocations.
+   
+   - Techniques
+     -1. Expandable Segments: Use PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True" to allow memory blocks to expand as needed.
+     -2. Consistent Data Shapes: Pad data to consistent sizes to help the allocator reuse memory blocks effectively.
+
+   - Visualization
+     You can visualize memory usage and detect inefficiencies using PyTorch’s memory visualization tools.
+
+5. Using FlashAttention for Efficient Attention Computations
+   FlashAttention optimizes the computation of dot-product attention by reducing memory usage and speeding up calculations, 
+   especially beneficial for Transformer models.
+
+   Example Libraries:
+
+   FlashAttention
+   XFormers
+   Transformer Engine
+
+6. Distributed Training with Fully Sharded Data Parallel (FSDP)
+   When training on multiple GPUs, using FSDP can reduce memory usage by sharding the model, optimizer states, and gradients across GPUs.
+
+   Example:
+   #############################################
+   from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+
+   model = FSDP(model)
+   optimizer = optim.Adam(model.parameters())
+   train(model, optimizer)
+   #############################################
+
+7. Speedup with torch.compile
+   Using torch.compile can optimize the execution of your PyTorch models by tracing and compiling them into efficient formats.
+
+   Example:
+   #############################################
+   import torch
+
+   model = torch.compile(model)
+   #############################################
+
+Conclusion
+The techniques discussed provide various ways to speed up model training and improve efficiency. 
+From containerization for reproducibility to advanced profiling and memory management, these methods can help streamline the development process. 
+Implementing these strategies will lead to faster training times and more efficient use of computational resources. 
+For further details, refer to the PyTorch documentation and related resources on profiling and optimization.
