@@ -1,0 +1,39 @@
+## From https://pub.towardsai.net/meet-husky-a-new-agent-optimized-for-multi-step-reasoning-0edb8e087d22
+## https://arxiv.org/html/2406.06469v1
+
+
+1. Overview of Reasoning in LLMs:
+   Reasoning is the next big challenge in generative AI, involving the decomposition of tasks into smaller,
+   manageable subsets. Techniques like Chain-of-Thought, Tree-of-Thought, Skeleton-of-Thought, 
+   and Reflexion have emerged, but they often fail to generalize across domains due to high computational demands.
+   A recent paper from Meta AI, Allen Institute of AI, and the University of Washington addresses these challenges.
+
+2. Introducing HUSKY
+   HUSKY is an open-source language agent designed for complex tasks involving numerical, tabular, and knowledge-based reasoning.
+   Unlike task-specific models, HUSKY operates within a unified framework to handle diverse challenges through
+   a two-stage process: generating and executing actions with expert models.
+
+3. HUSKY's Approach
+  -1. Action Generation: Determines the next step and required tool.
+  -2. Action Execution: Uses specialized models to perform the action and update the solution.
+
+4. Detailed Mechanism:
+   -1. Action Plan: Generates the next step, selects the tool, executes with expert models, and updates the solution state.
+   -2. Tool Integration: Uses predefined tools (code, math, search, commonsense) and calls expert models based on the tool assigned.
+   -3. Training: Involves creating tool-integrated solution trajectories with a teacher model to build training data for both the action generator and expert models.
+   -4. Inference: Uses trained modules iteratively to solve multi-step tasks.
+
+5. Evaluation and Performance
+   HUSKY is evaluated on various reasoning tasks, including
+   -1. Numerical Reasoning: Utilizes datasets like GSM-8K, MATH, and MathQA, with tasks ranging from elementary to high school level.
+   -2. Tabular Reasoning: Involves datasets like TabMWP, FinQA, and TAT-QA.
+   -3. Knowledge-based Reasoning: Uses datasets like HotpotQA, CWQ, and Musique.
+
+6. Key Findings
+   HUSKY matches or surpasses frontier models like GPT-4, even with smaller models.
+   Evaluations highlight HUSKY's ability to perform complex reasoning tasks effectively using 
+   a combination of action generation and expert models.
+
+7. Conclusion
+   HUSKY demonstrates a significant advancement in language agents, offering a versatile solution for complex reasoning tasks.
+   Its holistic approach enables it to tackle diverse challenges, making it a promising tool for the future of AI.
