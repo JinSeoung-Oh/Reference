@@ -1,0 +1,41 @@
+## From https://towardsdatascience.com/understanding-buffer-of-thoughts-bot-reasoning-with-large-language-models-391919d2f76f
+## https://github.com/YangLing0818/buffer-of-thought-llm
+
+1. Key Challenges with LLMs
+   - Complex Reasoning and Hallucinations: Major ongoing research areas.
+   - Generalized Reasoning Capabilities: LLMs struggle despite traditional methods like Chain-of-Thought (CoT) and Tree-of-Thought (ToT), which are computationally intensive.
+
+2. Buffer of Thoughts (BoT) Overview
+   - Dynamic and Adaptive: Uses a repository of high-level thought templates (meta-buffer).
+   - Problem Simplification: Analyzes and extracts key elements to retrieve relevant thought templates.
+   - Efficiency: Claims to enable smaller models (Llama3–8B+BoT) to outperform larger ones (Llama3–70B).
+
+3. BoT Advantages
+   - Leverages Previous Solutions: Applies past insights to new challenges.
+   - Boosts Efficiency: Eliminates multiple query iterations required by methods like Graph-of-Thoughts (GoT) or ToT.
+   - Dynamic Updating: Continuously evolves the template repository.
+
+4. BoT Components
+   - Problem Distiller: Preprocesses input to extract essential information and constraints.
+   - Meta-Buffer: Central repository storing high-level thought templates, dynamically updated.
+   - Template Retrieval: Selects the most similar template based on embedding similarity.
+   - Buffer Manager: Updates thought templates based on new insights and creates new templates for drastically different problems.
+
+5. Efficiency and Performance:
+   - Computational Cost: BoT requires only 12% of the computational cost compared to multi-query methods.
+   - Benchmarking: Demonstrated superior results in various tasks, e.g., data understanding, programming puzzles, and multilingual math.
+
+6. Practical Example:
+   - Task: Reordering words to form meaningful sentences.
+   - Process:
+     -1) Distillation of the task into key information and constraints.
+     -2) Retrieval of relevant thought template.
+     -3) Instantiation and reasoning to reorder words.
+   Demo Results: Showed promising accuracy, though the demo lacked some features of the full framework.
+
+7. Conclusion
+   - Promising Approach
+     BoT shows potential in improving both accuracy and efficiency of LLMs by 
+     breaking down reasoning tasks and leveraging previous solutions.
+   - Future Work
+     Complete practical implementation is awaited, but initial benchmarks indicate significant promise.
