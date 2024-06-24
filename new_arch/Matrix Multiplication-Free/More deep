@@ -1,0 +1,58 @@
+## https://levelup.gitconnected.com/superfast-matrix-multiplication-free-llms-are-finally-here-cac5b78a4fa7 <-- Have to read this article, it expained about this model with some image
+
+A recent research article published on ArXiv presents a significant innovation in Large Language Models (LLMs) by eliminating Matrix Multiplication (MatMul), 
+a core mathematical operation. The new MatMul-free LLMs demonstrate strong performance even at billion-parameter scales, surpassing traditional LLMs in specific tasks. 
+This development is crucial because MatMul is computationally expensive, necessitating the use of powerful GPUs for LLM training and inference. 
+The researchers’ optimization could reduce this reliance on GPUs, potentially revolutionizing AI model efficiency.
+
+1. Understanding Matrix Multiplication
+   Matrix Multiplication is a fundamental algebraic operation in LLMs where two matrices are multiplied to produce a third matrix. 
+   -1. Token and Positional Embeddings
+       MatMul is used to generate embeddings from input text.
+   -2. Self-Attention Mechanism
+       MatMul computes the attention score matrix using Query (Q), Key (K), and Value (V) matrices, which are derived from MatMul operations on input and learned weight matrices.
+   -3. Feedforward Networks
+       MatMul is applied to inputs, weights, and biases, producing outputs for dense networks within LLMs.
+   -4. Final Predictions
+       The output layer uses MatMul to generate final predictions.
+
+2. Optimizing MatMul Today
+   Currently, MatMul operations are optimized using CUDA and libraries like cuBLAS to parallelize and accelerate them with GPUs. 
+   Despite these optimizations, MatMul remains a significant computational cost in LLM training and inference. 
+   Previous attempts to replace MatMul (e.g., AdderNet, Spiking Neural Nets, Binarized Nets, BitNet) failed at scale, but the new MatMul-free approach promises a breakthrough.
+
+3. Components of Traditional LLMs
+   The Transformer architecture, foundational to traditional LLMs, consists of:
+   -1. Token Mixer
+       Manages relationships between different tokens in a sequence using self-attention mechanisms.
+   -2. Channel Mixer
+       Integrates information across various feature dimensions using Position-wise Feedforward Networks.
+
+4. Innovations in MatMul-free LLM Architecture
+   The new MatMul-free LLM architecture involves three key modifications
+   -1. MatMul-free Dense Layers
+       - Inspired by BitNet, dense layers are replaced with BitLinear modules using ternary weights (-1, 0, +1), which enable simpler addition and subtraction operations.
+       - Fused BitLinear Layer
+         Combines RMSNorm activation and quantization into a single operation, reducing inefficient memory I/O operations.
+   -2. MatMul-free Token Mixer
+       - Self-attention is replaced by a modified Gated Recurrent Unit (GRU) architecture.
+       - Modifications include removing hidden-state-related weights and tanh activations, simplifying candidate hidden state computation,
+         adding a data-dependent output gate, and using ternary weights.
+   -3. MatMul-free Channel Mixer
+       - Gated Linear Units (GLUs) replace Feed-Forward Networks, utilizing ternary weights to perform simple addition and subtraction instead of matrix multiplications.
+
+5. Performance and Efficiency
+   -1. MatMul-free LLMs exhibit
+       - Strong Zero-shot Performance
+         Effective across various language tasks, sometimes outperforming traditional models like Transformer++.
+       - Memory Efficiency
+         Lower memory usage and latency compared to Transformer++, especially notable in larger models (e.g., 13B parameters).
+       - Improved Training Speed
+         Fused BitLinear implementation enhances training speed by 25.6% and reduces memory consumption by 61.0%.
+       - Custom Hardware Solutions
+         Using Field-programmable gate arrays (FPGAs) for ternary operations further reduces power consumption, latency, and memory usage.
+
+6. Future Implications
+   Scaling projections show that MatMul-free LLMs are more efficient with additional computational resources, promising for future models with multi-billion or trillion parameters. 
+   While these models haven’t been tested at the 100B+ parameter scale due to computational constraints, 
+   they represent a significant step towards more efficient LLM training and usage without heavy reliance on GPUs.
