@@ -1,0 +1,52 @@
+# From https://medium.com/yugen-ai-technology-blog/efficient-llm-fine-tuning-lora-dora-and-apples-innovative-approach-ea1b0b31c0a7
+# https://machinelearning.apple.com/research/introducing-apple-foundation-models?source=post_page-----ea1b0b31c0a7--------------------------------
+
+Apple has introduced advanced On-Device & Server Foundation Models designed for enhancing user tasks and interactions, 
+revealing technical specifics about their pre-training, post-training phases, and optimization techniques.
+
+1. Introduction of Apple Intelligence
+   At the 2024 Worldwide Developers Conference, Apple presented Apple Intelligence, 
+   which includes multiple generative models tailored for everyday tasks. 
+   These models adapt in real-time based on user context and power features like text composition,
+   notification management, and in-app actions.
+
+2. Model Specifications
+   Apple uses two primary models:
+   -1. A ~3 billion parameter on-device language model for local tasks.
+   -2. A larger server-based model running on Apple Silicon Servers for more complex tasks.
+   These models are optimized for speed and efficiency using techniques like grouped-query-attention, 
+   shared embedding tables, and low-bit palletization. The on-device model achieves low latency and high token generation rates.
+
+3. Adapters for Fine-Tuning
+   Adapters, specifically LoRA/DoRA, are employed to enhance foundational models without altering their original parameters. 
+   These are modular neural network components that can be inserted into pre-trained models,
+   offering several benefits:
+   -1. Preservation of existing model capabilities.
+   -2. Faster and resource-efficient fine-tuning.
+   -3. Minimal impact on inference latency.
+   Adapters are particularly useful on devices with limited memory, allowing dynamic loading and 
+   updating to handle specific tasks without consuming excessive resources.
+
+4. "Fine-Tuning with Adapters"
+   Adapters focus on fine-tuning specific model layers, such as attention matrices and fully connected layers in transformer architectures.
+   This targeted adaptation allows models to excel in tasks like sentiment analysis or named entity recognition
+   by emphasizing relevant features in the input data.
+
+5. Implementation and Efficiency
+   Apple's models adapt key layers using LoRA techniques, influencing attention mechanisms to focus on task-specific elements. 
+   The modular design of adapters enables efficient memory use and on-the-fly task specialization.
+
+6. Infrastructure for Adapter Training
+   Apple has developed robust infrastructure to retrain, test, and deploy adapters efficiently.
+   This infrastructure supports rapid iteration and deployment, highlighting the importance of ML/LLM platforms in managing these processes.
+
+7. Conclusion
+   Apple's innovative use of foundation models and adapters, particularly through techniques like LoRA, 
+   enhances their models' performance for specific tasks while maintaining efficiency and flexibility.
+   This approach ensures scalable and dynamic AI capabilities across various user interactions.
+
+
+
+
+
+
