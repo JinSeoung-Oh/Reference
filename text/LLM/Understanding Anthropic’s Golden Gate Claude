@@ -1,0 +1,50 @@
+# From https://medium.com/@jonnyndavis/understanding-anthropics-golden-gate-claude-150f9653bf75
+
+At the end of May, Anthropic publicly released a unique version of its Claude 3 Sonnet model, called Golden Gate Claude,
+for a 24-hour period.
+This version was distinctly obsessed with the Golden Gate Bridge, showcasing its fascination in various interactions. 
+For example, it would suggest spending $10 to drive across the bridge, 
+spin love stories centered around it, and even imagine itself as the bridge.
+
+Beyond its entertainment value and the publicity it garnered,
+the release of Golden Gate Claude was backed by a research paper 
+demonstrating promising methods to address two major challenges in large language models (LLMs):
+
+interpretability and safety. This article delves into the process the researchers used to create Golden Gate Claude
+and the broader implications for understanding and manipulating LLMs.
+
+1. Feature Superposition in Neural Networks
+   In an ideal scenario, neural networks would have monosemantic neurons, where each neuron represents a single,
+   understandable concept. For example, the concept of "blue" would activate neurons related to color and the sky.
+   However, most neural networks are composed of polysemantic neurons, where features are represented
+   as a superposition of multiple neurons. This superposition allows for a more efficient storage of information,
+   creating a denser network. To address this, the researchers used a sparse autoencoder (SAE).
+
+2. Sparse Autoencoders
+   Autoencoders are neural networks designed to learn and reconstruct data representations. 
+   The sparse autoencoder, in particular, introduces sparsity constraints to create more interpretable features.
+   The encoder transforms input data into a latent space, while the decoder reconstructs the output. 
+   The SAE developed by Anthropic's researchers employed a linear transformation and ReLU as the encoder, 
+   with a single decoder layer, aiming to minimize reconstruction error and encourage sparsity.
+
+3. Model Architecture and Dictionary Learning
+   The SAE was designed to decompose the input from the LLM into individual features (atoms) and then reconstruct
+   the signal using a dictionary learning approach. This method represents data as a sparse linear combination of basic elements,
+   making the representation both compact and interpretable. 
+   The Claude 3 Sonnet model's latent space was significantly overcomplete, allowing for a wide array of features to be represented.
+
+4. Feature Interpretability and Steering
+   The researchers identified a variety of features, ranging from specific concepts like 
+   the Golden Gate Bridge to abstract notions like inner conflict. 
+   The strength of a feature's activation varied depending on the token's relevance to the concept. 
+   This interpretability is crucial for understanding the inner workings of LLMs.
+
+To ensure safety, the researchers explored "feature steering," where identified features influence the model's behavior. T
+his technique, called feature clamping, involves hardcoding activations in the SAE's latent space to specific values. 
+This method was used to create Golden Gate Claude by clamping the model to the Golden Gate Bridge feature. 
+The same technique could be employed to enhance model safety by steering towards features that represent safe and unbiased behaviors.
+
+# Conclusion
+  The creation of Golden Gate Claude and the accompanying research showcase a significant advancement 
+  in making LLMs more interpretable and safer. By understanding and manipulating the internal features of these models,
+  we can improve their application in various fields, ensuring they operate reliably and ethically.
