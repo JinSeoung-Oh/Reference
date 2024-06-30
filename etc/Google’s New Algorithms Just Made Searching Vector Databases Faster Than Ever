@@ -1,0 +1,51 @@
+## From https://levelup.gitconnected.com/googles-new-algorithms-just-made-searching-vector-databases-faster-than-ever-36073618d078
+
+Vector databases have become essential tools for efficiently storing and querying vector representations 
+of real-world entities like text, images, and more. Here’s a breakdown of how these databases work and how recent advancements, 
+particularly with Google's ScaNN and SOAR, have significantly enhanced their efficiency
+
+1. Basics of Vector Databases
+   Vector databases store embeddings, which are continuous vector representations capturing the features and semantics of entities. 
+   These embeddings are organized using specialized indexing structures, such as Hierarchical Navigable Small World (HNSW) graphs, 
+   to facilitate efficient similarity searches.
+
+   -1. Similarity Search
+       The core function of a vector database is to perform similarity searches between a query vector and stored vectors. 
+       This involves finding the closest vector (nearest neighbor) to the query vector based on similarity measures like the dot product.
+
+   -2. Challenges with Similarity Search
+       Performing exhaustive searches becomes computationally expensive as the dataset size grows.
+       To address this, approximate nearest neighbor methods are used to trade off accuracy for significantly faster search times.
+
+2. ScaNN: Scalable Nearest Neighbors
+   Learned Quantization: ScaNN employs a technique known as Learned Quantization to compress vectors efficiently.
+   This involves iteratively updating representative vectors (cluster centers) using algorithms 
+   like K-Means Clustering to minimize quantization error, which is the difference between original vectors 
+   and their compressed representations.
+
+   -1. Anisotropic Vector Quantization
+       ScaNN introduced Anisotropic Vector Quantization, which considers both the magnitude and direction of quantization errors.
+       This approach improves accuracy by ensuring that the quantization error aligns directionally with the original 
+       vector rather than being orthogonal.
+
+3. SOAR: Spilling with Orthogonality-Amplified Residuals
+   -1. Redundancy
+       SOAR enhances ScaNN by introducing redundancy. Instead of assigning each vector to a single cluster,
+       vectors are assigned to multiple clusters (primary and secondary). 
+       This redundancy helps mitigate errors during the search phase when the primary cluster might fail to provide accurate results.
+
+   -2. Orthogonality-Amplified Residuals
+       SOAR ensures that secondary clusters are chosen such that the difference (residual) between the original vector 
+       and the cluster center is near orthogonal to the query vector. This selection criterion reduces search failures, 
+       enhancing the robustness of similarity searches.
+
+4. Performance
+   SOAR significantly improves the efficiency of ScaNN. It achieves faster search times and requires smaller 
+   memory footprints compared to other libraries. For instance, achieving similar performance 
+   with other libraries would often require over 10 times more memory and 50 times longer indexing times.
+
+# Conclusion
+  Vector databases are crucial for modern machine learning applications, enabling efficient storage and retrieval of embeddings
+  for various tasks. Innovations like ScaNN with SOAR have pushed the boundaries of efficiency in similarity search, 
+  making these databases indispensable for large-scale applications requiring fast and accurate retrieval of 
+  similar items based on vector representations.
