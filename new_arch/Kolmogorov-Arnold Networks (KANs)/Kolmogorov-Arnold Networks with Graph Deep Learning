@@ -1,0 +1,44 @@
+# https://levelup.gitconnected.com/kolmogorov-arnold-networks-kans-are-being-used-to-boost-graph-deep-learning-like-never-before-2d39fec7dfc3
+# https://github.com/mintisan/awesome-kan
+
+In April 2024, Kolmogorov-Arnold Networks (KANs) emerged as a significant advancement in machine learning,
+offering an alternative to Multi-layer Perceptrons (MLPs). 
+Recently, researchers introduced Graph Kolmogorov-Arnold Networks (GKANs), 
+applying KANs to graph-structured data. 
+They found that GKANs outperformed traditional Graph Convolutional Networks (GCNs) 
+in semi-supervised learning tasks using the Cora dataset.
+
+1. Graph Deep Learning Basic
+   Graphs are structures composed of nodes and edges, representing various real-world data like social networks, 
+   recommendation systems, and molecular structures. Graph Deep Learning involves
+   methods to analyze and predict based on these structures, including tasks like node classification, link prediction, and graph generation.
+
+2. Graph Convolutional Networks (GCNs)
+   GCNs integrate node features with graph topology to capture dependencies within a graph.
+   They update node representations by aggregating information from neighboring nodes through normalized adjacency matrices.
+
+3. Introduction to KANs
+   KANs utilize learnable univariate activation functions (e.g., B-Splines) on edges and summations on nodes, 
+   contrasting with MLPs that use fixed activation functions.
+   They are noted for smaller computational graphs, parameter efficiency, faster convergence, and high interpretability.
+
+4. Graph Kolmogorov-Arnold Networks (GKANs)
+   GKANs extend KANs to graph data, aiming to leverage both labeled and unlabeled data effectively. 
+   They introduce two architectures:
+   -1. GKAN Architecture 1: Applies activation functions after aggregating node features.
+   -2. GKAN Architecture 2: Applies activation functions before aggregating node features.
+
+5. Performance Comparison
+   GKANs were evaluated against GCNs on the Cora dataset, achieving higher accuracy across different feature subsets. 
+   For instance, GKAN Architecture 2 surpassed GCN with 67.66% accuracy on the first 200 features compared to GCN's 61.24%. 
+   GKANs also exhibited faster convergence and lower loss values during training.
+
+6. Parameter Optimization
+   Optimal GKAN performance was observed with lower polynomial degrees, intermediate grid sizes for activation functions,
+   and moderate hidden layer sizes. However, researchers noted that training GKANs could be slower compared to MLP-based approaches.
+
+# Conclusion
+  GKANs represent a significant advancement in graph deep learning, offering improved efficiency and accuracy over traditional GCNs. 
+  Their adoption could lead to enhanced capabilities in various applications, including social network analysis, recommendation systems,
+  and biological research. Future research aims to optimize training times and explore further applications of 
+  this innovative neural network architecture.
