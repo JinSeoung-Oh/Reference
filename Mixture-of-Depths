@@ -1,24 +1,115 @@
-# From https://medium.com/@ignacio.de.gregorio.noblejas/mixture-of-depths-a-dazzling-new-ai-breakthrough-be958fc629b2
+# https://medium.com/@techsachin/mixture-of-depths-dynamic-compute-allocation-for-language-models-a1ef9bd3d75d
 
-The research paper "Mixture-of-Depths (MoD)" by Google Deepmind introduces a groundbreaking approach to AI models, 
-addressing a fundamental issue in current models: 
+1. Introduction
+   In a recently released paper by DeepMind, researchers introduced Mixture of Depths (MoD) as a technique 
+   to demonstrate that transformers can dynamically allocate FLOPS (floating point operations per second) to 
+   specific positions in a sequence. This implementation enables the network to dynamically allocate 
+   compute resources by making decisions per token in each layer.
 
-the uniform allocation of compute resources regardless of task complexity. 
-Unlike humans who allocate effort based on task difficulty, existing models treat all tasks equally.
-MoD models aim to rectify this by dynamically assigning compute resources to each prediction, mirroring human cognition.
+   From a high-level perspective, the technique adopted here resembles Mixture of Experts (MoE) transformers,
+   where dynamic token-level routing decisions are made across the network's depth. 
+   However, unlike MoE, Mixture of Depths either applies computation to a token like vanilla transformers or passes 
+   it through a residual connection, which then saves compute.
 
-Transformers, such as ChatGPT, are central to this discussion. 
-These models process input sequences and generate output sequences using a series of Transformer blocks.
-Each block consists of a multi-head attention layer and a feedforward layer, enabling the model to capture nuanced relationships between words. 
-However, the standard attention mechanism in Transformers is computationally expensive and potentially unnecessary for all word-to-word interactions.
+2. Trade-Offs
+   Mixture of Depths allows for a trade-off between performance and speed. 
+   On one hand, it allows training a MoD transformer that improves upon vanilla transformers by as much as 1.5% 
+   on the final log-probability objective using the same training FLOPS, 
+   taking an equivalent amount of time to train.
+   On the other hand, one can train a MoD transformer that achieves training loss parity with an isoFLOP optimal vanilla transformer, 
+   while using a fraction of the FLOPs (upwards of 50%) per forward pass, thus being much faster to step.
 
-MoD introduces a solution to this problem by implementing a routing mechanism. 
-"" Before each Transformer block, tokens are fed into a router, which assigns weights to determine their importance for that block."" 
-This weight dictates whether a token undergoes the attention process or is bypassed, reducing unnecessary computations. 
-Notably, this routing process is learned during training, enabling the model to predict the relevance of each word dynamically.
+   These points combined suggest that MoD transformers can intelligently route computations, skipping unnecessary ones, 
+   and achieve equal or better log probabilities per sequence while using a smaller FLOP footprint per forward pass.
 
-The significance of MoD lies in its ability to drastically reduce computational requirements while improving model performance.
-By allowing models to allocate compute resources based on task complexity, 
-MoD opens the door to creating smarter and more efficient AI models. 
-Moreover, its applicability to various Transformer-based architectures suggests broad potential across the AI landscape. 
-Through controlled routing of compute resources, MoD offers a promising pathway towards more effective and resource-efficient AI systems.
+3. Architecture
+   Similar to Mixture-of-Experts (MoE) transformers, a router is used to choose among potential computational paths.
+   However, deviating from MoE, routers in Mixture-of-Depths have choices to pick either a standard block’s
+   computation like self-attention and MLP or a residual connection. For the tokens picking the residual connection, 
+   Mixture-of-Depths (MoD) transformers have a smaller total FLOP footprint compared to vanilla or MoE transformers.
+
+4. Mixture-of-Depth Architecture
+   In the accompanying diagram, the trained model’s routing decisions for a short sequence are truncated to 64 tokens for visualization. 
+   The choices show that tokens were processed by later blocks’ layers despite passing through relatively few total blocks 
+   throughout the model’s depth. MoD’s approach provides the unique ability to engage blocks serially compared
+   to vanilla transformers engaging every block.
+
+5. Implementation
+   -1. Defining a Compute Budget
+       The first step is defining a compute budget, which will be less than that of an equivalent vanilla transformer 
+       by limiting the number of tokens in a sequence that can participate in a block’s computations like self-attention and MLP. 
+       The compute budget involves understanding capacity, which defines the total number of tokens that comprise the input to 
+       a given computation, determining the total FLOPs for transformers that use conditional computation. 
+       By identifying tokens that require less processing, a smaller compute budget per forward pass compared to a vanilla transformer
+       can be defined by lowering the capacity of the computations.
+
+   -2. Routing Around Transformer Blocks
+       Routing of tokens can be done via self-attention and MLP blocks or residual connection, with the latter being computationally cheap.
+       There exist two extremes for routing: routing each token to every block as in a vanilla transformer, 
+       or routing all tokens around each block, resulting in a faster but less effective model. 
+       The ideal approach is hypothesized to be between these extremes, aiming for an optimal model with better performance
+       and faster processing than a vanilla transformer.
+
+   -3. Routing Schemes
+      Learned routing is preferable to layer dropouts, which underperform for routing tokens. 
+      Two learned routing schemes proposed are:
+
+      1) Token-Choice Routing
+         A router produces per-token probability distributions across computational paths, funneling tokens to the path with
+         the highest probability. This scheme can have load balancing problems since there is no guarantee of appropriate 
+         token division between paths.
+
+      2) Expert-Choice Routing
+         Each path chooses the top-𝑘 tokens based on tokens’ preferences, ensuring perfect load balance since 𝑘 tokens are shuttled
+        to each path. This scheme is more preferred for MoD due to its advantages in load balancing and critical token processing.
+
+      3) Routing Implementation  
+         Each token is processed by a router to produce a scalar weight, and the top-𝑘 weights choose the token identities
+         that will route through a transformer’s block. The goal is to determine the output of a block’s computation for each token, 
+         accruing more compute savings compared to baseline vanilla transformers.
+
+6. Sampling
+   Expert-choice routing faces the non-causality issue of the top-k operation. Two methods were proposed to address this:
+
+   -1. Introducing an Auxiliary Loss
+       A binary cross-entropy loss affecting the language model objective slightly but allowing autoregressive sampling.
+   -2. Introducing an Auxiliary MLP Predictor
+       A second router predicting whether a token will be among the top-𝑘 in the sequence.
+
+7. Results
+   -1. Training and isoFLOP Comparisons
+        Variants of the MoD transformer were trained to determine optimal hyperparameters for further isoFLOP analyses.
+
+   -2. MoD Hyperparameter Tuning
+       Models that perform better than the isoFLOP optimal baseline were identified, with the best MoD variant routing
+       every other block and using a top-k of 256, meaning 12.5% of tokens are processed by self-attention and MLP,
+       while 87.5% route around the block.
+
+   -3. isoFLOP Analysis
+       An isoFLOP analysis was performed using 12.5% capacity MoD variant for different training FLOPs and model sizes,
+       showing significant compute savings.
+
+   -4. Routing Analysis
+       A MoD transformer interleaved 12.5% capacity routing blocks with full-attention blocks, showing effective 
+       routing decisions and weight distributions as dictated by auxiliary loss.
+
+   -5. Auto-Regressive Evaluation
+       MoD variants tested during autoregressive sampling showed minimal performance degradation, 
+       attributed to the accurate prediction problem learned early in training.
+
+8. Mixture-of-Depths-and-Experts (MoDE)
+   MoDE integrates Mixture of Depths with Mixture of Experts. Two variants proposed are:
+
+  -1. Staged MoDE
+      Routes tokens around or towards blocks before self-attention.
+  -2. Integrated MoDE
+      Implements MoD routing by integrating “no-op” experts among MLP experts.
+
+Integrated MoDE is preferable as tokens learn to choose the residual path around experts explicitly, 
+combining performance improvements of MoD and MoE.
+
+9. Conclusion
+   Mixture-of-Depths transformers demonstrate improvements over isoFLOP-optimal baseline performance with fewer FLOPs per forward pass. 
+   For a given training FLOP budget, MoD transformers allow for faster and better-performing models compared to 
+   their baseline counterparts. MoD transformers offer flexibility in tuning compute per forward pass and
+   can integrate with other techniques like Mixture of Experts for further enhancements.
