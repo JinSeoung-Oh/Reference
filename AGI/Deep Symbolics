@@ -1,0 +1,85 @@
+## From https://medium.com/pat-inc/introducing-deep-symbolics-739ca91a8afd
+
+The pursuit of Artificial General Intelligence (AGI) requires moving
+beyond the limitations of current Deep Learning (DL) techniques. 
+Deep Symbolics (DS) represents this next step by integrating the brain's symbolic capabilities into AI systems. 
+Unlike DL, which relies on statistical models, DS focuses on the brain’s ability to handle and manipulate symbols,
+thus addressing the shortcomings of DL in achieving AGI.
+
+1. The Limitations of Deep Learning
+   Deep Learning has shown impressive results, particularly since its breakthrough in 2012 with ImageNet.
+   However, DL models, which include Artificial Neural Networks (ANNs), face significant challenges:
+
+   -1. Black-Box Problem
+       DL models operate as black boxes, making their decision-making processes opaque and difficult to explain.
+   -2. Static Learning
+       DL systems typically require a training phase followed by an operational phase, limiting their ability 
+       to learn continuously or adapt in real-time.
+   -3. Lack of Symbolic Reasoning
+       DL models are primarily statistical and lack the symbolic reasoning capabilities necessary for 
+       true understanding and manipulation of complex concepts.
+
+2. Introduction to Patom Theory
+   Patom Theory (PT) forms the foundation of Deep Symbolics.
+   PT was developed to explain the brain's functioning by focusing on evolutionary capabilities and 
+   the effects of brain damage rather than on the anatomical details of neurons.
+   It proposes that the brain operates by storing, matching, and using hierarchical, bidirectional linkset patterns.
+
+   -1. Key Concepts of Patom Theory
+       -1) Bidirectional Patterns
+           Brain regions can send and receive signals, allowing for feedback and more dynamic processing.
+       -2) Hierarchical Structure
+           Information is processed in layers, with higher-level concepts building upon lower-level patterns.
+       -3) Linkset Patterns
+           Instead of isolated data points, the brain uses interconnected patterns, 
+           enabling more efficient and context-aware processing.
+
+3. Emulating Brain Functions with Deep Symbolics
+   Deep Symbolics aims to emulate the brain’s symbolic capabilities more closely than DL.
+
+   -1. Symbolic Knowledge Representation
+       Unlike DL's statistical approach, DS uses predefined symbols and relationships to represent knowledge, 
+       akin to how dictionaries link words to their meanings.
+   -2. Continuous Learning
+       DS systems can learn and update their knowledge in real-time, similar to how humans learn continuously.
+   -3. Hierarchical and Contextual Processing
+       DS systems process information hierarchically and contextually, integrating various sensory inputs into a cohesive understanding.
+
+4. Practical Example: Throwing a Ball
+   To understand how brains work, consider the task of throwing a ball. 
+   This involves a complex sequence of neurons firing to control muscles, with sensory feedback adjusting the action in real-time. 
+   DS systems aim to replicate this by:
+
+   -1. Pattern Recognition and Matching
+       Recognizing and matching sensory inputs to control outputs effectively.
+   -2. Learning on the Fly
+       Continuously improving the action based on feedback, much like a human adjusts their throw with practice.
+
+5. Deep Symbolics in Action
+   -1. High-Level Brain Model
+       In DS, sensory inputs (e.g., vision and hearing) are matched with stored patterns and combined into multisensory patterns.
+       This is illustrated in Diagram 2, where sensory inputs are processed in dedicated areas and linked to other regions
+       for comprehensive understanding.
+
+   Example of Learning
+   Consider the sentence "I saw her duck!" DS systems can handle this ambiguity by asking clarifying questions, 
+   such as "She ducked?" to resolve the meaning accurately, demonstrating a level of contextual understanding absent in DL systems.
+
+6. Advantages of Deep Symbolics
+   -1. Explainability
+       DS provides interpretable results, unlike the black-box nature of DL.
+   -2. Real-Time Adaptation
+       DS can learn and adapt continuously, reflecting human learning processes.
+   -3. Symbolic Reasoning
+       By using symbols, DS can handle complex concepts and relationships more effectively.
+
+7. Conclusion
+   Deep Symbolics offers a promising path towards AGI by integrating symbolic reasoning with continuous learning and hierarchical processing.
+   By addressing the limitations of Deep Learning, DS aligns more closely with the brain's functioning, 
+   potentially leading to more advanced and capable AI systems.
+
+
+
+
+
+
