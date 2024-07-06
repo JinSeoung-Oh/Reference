@@ -1,0 +1,83 @@
+## From https://towardsdatascience.com/how-bend-works-a-parallel-programming-language-that-feels-like-python-but-scales-like-cuda-48be5bf0fc2c
+
+The article delves into Bend, a newly introduced programming language designed for
+massive parallelism without requiring manual thread management. 
+Bend leverages the Higher-Order Virtual Machine (HVM), which automatically parallelizes operations.
+This automation is based on Interaction Combinators, a computational model that uses graph-based structures and rules.
+Yves Lafont developed this model in the 1990s.
+
+1. Higher-Order Virtual Machine (HVM) and Interaction Combinators
+   -1. Interaction Combinators
+       These are a graphical computation model introduced by Yves Lafont. 
+       They are based on nodes and edges (graphs) rather than the traditional step-by-step instructions found
+       in other computation models. The computation is done through interaction rules applied to these graphs.
+
+   -2. HVM
+       It operates on the principles of Interaction Combinators.
+       HVM's automatic parallelization capabilities stem from this model, 
+       which allows computations to occur simultaneously without explicit thread management by the programmer.
+
+The author initially found the concept of Interaction Combinators to be complex and challenging to understand. 
+However, with dedicated study, they eventually grasped the underlying principles, 
+which led to the creation of the Bend programming language.
+
+2. Lambda Calculus
+   To explain the foundational concepts behind HVM and Interaction Combinators, 
+   the article starts with λ-calculus (Lambda Calculus):
+
+   -1. λ-Calculus
+       Introduced by Alonzo Church in the 1930s, it is a formal system in mathematical logic for expressing computation
+       based on function abstraction and application. It forms the theoretical foundation for many functional programming languages.
+
+   -2. Basic Construct
+       -1) Function Abstraction
+           Represented as λx.E, where λ is the lambda symbol, x is the parameter, and E is the expression.
+       -2) Function Application
+           Applying a function to an argument, represented as (λx.E) y, which replaces x with y in E.
+       -3) α-Conversion (Alpha Conversion)
+           Renaming bound variables to avoid name conflicts. For example, λx.x can be renamed to λy.y.
+       -4) β-Reduction (Beta Reduction)
+           The process of function application where the function’s parameter is replaced with the argument. 
+           For example, (λx.x) y reduces to y.
+
+    -3. Representing Numbers
+        -1) Church Numerals
+            A way to represent natural numbers using λ-calculus. For instance, the number 0 is represented as λf.λx.x, 
+            and the number 1 as λf.λx.f x.
+        -2) Arithmetic Operations
+            Using λ-calculus, operations like addition and multiplication can be represented. 
+            Addition can be defined as λm.λn.λf.λx.m f (n f x).
+
+     -4. Booleans
+        -1) In λ-calculus, true and false are defined as functions. For example, true can be λx.λy.x and false can be λx.λy.y.
+        -2) Conditional statements can be constructed using these boolean definitions.
+
+3. Interaction Nets
+   Following the explanation of λ-calculus, the article moves on to Interaction Nets, another computational concept
+   introduced by Yves Lafont
+
+   -1. Basic Components
+      -1) Cells
+          Represent operations or values.
+      -2) Nets
+          Graph-like structures consisting of cells connected by edges.
+      -3) Interaction Rules
+          Define how cells interact with each other to perform computations.
+
+   -2. Building Interaction Systems
+       -1) An example is provided to construct an interaction system for arithmetic operations based on Peano’s axioms.
+       -2) Peano's Axioms
+           A set of axioms for the natural numbers introduced by Giuseppe Peano. 
+           These axioms can be modeled using interaction nets to define natural numbers and their arithmetic properties.
+
+4. Interaction Process
+   The process involves creating and applying interaction rules to cells and nets to achieve irreducible forms. 
+   This process models natural numbers and their operations graphically, allowing for parallel computation.
+
+5. Connection to Bend and HVM
+   The author emphasizes that understanding λ-calculus and Interaction Nets is crucial for grasping how Bend and HVM achieve parallelism.
+   Bend's automatic parallelization is rooted in these theoretical foundations, 
+   making it powerful for handling massive parallel computations without manual intervention by the programmer.
+
+By combining the concepts of λ-calculus and Interaction Nets, Bend and HVM provide a robust framework for efficient parallel computation,
+leveraging the principles of Interaction Combinators for automated parallel execution.
