@@ -1,0 +1,88 @@
+# From https://generativeai.pub/multi-agent-systems-architecture-d07227b3059b
+
+1. Single-Agent Systems
+   In single-agent systems, a centralised agent is responsible for all decision-making processes, 
+   with other agents acting merely as remote executors of the central agent's decisions. 
+   This centralised approach can lead to a narrow viewpoint, as the decision-making process relies solely on the perspective
+   and information available to the central agent. As a result, alternative viewpoints and potential solutions may be overlooked.
+
+2. Multi-Agent Systems
+   Conversely, multi-agent systems consist of several intelligent agents, each capable of 
+   making decisions and influencing their environment. These agents interact and collaborate, bringing diverse perspectives to the table.
+   The purpose of multi-agent architecture is to construct agents that can provide multiple perspectives 
+   due to their specific roles, functions, and contexts. For instance, one agent might be responsible 
+   for generating application code while another reviews it, leading to better overall outcomes through iterative collaboration.
+
+3. What are AI Agents and Why are They Popular?
+   AI agents are software programs that can interact with their surroundings, gather information, 
+   and use that information to perform tasks and make decisions. They are becoming increasingly popular due to their ability 
+   to automate complex processes, improve efficiency, and adapt to changing environments. 
+   The flexibility and scalability of AI agents make them ideal for a variety of applications across different industries.
+
+4. Advantages of Multi-Agent Designs
+   -1. Separation of Concerns
+       Multi-agent systems allow for the separation of responsibilities. Each agent can focus on specific tasks, 
+       supported by fine-tuned language models and tools, leading to better outcomes compared to a single-agent system 
+       where one agent must handle a wide range of tasks.
+
+   -2. Modularity
+       Multi-agent designs are modular, enabling the division of complex tasks into manageable segments that specialized agents can target.
+       This modularity allows for the independent evaluation and improvement of each agent without disrupting the entire system. 
+       By grouping tools and responsibilities, agents can become more efficient in their specific tasks.
+
+   -3. Diversity
+       Incorporating diverse agents into the system ensures a variety of viewpoints, 
+       improving the quality of output and reducing the likelihood of hallucinations and bias. 
+       This diversity mirrors traditional human teams, where varied perspectives contribute to better decision-making and problem-solving.
+
+   -4. Reusability
+       Once developed, agents can be reused for various use cases. An ecosystem of agents can collaborate to solve problems 
+       using an appropriate orchestration framework (e.g., AutoGen, CrewAI), enhancing efficiency and adaptability.
+
+5. Components of a Multi-Agent Architecture
+   -1. Agents
+       Intelligent agents operate based on a large language model (LLM) and have clear purposes, personas, and contexts.
+
+   -2. Connections
+       These are the links between agents, enabling communication and collaboration.
+
+   -3. Orchestration
+       This process involves coordinating the agents' interactions, which can be sequential, hierarchical, or bi-directional.
+
+   -4. Human
+       A human intermediary assists with decision-making and outcome evaluation.
+
+   -5. Tools
+       Agents use tools to perform specific tasks, such as searching the internet, generating and reading documents, 
+       and uploading code to repositories like GitHub.
+
+   -6. LLM
+       Large language models support the agents' design for inference and decision-making.
+
+6. Popular Multi-Agent Frameworks
+   -1. OpenAI Assistant
+       One of the first frameworks, enabling the development of persistent, multi-modal multi-agent systems that interact 
+       with users over extended periods.
+
+   -2. Microsoft’s Autogen Framework
+       A popular open-source framework for constructing robust multi-agent applications. 
+       It includes Autogen Studio, an intuitive UI-based programming tool, and provides a well-defined multi-agent 
+       architectural method based on an orchestrator.
+
+   -3. Dragonscale’s Multi-Agent Systems
+       Integrates generative AI models and tools to develop intelligent systems suitable for dynamic business environments,
+       handling simple to complex tasks.
+
+   -4. CrewAI
+       A framework for orchestrating autonomous AI agents, enabling them to collaborate on challenging tasks, adopt roles, share goals, 
+       and work together. CrewAI is favored for its ability to facilitate teamwork among agents.
+
+   -5. LangGraph
+       Built on top of LangChain, LangGraph allows the development of stateful, multi-actor applications using LLMs. 
+      It enhances LangChain Expression Language by adding cyclic coordination of numerous chains (or actors) over various processing steps.
+
+7. Conclusion
+   The ultimate objective of AI evolution is to develop intelligent systems that learn from and adapt to their environments,
+   leading to more personalized and efficient solutions across industries. Multi-agent systems, with their modularity, 
+   diversity, and reusability, represent a significant step toward this goal, offering substantial advantages
+   over traditional single-agent systems.
