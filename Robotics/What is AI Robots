@@ -1,0 +1,53 @@
+# https://konfuzio.com/en/ki-robot/
+
+1. What Are AI Robots?
+   AI robots are mechanical devices programmed to perform tasks autonomously or under external control. 
+   They use AI to understand, learn, and execute tasks, equipped with algorithms and technologies enabling human-like abilities 
+   such as perception, decision-making, speech recognition, and problem-solving.
+
+2. Types of AI Robots
+   1) Autonomous Mobile Robots (AMR)
+      AMRs can move independently in their environment using sensors, actuators, and advanced software. 
+      They are used in logistics, warehouses, manufacturing, healthcare, and agriculture for tasks like transporting goods,
+      feeding production lines, checking inventories, disinfecting rooms, and harvesting produce. 
+      The cost of AMRs varies based on their specific functions and requirements.
+
+   2) Articulated Robots
+      Also known as robotic arms, articulated robots have joints and arms designed for human-like movements, capable of gripping,
+      lifting, rotating, and positioning objects. They are used in manufacturing, medicine, space travel, research, 
+      and entertainment for tasks such as product assembly, material handling, welding, painting, and packaging. 
+      Articulated robots are generally more expensive than AMRs due to their complexity.
+
+   3) Cobots (Collaborative Robots)
+      Cobots are designed to work safely alongside humans, equipped with sensors to recognize and respond to human movements and speech. 
+      They support human workers by taking on repetitive or dangerous tasks, increasing workplace efficiency.
+      Cobots are used in manufacturing, assembly, logistics, healthcare, and research.
+
+2. Key Technological Elements of AI Robots
+   1) Machine Learning
+      Machine learning enables AI robots to learn from data and make decisions. Robots use real-time data and contextual information to improve their actions and reactions over time.
+
+   2) Deep Learning / Deep Reinforcement Learning
+      Deep learning uses artificial neural networks to recognize and internalize complex patterns from large data sets. Deep reinforcement learning combines deep learning with reinforcement learning, allowing robots to learn optimal decisions through interaction with their environment.
+
+   3) Natural Language Processing (NLP)
+      NLP allows robots to understand, interpret, and respond to human language in real-time. It uses linguistic rules and statistical models to analyze and understand text data, enabling robots to interact with humans through speech and text.
+
+   4) Conversational AI
+      Conversational AI enhances interaction between humans and robots using NLP and machine learning. It helps robots understand and respond to human dialogue, improving their efficiency in tasks like customer service.
+
+
+3. 4 Challenges of AI Robotics
+   1) High AI Requirements
+      AI robots require advanced technologies like machine learning, deep learning, NLP, and computer vision to understand and execute complex tasks.
+
+   2) Integration Complexity
+      Integrating AI robots into existing production lines is complex and requires customized solutions for smooth communication with other machines and systems.
+
+   3) Need for Specialist Knowledge
+      Employees need training to interact with AI robots efficiently and safely, requiring companies to invest in skill development.
+
+   4) Safety Aspects
+      Strict safety protocols and state-of-the-art safety systems are necessary to ensure safe collaboration between humans and AI robots, preventing accidents and protecting employees.
+
+AI robots, equipped with advanced technologies and capabilities, are revolutionizing various industries by increasing efficiency, improving quality, and enhancing safety. Despite the challenges, the benefits they bring to companies are significant, making them a key component in the future of industrial and service sectors.
