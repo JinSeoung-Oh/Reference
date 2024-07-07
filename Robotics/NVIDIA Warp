@@ -1,0 +1,44 @@
+# https://github.com/NVIDIA/warp
+# https://developer.nvidia.com/warp-python
+# https://docs.omniverse.nvidia.com/extensions/latest/ext_warp.html
+
+NVIDIA Warp is a Python framework designed for high-performance simulation and spatial computing, 
+particularly within the NVIDIA Omniverse ecosystem. 
+It allows developers to write kernel-based programs that are automatically compiled to CUDA code for GPU acceleration,
+enabling the creation of efficient, high-performance 3D simulations and workflows.
+
+# Key Features of NVIDIA Warp
+  -1. Kernel-Based Programming
+      Warp allows developers to write functions in Python that are just-in-time (JIT) compiled into x86 or CUDA kernels. 
+      This low-level abstraction offers fine-grained control over GPU hardware, providing benefits like kernel fusion, 
+      conditional logic, and support for sparse data structures.
+
+  -2. Differentiable Programming
+      Warp can generate reverse-mode (adjoint) kernels for gradient propagation, which is crucial for training neural networks,
+      design optimization, and parameter estimation in machine learning frameworks like PyTorch and JAX.
+
+  -3. Built for Spatial Computing
+      The framework includes a comprehensive spatial math library and supports complex data structures such as meshes,
+      hash grids, and sparse volumes (using NanoVDB), facilitating 3D simulation and geometry processing.
+
+  -4. Omniverse Integration
+      Warp is integrated into NVIDIA's Omniverse, enabling Python developers to create real-time simulations and graphics code
+      within the Omniverse environment. This integration allows for hot-reloading of kernels and supports 
+      the creation of custom OmniGraph nodes.
+
+# Applications and Examples:
+  -1. Simulation
+      Used for creating detailed simulations such as aerodynamics around vehicles and dynamics of quadrotor drones,
+      leveraging its support for multi-dimensional arrays and collision fields.
+
+  -2. Robotics
+      Helps in simulating robotic systems and optimizing their trajectories using differentiable simulation capabilities.
+
+  -3. Data Generation
+      Accelerates procedural data generation processes, which are essential for synthetic data generation in machine learning pipelines.
+
+  -4. Graphics
+      Utilized for tasks like mesh deformation and image processing, providing a powerful tool for graphics professionals.
+
+To start using Warp, developers can enable the Warp extensions in Omniverse and write their kernels using the provided Python API.
+Detailed documentation and examples are available on NVIDIA's developer portal and Omniverse documentation site.
