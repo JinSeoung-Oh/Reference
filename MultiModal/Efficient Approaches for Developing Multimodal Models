@@ -1,0 +1,136 @@
+## From https://towardsdatascience.com/from-open-source-unimodal-to-multimodal-diy-techniques-for-building-foundational-models-e1df92276379
+
+With recent advancements in large language models (LLMs), AI has become the spotlight of technology.
+We’re now more eager than ever to reach AGI-level intelligence. 
+Yet, achieving a human-like understanding of our surroundings involves much more than just mastering language and text comprehension. 
+Humans use their five senses to interact with the world and act based on these interactions to achieve goals. 
+This highlights that the next step for us is to develop large models that incorporate multimodal inputs and outputs,
+bringing us closer to human-like capabilities. However, we face two main obstacles. 
+First, we need a multimodal labeled dataset, which is not as accessible as text data.
+Second, we are already pushing the limits of compute capacity for training models with textual data.
+Increasing this capacity to include other modalities, especially high-dimensional ones like images and videos, is incredibly challenging.
+
+These limitations have been a barrier for many AI researchers aiming to create capable multimodal models. 
+So far, only a few well-established companies like Google, Meta, and OpenAI have managed to train such models.
+However, none of these prominent models are open source, and only a few APIs are available for public use. 
+This has forced researchers, especially in academia, to find ways to build multimodal models without massive compute capabilities,
+relying instead on open-sourced pre-trained models, which are mostly single modal.
+
+In this blog, we focus on successful, low-effort approaches to creating multi-modal models.
+Our criteria are centered on projects where the compute costs remain a few thousand dollars,
+assuming this is within the budget a typical lab can afford.
+
+-1. Parameter-Efficient Fine-Tuning (PEFT)
+    Before we dive into the proposed approaches for integrating and aligning two pre-trained models, 
+    we need to discuss the mechanics of fine-tuning a large model with limited compute power. 
+    Therefore, we’ll start by exploring Parameter-Efficient Fine-Tuning (PEFT) and then describe 
+    how these methods can be further used to align pre-trained models and build open-source multimodal models.
+
+    As model sizes continue to grow, the need for efficient fine-tuning methods becomes more critical. 
+    Fine-tuning all parameters in a large-scale pre-trained model is often impractical due to the substantial computational resources 
+    and time required. Parameter-efficient fine-tuning (PEFT) addresses this challenge by freezing the model’s parameters 
+    and only training the injected modules with a small number of parameters. 
+    Hence, only one copy of the large Transformer is stored with learned task-specific lightweight PEFT modules, 
+    yielding a very small overhead for each additional task. 
+    This approach not only reduces resource demands but also accelerates the adaptation of models to new tasks, 
+    making it a practical and effective strategy in the era of ever-expanding models. 
+    PEFT approaches are very commonly used in LLMs and giant vision models and can be mainly divided into three categories:
+
+    -1) Adapters
+        An adapter is essentially a small module, typically consisting of a downsample layer, nonlinearity, 
+        and an upsample layer with a skip connection to preserve the original input. 
+        This module is inserted into a pretrained model, with only the adapters being trained during fine-tuning.
+
+    -2) LoRA (Low-Rank Adaptation)
+        LoRA injects trainable low-rank decomposition matrices into the model to approximate weight updates, 
+        significantly reducing the number of trainable parameters for downstream tasks. For a pre-trained weight matrix  
+        𝑊 of dimensions 𝑑×𝑘, LoRA represents its update with a low-rank decomposition
+        𝑊+Δ𝑊=𝑊+𝐷𝑈
+        where 𝐷 has dimensions 𝑑×𝑟 and 𝑈 has dimensions 𝑟×𝑘. These matrices 𝐷 and 𝑈 are the tunable parameters. 
+        LoRA can be applied to the attention matrices and/or the feedforward module for efficient fine-tuning.
+
+    -3) P*-Tuning (Prefix-Tuning, Prompt Tuning)
+        P*-tuning typically prepend a set of learnable prefix vectors or tokens to the input embedding, 
+        and only these so-called “soft prompts” are trained when fine-tuning on downstream tasks. 
+        The philosophy behind this approach is to assist the pre-trained models in understanding downstream tasks 
+        with the guidance of a sequence of extra “virtual tokens” information. 
+        Soft prompts are sequences of vectors that do not correspond to actual tokens in the vocabulary. 
+        Instead, they serve as intermediary representations that guide the model’s behavior to accomplish specific tasks,
+        despite having no direct linguistic connection to the task itself.
+
+    Evaluating PEFT Techniques: Strengths and Limitations
+    -1) Adapters
+        Add a small number of parameters (3–4% of the total parameters), making them more efficient than full fine-tuning 
+        but less than prompt tuning or LoRA. They can capture complex task-specific information effectively
+        but can complicate the optimization process and lead to longer training times.
+    -2) LoRA
+        Adds only a small fraction of parameters (0.1% to 3%), making it highly efficient and scalable with very large models. 
+        However, it might be less flexible compared to adapters in capturing certain types of task-specific information.
+    -3) P-Tuning*
+        Extremely parameter-efficient (often requiring less than 0.1%), as it only requires learning additional prompt tokens
+        while keeping the original model parameters unchanged, preserving the model’s generalization capabilities. 
+        However, it may not be able to capture complex task-specific information as effectively as other methods.
+    So far, we’ve reviewed new methods to fine-tune a large model with minimal compute power. This capability opens the door for us to combine two large models, each with billions of parameters, and fine-tune only a few million parameters to make them work together properly. This alignment allows one or both models to generate embeddings that are understandable by the other. Next, we’ll discuss three main approaches that demonstrate successful implementations of such a training regime.
+
+2.1 Prompt Adaptation
+    -1) LLaMA-Adapter
+        LLaMA-Adapter presents a lightweight adaptation method to efficiently fine-tune the LLaMA model into an instruction-following model. 
+        This is achieved by freezing the pre-trained LLaMA 7B model and introducing a set of learnable adaptation prompts (1.2M parameters)
+        into the topmost transformer layers. Additionally, a learnable zero-initialized gating factor is introduced to adaptively 
+        control the importance of the adaptation prompts. LLaMA-Adapter extends to multi-modal tasks by integrating visual information 
+        using a pre-trained visual encoder such as CLIP. Fine-tuning with LLaMA-Adapter takes less than one hour on 8 A100 GPUs.
+
+    -2) LLaMA-Adapter V2
+        LLaMA-Adapter V2 focuses on instruction-following vision models that can also generalize well on open-ended visual instructions. 
+        It introduces more learnable parameters (14M) by unfreezing all the normalization layers in LLaMA and adding a learnable bias
+        and scale factor to all linear layers in the transformer. Visual tokens are fed into the early layers of the language model, 
+        while the adaptation prompts are added to the top layers. This improves the integration of visual knowledge without
+        disrupting the model’s instruction-following abilities. Training LLaMA-Adapter V2 takes approximately 100 hours on a single A100 GPU.
+
+2.2 Intermediate Module Training
+    -1) MiniGPT-4
+        MiniGPT-4 aligns a frozen visual encoder, ViT-G/14, with a frozen LLM, Vicuna, using one projection layer.
+        Training the projection layer involves two stages: pretraining on a large dataset of aligned image-text pairs 
+        and fine-tuning with a smaller, high-quality dataset. In both stages, all other parameters are frozen. 
+        MiniGPT-4 requires training approximately 10 hours on 4 A100 GPUs.
+
+    -2) LLaVA
+        LLaVA connects LLM Vicuna with a vision encoder, ViT-L/14, using a single linear layer for vision-language instruction-following tasks.
+        The training process involves two stages: pretraining the projection layer on a large dataset of paired examples and fine-tuning 
+        the projection layer and LLM weights using a high-quality generated dataset of language-image instruction-following data. 
+        Pretraining takes 4 hours, and fine-tuning takes 4–8 hours on 8 A100 GPUs.
+
+    -3) LLaVa-1.5
+        LLaVa-1.5 improves LLaVA by adding a two-layer MLP to connect the LLM to the vision encoder, scaling up the input image resolution,
+        and adding academic-task-oriented VQA data. Training finishes in approximately 1 day on a single 8-A100 GPU.
+
+    -4) Video-ChatGPT
+        Video-ChatGPT focuses on creating a video-based conversational agent by using the pretrained image-based visual encoder, 
+        CLIP ViT-L/14 for video tasks and connecting it with pretrained LLM Vicuna through a learnable linear projection model. 
+        Training of the linear projection layer takes around 3 hours on 8 A100 40GB GPUs.
+
+    -5) PandaGPT
+        PandaGPT integrates the pretrained LLM Vicuna with the multimodal encoder ImageBind through a linear projection layer. 
+        The linear projection layer is trained, and Vicuna’s attention modules are fine-tuned using LoRA on 8 A100 40G GPUs for 7 hours. 
+        PandaGPT exhibits emergent, zero-shot, cross-modal capabilities across multiple modalities.
+
+2.3 Adapter Mixture
+    -1) Cheap&Quick
+        Cheap&Quick adopts lightweight adapters to integrate large language models (LLMs) and vision models for vision-language tasks.
+        The paper proposes a Mixture-of-Modality Adapters (MMA), designed to facilitate switching between single- and multi-modal
+        instructions without compromising performance. Training the adapters and projection layer (only 3.8M parameters) 
+        takes 1.4 hours on 8 A100 GPUs.
+
+2.4 Modality as Grounding Without Training
+    -1) MAGIC
+        MAGIC proposes a novel, training-free, plug-and-play framework and uses image embedding, through pre-trained CLIP, 
+        as a modulating input to the language model. The magic relies on a two-stage process. The first stage is retrieving 
+        a similar image that matches the user-provided image from a large pre-computed image database. 
+        The second stage is feeding the embedding of the retrieved image into the language model as a grounding signal.
+
+# Conclusion
+  Given that the vast majority of multimodal models are built by combining two already pre-trained models,
+  PEFT plays a critical role in making this alignment effective and feasible. By focusing on efficient fine-tuning methods such as adapters,
+  LoRA, and P*-tuning, researchers can create multimodal models with minimal computational resources. 
+  This opens up opportunities for the broader AI research community, particularly those with limited access to extensive compute capabilities,
+  to explore and innovate in the multimodal space.
