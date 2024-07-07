@@ -1,0 +1,77 @@
+## From https://medium.com/@techsachin/gnn-rag-combining-llms-language-abilities-with-gnns-reasoning-in-rag-style-d72200da376c
+
+Key Contributions
+1. Framework
+   -1) GNN-RAG
+       The method repurposes GNNs to enhance the reasoning capabilities of LLMs in a retrieval-augmented generation (RAG) style,
+       achieving state-of-the-art performance on benchmarks like WebQSP and CWQ.
+
+   -2) Effectiveness & Faithfulness
+       GNN-RAG shows superior performance on KGQA benchmarks without requiring additional LLM calls, improving efficiency.
+
+   -3) Efficiency
+       By using GNNs for initial retrieval, GNN-RAG enhances performance without incurring extra costs typically associated 
+       with LLM-based retrieval systems.
+
+2. Problem Statement & Background
+   -1) KGQA
+       Given a knowledge graph (KG) 𝐺 with facts in the form (head entity 𝑣, relation 𝑟, tail entity 𝑣), the task is to extract entities from 
+       𝐺 that correctly answer a natural language question 𝑞.
+
+   -2) Retrieval & Reasoning
+       A smaller, question-specific subgraph 𝐺_𝑞 is retrieved for 𝑞 via entity linking and neighbor extraction to handle
+       the vast information in KGs.
+
+   -3) GNNs
+       KGQA can be seen as a node classification problem where KG entities are classified as answers or non-answers for a given question.
+
+   -4) LLMs
+       LLMs perform retrieval-augmented generation (RAG) by converting retrieved subgraphs into natural language, 
+       which can then be processed by the LLM.
+
+   -5) LLM-based Retriever
+       An example, RoG, extracts shortest paths to answers from training question-answer pairs for fine-tuning the retriever. 
+       An LLM generates reasoning paths based on these fine-tuned models.
+
+3. GNN-RAG Framework
+   -1) Workflow
+       A GNN reasons over a dense KG subgraph to retrieve answer candidates.
+       Shortest paths in the KG connecting question entities and GNN-based answers are extracted and verbalized.
+       The LLM uses these verbalized paths for reasoning with RAG.
+
+   -2) GNN
+       GNNs explore diverse reasoning paths in KGs, scoring nodes as answers or non-answers.
+       During inference, nodes with high probability scores are returned as candidate answers along with their reasoning paths.
+
+   -3) LLM
+       The reasoning paths are verbalized and input to an LLM, like LLaMA, which is fine-tuned to generate correct answers using these paths.
+        Prompt tuning is used to optimize LLMs' handling of verbalized graph information.
+
+   -4) Retrieval Analysis: GNNs & Their Limitations
+       Deep GNNs (e.g., L = 3) handle complex graph structures and multi-hop information effectively,
+       while shallow GNNs (L = 1) are better for simple questions.
+
+   -5) Retrieval Augmentation (RA)
+       Combines outputs from different retrieval approaches to increase diversity and recall.
+       GNN-RAG+RA uses both GNN-based and LLM-based retrievers, while GNN-RAG+Ensemble combines outputs of different GNNs.
+
+4. Detailed Workflow:
+   -1) Initial Step
+       A GNN reasons over a dense subgraph retrieved from the KG to find potential answers to a question.
+
+   -2) Path Extraction
+       Shortest paths connecting question entities to candidate answers are extracted and verbalized.
+
+   -3) Input to LLM
+       These verbalized paths are used as input for an LLM like LLaMA2-Chat-7B, fine-tuned to generate answers.
+
+5. Conclusion
+   -1) Advantages
+       GNN-RAG leverages GNNs' strengths in reasoning over graph structures and LLMs' natural language processing abilities 
+       to improve KGQA performance.
+
+   -2) Efficiency
+       It achieves state-of-the-art results without additional LLM calls, making it both effective and efficient.
+
+   -3) Scalability
+       GNN-RAG can handle complex and large-scale KGs, providing a scalable solution for KGQA tasks.
