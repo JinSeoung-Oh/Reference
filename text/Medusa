@@ -1,0 +1,93 @@
+## from https://towardsdatascience.com/exploring-medusa-and-multi-token-prediction-de7f8312e4a7
+# https://arxiv.org/pdf/2401.10774
+# Medusa is a freamwork to speed up LLM inference
+
+The internet is highly competitive, with users abandoning webpages if they take longer than 5 seconds to load. 
+This is particularly challenging for Large Language Models (LLMs), which are among the slowest programs. 
+Custom hardware can speed up LLMs but is costly. 
+Enhancing performance on standard hardware can significantly improve user experience.
+
+## MEDUSA: A Framework for Accelerating LLM Inference
+   The paper "MEDUSA: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads" 
+   presents an architectural innovation that accelerates LLM inference by 2-3 times using existing hardware. 
+   This approach, Medusa, uses speculative decoding to enhance speed.
+
+1. Speculative Decoding
+   Speculative decoding aims to predict multiple tokens in one forward pass, rather than predicting one token at a time. 
+   This reduces redundant calculations since the attention patterns for subsequent tokens are similar. 
+   The process involves three steps:
+
+  -1. Generate Candidates: Create potential token sequences.
+  -2. Process Candidates: Evaluate these sequences.
+  -3. Accept Certain Candidates: Select the best sequences based on certain criteria.
+
+2. Medusa Framework
+   Medusa integrates additional decoding heads into the final layer of the model.
+   Each head predicts further tokens from the forward pass, enabling multiple token predictions simultaneously. 
+   The recommended number of heads is five for an optimal balance between speed and quality. 
+   The decoding heads transform the internal hidden state into token probabilities using specific architectural changes.
+
+   -1. Decoding Heads Implementation
+       - Equation for k-th Head
+         -1) Use trained weights 𝑊_1 to multiply with the internal state for token 𝑡
+         -2) Apply the SiLU activation function to pass selective information.
+         -3) Add a skip connection with the internal state to retain information during activation.
+         -4) Multiply the result by a second set of weights𝑊_2 and apply a softmax function to obtain probabilities.
+
+3. Tree Attention
+   Medusa's tree attention mechanism processes multiple token predictions concurrently.
+   Early Medusa heads propose several token candidates, and subsequent heads consider these for their predictions. 
+   This exponentially increases the number of potential outcomes.
+
+   - Tree Attention Process
+     -1) Use a masked attention mechanism to ensure that only relevant tokens are considered for each prediction.
+     -2) This method allows efficient and concurrent candidate generation and verification.
+     -3) Probability-based prioritization is used to manage computational load, focusing on the most likely predictions.
+
+4. Candidate Acceptance
+   To finalize predictions, Medusa employs two methods
+   -1) Rejection Sampling
+       A secondary model evaluates token quality. This method is dependent on the secondary model’s speed and accuracy.
+   -2) Typical Acceptance Scheme
+       Sets a probability threshold for token acceptance. Adjustments based on temperature settings allow
+       for varying levels of creativity and speed in the model's responses.
+
+   - Typical Acceptance Scheme Equation
+     -1) The scheme uses the original model’s probability distribution to set thresholds 𝜖 and 𝛿 for accepting tokens.
+     -2) High probability tokens and lower probability tokens from distributions with generally low probabilities are accepted.
+
+5. Self-Distillation
+   To create Medusa models, high-quality foundation models are augmented with Medusa heads. 
+   Fine-tuning involves using a dataset, such as ShareGPT, for high-quality interaction prompts.
+   Initial fine-tuning attempts using only ground-truth data proved inadequate, leading to a new method
+   using probability distributions as ground-truth via a reformulated loss function.
+
+   - Loss Function
+     -1) Uses Kullback-Leibler (KL) divergence to measure the difference between original and new probability distributions.
+     -2) This approach maintains both original and new model probabilities, which is storage and memory intensive.
+         Low Rank Adaptation (LoRA) fine-tuning is recommended to manage this complexity.
+
+6. Training Medusa
+    Medusa introduces new parameters that need fine-tuning through two methods:
+
+    -1) Medusa-1
+        Freezes all model weights except Medusa heads. This method is cost-effective and prevents performance degradation
+        of the original model. Using quantized backbone models and Quantized Low Rank Adaptation (QLoRA) 
+        further reduces memory requirements and costs.
+
+        - Medusa-1 Training Equation
+          Matches the correct ground-truth token to the corresponding Medusa head with a specific loss function
+    
+    -2) Medusa-2
+        Updates all model weights for optimal performance. This method involves an initial Medusa-1 run to set Medusa weights,
+        followed by fine-tuning with separate learning rates for Medusa heads and backbone weights. 
+        The loss function balances the Medusa-1 loss with the backbone model loss.
+
+        - Medusa-2 Training Equation
+          Combines the Medusa-1 loss function with the backbone model’s loss function, scaled by a value 𝜆_0 
+          to ensure balanced computation.
+
+7. Conclusion
+   Medusa accelerates LLM inference by employing speculative decoding, multiple decoding heads, and tree attention. 
+   Its training strategies ensure efficiency and maintain high performance, offering a significant improvement
+   in using standard hardware for LLMs.
