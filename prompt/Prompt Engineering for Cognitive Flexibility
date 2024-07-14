@@ -1,0 +1,38 @@
+## I just summarize result part. See more detail : https://towardsdatascience.com/prompt-engineering-for-cognitive-flexibility-44e490e3473d
+
+The mini-experiment using the MMLU-Pro benchmark evaluated the effectiveness of different prompt engineering techniques
+and the impact of constraining reasoning on the model's accuracy. 
+
+1. Accuracy Across Different Prompt Techniques
+   -1. Direct Question: Performed slightly better than the other techniques with an accuracy of 66%.
+   -2. Chain-of-Thought (CoT): Achieved 65% accuracy.
+   -3. Knowledge Domain Activation: Scored 64% accuracy.
+   -4. Contextual Scaffolds: Resulted in 63% accuracy.
+
+2. Impact of Constraining Reasoning
+   -1. When reasoning was deliberately constrained, the accuracy of all techniques dropped significantly from an average of 66% to 51%.
+   -2. This indicates that allowing the model to reason openly is crucial for maintaining higher accuracy.
+
+3. Token Efficiency
+   -1. The Direct Question approach was the most token-efficient, generating an average of 180 tokens per answer.
+   -2. CoT was the least efficient, generating approximately 339 tokens per answer (88% more than the Direct Question approach).
+   -3. Despite comparable accuracy, CoT's verbosity suggests it may not always be the most efficient strategy
+       for intra-generation knowledge activation.
+
+4. Reasoning Without Prompts
+   -1. In some instances, the model chose to answer directly without generating reasoning traces, 
+       even when not explicitly instructed to do so.
+   -2. Accuracy in these instances ranged from 64% to 70%, indicating the model's ability to adapt its strategy
+       based on the specific question at hand.
+
+5. Practical Implications
+   The findings suggest that straightforward prompt strategies can be as effective as more structured ones.
+   While CoT aims to simulate reasoning by inducing specific feature activations,
+   it may not always be necessary or optimal, especially if excess token generation is a concern. 
+   Allowing the model to exercise cognitive flexibility can be a more suitable approach, balancing accuracy and efficiency.
+
+6. Conclusion
+   The mini-experiment highlights the importance of cognitive flexibility in LLMs. 
+   Effective prompt engineering should balance cognitive flexibility and reasoning, optimizing both accuracy and efficiency. 
+   Direct Question prompts, which allow open reasoning and adaptability, emerge as a promising approach for complex, 
+   reasoning-oriented tasks.
