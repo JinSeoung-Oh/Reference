@@ -1,0 +1,75 @@
+## From https://levelup.gitconnected.com/the-new-adam-mini-optimizer-is-here-to-cause-a-breakthrough-in-ai-6b0ba252ae36
+## https://github.com/zyushun/Adam-mini
+## https://arxiv.org/abs/2406.16793
+
+1. Introduction to Adam-mini
+   The Adam Optimizer, introduced in 2017, has become the standard for training large language models (LLMs) due
+   to its superior performance. However, it has a significant drawback: memory inefficiency. 
+   For instance, training a 7-billion parameter model with Adam requires around 86 GB of memory, 
+   and models like Google PaLM with 540 billion parameters need over 50 GPUs just to accommodate Adam.
+
+   To address this, a new optimizer called Adam-mini has been developed, which is twice as memory efficient
+   and achieves nearly 50% higher throughput compared to AdamW when training billion-parameter LLMs.
+
+2. What Are Optimizers?
+   Optimizers are algorithms that adjust the parameters (weights and biases) of machine learning models to minimize
+   the loss function, leading to a more accurate model.
+
+3. Gradient Descent: The Foundation
+   The basic optimization algorithm is Gradient Descent, which iteratively minimizes the loss function. 
+   It updates model parameters in the direction opposite to the gradient of the loss function.
+
+4. Gradient Descent Update Rule
+𝜃_(𝑡+1)=𝜃_𝑡−𝛼∇𝐿(𝜃_𝑡)
+where 𝜃 represents the model parameters, 𝛼 is the learning rate, and ∇𝐿(𝜃) is the gradient of the loss function.
+
+5. Variants of Gradient Descent
+   -1. Batch Gradient Descent (BGD): Uses the entire dataset for each update.
+   -2. Stochastic Gradient Descent (SGD): Uses one data point at a time for each update.
+   -3. Mini-Batch Gradient Descent (MBGD): Uses a subset of the dataset for each update.
+
+6. Modern Optimizers
+   Modern optimizers build on the limitations of basic Gradient Descent.
+   -1. Momentum
+       Momentum improves SGD by using a velocity term that accumulates past gradients, helping to maintain consistent parameter
+       updates.
+
+   -2. AdaGrad
+       AdaGrad adjusts the learning rate for each parameter, making larger updates on infrequent parameters and smaller
+       updates on frequent ones.
+
+   -3. RMSProp
+       RMSProp adapts the learning rate for each parameter using an exponentially decaying average of past squared gradients.
+
+   -4. Adam Optimizer
+       Adam combines the benefits of Momentum and RMSProp by maintaining first and second moment estimates of the gradients.
+
+      - Adam Update Rule
+        𝑚_𝑡 = 𝛽_1𝑚_(𝑡−1)+(1−𝛽_1)𝑔_𝑡
+        𝑣_𝑡 = 𝛽_2𝑣_(𝑡−1)+(1−𝛽_2)𝑔^2_𝑡
+        (𝑚^)_𝑡 = (𝑚_𝑡) / (1−(𝛽^𝑡)_1)
+        (𝑣^)_𝑡 = (𝑣_𝑡) / (1−(𝛽^𝑡)_2)
+        𝜃_(𝑡+1) = 𝜃_𝑡 − 𝜂((𝑚^)_𝑡)/(np.root ((𝑣^)_𝑡)+𝜖)
+
+  -5. AdamW Optimizer
+      AdamW improves Adam by decoupling the weight decay term from the gradient update process.
+
+      - AdamW Update Rule
+        𝜃_(𝑡+1) = 𝜃_𝑡−𝜂(((𝑚^)_𝑡) / (np.root((𝑣^)_𝑡) +𝜖) + 𝜆𝜃_𝑡)
+
+   -6. Adam-mini Optimizer
+       Adam-mini optimizes memory usage by assigning a single learning rate to parameter blocks rather than individual parameters.
+       This approach leverages the near-block diagonal structure of the Hessian matrix in Transformers, 
+       where groups of related parameters are updated with a shared learning rate.
+
+       - Adam-mini Process
+         -1. Partitioning Parameters
+             Divide model parameters into blocks based on the Transformer's Hessian structure.
+         -2. Shared Learning Rates
+             Use a single learning rate for all parameters within a block, calculated by averaging the second moment
+             estimates within that block.
+
+Conclusion
+Adam-mini offers a breakthrough in training large language models by significantly reducing memory usage
+and increasing throughput without compromising performance. This makes it a promising tool for the future of deep learning,
+enabling efficient training of massive models on more modest hardware configurations.
