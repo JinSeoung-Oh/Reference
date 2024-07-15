@@ -1,0 +1,76 @@
+## From https://medium.com/@raunak-jain/orchestrating-agentic-systems-eb945d305083
+
+# Static and Dynamic Execution of Tasks by Agents
+1. Limitations and Advancements of Traditional NLP and LLM Pipelines
+   -1. Traditional LLM Pipeline
+       - Sequential execution where the output of one LLM call is the input for the next.
+   -2. Advancements in LLMs' Planning and Reasoning Abilities
+       - Enhanced reasoning and planning allow LLMs to dynamically decide execution paths based on observations and plans.
+
+2. Difference Between Multi-State and Multi-Agent Systems
+   -1. Multi-State Systems
+       - LLMs might enter different states to achieve specific goals, e.g., Thought, Act, Observe in the ReAct system.
+       - Fixed sequence of state transitions (Thought -> Act -> Observe -> Thought).
+   -2. Multi-Agent Systems
+       - Each agent operates independently with specific states and goals.
+       - Processes of thought generation, action taking, and observation are handled by separate agents, extending to a multi-agent problem.
+
+3. Controlling Multi-Agent Systems
+   -1. Orchestration
+       - Methods to determine and control the sequence of steps during execution.
+       - Using routers and state machines to manage the flow.
+       - Even with decentralized decision-making, routers can open or close paths based on node outputs.
+   -2. Decision-Making Patterns
+       -1) Graph Model
+           - Represent agents and their interactions as a graph with entities (agents) and edges (order of flow).
+           - Agents transform and pass messages through pre-defined or dynamically decided paths.
+           - Frameworks like Langgraph and Autogen use routers or orchestrators to handle this.
+
+4. Essential Capabilities of Agents
+   -1. Profile
+       - Clear purpose and goals to ensure focused execution.
+   -2. Memory
+       - Retain and manage messages and plans.
+       - Consider scratch pads accessible by agents.
+   -3. Planning
+       - Determine the next step based on the current message and overall goal.
+       - Handle complex reasoning involving multiple paths.
+   -4. Action
+       - Access tools and take user inputs while executing plans.
+
+5. Various Reasoning Methodologies
+   -1. ToT and CoT-Based Reasoning
+       - Enable different execution paths.
+   -2. Graph of Thoughts (GoT)
+       - Allows self-reflection, backtracking, and path refinement.
+       - Uses advanced prompting techniques.
+       - Although capable, it's costly and unpredictable to rely solely on LLMs for path generation.
+
+6. Execution Plans
+   -1. Static Execution Plan
+       - Generate a plan using methods like GoT or ToT, then execute it.
+       - Example: Semantic Kernel represents plans as executables using handlebars.
+   -2. Dynamic Execution Plan
+       - Define only the entry point and dynamically decide the next steps based on LLM outputs.
+       -1) Centralized Pattern
+           A supervisor LLM distributes tasks and handles responses, planning, and execution termination.
+       -2) Decentralized Pattern
+           Each agent decides the next step independently.
+           Execution controlled by a router/executor.
+
+7. Centralized Pattern Example
+   -1. Supervisor LLM
+       - Decides which agent to task next.
+       - Uses function calls to predict structured paths. 
+       - Checks loop limits or conditions to avoid infinite repetitions.
+
+8. Decentralized Pattern Example
+   -1. Independent Decision by Each Agent
+       - Each agent has specific goals and tools.
+       - Router controls communication flow to prevent all agents from interacting with every other agent.
+
+9. State-Based Path Generation Control
+   -1. State Machines and State-Driven Workflows
+       - Use rules-based path generation when GoT is unreliable.
+       - Control flow using agent profiles and state machines.
+       - Influence execution based on user or system states for personalized actions.
