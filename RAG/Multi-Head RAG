@@ -1,0 +1,63 @@
+## https://medium.com/@techsachin/multi-head-rag-using-llms-multi-head-attention-for-multi-aspect-document-retrieval-3ae9db93706a
+## https://github.com/spcl/MRAG
+## https://arxiv.org/abs/2406.05085
+
+1. Introduction
+   Multi-Head RAG (MRAG) addresses limitations in existing Retrieval-Augmented Generation (RAG) systems, which struggle with fetching multiple documents
+   that are significantly different from each other due to varied embeddings. MRAG introduces a novel approach using activations 
+   from the multi-head attention layer of Transformer models to enhance document retrieval.
+
+2. Key Contributions
+   -1. Innovative Use of Transformer Activations
+       Instead of using the decoder layer for embeddings, MRAG utilizes activations from the multi-head attention layer. 
+       This approach captures multi-aspectuality without increasing storage requirements compared to standard RAG.
+   -2. Comprehensive Evaluation Framework
+       The paper establishes an evaluation methodology encompassing data construction, query processing pipelines, and benchmarking against synthetic 
+       and industry-specific datasets, showcasing the benefits of MRAG.
+   -3. Integration and Flexibility
+       MRAG seamlessly integrates with existing RAG solutions and benchmarking frameworks like RAGAS, offering versatility in model selection and data usage.
+
+3. MRAG Formulation
+   MRAG formulates embeddings using H separate activation vectors from the last attention layer of Transformer models. 
+   These vectors, combined via a linear layer, serve as embeddings (S = {ek∀k}), maintaining the same space requirements as standard RAG.
+
+4. MRAG Pipeline
+   -1. MRAG Pipeline Overview
+       -1) Data Preparation
+           Populate a data store with multi-aspect MRAG text embeddings, using selected decoder-based embedding models or synthetic data generation.
+       -2) Query Execution
+           Generate multi-aspect embeddings for input queries and retrieve nearest embeddings and corresponding text chunks using a specialized multi-aspect retrieval strategy.
+   -2. Constructing Multi-Aspect Embeddings
+       -1) MRAG leverages embedding models with multi-head attention support (e.g., SFR-Embedding-Model, e5-mistral-7b-instruct) 
+           for creating multi-aspect embeddings, proving effective in experimental settings.
+   -3. Retrieval Strategies for Multi-Aspect Data
+       -1) Importance Scores Assignment
+           Assign importance scores during data preparation to prioritize relevant embedding spaces.
+       -2) Getting Closest Text Chunks
+           Apply traditional RAG retrieval separately for each embedding space and use a voting strategy to select top chunks based on pre-computed scores.
+       -3) Integration with Data Stores
+           Compatibility with various data stores and nearest neighbor search approaches enhances retrieval efficiency.
+
+5. Multi-Aspect Datasets, Queries, and Metrics
+   -1. Multi-Aspect Dataset Generation
+       Includes diverse document categories sourced from Wikipedia, ensuring each overview meets standard chunk sizes.
+   -2. Multi-Aspect Query Generation
+       Generates queries with varying aspects, integrating documents from multiple categories to evaluate retrieval performance.
+   -3. Metrics
+       Defines metrics like Retrieval Success Ratio and Weighted Retrieval Success Ratio to quantify retrieval effectiveness across different query complexities.
+
+6. Evaluation
+   -1. Comparison Baselines
+       Compares MRAG with Standard RAG and Split RAG, demonstrating consistent performance improvements in exact document matches and category matches across multi-aspect queries.
+   -2. Samples & Summaries
+       Visualizes retrieval success ratios between MRAG and Standard RAG across diverse query scenarios, highlighting MRAG's superior performance.
+
+7. Conclusion
+   -1. Innovative Approach
+       MRAG leverages multi-head attention for enhanced document retrieval without additional resource overhead.
+   -2. Practical Applications
+       Demonstrates effectiveness through real-world use cases in legal document synthesis and industrial accident analysis, showcasing improved retrieval accuracy and efficiency.
+
+In conclusion, MRAG represents a significant advancement in RAG systems by optimizing multi-aspect document retrieval using Transformer model activations,
+offering practical benefits across diverse applications and datasets.
+
