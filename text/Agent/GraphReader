@@ -1,0 +1,44 @@
+## From https://medium.com/@techsachin/graphreader-a-graph-based-agent-to-enhance-long-context-abilities-of-llms-eeace5fc6bad
+
+1. Introduction
+   GraphReader addresses the challenge of handling long texts effectively by structuring them into a graph and employing an autonomous agent
+   to navigate and extract relevant information for question answering.
+
+2. Key Contributions
+   -1. Graph-Based Approach
+       Introduces GraphReader, a system that organizes long texts into a graph (G = {V, E}), where nodes (vi ∈ V) represent key elements and associated atomic facts (Ai). 
+       This structured representation facilitates efficient exploration and retrieval of information.
+   -2. Long-Context Capability
+       Demonstrates scalability with a 4k context window, showing competitive performance comparable to or exceeding models like GPT-4 with a 128k context window across various text lengths.
+   -3. Superior Performance
+       Through extensive experiments on challenging benchmarks, GraphReader achieves superior performance in complex single-hop and multi-hop question answering tasks.
+
+3. Approach
+   -1. Graph Construction
+       -1) Chunking and Summarization
+           Documents (D) are segmented into chunks to fit within the context limit of a large language model (LLM). Each chunk is summarized into atomic facts,
+           simplifying the original text while retaining essential information.
+       -2) Key Element Extraction
+           Key elements (ki) are identified from atomic facts (Ai), encompassing essential nouns, verbs, and adjectives.
+       -3) Node Formation
+           Nodes (vi = (ki, Ai)) are constructed, linked based on shared key elements across nodes to form the graph structure.
+   -2. Graph Exploration
+       -1) Agent Initialization: Given a graph G and a question Q, an autonomous agent initializes by formulating a rational plan and
+           selecting initial nodes (N) based on the question's requirements.
+       -2) Exploration Strategies
+           - Exploring Atomic Facts
+             Agents explore atomic facts associated with nodes, organizing them by chunk IDs and utilizing functions like read_chunk
+             and stop_and_read_neighbor to manage exploration priorities.
+           - Exploring Chunks
+             Sequentially traversing chunks in the queue, agents decide to search more, read previous or subsequent chunks, or terminate based on the sufficiency of gathered information.
+           - Exploring Neighbors
+             After processing current node information, agents evaluate neighboring nodes to determine further exploration or termination based on relevance to the question.
+    -3.  Answer Reasoning
+         - Integration of Notes
+           Multiple agents independently gather and compile notes from their explorations into a cohesive reasoning process.
+         - Final Answer Generation
+           Utilizing aggregated information from agent notes, GraphReader generates the final answer to the posed question.
+
+4. Conclusion
+GraphReader presents an innovative approach to handling long texts by structuring them into a graph and employing autonomous agents for efficient exploration and retrieval of information.
+Its demonstrated capabilities in single-hop and multi-hop question answering tasks highlight its potential for handling complex and lengthy textual inputs effectively.
