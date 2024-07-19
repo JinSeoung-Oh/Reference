@@ -1,0 +1,51 @@
+## From https://medium.com/@ignacio.de.gregorio.noblejas/metas-multi-token-model-a-new-beginning-for-ai-10fdddcf7e54
+
+Meta's latest research introduces a groundbreaking approach to training large language models (LLMs). 
+This new method involves predicting multiple tokens at once instead of the traditional one-token-at-a-time approach,
+potentially transforming the efficiency and capability of LLMs.
+
+1. Current Inefficiencies in LLM Training
+   Traditional Next-Word Prediction
+   -1) Sequential Prediction
+       LLMs predict the next token in a sequence, then use this predicted token as part of the input to predict the following token. 
+       This process repeats until the sequence is complete.
+   -2) Cross-Entropy Function
+       Measures how well the model's predictions match the ground truth, focusing on the probability assigned to the correct token.
+   -3) Perplexity
+       Indicates the model's uncertainty. Lower perplexity signifies better performance.
+   This method, while effective, is slow and data-intensive, requiring extensive training data to achieve high accuracy.
+
+2. Meta's Multi-Token Prediction Model
+   - Key Innovations
+     -1) Multiple Output Heads
+         The model predicts multiple tokens simultaneously. 
+         For example, instead of predicting one token and then the next, the model predicts four tokens at a time.
+     -2) Improved Representation
+         All heads share the same representation, considering both previous and likely next tokens, enhancing the model's understanding of context and syntax.
+
+   - Advantages
+     -1) Speed
+         By predicting multiple tokens at once, generation speed can increase up to three times.
+     -2) Smarter Predictions
+         The model becomes better at understanding the context and making more accurate predictions, especially for tasks like coding.
+
+3. Why Multi-Token Prediction Works Better
+   -1) Choice Points
+       These are crucial junctures in a sequence where the choice of the next token significantly impacts the subsequent tokens.
+       Multi-token prediction helps the model better handle these points, improving the quality of generation.
+   -2) Reinforcement of Local Patterns
+       Predicting several tokens simultaneously reinforces the model's ability to learn and generate correct sequences, 
+       particularly beneficial for tasks requiring strict syntax, like coding.
+
+4. Practical Implications
+   -1) Efficiency
+       This method significantly reduces the computational load and time required for both training and inference. 
+   -2) Coding and Beyond
+       Initial results show substantial improvements in coding tasks. 
+       This approach could also enhance natural language processing, translation, and other applications.
+
+5. Conclusion
+   Meta's new training paradigm for LLMs could redefine the standards for AI development. By predicting multiple tokens at once, 
+   models not only become faster but also smarter, offering significant advancements in efficiency and capability. As larger models 
+   are trained using this method, its benefits could extend across various AI applications, potentially setting a new industry standard.
+
