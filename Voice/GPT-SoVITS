@@ -1,0 +1,98 @@
+## From https://medium.com/axinc-ai/gpt-sovits-a-zero-shot-speech-synthesis-model-with-customizable-fine-tuning-e4c72cd75d87
+
+GPT-SoVITS is a machine learning model designed for use with the ailia SDK. 
+This model allows for the easy creation of AI applications and works seamlessly with various other ailia MODELS. 
+Released on February 18, 2024, GPT-SoVITS is a speech synthesis model that supports zero-shot speech synthesis using reference audio and can be fine-tuned for improved performance.
+
+1. Overview
+   - Features of GPT-SoVITS
+     -1) Zero-Shot TTS
+         Instantly synthesizes speech by inputting a 5-second audio sample.
+     -2) Few-Shot TTS
+         Fine-tunes the model with just 1 minute of training data to enhance voice similarity and realism.
+     -3) Cross-Lingual Support
+         Supports inference in English, Japanese, and Chinese.
+     -4) WebUI Tools
+         Provides tools for voice and accompaniment separation, automatic training set segmentation, Chinese ASR, and text labeling to aid in the creation of training datasets
+         and the construction of GPT/SoVITS models.
+
+2. Previous Research
+   - GPT-SoVITS is based on advancements in speech synthesis and voice changer models
+     -1) VITS (January 2021)
+         An end-to-end speech synthesis model that introduced a Flow model to improve performance by removing speaker characteristics and using adversarial training.
+     -2) VITS2 (July 2023)
+         Improved upon VITS by replacing the Flow model with a Transformer Flow, addressing issues like unnaturalness and dependency on phoneme conversion.
+     -3) Bert-VITS2 (September 2023)
+         Replaced the text encoder in VITS2 with a Multilingual BERT.
+     -4) SoVITS (July 2023)
+         Replaced the Text Encoder in VITS with the Content Encoder from SoftVC, enabling Speech2Speech synthesis.
+
+3. Architecture
+   - GPT-SoVITS is a token-based speech synthesis model that generates acoustic tokens using a seq2seq model and converts these tokens back into waveforms
+     to produce the synthesized speech. 
+
+     -1) cnhubert
+         Converts input waveforms into feature vectors.
+     -2) t2s_encoder
+         Generates acoustic tokens from input text, reference text, and feature vectors.
+     -3) t2s_decoder
+         Synthesizes acoustic tokens from the generated tokens.
+     -4) vits
+         Converts acoustic tokens into waveforms.
+
+   - Inputs
+     -1) text_seq: Text to be synthesized into speech.
+     -2) ref_seq: Text from the reference audio file.
+     -3) ref_audio: Waveform of the reference audio file.
+
+4. Processing
+   -1) Convert text_seq and ref_seq to phonemes using g2p.
+   -2) Convert ref_audio into feature vectors (ssl_content) after appending 0.3 seconds of silence.
+   -3) t2s_encoder uses ref_seq, text_seq, and ssl_content to generate acoustic tokens.
+   -4) t2s_decoder outputs subsequent acoustic tokens using a seq2seq model.
+   -5) vits generates the speech waveform from acoustic tokens.
+
+5. Phoneme Conversion
+   Japanese text is converted using pyopenjtalk's g2p.
+   English text is converted using g2p_en.
+
+6. Zero-Shot Inference
+   To perform zero-shot inference, use the WebUI by selecting the appropriate model and inputting the reference audio file, reference text, and inference text.
+
+   - Custom Training
+     -1) Create a dataset: Specify the audio file path and split the audio.
+     -2) Use ASR tools to generate reference text.
+     -3) Format training data: Specify the text annotation file and directory of training audio files.
+     -4) Train the models: Fine-tune both SoVITS and GPT models.
+
+7. ONNX Conversion
+   The official repository includes code for exporting to ONNX. However, additional implementation is needed to address differences between ONNX and torch versions, 
+   including sampling methods and noise scale.
+
+8. Intonation in Japanese
+   Currently, g2p without accent marks is used for Japanese, which can cause some unnatural intonation. Improvements are being considered to introduce accent marks.
+
+9. Usage in ailia SDK
+  GPT-SoVITS can be used with ailia SDK 1.4.0 or later. 
+  The following command performs speech synthesis
+  ##############################################################
+  python
+  python3 gpt-sovits.py -i "Testing speech synthesis." --ref_audio reference_audio_captured_by_ax.wav --ref_text "We need to buy water from Malaysia."
+
+  You can also run it in Google Colab.
+
+10. Conclusion
+   GPT-SoVITS provides high-quality Japanese speech synthesis with shorter fine-tuning times, making it practical. 
+   Inference time is short, and CPU inference is possible, suggesting widespread future use.
+
+** Troubleshooting
+   If you encounter an error related to obtaining semantic tokens, update numba:
+
+bash
+Copy code
+pip install -U numba
+
+
+
+
+
