@@ -1,0 +1,111 @@
+## From https://ai.gopubby.com/balancing-ai-performance-cost-using-routellm-db81c94a423f
+## https://github.com/lm-sys/RouteLLM
+## https://arxiv.org/pdf/2406.18665
+
+1. AI Performance vs Cost Challenge:
+   Research groups often have limited budgets but need advanced AI technology.
+   High-end models like GPT-4, Claude Opus, and Gemini are powerful but expensive.
+   Smaller models are cheaper but may not handle complex tasks well.
+
+2. LLM Routing Solution:
+   Optimizes selection of LLMs for specific tasks.
+   A router chooses between different models (e.g., GPT-4, Claude-3.5-sonnet, llama-3-8b-instruct) based on the query.
+
+3. Commercial LLM Routing Options:
+   -1. OpenRoute.ai: Offers various models, easy to use, pay-as-you-go or subscription-based.
+   -2. Martian: Claims to save 20-97% on costs, charges after first 2000 requests.
+   -3. Neutrino AI: Similar to Martian with more analytics, charges 3% of AI spend.
+
+4. RouteLLM (Open-Source Alternative):
+   Developed by LMSYS (creators of ChatBot Arena).
+   Key features: Automatic model selection, significant cost savings, high accuracy, customizable.
+   Demonstrated cost savings: Over 85% on MT Bench, 45% on MMLU, 35% on GSM8K datasets.
+   Maintains 95% of GPT-4's performance despite cost reduction.
+
+5. RouteLLM Techniques:
+   -1. Similarity-Weighted ELO Calculation: Uses embedding data and feedback loops.
+   -2. Matrix Factorization: Predicts best model for new data, updates with new performance data.
+   -3. BERT Classifier: Classifies queries for model suitability, periodically retrains.
+   -4. LLM Classifier: Finds most efficient model based on performance-cost ratio.
+
+6. Performance Results:
+   Matrix factorization method achieves 95% of GPT-4's performance while using it only 26% of the time.
+   With enhanced training data (using GPT-4 as a judge), matrix factorization reduces GPT-4 usage to 14% while maintaining 95% performance.
+   Models work even when swapping out LLMs (e.g., Mixtral for Llama-3 8B, GPT-4 for Claude Opus).
+
+7. Model Support:
+   Uses LiteLLM library for easy integration of various LLM APIs.
+   Supports over 100 LLM services from different providers.
+   Requires OpenAI API key for embeddings when using SW ranking routing option.
+
+
+## More detail about RouteLLM
+
+1. Development and Purpose:
+   RouteLLM was developed by LMSYS, the team behind ChatBot Arena.
+   It's designed to solve the dilemma between using high-quality but expensive models and cheaper but less capable ones.
+
+2. Core Functionality:
+   Automatically selects the most appropriate LLM based on query complexity.
+   Aims to balance performance and cost efficiency.
+
+3. Key Performance Metrics:
+   Achieves up to 85% cost savings compared to using only GPT-4.
+   Maintains 95% of GPT-4's performance despite significant cost reduction.
+   Demonstrates effectiveness across various datasets: MT Bench, MMLU, and GSM8K.
+
+4. Technical Approaches:
+   a) Similarity-Weighted ELO Calculation:
+      Uses OpenAI's small embeddings for data.
+      Goes beyond simple cosine scores.
+      Incorporates model-specific factors and a feedback loop.
+      Updates historical preference data based on response quality.
+
+   b) Matrix Factorization:
+      Approximates a large preference matrix using two smaller matrices.
+      Predicts best model for new data points.
+      Updates matrix with new performance data after each query.
+      Proved to be the best-performing method among all tested.
+
+   c) BERT Classifier:
+      Trained to classify which queries suit which models best.
+      Routes queries to predicted models for response generation.
+      Periodically retrains with new data to improve accuracy.
+
+   d) LLM Classifier:
+      Aims to find the most efficient model based on the performance-cost ratio.
+      Uses GPT-4 as a human judge to augment training data.
+      Significantly improved performance, especially for matrix factorization method.
+
+5. Adaptability:
+   Works effectively even when swapping out models (e.g., replacing Mixtral with Llama 3 or GPT-4 with Claude Opus).
+   This flexibility suggests robust performance across different model combinations.
+
+6. Model Support:
+   Utilizes the LiteLLM library for integrating various LLM APIs.
+   Supports over 100 large language model services from different providers.
+   Includes both open-source and closed models for chat completions.
+
+7. Implementation Details:
+   Requires setting up API keys for desired providers.
+   For SW ranking routing option, an OpenAI API key is necessary for generating embeddings, regardless of the model pair used.
+
+8. Cost-Efficiency Example:
+   In tests, matrix factorization method achieved 95% of GPT-4's performance while only using GPT-4 for 26% of queries.
+   With enhanced training data, it reduced GPT-4 usage to 14% while still maintaining 95% performance.
+
+9. Open-Source Nature:
+   Allows for customization and adaptation to specific needs.
+   Provides a cost-effective solution for both research projects and organizational AI implementations.
+
+RouteLLM represents a significant advancement in optimizing LLM usage, offering a balance between high-performance AI capabilities and cost-effectiveness. 
+Its open-source nature and impressive performance metrics make it a valuable tool for a wide range of AI applications.
+
+
+
+
+
+
+
+
+
