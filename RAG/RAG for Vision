@@ -1,0 +1,53 @@
+## https://medium.com/@tenyks_blogger/rag-for-vision-building-genai-computer-vision-systems-6a812adfb20e
+
+1. Retrieval Augmented Generation (RAG) Basics:
+   RAG combines prompting techniques with information retrieval.
+   Visual prompting uses visual inputs to instruct large-scale vision models.
+   RAG enables models to access external, up-to-date information, overcoming the limitations of static knowledge cutoffs.
+
+2. RAG Workflow:
+   -1. Retrieval: The system fetches relevant information from a knowledge base.
+   -2. Augmentation: Retrieved information enhances the original input.
+   -3. Generation: The model produces a response based on both the query and retrieved data.
+
+3. Visual RAG:
+   Adapts RAG concepts to vision tasks.
+   Processes images, sometimes with accompanying text.
+   Uses vision encoders (e.g., CLIP) instead of text encoders.
+   Knowledge base contains visual information rather than text documents.
+   Particularly effective for tasks requiring visual understanding combined with external knowledge.
+
+4. Visual RAG vs. Fine-tuning:
+   RAG is generally less expensive and faster to implement initially.
+   Fine-tuning is more compute-intensive during training but potentially faster at inference.
+   RAG is ideal for starting, while fine-tuning suits more specific, narrow tasks.
+  The two approaches can be combined for evolving domains with core tasks, e.g., medical imaging, e-commerce, content moderation.
+
+5. Multimodal Visual RAG for Video Understanding:
+   Utilizes a knowledge base of videos and images.
+   Employs an embedding model (e.g., CLIP) to convert content into a common vector space.
+   Uses a vector database for efficient similarity searches.
+   Processes user queries through the embedding model.
+   Retrieves and ranks relevant information from the vector database.
+   Augments retrieved information for context refinement.
+   Uses a fine-tuned LLaVA (Large Language and Vision Assistant) for processing.
+   Generates visual responses matching user queries.
+
+6. Computer Vision Pipeline 2.0:
+   Anticipates a paradigm shift in computer vision.
+   Traditional stages like labeling may be replaced by promptable foundation models.
+   Enables more flexible and powerful vision systems.
+
+7. Advantages of Visual RAG:
+   Enhances vision systems with up-to-date external knowledge.
+   Improves handling of rare or edge cases in object identification.
+   Allows for more dynamic and adaptable vision models.
+
+8. Practical Applications:
+   - Medical imaging: Combining standard procedures with recent research.
+   - E-commerce: Recognizing product categories and retrieving current inventory information.
+   - Content moderation: Handling common violations while adapting to new trends.
+
+
+
+This technology represents a significant advancement in computer vision, allowing systems to leverage external knowledge more effectively and produce more accurate, context-aware, and flexible visual understanding.
