@@ -1,0 +1,31 @@
+## From https://medium.com/syncedreview/revolutionizing-transformers-deepminds-peer-layer-and-the-power-of-a-million-experts-a55ef6b37125
+## https://arxiv.org/abs/2407.04153
+
+Feedforward (FFW) layers in standard transformer architectures experience a linear increase in computational costs and activation memory as the hidden layer width expands. 
+To address this, sparse mixture-of-experts (MoE) architectures have emerged, decoupling model size from computational cost.
+A recent discovery, the fine-grained MoE scaling law, shows that higher granularity leads to better performance.
+However, existing MoE models face computational and optimization challenges, limiting the number of experts they can use.
+
+In the new paper "Mixture of A Million Experts," a Google DeepMind research team introduces Parameter Efficient Expert Retrieval (PEER),
+an innovative layer design leveraging the product key technique for sparse retrieval from an extensive pool of tiny experts (over a million).
+This approach offers an impressive performance-compute trade-off, unlocking potential for further scaling transformer models while maintaining computational efficiency.
+
+The team's main contributions are as follows:
+  -1. Exploration of Extreme MoE Setting
+      This work investigates the under-explored scenario of numerous tiny experts, departing from the conventional focus on a small number of large experts.
+  -2. Learned Index Structure for Routing
+      The study demonstrates for the first time that a learned index structure (Kraska et al., 2018) can efficiently route to over a million experts.
+  -3. New Layer Design
+      By combining product key routing with single-neuron experts, the PEER layer expands layer capacity without significant computational overheads.
+      Empirical results show its superior efficiency compared to dense FFW, coarse-grained MoEs, and Product Key Memory (PKM) layers.
+  -4. Comprehensive Ablation Studies
+      The researchers explore various design choices of PEER, such as the number of experts, active parameters, number of heads, and query batch normalization,
+      focusing on their impact on language modeling tasks.
+
+A PEER layer is formally defined as a function consisting of three components
+- a pool of experts, each sharing the same signature; a corresponding set of product keys; and a query network that maps the input vector to a query vector.
+
+A PEER layer can be inserted into the middle of a transformer backbone or used to replace FFW layers. 
+Given the state vector from the previous layer, a query network maps it to a query vector.
+This vector is then compared with the product keys to compute the router scores and retrieve the top experts.
+After the retrieved experts make their predictions, their outputs are linearly combined using softmax-normalized router scores as weights.
