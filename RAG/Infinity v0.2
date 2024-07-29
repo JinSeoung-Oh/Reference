@@ -1,0 +1,52 @@
+## From https://medium.com/@infiniflowai/dense-vector-sparse-vector-full-text-search-tensor-reranker-best-retrieval-for-rag-9c86b02a55ef
+
+1. Introduction of Infinity v0.2:
+   New Data Types: The release introduces Sparse Vector and Tensor data types.
+   Enhanced Retrieval Methods: Users can now perform hybrid searches (N ≥ 2), making Infinity highly powerful for RAG applications.
+
+2. Why Hybrid Search?
+   Limitations of Vector Search: Relying solely on dense vectors can be inadequate for precise semantic queries. Dense vectors, representing varying levels of text (words to entire articles), often fail to match specific query keywords accurately.
+   Advantages of Keyword-Based Full-Text Search: For precise recall, combining keyword-based full-text search with vector search (two-way recall) improves accuracy.
+   Sparse Vectors as an Alternative: Sparse vectors, unlike dense vectors, offer an alternative to full-text search by defining keyword weights for the inverted index vocabulary. They enable better keyword pruning and expansion, addressing redundancy and adding relevant terms.
+
+3. Three-Way Retrieval:
+   Importance: Despite advancements, RAG faces challenges that sparse vectors alone cannot solve, such as coverage of model-specific terms, abbreviations, and jargon. Full-text search is essential for these precise queries.
+   IBM Research Findings: A study comparing various retrieval methods concluded that three-way retrieval (full-text search + dense vectors + sparse vectors) is optimal for RAG.
+   Complexity: Implementing three-way retrieval requires integrating multiple databases, leading to challenges in data synchronization and increased engineering complexity.
+
+4. Infinity's Solution:
+   Unified Database: Infinity allows the insertion of all three data types and original data into a single database, enabling three-way retrieval within a single query.
+   Efficiency and Convenience: This approach eliminates the need for multiple databases and complex synchronization.
+
+5. Reranking Techniques in Infinity:
+   -1. Reciprocal Rank Fusion (RRF):
+       Mechanism: Scores are assigned based on ranking positions from each retrieval route. The final score is the sum of these scores, offering robustness and simplicity.
+   -2. Simple Weighted Fusion:
+       Use Case: Applicable when further control over keyword scores is needed, such as specific model inquiries.
+   -3. Reranking with External Models:
+       Support for ColBERT: Infinity natively supports ColBERT-based reranking, which improves ranking accuracy.
+
+6. ColBERT Explained:
+   Ranking Model Paradigms:
+     -1. Dual Encoder: Encodes queries and documents separately, suitable for ranking and reranking but lacks interaction between tokens.
+     -2. Cross Encoder: Encodes both queries and documents together, capturing complex interactions but is slower.
+     -3. Late Interaction Model: ColBERT uses a dual-encoder architecture for faster encoding and introduces MaxSim for efficient similarity calculations.
+   Advantages: ColBERT balances efficiency and effectiveness, making it a promising ranking model.
+
+7. Challenges and Solutions with ColBERT:
+   High Computational Cost: MaxSim in ColBERT is computationally expensive. ColBERT v2 addresses this with cross-encoder pretraining and compression techniques.
+   Training Set Limitations: Small training sets and token limits in ColBERT pose challenges. Infinity v0.2 introduces Tensor data types to support end-to-end ColBERT solutions.
+
+8. Infinity's Tensor Data Type:
+   Integration: Tensors fit ColBERT's multiple embeddings, enabling efficient MaxSim score calculations.
+   Binary Quantization: Reduces Tensor size without altering MaxSim rankings, used primarily for reranking.
+   Tensor Indexing with EMVB: Accelerates performance and is used for retrieval, not reranking.
+   Support for Long Documents: Infinity splits long documents into paragraphs, encoding each into a Tensor and comparing queries with each paragraph.
+
+9. Evaluation on Real Dataset:
+   MLDR Dataset: Infinity's results show significant nDCG gains with hybrid searches. 
+                 Combining BM25 full-text search with vector search and incorporating ColBERT as a reranker yields substantial improvements.
+
+10. Conclusion:
+    Optimal Hybrid Search Solution: Blended RAG with ColBERT reranker is recommended for high-retrieval quality without compromising performance. 
+    Future articles will explore Tensor as a reranker, highlighting its cost-effectiveness.
