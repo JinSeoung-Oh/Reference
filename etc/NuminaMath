@@ -1,0 +1,47 @@
+## From https://pub.towardsai.net/insidenuminamath-the-ai-model-that-took-the-first-place-in-the-ai-math-olympiad-5d0d7063d3a2
+
+The AI Mathematical Olympiad (AIMO) is a new initiative evaluating AI models' mathematical reasoning with a $10 million prize for models performing
+at the level of International Math Olympiad (IMO) gold medalists. 
+This requires sophisticated multi-step reasoning, math, and deep language understanding.
+The winner, NuminaMath 7B TIR, developed by HuggingFace and Numina, a lab focused on math capabilities in foundation models, demonstrated significant advancements.
+
+1. NuminaMath Overview:
+   NuminaMath combines established methods with innovative approaches, built on the DeepSeekMath model and incorporating:
+   -1. Fine-Tuning Strategy: The model was fine-tuned to act as a reasoning agent, solving mathematical problems using natural language reasoning and Python REPL for intermediate results.
+   -2. Decoding Algorithm: A novel decoding algorithm integrated code execution feedback for generating solution candidates during inference.
+   -3. Internal Validation Sets: Used to guide model selection and prevent overfitting to public benchmarks.
+
+2. Training and Architecture:
+   -1. Training: Conducted with TRL, PyTorch, vLLM, and DeepSpeed libraries on 8 x H100 GPUs over 10 hours.
+   -2. Fine-Tuning Stages:
+       1) Stage 1: Fine-tuned on diverse natural language math problems using Chain of Thought (CoT) templates.
+       2) Stage 2: Further fine-tuned on synthetic datasets for tool-integrated reasoning, breaking problems into rationales, Python programs, and outputs.
+
+3. Dataset Construction:
+   -1. Chain of Thought Dataset: Included hundreds of thousands of problems from various sources, processed into CoT format.
+   -2. Tool-Integrated Reasoning Dataset: Comprised 60,000 problems with numerical outputs, using GPT-4 to generate and refine reasoning paths and code.
+
+4. SC-TIR Algorithm:
+   Addressed high variance in model evaluation by:
+   -1. Copying input to define the initial batch of prompts.
+   -2. Sampling diverse completions until complete Python code blocks were produced.
+   -3. Executing Python blocks and concatenating outputs.
+   -4. Repeating the process to allow self-correction.
+   -5. Using majority voting to select the final answer.
+
+5. Avoiding Overfitting:
+   Four internal validation sets were used, including AMC12 and AIME datasets, and subsets of the MATH test set, 
+   to select models and fine-tune hyperparameters effectively.
+
+6. Challenges and Innovations:
+   -1. CoT Model with Majority Voting: Did not yield desired results.
+   -2. MMOS Model for Single-Step Solutions: Unsuccessful.
+   -3. Kahneman-Tversky Optimization (KTO): Showed promise but had limited implementation time. KTO involved sampling completions, 
+                                            comparing them to the ground truth, and adjusting rewards based on correctness.
+7. Results:  
+   NuminaMath topped the AIMO leaderboard, solving 29 out of 50 problems, outperforming the second place by seven problems.
+
+8. Conclusion: 
+   NuminaMath represents a significant advancement in math reasoning models. Its success in the AIMO challenge highlights
+   its potential and sets a new standard for AI-driven mathematical reasoning. The techniques and innovations behind NuminaMath are likely to inspire future models in this domain.
+
