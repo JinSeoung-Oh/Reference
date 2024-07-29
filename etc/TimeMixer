@@ -1,0 +1,207 @@
+## From https://towardsdatascience.com/timemixer-exploring-the-latest-model-in-time-series-forecasting-056d9c883f46
+
+"""
+The field of time series forecasting is rapidly evolving with many new models claiming state-of-the-art performance. 
+Deep learning models are particularly effective for large datasets with numerous features. 
+Despite many models being proposed recently, such as iTransformer, SOFTS, and TimesNet, they often underperform compared to models like NHITS, PatchTST, and TSMixer.
+
+In May 2024, a new model called TimeMixer was introduced. According to the paper "TimeMixer: Decomposable Multiscale Mixing for Time Series Forecasting,"
+this model uses feature mixing and series decomposition in an MLP-based architecture to produce forecasts.
+
+1. Discovering TimeMixer:
+   The motivation behind TimeMixer is that time series data contain different information at various scales. 
+   At small scales, data show fine variations, while at larger scales, they exhibit more coarse changes.
+   TimeMixer aims to separate microscopic and macroscopic information and apply feature mixing, a concept explored in TSMixer.
+
+2. Architecture of TimeMixer:
+   1. Downsampling and Decomposition:
+      The input series is first downsampled using average pooling to separate fine and coarse variations. 
+      This decoupled series is then processed by the Past-Decomposable-Mixing (PDM) block, which further decomposes the series into trend and seasonal components.
+
+   2. Past Decomposable Mixing (PDM)
+      The series is decomposed into trend and seasonal components. 
+      The trend captures slow, long-term changes, while the seasonal component captures short-term, cyclical changes. 
+      This decomposition uses average pooling and Fourier transform to separate trend and seasonal effects.
+
+   3. Seasonal Mixing
+      TimeMixer employs a bottom-up approach where larger seasonal periods are seen as aggregations of smaller periods.
+
+   4. Trend Mixing
+      A top-down approach is used for trend mixing to avoid introducing noise from fine-scale series when capturing macroscopic trends.
+
+Future Multipredictor Mixing (FMM): The FMM block aggregates information from different scales to produce the final forecast. 
+Predictors on finer scales influence predictions at many steps, while those on coarser scales influence fewer steps.
+"""
+
+! pip install git+https://github.com/Nixtla/neuralforecast.git
+import time
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+from datasetsforecast.m3 import M3
+from datasetsforecast.long_horizon import LongHorizon
+
+from neuralforecast.core import NeuralForecast
+from neuralforecast.losses.pytorch import MAE, MSE
+from neuralforecast.models import TimeMixer, PatchTST, iTransformer, NHITS, NBEATS
+
+from utilsforecast.losses import mae, mse, smape
+from utilsforecast.evaluation import evaluate
+
+def get_dataset(name):
+    if name == 'M3-yearly':
+        Y_df, *_ = M3.load("./data", "Yearly")
+        horizon = 6
+        freq = 'Y'
+    elif name == 'M3-quarterly':
+        Y_df, *_ = M3.load("./data", "Quarterly")
+        horizon = 8
+        freq = 'Q'
+    elif name == 'M3-monthly':
+        Y_df, *_ = M3.load("./data", "Monthly")
+        horizon = 18
+        freq = 'M'
+
+    return Y_df, horizon, freq
+
+results = []
+
+DATASETS = ['M3-yearly', 'M3-quarterly', 'M3-monthly']
+
+for dataset in DATASETS:
+
+    Y_df, horizon, freq = get_dataset(dataset)
+
+    test_df = Y_df.groupby('unique_id').tail(horizon)
+    train_df = Y_df.drop(test_df.index).reset_index(drop=True)
+  
+results = []
+
+DATASETS = ['M3-yearly', 'M3-quarterly', 'M3-monthly']
+
+for dataset in DATASETS:
+
+    Y_df, horizon, freq = get_dataset(dataset)
+
+    test_df = Y_df.groupby('unique_id').tail(horizon)
+    train_df = Y_df.drop(test_df.index).reset_index(drop=True)
+
+    timemixer_model = TimeMixer(input_size=2*horizon, 
+                                h=horizon, 
+                                n_series=1, 
+                                scaler_type='identity', 
+                                early_stop_patience_steps=3)
+    nbeats_model = NBEATS(input_size=2*horizon, 
+                          h=horizon, 
+                          scaler_type='identity', 
+                          max_steps=1000, 
+                          early_stop_patience_steps=3)
+    nhits_model = NHITS(input_size=2*horizon, 
+                        h=horizon, 
+                        scaler_type='identity', 
+                        max_steps=1000, 
+                        early_stop_patience_steps=3)
+
+    MODELS = [timemixer_model, nbeats_model, nhits_model]
+    MODEL_NAMES = ['TimeMixer', 'NBEATS', 'NHITS']
+
+for i, model in enumerate(MODELS):
+    nf = NeuralForecast(models=[model], freq=freq)
+
+    start = time.time()
+    nf.fit(train_df, val_size=horizon)
+    preds = nf.predict()
+
+    end = time.time()
+    elapsed_time = round(end - start,0)
+
+    preds = preds.reset_index()
+    test_df = pd.merge(test_df, preds, 'left', ['ds', 'unique_id'])
+
+    evaluation = evaluate(
+            test_df,
+            metrics=[mae, smape],
+            models=[f"{MODEL_NAMES[i]}"],
+            target_col="y",
+        )
+
+    evaluation = evaluation.drop(['unique_id'], axis=1).groupby('metric').mean().reset_index()
+
+    model_mae = evaluation[f"{MODEL_NAMES[i]}"][0]
+    model_smape = evaluation[f"{MODEL_NAMES[i]}"][1]
+
+    results.append([dataset, MODEL_NAMES[i], round(model_mae, 0), round(model_smape*100,2), elapsed_time])
+
+results_df = pd.DataFrame(data=results, columns=['dataset', 'model', 'mae', 'smape', 'time'])
+results_df.to_csv('./M3_benchmark.csv', header=True, index=False)
+
+def load_data(name):
+    if name == 'Ettm1':
+        Y_df, *_ = LongHorizon.load(directory='./', group='ETTm1')
+        Y_df['ds'] = pd.to_datetime(Y_df['ds'])
+        freq = '15T'
+        h = 96
+        val_size = 11520
+        test_size = 11520
+    elif name == 'Ettm2':
+        Y_df, *_ = LongHorizon.load(directory='./', group='ETTm2')
+        Y_df['ds'] = pd.to_datetime(Y_df['ds'])
+        freq = '15T'
+        h = 96
+        val_size = 11520
+        test_size = 11520
+
+    return Y_df, h, val_size, test_size, freq
+
+DATASETS = ['Ettm1', 'Ettm2']
+
+for dataset in DATASETS:
+
+    Y_df, horizon, val_size, test_size, freq = load_data(dataset)
+
+    timemixer_model = TimeMixer(input_size=horizon, 
+                                h=horizon, 
+                                n_series=7,
+                                e_layers=2,
+                                d_model=16,
+                                d_ff=32,
+                                down_sampling_layers=3,
+                                down_sampling_window=2,
+                                learning_rate=0.01,
+                                scaler_type='robust',
+                                batch_size=16, 
+                                early_stop_patience_steps=5)
+    
+    patchtst_model = PatchTST(input_size=horizon, 
+                              h=horizon, 
+                              encoder_layers=3,
+                              n_heads=4,
+                              hidden_size=16,
+                              dropout=0.3,
+                              patch_len=16,
+                              stride=8,
+                              scaler_type='identity', 
+                              max_steps=1000, 
+                              early_stop_patience_steps=5)
+    
+    iTransformer_model = iTransformer(input_size=horizon, 
+                                      h=horizon, 
+                                      n_series=7,
+                                      e_layers=2,
+                                      hidden_size=128,
+                                      d_ff=128,
+                                      scaler_type='identity', 
+                                      max_steps=1000, 
+                                      early_stop_patience_steps=3)
+
+    models = [timemixer_model, patchtst_model, iTransformer_model]
+
+    nf = NeuralForecast(models=models, freq=freq)
+
+    nf_preds = nf.cross_validation(df=Y_df, val_size=val_size, test_size=test_size, n_windows=None)
+    nf_preds = nf_preds.reset_index()
+
+    evaluation = evaluate(df=nf_preds, metrics=[mae, mse], models=['TimeMixer', 'PatchTST', 'iTransformer'])
+    evaluation.to_csv(f'{dataset}_results.csv', index=False, header=True)
+  
