@@ -1,0 +1,79 @@
+OpenAI's Strawberry Project
+1. Overview:
+   - Renaming and Purpose
+     The project, initially known as Q*, has been rebranded as Strawberry. 
+     It aims to enhance AI reasoning capabilities and achieve what OpenAI refers to as "deep research."
+
+2. Objectives and Innovations:
+   - Enhanced Reasoning:
+     Focus: The primary goal is to improve AI’s problem-solving skills, particularly in mathematical and multi-step logical reasoning.
+     Approach: Inspired by the Self-Taught Reasoner (STaR) methodology, which uses "chain-of-thought" prompting to train AI models iteratively by generating and refining reasoning steps.
+
+3. Long-Term Task Execution:
+  - Capability: Enables AI to plan and perform complex tasks autonomously, navigating and researching on the internet to solve problems independently.
+
+4. Demonstrations and Progress:
+   Internal Tests: OpenAI has internally demonstrated Strawberry’s ability to achieve over 90% on complex math tests, indicating significant progress in reasoning capabilities.
+   Techniques: Uses fine-tuning of existing large language models with new algorithms that allow self-improvement through iterative learning from generated data.
+
+5. Challenges and Skepticism:
+   Incremental Progress: While Strawberry represents a rebranding of Q*, tangible advancements have been incremental, with industry skepticism about rapid breakthroughs being warranted.
+   Commercial Motivations: Companies often emphasize progress to maintain a competitive edge, so claims should be considered cautiously.
+
+6. Future Implications:
+   Potential Breakthrough: If successful, Strawberry could significantly impact AI's ability to perform autonomous research and reasoning, pushing closer towards Artificial General Intelligence (AGI).
+
+7. Industry Impact:
+   Anticipated Advances: AI researchers and companies are eagerly watching Strawberry's developments, as it represents a critical step in overcoming current limitations in AI reasoning.
+
+########
+Some people said Strawberry Project similar with "Self-Taught Reasoner (STR) System" - 2022
+
+1. Structure and Operation:
+    - Knowledge Extraction and Representation:
+      Extracts knowledge from text and semantically represents it using NLP techniques to understand and transform text into structured forms.
+
+2. Self-Supervised Learning:
+   Utilizes large-scale unstructured text data for self-supervised learning. The model progressively acquires knowledge by predicting or completing parts of the text.
+
+3. Knowledge Connection and Expansion:
+   Identifies connections between existing knowledge and infers new knowledge based on these connections, forming a reasoning network to answer complex questions.
+
+4. Knowledge Update and Enhancement:
+   Continuously learns and updates knowledge with new information and feedback, improving accuracy over time.
+
+5. Core Algorithms:
+   -1. Transformer-Based Model:
+       Utilizes the Transformer model known for its strong performance in understanding and generating natural language, maintaining context effectively.
+
+   -2. Masked Language Modeling (MLM):
+       Implements MLM by masking parts of the text and predicting the masked words, helping the model understand context and language patterns.
+
+   -3. Next Sentence Prediction (NSP):
+       Predicts if the second sentence follows the first, enhancing the model's understanding of logical connections between sentences and overall context.
+
+   - 4. Self-Attention Mechanism:
+        Uses self-attention to calculate the importance of each word in the input sequence relative to others, improving contextual understanding and extracting important information
+        from long texts.
+
+6. Applications and Scalability:
+   -1. Versatility Across Domains:
+       Designed to answer questions across various fields such as healthcare, law, and finance.
+
+   -2. Continuous Performance Improvement:
+       Learns from user feedback and incorporates it into the training process for ongoing performance enhancement.
+
+   -3. Interactive Q&A System:
+       Provides immediate answers to user queries and can handle follow-up questions or clarifications for more accurate information.
+
+7. Conclusion:
+   Self-Taught Reasoner (STR) provides quick and accurate information, independently acquiring and expanding knowledge without relying on external databases.
+   Self-Taught Reasoner needs very good quality of data. I think it is very interesting point how OpenAI solve this problem
+   because good quality is not defined well. I think they use Feature selection method, but who know it
+
+
+
+
+
+
+
