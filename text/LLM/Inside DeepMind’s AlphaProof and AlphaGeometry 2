@@ -1,0 +1,55 @@
+## From https://pub.towardsai.net/inside-deepminds-alphaproof-and-alphageometry-2-two-models-that-achieved-silver-medal-status-in-db301d1e5838
+
+1. AlphaProof: A Formal Approach to Reasoning
+   -1. Overview:
+       - AlphaProof is designed to prove mathematical statements using the formal language of Lean, integrating a pre-trained language model with
+         the AlphaZero reinforcement learning algorithm.
+   -2. Advantages of Formal Languages
+       - They provide verifiable proofs, but their application in machine learning has been limited due to scarce human-written data.  
+         Conversely, natural language-based methods can access vast amounts of data but often produce plausible yet incorrect reasoning.
+   -3. Methodology:
+       - Gemini Model
+         Fine-tuned to translate natural language problem statements into formal ones, creating a library of formal problems of varying difficulty.
+       - Problem-Solving Process
+         AlphaProof generates solution candidates and verifies them by exploring proof steps in Lean. 
+         Verified proofs enhance the language model, improving its ability to solve complex problems.
+       - Training for the IMO:
+         AlphaProof was trained by proving or disproving millions of problems across various mathematical topics, continuing to reinforce proofs
+         of self-generated problem variations until complete solutions were found.
+
+2. AlphaGeometry Recap
+   -1. Overview:
+       AlphaGeometry 2 is the second iteration of its generation, following the neurosymbolic approach introduced by DeepMind earlier in the year.
+   -2. Neurosymbolic Approach
+       Combines a neural language model with a symbolic deduction engine to solve complex geometric theorems.
+   -3. Dual-Mode Operation:
+       -1. Neural Language Model: Quickly generates intuitive ideas and recognizes patterns, suggesting potential geometric constructs.
+       -2. Symbolic Deduction Engine: Engages in systematic, logical reasoning, grounded in formal logic to work toward conclusions.
+   -4. Problem-Solving Synergy:
+       The neural model proposes geometric elements, while the symbolic engine applies logical reasoning to explore and solve problems, 
+       achieving a balance of speed and precision.
+
+3. AlphaGeometry 2: Enhancements and Capabilities
+  -1. Improvements:
+      - Enhanced version combining neuro-symbolic hybrid systems and a Gemini-based language model, trained on more synthetic data to address complex geometry problems.
+      - Faster symbolic engine and advanced knowledge-sharing mechanism for solving intricate problems.
+  -2. Performance:
+      - Solved 83% of historical IMO geometry problems, compared to 53% by the previous version. 
+         During IMO 2024, it solved a geometry problem in just 19 seconds after formalization.
+
+4. Results at IMO 2024
+   -1. Performance:
+       The maximum score in the IMO is 42 points (6 problems, 7 points each). AlphaProof and AlphaGeometry 2 combined to reach 28 points,
+       just short of the gold medal threshold of 29 points.
+   -2. Achievements: AlphaProof solved two algebra problems and one number theory problem, while AlphaGeometry 2 successfully tackled the geometry problem.
+
+5. Future Directions and Impact
+   -1. Natural Language Reasoning System:
+       DeepMind experimented with a natural language reasoning system built on Gemini, 
+       which doesn’t require formal language translation and can be integrated with other AI systems.
+   -2. Vision:
+       DeepMind envisions AI tools collaborating with mathematicians to explore hypotheses, solve long-standing problems, and expedite the proof process. 
+       AI systems like Gemini are expected to improve in mathematical and broader reasoning tasks.
+
+6. Future Plans:
+   DeepMind plans to share more technical details about AlphaProof and continues to explore AI approaches to advance mathematical reasoning.
