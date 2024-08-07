@@ -1,4 +1,5 @@
 From https://ai.meta.com/blog/v-jepa-yann-lecun-ai-model-video-joint-embedding-predictive-architecture/
+From https://medium.com/@jelkhoury880/jepa-is-the-future-of-video-understanding-8b3ac4a7289e
 
 ## What is V-JEPA?
 V-JEPA is a machine learning model developed by Meta (formerly known as Facebook) that is designed to learn from video data in a self-supervised manner. 
@@ -31,6 +32,13 @@ by forming internal models of the world around them to learn, adapt, and forge p
 5. Frozen Evaluation
    After pre-training, V-JEPA is not further updated. Instead, it is adapted to new tasks by training a small specialized layer or network on top of it. 
    This makes the adaptation process more efficient and quick.
+
+## Training
+   -1. Masking: During training, random spatiotemporal regions of the video are masked.
+   -2. Encoding visible regions: The visible regions are passed through the x-encoder, generating embeddings for each visible token.
+   -3. Concatenating learnable mask tokens: The x-encoder output is concatenated with learnable mask tokens, which serve as placeholders for the masked regions.
+   -4. Predicting masked regions: The concatenated sequence is passed through the predictor network, which outputs embeddings for each mask token.
+   -5. Training objective: The predictor’s output is compared to the actual features of the masked region using a loss function, and the model is trained to minimize this loss.
 
 Overall, V-JEPA's approach to video understanding and learning makes it highly efficient in terms of both training and adaptation,
 while also providing the capability to generalize across tasks without requiring significant changes to the model.
