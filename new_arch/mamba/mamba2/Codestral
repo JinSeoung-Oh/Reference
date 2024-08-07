@@ -1,0 +1,38 @@
+## From https://medium.com/@ignacio.de.gregorio.noblejas/codestral-mamba-a-new-way-of-building-ai-91aabc3c2ae6
+
+1. The Curse of the Transformer
+   -1. Comparison to Human Memory
+       Human brains compress experiences and knowledge into a 'world model,' remembering only key information. 
+       In contrast, Large Language Models (LLMs) like ChatGPT retain all details without compression, leading to inefficiency.
+   -2. Transformers' Drawbacks
+       - They have high memory and computational demands due to their approach of 'rereading' information instead of retaining it efficiently.
+       - This inefficiency is exacerbated by the need to handle long sequences, making them computationally expensive.
+
+2. Introduction of Mamba2 Architecture
+   -1. Innovation
+       Mamba2 models are designed for sequence modeling with a focus on compressing state information, mimicking human memory by remembering 
+       only essential details and discarding the rest.
+   -2. Benefits:
+       - Fixed memory requirements regardless of sequence length, which contrasts with the quadratic memory needs of Transformers.
+       - Linear scaling in computation as the sequence length increases, maintaining constant memory usage.
+   -3. Drawbacks
+       Potential loss of non-Markovian dependencies, which can impact the model's ability to make predictions based on past information.
+
+3. Hybrid Architecture Exploration
+   -1. Research Direction
+       There is interest in hybrid models that combine Mamba's efficient state compression with Transformers' ability to retrieve facts, 
+       leveraging the strengths of both architectures.
+
+4. Advancements with Mamba2 and Codestral
+   -1. Technical Improvements
+       Mamba2 has been optimized to function efficiently on GPUs by transforming its operations into matrix multiplications, similar to how Transformers operate.
+   -2. Performance
+       Codestral Mamba, under the Apache 2.0 open-source license, outperforms models of similar size and even surpasses state-of-the-art models
+       like CodeLlama 34B in coding tasks.
+   -3. Token Handling
+       Capable of managing up to 256k tokens (approximately 200k words), making it ideal for code-related tasks that require handling large amounts of data.
+
+5. Conclusion
+   -1. Implications
+       The release of Codestral suggests that Mamba models are ready to make a significant impact in the AI landscape,
+       potentially leading to a new era of AI development as suggested by Mistral's confidence in their approach.
