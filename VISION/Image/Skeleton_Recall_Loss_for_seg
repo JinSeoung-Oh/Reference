@@ -1,0 +1,76 @@
+## From https://levelup.gitconnected.com/skeleton-recall-loss-is-the-new-breakthrough-in-segmentation-b1ce43c093f4
+
+1. Overview of Precise Segmentation:
+   Precise segmentation is essential in various fields such as self-driving cars, medical image recognition, and satellite imagery. 
+   It is also crucial in areas where objects are small but significant, such as blood vessel analysis, surgical planning, structural crack detection, 
+   and route optimization.
+
+2. Challenges and Existing Solutions:
+   -1. Traditional methods for segmentation include:
+       -1) Image Transforms
+       -2) Mathematical Morphologies
+       -3) Filtering
+       -4) Differential Operators
+   Advancements in deep learning, specifically U-Nets and their variations, have improved segmentation accuracy.
+   U-Nets are a type of Convolutional Neural Network (CNN) known for their speed, accuracy, adaptability, and efficient training.
+
+3. Limitations of Current Methods:
+   Despite advancements, current methods struggle with segmenting tiny, elongated, and curvilinear structures.
+   The existing loss functions, such as centerline-Dice (cl-Dice), are computationally intensive,
+   particularly for large datasets and multi-class segmentation, even on modern GPUs.
+
+4. Introduction of Skeleton Recall Loss:
+   A new loss function, Skeleton Recall Loss, has been introduced to address these challenges. 
+   It outperforms existing methods on five public datasets for topology-preserving segmentation. 
+   This loss reduces computational overhead by more than 90% by using CPU-based operations instead of GPU-based ones, 
+   enhancing efficiency and accuracy for multi-class thin structure segmentation.
+
+5. U-Net Architecture and Loss Functions:
+   U-Nets consist of a contracting path (encoder) that downsamples and captures image features and a symmetrical expanding path (decoder) 
+   that reconstructs images from the learned features. Skip connections between the encoder and decoder improve gradient flow 
+   and spatial information preservation.
+
+   Common loss functions for U-Nets include:
+   -1. Cross-Entropy Loss: Penalizes inaccurate predictions by measuring differences between predicted probabilities and true class labels.
+   -2. Dice Coefficient Loss: Penalizes dissimilarity by measuring overlap between predicted and true segments.
+
+6. Issues with cl-Dice Loss:
+   Centerline-Dice (cl-Dice) combines Dice coefficient loss with the skeleton of the segmented structure. 
+   However, it involves intensive GPU-based operations and can produce jagged, perforated skeletons, leading to inaccuracies.
+
+7. Skeleton Recall Loss Approach:
+   Skeleton Recall Loss focuses on preserving connectivity in thin tubular structures while reducing computational demands. 
+   It applies to any deep learning segmentation network and works with both 2D and 3D inputs.
+
+   Key steps in this approach:
+   -1. Binarization: Convert the ground truth segmentation mask to a binary form.
+   -2. Skeleton Extraction: Compute the skeleton using existing methods.
+   -3. Dilation: Dilate the binarized skeleton to create a tubular structure, increasing the effective area and stabilizing loss computation.
+   -4. Multi-class Assignment: Multiply the tubular skeleton by the original ground truth mask for multi-class segmentation.
+   These operations are computationally inexpensive and can be performed on a CPU during data loading.
+
+8. Performance and Evaluation:
+   Skeleton Recall Loss was evaluated on five public datasets featuring thin structures from various domains:
+
+   -1. Roads: 2D aerial images with binary labels.
+   -2. DRIVE: 2D images of retinal blood vessels with binary labels.
+   -3. Cracks: 2D images of cracks in concrete structures with binary labels.
+   -4. ToothFairy: 3D CT images with binary labels.
+   -5. TopCoW: 3D images of 13 types of vessels in the Circle of Willis.
+
+   Evaluation metrics included:
+   -1. Dice Similarity Coefficient: For measuring overlap.
+   -2. cl-Dice: For measuring connectivity.
+   -3. Betti Number Errors: For measuring topological accuracy.
+
+9. Results and Advantages:
+   Skeleton Recall Loss consistently outperformed cl-Dice and Topo-clDice Loss across datasets, improving Dice, clDice, 
+   and Betti number metrics with both nnUNet and HRNet segmentation networks. It showed improved topology preservation and enhanced connectivity, 
+   with minimal VRAM usage (2%) and training time increase (8%) compared to cl-Dice Loss. 
+   It excels in multi-class segmentation without significant computational overhead, unlike cl-Dice, 
+   which becomes infeasible due to high memory usage and training time.
+
+10. Conclusion:
+    Skeleton Recall Loss establishes a new state-of-the-art in segmentation. It is memory-efficient, 
+    reduces training time, integrates seamlessly into various architectures for 2D and 3D segmentation, and supports multi-class labels, 
+    potentially accelerating AI applications in medical imaging and other critical domains.
