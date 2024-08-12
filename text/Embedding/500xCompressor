@@ -50,3 +50,32 @@
    the potential of the 500xCompressor to significantly compress prompts without losing critical functionalities, 
    thus pushing the boundaries of what is possible in NLP prompt compression.
 
+
+## What is Prompt Compression?
+   Prompt Compression is a technique used in natural language processing (NLP) to shorten long prompts (commands or input sentences) 
+   into more concise forms. This technique is primarily used to enhance efficiency when working with large language models (LLMs).
+   Compressed prompts aim to retain as much original information as possible while reducing input length, improving processing speed, 
+   reducing memory usage, and enhancing the overall user experience.
+
+   - Why is Prompt Compression Necessary?
+     -1. Speed and Cost
+         Long prompts can slow down model inference speed and increase computational costs. 
+         Compressing prompts is crucial for improving model efficiency.
+
+     -2. Context Length Limitations
+         Many NLP models have limitations on the maximum length of input sentences they can process. 
+         Prompt compression helps overcome these limitations by allowing the model to handle longer inputs effectively.
+
+     -3. Expanded Application Scope
+         By compressing prompts, more contextual information can be fed into the model in a compressed form, 
+         expanding the model's application scope and enabling more complex tasks.
+
+    - Methods of Prompt Compression
+      Prompt compression can be achieved through various techniques. The most common methods include:
+      -1. Soft Prompts
+          This involves adjusting the embedding vectors used as model inputs to compress them. It typically allows models to be used without fine-tuning.
+      -2. Generative Compression
+          This method involves extracting key information from the original text and summarizing it into a shorter form.
+          The compressed prompt then replaces the original sentence when fed into the model.
+      -3. Use of Special Tokens: This involves compressing long prompts composed of multiple tokens into a single special token for processing.
+          This approach often leverages the model's internal capabilities to interpret compressed information.
