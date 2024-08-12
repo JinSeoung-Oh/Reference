@@ -1,0 +1,52 @@
+## https://medium.com/syncedreview/from-500-tokens-to-one-the-breakthrough-power-of-cambridge-us-500xcompressor-d31ba13964ea
+## From https://arxiv.org/abs/2408.03094
+
+1. Challenges in NLP and Need for Prompt Compression:
+   In natural language processing (NLP) applications, long prompts present several challenges, 
+   including slower inference speed, higher computational costs, and a diminished user experience. 
+   The constraints of context length limit model performance and application scope, creating a need for reducing prompt length.
+
+2. Introduction of the 500xCompressor:
+   A research team from Cambridge University has introduced a novel method called the 500xCompressor.
+   This method is designed to condense extensive natural language contexts into a minimum of just one special token, 
+   achieving compression ratios between 6x to 480x. The 500xCompressor builds on the benefits of previous methods while introducing new features.
+
+3. Key Features of the 500xCompressor:
+   -1. Generalized and Non-selective Compression:
+       Similar to earlier soft prompt techniques, the 500xCompressor is generalized and non-selective, 
+       capable of compressing unseen texts across various topics for tasks such as question answering (QA).
+       This feature showcases its versatility.
+
+   -2. Full Regeneration Capability:
+       Unlike selective compression methods, the 500xCompressor is designed to regenerate the entire original text, 
+       ensuring all tokens from the original are represented in the compressed version.
+
+   -3. Preservation of LLM Capabilities:
+       Compressed prompts can be used to regenerate original texts or perform QA without the need for fine-tuning the large language model (LLM),
+       thereby maintaining the LLM’s original capabilities and enhancing convenience.
+
+4. Significant Contributions of the Study:
+   - The research makes three key contributions:
+     -1. High Compression Ratio:
+         The study evaluates the compression model using one, four, and sixteen tokens to compress up to 500 tokens,
+         achieving compression ratios from 6x to 480x. These ratios exceed those in previous studies, which achieved less than 50x compression, 
+         fully exploring the upper limits of prompt compression.
+
+     -2. Strict Unseen Evaluation Set:
+         Evaluation texts are sourced from the Arxiv Corpus and ArxivQA dataset, with content published after January 2024, representing new,
+         domain-specific material not used in training the original LLM or the compression model.
+
+     -3. Quantitative Analysis of Information Loss:
+         Compressed texts are assessed in an extractive QA setup, where the answer is a specific span within the context. 
+         This setup allows a precise comparison of the 500xCompressor with baseline methods and gold standards, 
+         providing a detailed analysis of any information loss during prompt compression.
+
+5. Experimental Findings:
+   Experimental results indicate that the 500xCompressor achieves a high compression ratio while retaining most functionalities of non-compressed prompts.
+   This outcome highlights the potential for compressing current prompts, encouraging further research into compression techniques and their applications.
+
+6. Conclusion:
+   The paper, "500xCompressor: Generalized Prompt Compression for Large Language Models," demonstrates
+   the potential of the 500xCompressor to significantly compress prompts without losing critical functionalities, 
+   thus pushing the boundaries of what is possible in NLP prompt compression.
+
