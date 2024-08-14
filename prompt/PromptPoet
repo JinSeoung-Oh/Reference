@@ -1,0 +1,69 @@
+## From https://pub.towardsai.net/meet-promptpoet-the-new-prompt-engineering-framework-that-everyone-is-talking-about-e1daddde61af
+
+1. PromptPoet Overview
+   PromptPoet is a tool developed by Character.ai to address the challenges of prompt engineering in Large Language Models (LLMs). 
+   As prompt quality plays a critical role in LLM performance, PromptPoet aims to simplify the process of designing and managing high-quality prompts, 
+   making it accessible to both developers and non-technical users.
+
+2. Key Features of PromptPoet
+   -1. Simplified Prompt Design
+       PromptPoet allows users to create and manage prompts without needing deep technical knowledge or engaging in complex string manipulations. 
+       It shifts the focus from coding to designing prompts through a combination of YAML and Jinja2 templates, making it easier to iterate and refine prompts.
+
+   -2. Jinja2 and YAML Templating
+       The tool leverages Jinja2 for dynamic data bindings, function calls, and control flow, while YAML provides structure for the prompts. 
+       This combination allows for sophisticated prompt creation and management, including handling complex scenarios like truncation when token limits are reached.
+
+   -3. Tokenization and Truncation
+       PromptPoet includes built-in features for tokenization and truncation, crucial for optimizing prompt performance within the constraints of LLM token limits. 
+       The truncation strategy is particularly sophisticated, optimizing for GPU prefix cache rates, which improves efficiency by reusing cached computations.
+
+   -4. Function Calling Within Templates
+       One of the notable features of Jinja2 integration is the ability to call Python functions directly within templates,
+       enabling real-time data retrieval, manipulation, and validation. This is particularly useful for dynamic prompt generation based on user input.
+
+   -5. Custom Encoding Options
+       Users can specify custom encoding functions for tokenization, allowing flexibility in how prompts are processed and ensuring compatibility
+       with different LLM providers.
+
+   -6. Cache-Aware Truncation
+       Character.ai’s advanced truncation algorithm improves efficiency by maintaining a stable token sequence across multiple turns,
+       maximizing the use of GPU prefix caches and reducing computation costs.
+
+3. Benefits
+   -1. Ease of Use
+       By abstracting away the complexities of string manipulation and coding, PromptPoet makes it easier for users to focus on the content and logic of prompts.
+   -2. Portability
+       The templated approach allows for easy sharing and reuse of prompts across different teams and environments, 
+       facilitating collaboration and consistency in prompt design.
+   -3. Efficiency
+       The combination of sophisticated tokenization, truncation strategies, and cache-awareness ensures that prompts are not only effective 
+        but also optimized for performance.
+
+4. Examples of PromptPoet in Use:
+   The article provided a basic example demonstrating how to use PromptPoet for designing prompts
+
+   -1. System Instructions
+       - Name: system instructions
+       - Role: system
+       - Content: Your name is {{ character_name }} and you are meant to be helpful and never harmful to humans.
+       - This segment sets up the system's identity and behavior using variables like character_name.
+   -2. User Query
+       - Name: user query
+       - Role: user
+       - Content: {{ username }}: {{ user_query }}
+       - This part defines how user queries are structured, with placeholders for username and user_query.
+   -3. Response
+       - Name: response
+       - Role: user
+       - Content: {{ character_name }}:
+       - This segment specifies the response format, focusing on the character's identity in the dialogue.
+   These examples illustrate how PromptPoet uses a blend of YAML and Jinja2 to create dynamic, easily manageable prompts
+   by focusing on templates rather than intricate coding.
+
+
+5. Conclusion
+   PromptPoet represents a significant advancement in the field of prompt engineering, providing a flexible and powerful framework that encapsulates 
+   best practices in prompt design. Its open-source availability is likely to encourage widespread adoption and further innovation in the prompt engineering space. 
+   The provided examples demonstrate how PromptPoet allows users to define prompts in a structured, template-driven manner, 
+   making it easier to create and manage high-quality prompts for LLM applications.
