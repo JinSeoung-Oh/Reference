@@ -1,0 +1,60 @@
+## From https://medium.com/towards-data-science/beyond-fine-tuning-merging-specialized-llms-without-the-data-burden-1c449c2060c4
+# WEBUI and MergeKit is the good library for model merging.
+
+1. The rapid evolution of computer vision and natural language processing has led to an increased demand for specialized models fine-tuned for specific downstream tasks. 
+   However, using separate fine-tuned models for each task has drawbacks:
+
+   -1. Each task requires a separate model to be stored and deployed, which can be mitigated by methods like LoRA for fine-tuning.
+   -2. Independently fine-tuned models do not benefit from leveraging information across related tasks, limiting their generalization to both in-domain and out-of-domain tasks.
+       Multi-task learning could address this but requires access to datasets for each task, which can be complex to integrate.
+
+   Instead of collecting extensive datasets and undergoing resource-heavy fine-tuning, a new approach involves merging existing fine-tuned models to create a desired LLM. 
+   Given the large repository of fine-tuned models available, particularly on platforms like Hugging Face, 
+   this method is becoming increasingly attractive due to its lightweight computation and lack of additional training data requirements.
+
+2. Categories of Model Merging:
+   Merging methods can be categorized into three main types
+   -1. Merging Models with Identical Architectures and Initializations
+       -1) Without Data Requirement:
+           - Model Soup
+             Averages the parameters of models fine-tuned with different configurations, leveraging Linear Mode Connectivity (LMC)
+             to find a low-loss linear path between model checkpoints.
+           - SLERP (Spherical Linear Interpolation)
+             Interpolates model parameters along a spherical path to smoothly merge models.
+           - Task Arithmetic
+             Combines task vectors calculated from fine-tuned models to enhance performance across multiple tasks.
+           - TIES (Task Interference Elimination Strategy)
+             Trims and aligns task vectors to avoid parameter interference, improving multi-task performance.
+           - DARE
+             Focuses on LLMs by randomly dropping and rescaling task vector values to reduce redundancy and improve merging.
+       -2) With Data Requirement:
+           - Fisher Merging
+             Uses the Fisher information matrix to weight and merge model parameters.
+           - RegMean
+             Recasts the merging task as a linear regression problem, optimizing layer weights for better performance.
+
+   -2. Merging Models with Identical Architectures but Different Initializations
+       -1) Git-Rebasin
+           Aligns model weights by reordering neurons to match configurations, making merging more effective.
+       -2) REPAIR
+           Addresses variance collapse in Rebasin by rescaling activations to maintain functional variability throughout the network layers.
+
+   -3. Merging Models with Different Architectures
+       -1) Frankenmerging
+           Stacks different layers from different models sequentially, enabling the combination of models with different architectures. 
+           This method is particularly used in style transfer and has produced notable models like Goliath and Solar-10.7B.
+       -2) EvolutionaryOptimization
+           An automated framework that merges models through an evolutionary algorithm, 
+           optimizing for task-specific metrics and selecting the best layers for inclusion in the final merged model.
+
+3. Conclusion
+   Model merging offers a powerful alternative to traditional fine-tuning, allowing for the creation of specialized models with minimal computation
+   and no need for additional training data. The development of tools like WEBUI and MergeKit, along with techniques like SLERP, Git-Rebasin,
+   and EvolutionaryOptimization, demonstrates the growing potential of this approach. As model merging continues to evolve, 
+   it may become a standard practice in the deployment of AI systems, offering a highly efficient way to leverage the strengths of multiple models for a wide range of tasks.
+
+
+
+
+
+
