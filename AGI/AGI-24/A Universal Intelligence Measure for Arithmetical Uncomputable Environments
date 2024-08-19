@@ -1,0 +1,56 @@
+The paper titled "A Universal Intelligence Measure for Arithmetical Uncomputable Environments" by James T. Oswald, Thomas M. Ferguson, 
+and Selmer Bringsjord proposes an extension to the existing universal intelligence (UI) measure developed by Legg and Hutter. 
+The proposed extension is designed to account for agents operating in uncomputable environments,
+specifically those that can be classified within the Arithmetical Hierarchy. 
+This new measure aims to evaluate the intelligence of agents in environments that are beyond the scope of computable environments traditionally considered by the UI measure.
+
+1. Motivation:
+   The authors identify that the original UI measure only considers computable environments, which excludes a significant number of important,
+   structured, but uncomputable environments such as those encountered in mathematical theorem proving. 
+   The goal of this paper is to expand the UI measure to include these uncomputable environments.
+
+2. Arithmetical Hierarchy and Uncomputable Environments:
+   The paper introduces the Arithmetical Hierarchy, a classification system for uncomputable sets of natural numbers based on their degree of uncomputability. 
+   The authors leverage this hierarchy to define environments that are uncomputable but still relevant for assessing the intelligence of agents.
+
+3. Oracle-Based Intelligence:
+   The extended measure allows agents to utilize oracles (special resources that provide solutions to uncomputable problems). 
+   The authors propose a measure that can assess how much an oracle improves an agent’s intelligence by considering environments
+   that become computable when access to an oracle is granted.
+
+4. Conditional Kolmogorov Complexity:
+   The authors incorporate conditional Kolmogorov complexity into their measure, which accounts for how complex an environment is when considered in relation to an oracle. 
+   This allows the extended UI measure to properly weight uncomputable environments according to their complexity relative to the oracle.
+
+5. Proposed Metric (Ϙ):
+   The new measure, denoted as Ϙ, extends the UI measure by evaluating agents in a broader class of environments,
+   including those that are uncomputable but become computable with the use of an oracle. 
+   The measure is defined to capture the intelligence of agents relative to oracles and environments in the Arithmetical Hierarchy.
+
+6. Examples and Applications:
+   The paper provides motivating examples, such as evaluating agents involved in first-order theorem proving or solving problems like the Entscheidungsproblem, 
+   which are traditionally uncomputable. The authors argue that these types of environments are crucial for a comprehensive measure of intelligence.
+
+7. Convergence and Uncomputability:
+   The paper proves that the proposed measure converges under certain assumptions and discusses the uncomputability of the measure itself,
+   noting that it is as uncomputable as determining the halting problem. This aligns with the complexity inherent in the environments being evaluated.
+
+8. Intelligence of Oracles:
+   The authors introduce a notion of "oracle intelligence," which measures how much an oracle enhances an agent’s ability to solve problems. 
+   This concept can be applied to evaluate not just agents but the resources they have access to, offering a more nuanced understanding of intelligence.
+
+9. Conclusion:
+   The paper extends the universal intelligence measure to account for a wider range of environments, 
+   particularly those that are uncomputable yet relevant to AI and mathematical reasoning. 
+   By introducing oracle-based intelligence and incorporating environments from the Arithmetical Hierarchy, 
+   the authors provide a framework that captures a broader spectrum of agent capabilities. 
+   The proposed metric opens the door for evaluating intelligence in more complex, uncomputable settings, 
+   which is essential for advancing the understanding of artificial general intelligence.
+
+In summary, this work provides a significant enhancement to the UI measure by expanding its applicability to uncomputable environments and considering the role of oracles in enhancing intelligence.
+
+
+
+
+
+
