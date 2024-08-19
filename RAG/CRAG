@@ -1,0 +1,70 @@
+## From https://medium.com/@techsachin/a-hybrid-rag-system-with-optimizations-for-complex-reasoning-d5a36bc0d6a4
+## From https://arxiv.org/abs/2408.05141
+## From https://gitlab.aicrowd.com/shizueyy/crag-new
+
+1. CRAG Benchmark Overview
+   - The CRAG Benchmark focuses on factual question-answering, providing thousands of QA pairs across 50 real-world web pages per data item. 
+     It also offers a mock API for KG searches.
+   - The benchmark, containing 2,706 data items (half for validation), spans five domains and eight question types. 
+     Each data item is labeled as static or dynamic to indicate the expected rate of answer change.
+
+2. Competition Tasks
+   -1. Task 1: Retrieval Summarization
+       Each question is paired with five web pages containing potentially relevant information, mimicking the top search results from real-world web searches.
+       The pages, containing around 120,000 tokens on average, challenge systems to accurately extract and summarize information.
+
+   -2. Task 2: Knowledge Graph and Web Retrieval
+       Besides web pages, this task introduces mock APIs for KG access. 
+       The KGs include structured data relevant to the questions and contain “hard negatives” to simulate complex retrieval environments.
+
+   -3. Task 3: End-to-End Retrieval-Augmented Generation
+       This task increases complexity by providing 50 web pages and mock API access for each question.
+       The goal is to evaluate how well systems can filter relevant information from a noisy, real-world-like environment.
+
+3. Evaluation Criteria
+   The benchmark uses automated (Auto-eval) and human (Human-eval) evaluations. Auto-eval checks answer correctness using rule-based matching and GPT-4 assessments.
+   The scoring system is nuanced, rewarding correct answers, assigning zero points for “I don’t know” responses, 
+   and penalizing incorrect answers to discourage hallucinations.
+
+4. System Design
+   The proposed system is designed with several modules for processing web pages, extracting knowledge, handling reasoning, and managing corner cases
+
+   -1. Web Page Processing:
+       The system uses libraries like Trafilatura and BeautifulSoup to clean and extract text from web pages.
+       Sentences are then segmented and grouped into chunks based on semantic coherence, with additional processing for tables.
+
+   -2. Text Embedding & Ranking Metrics:
+       Sentence-T5-large is employed to generate embeddings for text chunks, ranked using cosine similarity for relevance.
+
+   -3. Attribute Predictor:
+       Attributes like domain, question type, and static or dynamic status are predicted using both in-context learning from LLMs and support vector machines (SVM). 
+       The attribute predictor helps optimize the system’s performance for different question types.
+
+   -4. Numerical Calculator:
+       For finance-related questions, the system uses an external Python interpreter to handle precise calculations, integrating relevant data into prompts.
+
+   -5. LLM Knowledge Extractor:
+       The system leverages knowledge embedded in LLM responses and uses zero-shot chain-of-thought (CoT) reasoning to align LLM knowledge with external references.
+
+   -6. Knowledge Graph Module:
+       The KG module generates queries using a baseline LLM approach, though attempts to optimize function-calling methods were unsuccessful.
+
+   -7. Reasoning Module:
+       The reasoning process is controlled with carefully designed prompts, including intermediate questions and zero-shot CoT to guide the LLM toward precise answers.
+
+   -8. Handling Corner Cases:
+       The system is equipped with rules for detecting invalid questions, encouraging the model to say “I don’t know” when unsure, 
+       and addressing incorrect output formats using a summarization fallback.
+
+5. Experiments and Performance Analysis
+   The system demonstrated improved performance in local evaluations, particularly in reducing hallucinations and opting for “I don’t know” responses. 
+   The performance varied across domains, excelling in areas like movies and music but underperforming in dynamic domains like finance and sports.
+   An ablation study showed consistent performance improvement with each added module, underscoring the system's modular design.
+   In the competition’s private evaluation, the system performed well in Task 1 but lagged behind in Tasks 2 and 3, 
+   primarily due to underutilization of knowledge graph information.
+
+6. Conclusion 
+   The proposed RAG system achieved 3rd place in Task 1 and won prizes for 5 out of 7 question types in Task 2 at the Meta CRAG KDD Cup 2024. 
+   The system’s strength in complex reasoning tasks, particularly aggregation and multi-hop questions, highlights the effectiveness of its integrated reasoning module.
+ 
+
