@@ -1,0 +1,53 @@
+## From https://medium.com/@ignacio.de.gregorio.noblejas/grokking-a-new-form-of-reasoning-6785ea89d2ec
+## What is Grokking - https://pair.withgoogle.com/explorables/grokking/
+## korean version - https://news.hada.io/topic?id=10292
+
+## But as far as I know, the reason for grokking is veiled
+
+1. Four Approaches to AI Reasoning
+   -1. Implicit Reasoning
+       This occurs when the AI’s reasoning is built into its internal circuits, leading to ‘natural’ responses without explicit step-by-step processes.
+       It’s similar to how humans perform familiar tasks like driving unconsciously.
+   -2. Verbalized Reasoning
+       Here, models are prompted to explicitly verbalize their reasoning steps (e.g., solving problems step-by-step). 
+       This is common in chain-of-thought prompting, where the model articulates its thinking process. Although this improves reasoning slightly,
+       it remains limited in effectiveness.
+   -3. Few-Shot Reasoning
+       This involves providing reasoning examples within the input prompt. The model imitates these examples, but the quality of reasoning remains limited to the examples given.
+   -4. Active Search Reasoning
+       The model generates and verifies multiple possible solutions iteratively, akin to human deliberative thinking (System 2). 
+       While promising, this approach is computationally expensive and currently impractical for widespread use.
+
+2. The Limits of Current AI Reasoning Approaches
+   Despite the popularity of verbalized and few-shot reasoning, both methods produce mediocre results, especially for more complex reasoning tasks. 
+   The article highlights that search-based reasoning is potentially the most powerful approach but is hindered by scalability and cost challenges.
+
+3. The Challenge of Compositional Reasoning
+   The article emphasizes that current LLMs struggle with basic compositional reasoning, where two facts need to be combined to infer a third. 
+   Examples like inferring the number of sisters Alice’s brothers have, or reasoning about birth dates,
+   illustrate how even advanced models like GPT-4 can fail. 
+   The inability of these models to perform such simple tasks reveals their reliance on memorization rather than true understanding.
+
+4. Grokking: A Revolutionary Training Concept
+   Grokking involves extending training far beyond the typical point of overfitting, leading models to eventually “understand” the data rather than merely memorize it. 
+   This approach is counterintuitive because it embraces overfitting initially, allowing the model to refine its understanding over extended training.
+
+5. How Grokking Works
+   Initially, during overfitting, the model memorizes the training data.
+   As training continues, the model begins to find simpler and more generalizable solutions, 
+   which allow it to apply learned principles even to unseen or out-of-distribution data.
+
+6. Mechanistic Explanation of Grokking
+   Using a Transformer model as an example, the article describes how during grokking, the model builds internal circuits that focus on key relationships between 
+   facts (e.g., identifying a "bridge" fact that connects two others). Instead of bypassing these connections (as memorizing models do), 
+   grokked models learn to infer new information by following logical steps, akin to human reasoning.
+
+7. Impressive Results from Grokking
+   The article showcases how a grokked GPT-2 model (from 2019) significantly outperforms much larger and more advanced models like GPT-4 Turbo
+   and Gemini 1.5 Pro in complex reasoning tasks. The grokked model effectively generalizes across different scenarios, 
+   demonstrating the potential of this training technique.
+
+8. The Future of Grokking in AI
+   Given the surprising effectiveness of grokking, the article predicts that many AI research labs will soon explore and release models
+   in the 2-to-10 billion parameter range that leverage grokking techniques. 
+   This approach could shift the focus from merely scaling model size to refining training strategies for deeper understanding and reasoning.
