@@ -1,0 +1,51 @@
+The paper titled "A Theory of Foundational Meaning Generation in Autonomous Systems, Natural & Artificial"
+by Kristinn R. Thórisson and Gregorio Talevi proposes a comprehensive theory of meaning generation that applies to both natural and artificial systems. 
+The theory is designed to explain how meaning is generated in autonomous agents and is positioned
+as a framework that could be implemented in artificial general intelligence (AGI) systems. 
+The authors emphasize that meaning and autonomy are intertwined, arguing that meaning generation is essential for true autonomy, and vice versa.
+
+1. Distinction Between Foundational and Semantic Meaning:
+   The paper distinguishes between foundational meaning, which is deeply tied to an agent's goals, actions, and experiences, and semantic meaning, 
+   which is related to the interpretation of symbols and language. Foundational meaning is more complex
+   and involves understanding how new information impacts an agent's goals and behavior.
+
+2. Motivation for a Theory of Meaning:
+   The authors argue that while the concept of meaning has been extensively studied in philosophy, linguistics, and cognitive science,
+   there is still no detailed and prescriptive theory that can be applied to the design of intelligent systems. 
+   The theory proposed here aims to fill that gap by providing a framework that explains how autonomous systems can generate and use meaning.
+
+3. Conceptual Framework:
+   The theory introduces several core concepts, including:
+   -1. World (W): A formal description of the environment, including variables, functions, and relationships that an agent interacts with.
+   -2. Situation (σ): The subset of the world that an agent can observe and manipulate at any given time.
+   -3. Agent (A): An autonomous system with sensors, actuators, and a controller (mind) that processes information and makes decisions based on goals and available knowledge.
+   -4. Goals and Plans: An agent's goals drive its actions, and these goals are organized hierarchically, with top-level goals derived from the agent's primary purpose.
+
+4. Meaning Generation Process:
+   Foundational meaning is generated when an agent links new information (I) to its existing goals, knowledge, and predictions. 
+   The process involves reasoning over causal models and updating goals and plans based on the new information.
+   This dynamic process is referred to as constructing an "M-structure," which encapsulates the agent’s understanding of its current situation and how it relates to its goals.
+
+5. Causal Models and Reliability:
+   Causal models are central to the theory, as they allow an agent to predict the outcomes of its actions and adjust its goals accordingly. 
+   The reliability of these models is key to ensuring that the meaning generated is accurate and useful for the agent’s decision-making.
+
+6. Importance of the 'Now':
+   The paper emphasizes that meaning generation is always bound to the present moment ("now").
+   Autonomous agents must operate within the constraints of time and space, making real-time predictions and decisions based on the information available in the present. 
+   This time-sensitive nature of meaning generation is critical for effective control and decision-making.
+
+7. Interdependence of Autonomy and Meaning:
+   The theory argues that autonomy and meaning are mutually dependent. 
+   An agent cannot be truly autonomous without the ability to generate meaning from its interactions with the world. 
+   Conversely, generating meaning without autonomy would be pointless, as the agent would have no capacity to act on that meaning.
+
+8. Implications for AGI:
+   The authors believe that this theory of meaning generation can pave the way for more advanced AGI systems with enhanced autonomy and generality. 
+   By grounding meaning in causal models, goals, and real-time decision-making, AGI systems could achieve a higher level of understanding and adaptability.
+
+9. Conclusion:
+   The paper presents a novel theory of meaning generation that integrates causal reasoning, goal management, and real-time decision-making in autonomous agents. 
+   The authors propose that this framework is essential for developing AGI systems that can operate autonomously and generate meaning in a manner similar to natural intelligence. 
+   The theory bridges the gap between philosophical discussions of meaning and practical considerations in the design of intelligent systems, 
+   offering a path toward more sophisticated and autonomous AI.
