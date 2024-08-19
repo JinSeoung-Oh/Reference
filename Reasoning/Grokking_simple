@@ -1,0 +1,42 @@
+1. What is Known About Grokking
+   -1. Observation of Grokking
+       Grokking was first observed in simple tasks, like modular arithmetic, where a model trained for a prolonged period first overfits (memorizes the data)
+       and then suddenly starts generalizing, often long after typical training would have stopped. 
+       This delayed phase shift from memorization to generalization is the core of grokking.
+
+   -2. The Role of Overfitting
+       Traditional training aims to avoid overfitting because it leads to poor generalization. In grokking, however, overfitting seems to be a necessary precursor. 
+       Only after the model has thoroughly memorized the training data does it begin to simplify and discover more general principles, 
+       leading to improved performance on unseen data.
+
+   -3. Simpler Representations and Regularization
+       One hypothesis is that during extended training, models eventually “find” simpler, more compact representations of the task at hand. 
+       These simpler representations might align better with broader generalization. 
+       This idea aligns with principles like Occam’s Razor—simpler solutions often generalize better.
+
+   -4. The Shift from Memorization to Understanding
+       In practical terms, during grokking, models seem to transition from relying on specific, overly detailed patterns (which don’t generalize well) to more abstract patterns 
+       that capture the underlying structure of the task.
+
+2. What Remains Unclear
+   -1. Why Does the Transition Happen?
+       While it’s observed that grokking occurs after a model overfits, the exact mechanism that drives the model to transition from memorization to generalization is 
+       still poorly understood. Is it a gradual refinement of the loss landscape, or does the model discover a hidden structure in the data
+       only after exhaustive exposure? Researchers don’t yet fully understand what triggers this shift.
+
+   -2. Does Grokking Depend on Specific Architectures or Data Types?
+       Grokking has been most prominently observed in simpler tasks and smaller models, like those used for modular arithmetic or basic compositional reasoning. 
+       Whether the same process scales effectively to more complex tasks and larger models is still an open question.
+       It’s unclear if grokking is a generalizable phenomenon across all types of data and architectures.
+
+   -3. The Role of Training Dynamics
+       The interaction between different training components (e.g., learning rates, batch sizes, regularization methods) and grokking is still not fully understood. 
+       How do specific choices in these parameters impact whether or not grokking occurs?
+
+   -4. The Bottom Line
+       Grokking represents a fascinating phenomenon where models seem to transition from memorizing data to truly understanding it after extended training.
+       However, the exact reason why grokking happens remains an open question. Researchers continue to explore whether it’s a byproduct of the optimization process, 
+       something related to the loss landscape, or an emergent property of the model's internal representations. While there are hypotheses and observations,
+       a fully satisfying explanation is still out of reach.
+
+       
