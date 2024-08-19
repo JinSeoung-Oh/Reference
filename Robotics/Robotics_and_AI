@@ -1,0 +1,65 @@
+## From https://medium.com/@mjvogelsong/unlocking-the-future-of-robotic-intelligence-991e151bffe9
+
+1. The Concept of Robotics Foundation Models
+   Robotics foundation models, although still largely aspirational, are envisioned to mirror the success of LLMs by leveraging vast, 
+   diverse datasets across multiple modalities: language, vision, actions, and sensor readings. 
+   In theory, such models would learn to predict future sequences of actions and states in a robot’s environment, just as LLMs predict the next word in a sentence.
+
+2. Challenges in Robotics Foundation Models
+   -1. Data Scarcity: Unlike the vast textual datasets available for LLMs, there’s a lack of large-scale, high-quality action and sensor data for training robotics models.
+   -2. High Accuracy Expectations: Robotics demands higher accuracy, as failures in real-world scenarios can be costly and dangerous.
+   -3. Real-World Complexity: Robotics involves dynamic, unpredictable environments, adding another layer of difficulty compared to text-based applications.
+
+3. Current Robotics Foundation Models
+   Several models are paving the way for robotics foundation models, focusing on vision-language-action (VLA) capabilities
+   Models like Octo, LLARVA, OpenVLA, and RT-X aim to predict robotic actions based on inputs like camera feeds, language descriptions, and sensor data.
+   These models are trained on datasets like the Open-X Embodiment dataset, containing millions of episodes of robot teleoperation data.
+
+4. How These Models Work
+   The inputs for training typically include a mix of text, images (RGB, depth, or LIDAR), and sensor readings.
+   The models are trained to predict future movements of the robot based on these inputs, with the goal of enabling robots to perform a variety of manipulation tasks.
+   While the ideal is high zero-shot performance, most systems still require fine-tuning on specific tasks.
+
+5. Scaling and Efficiency Considerations
+   The size and efficiency of these models vary significantly:
+   - Octo (20M-90M parameters) is small enough to run on lightweight GPUs like NVIDIA Jetson.
+   - OpenVLA (7.6B parameters) and RT-2-X (55B parameters) require more powerful hardware and offer slower inference speeds.
+
+6. Complementary AI Techniques in Robotics
+   Beyond foundation models, several other machine learning approaches are being applied in robotics
+   -1. Imitation Learning
+       Robots learn by mimicking expert demonstrations. This straightforward method works well but struggles with real-world unpredictability.
+   -2. Model-Free Reinforcement Learning
+       Robots learn from rewards received during interaction with their environment. While flexible, this approach is often inefficient and challenging in real-world scenarios.
+   -3. Model-Based Reinforcement Learning
+       Robots use learned models of their environment to plan actions and maximize rewards, offering more strategic learning but requiring detailed environment models.
+   -4. Inverse Reinforcement Learning
+       This method involves inferring the reward function from expert demonstrations and using it to guide learning.
+   -5. Simulation and Sim-to-Real Transfer
+       Virtual environments provide a cost-effective and scalable way to train models before deploying them in the real world. 
+       Generative models are being explored to enhance simulation realism.
+   -6. Demonstrations
+       Robots can be taught through various forms of demonstrations, from direct teleoperation to video-based learning, allowing for more accessible data collection.
+   -7. Curriculum Learning
+       This approach organizes training data from simple to complex, helping models learn more effectively.
+
+7. Vision-Language Models in Robotics
+   Vision-language models (VLMs) like CLIP, OWL-ViT, and LLAVA are being adapted to robotics to bridge the gap between language understanding and visual perception. 
+   These models help robots interpret visual scenes and respond based on natural language input.
+
+8. Challenges Specific to Robotic Manipulation
+   -1. Evaluation Difficulties
+       Unlike standardized test sets in fields like image classification, evaluating robotic systems involves setting up physical hardware and real-world environments, 
+       making comparisons more challenging.
+   -2. Sequential Decision Making
+       Robotic manipulation involves sequences of actions that impact the environment, introducing compounding errors and increased task complexity.
+
+9. The Path Forward
+   As research progresses, it’s essential to critically evaluate new methods and technologies, considering factors like the scope of controlled environments, 
+   input variety, and the adaptability of solutions across different robotic platforms. Robotics foundation models are still in their early stages, 
+   but the convergence of AI and robotics holds immense potential.
+
+10. Conclusion
+    Robotics foundation models represent a promising frontier, integrating insights from vision, language, and action to enable more versatile and capable robots. 
+    While significant challenges remain, ongoing developments in both foundational AI techniques and domain-specific strategies are pushing
+    the boundaries of what’s possible in robotic manipulation.
