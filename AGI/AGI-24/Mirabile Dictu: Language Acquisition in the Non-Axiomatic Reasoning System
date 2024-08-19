@@ -1,0 +1,37 @@
+Non-Axiomatic Reasoning System (NARS), could develop human-like language acquisition capabilities. 
+The main focus is on enabling agents within the NARS framework to evolve and use language as a tool for communication,
+akin to how humans develop language.
+
+1. Human-Like Language as a Path to AGI:
+   The author argues that achieving true AGI requires systems capable of developing, evolving, and utilizing novel languages. 
+   This involves not just mimicking human language patterns but enabling systems to acquire language internally based on their experiences and interactions.
+
+2. Limitations of Current Language Models:
+   While large language models (LLMs) have made impressive strides in language processing, they treat language as a static proxy for intelligence.
+   The paper suggests that this approach lacks the flexibility and adaptability of human-like language acquisition.
+
+3. NARS as a Candidate for AGI:
+   NARS operates under the assumption of insufficient knowledge and resources (AIKR), which mirrors the constraints faced by human cognition.
+   The system’s representative language, Narsese, uses term logic to model reasoning and learning. 
+   Narsese serves as the foundation for developing more complex language capabilities within NARS.
+
+4. Language Acquisition in NARS:
+   The paper hypothesizes how a community of NARS agents could acquire language.
+   It suggests that agents equipped with sensors and basic communication abilities would develop internal concepts and relate them to external symbols (e.g., pictograms), 
+   similar to how early humans evolved language. Over time, agents could establish shared meanings and syntaxes through repeated social interactions.
+
+5. Implementing Language Features:
+   The author aligns NARS’s capabilities with Hockett’s design features of human language (e.g., displacement, productivity, cultural transmission). 
+   The paper details how these features could be modeled within NARS, demonstrating the system’s potential to support complex language acquisition.
+
+6. Challenges and Future Work:
+   The paper acknowledges the challenges in making this approach practical, given the popularity of LLMs. 
+   However, it highlights the potential benefits, such as improved adaptability in unknown environments (e.g., space exploration) 
+   and modeling cognitive conditions related to language disorders.
+
+7. Conclusion:
+   The paper concludes that NARS has the necessary components to develop language capabilities similar to human communication. 
+   It suggests future work involving simulated environments where a population of NARS agents could interact, leading to the emergence of novel communication forms.
+
+In summary, the paper presents an alternative approach to AGI, focusing on the natural evolution of language within intelligent systems
+rather than relying solely on pre-trained language models.
