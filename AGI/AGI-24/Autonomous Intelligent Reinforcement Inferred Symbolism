@@ -1,0 +1,56 @@
+The paper titled "Autonomous Intelligent Reinforcement Inferred Symbolism (AIRIS)" 
+by Berick Cook and Patrick Hammer introduces a novel AI system designed for causality-based learning in autonomous agents. 
+AIRIS enables agents to autonomously generate expert-system-like causal rules through interactions with their environment, 
+offering flexibility, transparency, and adaptability that traditional systems lack. 
+Unlike other approaches like Markov Decision Processes (MDPs) or human-coded expert systems,
+AIRIS dynamically learns and applies rules without requiring predefined knowledge.
+
+1. Objective and Motivation:
+   The paper addresses the limitations of traditional expert systems, which rely on human-coded rules that are rigid and prone to failure in novel situations. 
+   AIRIS proposes a system that can autonomously infer rules based on observed changes in its environment, resulting in a more adaptive and generalized behavior.
+
+2. AIRIS Framework:
+   AIRIS uses a reinforcement-inferred causality mechanism to build rules that describe state changes within an environment. 
+   These rules are stored in a "State Graph," which the agent uses to predict future states, plan actions, and achieve goals.
+   The key advantage is that AIRIS can generate new states and causal paths that it has never directly experienced, 
+   offering flexibility beyond standard reinforcement learning approaches.
+
+3. Rule Creation and State Graph:
+   When the agent performs an action, it observes the resulting state changes and creates rules based on unexpected outcomes. 
+   These rules are stored in a State Graph, which serves as the agent’s internal world model.
+   The State Graph allows the agent to plan and achieve goals by leveraging learned causal relationships.
+
+4. Adaptive Learning and Planning:
+   The system continuously learns and updates its rules, allowing it to adapt to new situations. 
+   AIRIS can dynamically adjust its goals, switch objectives, and explore novel scenarios using its causal reasoning framework.
+   The system’s flexibility is demonstrated in experiments where it autonomously shifts strategies based on new objectives or environmental changes.
+
+5. Experiments and Performance:
+   The paper evaluates AIRIS across multiple environments:
+   -1. Grid World Puzzle Game: The agent learns game rules, adapts to new levels, and demonstrates generalization by solving previously unseen levels.
+   -2. Cartpole Experiment: AIRIS efficiently balances a pole on a cart, showing faster learning compared to traditional reinforcement learning techniques.
+   -3. MNIST Image Recognition: The system achieves high accuracy with minimal training data, demonstrating its potential for multi-modal applications and efficient learning.
+
+6. Strengths and Advantages:
+   The system retains the benefits of expert systems, such as transparency and scrutability, while adding continuous learning and adaptability. 
+   AIRIS offers real-time adaptability without needing extensive retraining or predefined logical models. 
+   The rule-based approach allows the agent to explain its reasoning, making it more interpretable compared to black-box models like deep learning.
+
+7. Limitations and Future Work:
+   Current limitations include difficulty handling events not directly caused by the agent’s actions (e.g., independent movements of other objects) 
+   and challenges with high-resolution environments. Future work aims to address these issues by extending the model to handle partial observability,
+   continuous spaces, and integrating more advanced attention mechanisms to improve efficiency.
+
+8. Conclusion:
+   AIRIS presents a promising approach to causality-based autonomous learning, offering a blend of flexibility, transparency, 
+   and efficiency that traditional systems often lack. By continuously learning and adapting to new situations, 
+   AIRIS moves toward more general-purpose intelligence. Future enhancements will focus on expanding its applicability to more complex and dynamic environments, 
+   potentially paving the way for more robust and generalizable AI systems.
+
+
+
+
+
+
+
+
