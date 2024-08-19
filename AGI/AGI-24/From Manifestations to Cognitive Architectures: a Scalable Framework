@@ -1,0 +1,51 @@
+The paper titled "From Manifestations to Cognitive Architectures: A Scalable Framework" by Alfredo Ibias,
+Guillem Ramirez-Miranda, Enric Guinovart, and Eduard Alarcon presents a novel approach to developing artificial general intelligence (AGI)
+by focusing on modeling rather than optimization methods. 
+The authors propose a framework that interprets reality as an information source and translates it into a computational structure
+capable of building cognitive architecture elements like long-term memory and working memory.
+
+1. Modeling vs. Optimization:
+   The paper critiques the predominant AI methods that focus on optimizing target functions, which restrict the system to providing one fixed solution for each input.
+   Instead, the authors advocate for modeling approaches that can store and reason about multiple possible solutions, much like how the human brain operates.
+
+2. Manifestations and Latent Information:
+   The paper introduces the concept of "manifestations," which are the observed perspectives or conditions of an object (e.g., different views of a cup). 
+   These manifestations are seen as expressions of a single latent piece of information. 
+   The framework aims to model this latent information by abstracting it from multiple manifestations.
+
+3. Self-Projecting Persistence Principle (SPPP):
+   A core idea is the Self-Projecting Persistence Principle, which states that latent information persists over time
+   and continuously projects itself based on surrounding conditions. 
+   The framework uses this principle to ensure that information remains consistent and stable across different manifestations.
+
+4. Cognitive Abstractions and Hierarchical Structure:
+   The framework categorizes cognitive abstractions into four groups: perception, sensorimotor, episodic, and reasoning abstractions. 
+   These abstractions are hierarchically organized, from simpler, concrete concepts to more complex, abstract ones.
+
+5. Footprints and Cells:
+   "Footprinting" is the method proposed for combining different manifestations into unified representations called Footprints. 
+    Footprints are further grouped into Cells, which are basic logical units that perform pattern recognition and matching based on these abstractions. 
+    The hierarchical organization of Cells forms Clusters, representing increasingly complex concepts.
+
+6. Metaclusters and Synthetic Cognition:
+   The framework extends to Metaclusters, which combine multiple Clusters to handle different types of inputs (e.g., visual, auditory) and produce high-level abstractions.
+   The paper introduces the concept of Synthetic Cognition, where Metaclusters are interconnected to simulate more complex reasoning and behavior in cognitive architectures.
+
+7. Implementation and Potential Applications:
+   The proposed framework is implemented using Sparse Distributed Representations (SDRs), which are inspired by how the brain processes information. 
+   The paper emphasizes that this modeling approach is scalable and capable of building cognitive architectures from the ground up, offering a novel path toward AGI.
+
+8. Conclusion:
+   The paper provides a fresh perspective on AGI development by shifting from optimization-based methods to a modeling-centric approach. 
+   The framework outlined here could lead to the development of scalable, hierarchical cognitive architectures that more closely resemble human cognition, 
+   potentially overcoming some limitations of current AI systems. Future research will explore how this approach can address more complex cognitive tasks and challenges, 
+   such as Fodor and Pylyshyn’s Systematicity Challenge.
+
+In summary, this work offers a theoretical foundation and a practical framework for constructing cognitive systems that mimic the way humans model and understand the world, 
+aiming to bring us closer to achieving AGI.
+
+
+
+
+
+
