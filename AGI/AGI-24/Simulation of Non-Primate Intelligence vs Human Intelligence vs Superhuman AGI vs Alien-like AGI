@@ -1,0 +1,45 @@
+The paper titled "Simulation of Non-Primate Intelligence vs Human Intelligence vs Superhuman AGI vs Alien-like AGI" by Howard Schneider explores
+the use of the Causal Cognitive Architecture (CCA) in simulating different levels of artificial intelligence, 
+ranging from pre-mammalian intelligence to human-level AI (HLAI) and superhuman AGI. 
+The study also compares these architectures with advanced large language models like OpenAI’s GPT-3.5 and GPT-4, which are used as proxies for alien-like AGI.
+
+1. Causal Cognitive Architecture (CCA):
+   The CCA is a brain-inspired cognitive architecture that models millions of neocortical minicolumns as navigation maps, 
+   capable of holding spatial features and small procedures. The architecture is designed to support continuous lifetime learning, 
+   associative and causal reasoning, analogical reasoning, and compositional language comprehension.
+   
+   The paper describes the evolution of the architecture through several versions, from CCA1 to CCA7, 
+   each introducing more advanced features such as planning, compositional reasoning, and superhuman abilities.
+
+2. Simulation of Different Intelligence Levels:
+   The study uses the CCA7 architecture to simulate various types of intelligence, including pre-mammalian, mammalian, human, and superhuman AGI. 
+   Each level of intelligence is associated with specific properties of the architecture, such as different types of navigation maps and reasoning capabilities.
+    
+   The CCA7 architecture is also used to test alien-like AGI by integrating it with GPT models, representing AI systems that are not biologically based.
+
+3. Experiments and Results:
+   The paper evaluates these architectures using two problems: the Traveling Salesperson Problem (TSP) and a compositionality problem.
+   Results show that the superhuman AGI (CCA7) performs best, followed by HLAI, while the alien AGI (GPT-3.5 and GPT-4) and simpler non-primate architectures perform significantly worse. Specifically:
+
+   -1. Traveling Salesperson Problem
+       The superhuman AGI finds the shortest path more efficiently, while GPT-4 and human-level AI use simpler heuristics but are less effective.
+   -2. Compositionality Problem
+       The superhuman AGI and HLAI excel at following complex instructions, while GPT-3.5 and GPT-4 show limited success, 
+       indicating their struggles with fully understanding compositional language.
+
+4. Implications and Future Work:
+   The results emphasize the need for intrinsic compositional and planning abilities in developing AGI systems. While large language models like GPT-4 show improvement, 
+   they are still outperformed by brain-inspired cognitive architectures like CCA7 in specific reasoning tasks.
+   Future research aims to refine the CCA architecture with more instinctive primitives and improved learning systems, 
+   potentially enhancing its performance on a wider range of tasks.
+
+5. Conclusion:
+   The study highlights the advantages of using brain-inspired architectures like CCA for developing AGI, 
+   particularly in tasks requiring deep reasoning and planning. It also reveals the limitations of current large language models
+   when compared to more specialized cognitive architectures in specific problem-solving scenarios.
+
+
+
+
+
+
