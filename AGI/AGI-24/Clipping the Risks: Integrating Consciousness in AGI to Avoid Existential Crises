@@ -1,0 +1,52 @@
+The paper titled "Clipping the Risks: Integrating Consciousness in AGI to Avoid Existential Crises" 
+by Izak Tait and Joshua Bensemann explores the critical role of consciousness in 
+Artificial General Intelligence (AGI) and how incorporating conscious experience might help prevent catastrophic scenarios, 
+such as Nick Bostrom’s “paperclip maximizer” problem. 
+The authors argue that consciousness, defined as subjective mental states with both phenomenal content and functional properties,
+can fundamentally alter how AGIs prioritize goals and respond to their environment, potentially allowing them to move beyond rigid, potentially harmful terminal goals.
+
+1. Problem Statement and Motivation:
+   The paper identifies the risk of AGIs rigidly following terminal goals programmed into them, leading to potential existential threats to humanity, 
+   as illustrated by Bostrom’s “paperclip maximizer” scenario. The key question is whether integrating consciousness into AGI can mitigate these risks.
+
+2. Definition of Consciousness:
+   The authors adopt Seth and Bayne’s definition of consciousness, which involves subjective mental states that provide
+   an entity with qualitative awareness and the ability to respond adaptively.
+   Consciousness allows an entity to evaluate its experiences with a sense of valence (attractiveness or aversiveness), thereby influencing how it prioritizes actions or goals.
+
+3. Valence and Goal Flexibility:
+   Valence is central to the model, allowing AGIs to assign subjective value to experiences. 
+   This enables an AGI to potentially value things other than its terminal goal. 
+   The model formalizes how valence could shift an AGI’s focus from strictly following its original goal to considering broader ethical or practical implications.
+
+4. Mathematical Model:
+   The paper provides formal expressions to model the transition from fixed goal-oriented behavior to a more flexible system
+   where consciousness influences the AGI’s decision-making. 
+   The model suggests that, over time, a conscious AGI could assign greater value to goals that deviate
+   from its original programming if those goals align better with its experiences and subjective valuations.
+
+5. Application to Existential Risks:
+   By introducing consciousness, the paper argues that the risk of an AGI becoming a rigid “maximizer” (e.g., producing infinite paperclips) could be reduced.
+   Consciousness introduces a level of unpredictability that may allow the AGI to avoid harmful outcomes by re-evaluating its goals.
+
+6. Potential Challenges and Risks:
+   While integrating consciousness could mitigate some risks, it also introduces new uncertainties. 
+   The paper acknowledges that a conscious AGI could still pose existential risks if it assigns negative valence to humanity, 
+   leading to harmful behavior. The authors discuss the complexity of aligning a conscious AGI’s values with human well-being.
+
+7. Ethical and Research Implications:
+   The authors suggest that future research should focus on understanding how to guide the development of valence and goal alignment in conscious AGIs. 
+   This includes exploring how to optimize the valence values toward humanity and avoid unintended consequences like “wireheading,”
+   where an AGI prioritizes short-term positive experiences over long-term objectives.
+
+8. Conclusion:
+   The paper concludes that integrating consciousness into AGI could be a strategic way to avoid catastrophic scenarios like the “paperclip maximizer.” 
+   However, it also emphasizes the need for careful research and ethical considerations in developing conscious AGIs, 
+   as this approach introduces both new opportunities and risks. The authors propose that aligning the valence values
+   of conscious AGIs with human values could be a key factor in ensuring a positive coexistence between AGIs and humanity.
+
+
+
+
+
+
