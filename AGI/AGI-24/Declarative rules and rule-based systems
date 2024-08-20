@@ -1,0 +1,34 @@
+1. Overview and Background
+    Despite the dominance of neural models in AI, rule-based systems remain valuable in specific domains like legal and medical applications. 
+    These systems face criticisms, primarily regarding the large number of rules required and high maintenance costs.
+    The paper introduces an alternative approach using declarative programming and meta-rules to enhance rule-based systems’ efficiency and adaptability.
+
+2. Rule-Based Systems vs. Declarative Systems
+   Traditional rule-based systems use imperative programming, defining specific steps for every possible scenario (e.g., “if it’s raining, take an umbrella”).
+   Declarative programming focuses on describing what should be done rather than how. 
+   This is especially useful for representing rules at a higher abstraction level, using meta-rules that operate on data structures rather than specific data points.
+
+3. NARS and Non-Axiomatic Logic (NAL)
+   The Non-Axiomatic Reasoning System (NARS), developed by Pei Wang, is presented as an example of a system using these principles.
+   NARS does not follow traditional rule-based systems but rather uses “Narsese,” a formal language that encodes reasoning patterns as meta-rules, 
+   focusing more on data structure than content.
+   - Example: Instead of defining specific instances (e.g., “if it’s raining, take an umbrella”), Narsese uses abstract terms and meta-rules like “{A =/> B, A} ⊢ B” 
+     to generalize logic.
+
+4. Challenges in Imperative Implementations
+   NARS traditionally implemented these meta-rules imperatively, leading to issues in maintainability and customization. 
+   The paper proposes a shift to a declarative approach using miniKanren, a logic programming language similar to Prolog.
+
+5. Proposed Solution with miniKanren
+   miniKanren, a domain-specific logic programming language, is used to implement a declarative inference engine within NARS. 
+   This allows rules to be represented more abstractly, improving readability and customization.
+   The inference engine processes inputs by checking them against rules stored in a text file, leveraging logic unification techniques to derive conclusions.
+
+6. System Implementation and Results
+   The implementation focuses on correctness over speed, achieving about 300-400 inference cycles per second, 
+   slower than traditional implementations but sufficient for many applications.
+   The paper highlights benefits in maintainability and flexibility, although miniKanren’s limited parallel processing remains a bottleneck.
+
+7. Conclusion and Future Work
+   The declarative approach, despite some trade-offs, provides a significant advantage in creating modular, maintainable rule-based systems.
+   Future work may involve optimizing for performance and exploring broader applications, inviting contributions from the community.
