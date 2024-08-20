@@ -1,0 +1,37 @@
+1. Introduction
+   Mechanistic Interpretability (MI) aims to uncover the specific neural pathways and processes that guide decision-making in neural networks.
+   This study applies MI techniques to a chess language transformer, focusing on how the model’s attention mechanisms guide move selection.
+   The study emphasizes the importance of transformers in various AI applications and how their architecture makes them suitable for detailed circuit analysis.
+
+2. The Chess Language Transformer Model (LCB)
+   The Learning Chess Blindfolded (LCB) model by Toshniwal et al. is the focus of this study. 
+   It is based on the GPT-2 small architecture and is trained on sequences of human chess games.
+   The model takes chess moves in Universal Chess Interface (UCI) notation as input, processing the starting and destination tiles as separate tokens. 
+   This allows it to predict legal moves with high accuracy (97.7%), though its primary goal is to predict the next move rather than play to win.
+
+3. Methodology
+   The authors conduct a mechanistic analysis by examining the horizontal and vertical information flows within the model, 
+   capturing hidden states and using Direct Logit Attribution (DLA) to map intermediate representations to the model’s output vocabulary.
+   The dataset consists of 1,000 games truncated to the first 10 moves, focusing on opening sequences.
+
+4. Findings: Attention Patterns
+   The study identifies various attention patterns emerging across the layers of the LCB model, revealing distinct structural regularities:
+   -1. Checkers Pattern: Attention focuses on the history of source/destination tiles.
+   -2. Big Checkers Pattern: Attention spans full move histories for either the current player or the opponent.
+   -3. Window Pane Pattern: This pattern primarily attends to white player destination tiles.
+   -4. Columns Pattern: Attention is restricted to either the source or destination phase.
+   -5. Additional patterns like Waffle, Backslash, Amorphous, and Polysemetic patterns were observed and indicate more specialized attention behaviors.
+
+5. Evaluating the LCB Model’s Decision Process
+   The study uses metrics like cosine similarity, precision at K, and magnitude precision at K to measure how well intermediate representations align with the final output.
+   Results show that significant computation occurs by layer 9, with earlier layers identifying plausible moves and later layers refining these choices.
+
+6. Conclusion
+   The analysis introduces a new taxonomy of chessboard attention mechanisms and highlights that the first seven layers play a crucial role in move selection. 
+   The later layers likely handle more complex, long-term strategies.
+   The findings suggest that structured attention patterns and move selection are strongly linked in the LCB model,
+   though further analysis is needed to fully understand the role of the final layers.
+
+7. Implications and Future Work
+   This work contributes to the broader field of mechanistic interpretability and provides insights that could be applied to other domains. 
+   The study demonstrates how examining attention mechanisms in a focused domain like chess can reveal broader principles applicable to general AI and AGI research.
