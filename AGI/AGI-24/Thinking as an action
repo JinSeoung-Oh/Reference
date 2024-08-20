@@ -1,0 +1,41 @@
+1. Introduction
+   The study aims to develop an AGI that can perform a variety of tasks and exhibit human-level intelligence in a virtual environment.
+   The environment chosen is Minetest (an open-source alternative to Minecraft), which offers programmatic access to gather data on various elements like animals, 
+   plants, and terrain.
+   The key innovation is integrating “thinking” as an action within the RL framework, allowing the agent to modify its internal dialogue through interactions with
+   an LLM, which in turn influences its decision-making.
+
+2. Related Work
+   Previous works like AlphaGo and RL-based video game agents are mentioned as inspiration, but these focus on narrow, well-defined tasks rather than general intelligence.
+   The study contrasts its goals with research in curiosity-driven exploration, which uses curiosity as an intrinsic reward. 
+   However, these approaches often require fine-tuning and are limited by specific task definitions.
+
+3. Proposed AGI Architecture
+   The architecture involves using Q-learning with thought processes integrated as actions.
+   The agent operates in Minetest, where it can perform various actions like moving, jumping, and thinking.
+   The thinking process involves providing the LLM with representations of the environment and reflecting on past thoughts.
+   The environment and the agent’s inner dialogue are processed as states, with actions determined using a Q table. 
+   The state is defined as a combination of the environment and the agent’s “mind state.”
+   The agent’s reward is based on the cosine similarity between recent thoughts and previous thoughts, promoting exploration and novelty in its actions.
+
+4. Components of the System
+   -1. Experience Replay and Support Vector Machines (SVM):
+       The system records past states and actions to train an SVM model, which is used to predict Q values and guide decision-making.
+       The SVM model allows the system to learn from past experiences while adapting to new scenarios.
+   -2. Thought Engineering:
+       The agent’s thoughts are generated using prompt engineering with OpenAI’s ChatGPT.
+       Three types of prompts are designed: for observing (describing surroundings), thinking (reflecting on past thoughts), 
+       and questioning (formulating new questions based on prior thoughts).
+   -3. Reward System in the Virtual Environment:
+       The reward is designed to encourage novel and intelligent behavior by reducing rewards for repetitive thoughts and promoting curiosity-driven exploration.
+       The reward system aims to emulate creativity and curiosity, pushing the agent to explore new areas or transform its environment.
+
+5. Discussion and Future Work
+   The study outlines plans to further explore thought processes and the philosophy of mind, aiming to create an agent that learns to perform based on its thinking patterns.
+   Future work includes designing more complex reward functions, incorporating multi-objective RL, and testing the system for AI alignment.
+
+6. Conclusion
+   The study presents a novel architecture for AGI that integrates thought processes as actions within an RL framework.
+   The proposed system is an experimental step towards creating a general intelligence capable of adapting
+   to different environments and tasks without predefined objectives.
+The approach introduces a curiosity-driven model that aligns with the concept of AGI by focusing on internal dialogue and reflective thinking.
