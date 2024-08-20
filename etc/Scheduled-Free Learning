@@ -1,0 +1,42 @@
+1. Scheduled Learning
+   In machine learning, optimizing models effectively often depends heavily on the learning rate, a key factor in determining how fast or slow a model converges.
+   Learning rate schedulers, such as step decay, exponential decay, and cosine annealing, have traditionally been used to adjust the learning rate during training.
+   These schedulers help accelerate training, avoid getting stuck in local minima, and improve generalization by dynamically adjusting the learning rate as training progresses.
+
+2. Scheduled-Free Learning
+   However, a new paradigm known as Schedule-Free Learning is emerging, which eliminates the need for traditional learning rate schedulers. 
+   Schedule-free optimizers promise faster training without the requirement to predetermine stopping times or steps.
+
+3. Facebook Research recently introduced two schedule-free optimizers:
+   -1. SGDScheduleFree
+   -2. AdamWScheduleFree
+
+4. Approach
+   In schedule-free learning, the momentum of traditional optimizers is replaced by a combination of interpolation and averaging. 
+   For gradient descent, the schedule-free update works as follows:
+
+   -1. x represents the sequence where evaluations of test/validation loss occur, differing from the main iterates z and the gradient evaluation locations y.
+   -2. The updates to z follow the underlying optimizer, such as a standard gradient step.
+
+5. Advantages of Scheduled-Free Learning
+   -1. No Need for Learning Rate Schedules
+       As the name suggests, schedule-free learning removes the requirement for predefined learning rate schedules. 
+       Despite this, it often outperforms, or at least matches, state-of-the-art schedules like cosine decay or linear decay.
+   -2. Memory Efficiency
+       Only two sequences need to be stored at any time, with the third sequence being computable on the fly. 
+       This results in the same memory requirements as the base optimizer (parameter buffer + momentum).
+   -3. Compatibility
+       Although learning rate schedules are not necessary, this method remains compatible with them if desired.
+
+6. Constraints and Recommendations
+   There are a few constraints and tuning guidelines when using schedule-free learning:
+
+   -1. Learning Rate Warmup: Using a warmup phase for the learning rate is recommended.
+   -2. Hyperparameter Tuning: Although schedule-free learning removes the need for schedules, it requires careful tuning of regularization and learning rate parameters.
+   -3. SGD Learning Rates: For SGD, start with learning rates 10x to 50x larger than those typically used in scheduled approaches.
+   -4. AdamW Learning Rates: For AdamW, learning rates 1x to 10x larger than usual are recommended.
+   -5. Betas: The training is more sensitive to the choice of betas than standard momentum methods. While 0.9 works for most cases, increasing this value to 0.95 or even 0.98 might be necessary, especially for long training runs.
+
+7. Conclusion
+   Scheduled-free learning is a promising approach that challenges the traditional reliance on learning rate schedules. While it requires some careful tuning, 
+   it offers flexibility and potentially superior performance, making it an exciting development in model optimization techniques.
