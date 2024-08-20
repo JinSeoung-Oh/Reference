@@ -1,0 +1,24 @@
+## From https://medium.com/@aipapers/mixture-of-nested-experts-ai-paper-explained-67564e2f464a
+
+Mixture of Nested Experts (MoNE), a model introduced by Google that addresses efficiency and redundancy issues in vision models like Vision Transformers (ViTs).
+Traditional Mixture-of-Experts (MoE) models scale up large models without proportional increases in computation 
+but have limitations like large memory requirements and inefficiency when handling redundant information in image patches.
+
+1. Key Ideas in MoNE:
+   -1. Redundancy in Vision Models
+       In ViTs, patches often contain redundant information (e.g., background), yet all patches receive equal computation power. 
+       MoNE addresses this by selectively allocating computation based on the importance of each patch.
+   -2. Nested Experts
+       MoNE uses nested experts within each layer, where each expert represents different portions of the model’s weights. 
+       For instance, one expert might use the full model layer, while another uses only half or a quarter of the weights.
+   -3. Routing Mechanism
+       A router assigns probabilities to tokens (image patches), directing them to experts based on their importance. 
+       Important tokens are processed by more capable experts, while less important ones are handled by smaller, less resource-intensive experts.
+   -4. Efficient Computation
+       By processing tokens with varying levels of compute, MoNE optimizes performance while reducing the overall computational cost.
+   -5. Performance
+       The paper shows that MoNE models achieve comparable performance to baselines on tasks like image classification but with significantly reduced compute,
+       making them more efficient.
+
+Overall, MoNE offers an advanced and adaptive approach to handling redundancy and efficiency in vision models, 
+particularly by optimizing computation for tokens based on their importance.
