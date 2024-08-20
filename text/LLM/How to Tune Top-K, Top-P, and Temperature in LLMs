@@ -1,13 +1,13 @@
 ## From https://generativeai.pub/from-theory-to-practice-how-to-tune-top-k-top-p-and-temperature-in-llms-45c1e9477bc4
 
 1. The Pottery Analogy for LLMs:
-   Imagine being a potter using a pottery wheel (the LLM) to shape creative outputs. You control the final product through tools like temperature, 
+   Imagine being a potter using a pottery wheel (the LLM) to shape creative outputs. Like control the final product through tools like temperature, 
    Top-K, and Top-P, which help you fine-tune the creative process:
    -1. Temperature
        Like adjusting the clay’s softness, higher temperature makes the model more creative and less predictable,
        while lower temperature produces more consistent, factual outputs.
    -2. Top-K
-       Like limiting your tool selection, Top-K restricts the LLM’s choices to the top ‘K’ words, balancing coherence and diversity.
+       Like limiting tool selection, Top-K restricts the LLM’s choices to the top ‘K’ words, balancing coherence and diversity.
    -3. Top-P
        Like using a stencil to guide the shape, Top-P controls word selection by considering a probability threshold, dynamically adapting to maintain coherence.
 
@@ -16,22 +16,21 @@
    - Random Sampling: Adds unpredictability by sampling based on the full probability distribution, allowing for surprising outputs, but sometimes at the cost of relevance.
 
 3. How Top-K, Top-P, and Temperature Work Together:
-   You broke down how these parameters can be adjusted simultaneously to achieve the desired balance between creativity and coherence:
+   Broke down how these parameters can be adjusted simultaneously to achieve the desired balance between creativity and coherence:
    - For example, combining low Top-K with a moderate temperature can yield precise, focused outputs.
      On the other hand, a high Top-P with a higher temperature can generate more imaginative, diverse outputs.
 
 4. Tuning for Specific Use Cases:
-   You provided practical examples of how to adjust these parameters depending on the goal:
    -1. Creative Writing: Higher temperatures and broader Top-P values allow the model to explore a wider range of possibilities.
    -2. Technical Writing: Lower temperatures and narrow Top-K values keep the output precise and fact-driven.
 
 5. Extending to Image and Audio Generation:
    The principles apply similarly to visual and audio generation:
    -1. Image Generation
-       You likened Top-K to choosing from a palette of colors, and Top-P to filtering out less probable choices. 
+       Likened Top-K to choosing from a palette of colors, and Top-P to filtering out less probable choices. 
        Temperature controls whether the output is more abstract or realistic.
    -2. Audio Generation
-       You compared Top-K to selecting instruments and Temperature to the intensity and complexity of the generated sound.
+       Compared Top-K to selecting instruments and Temperature to the intensity and complexity of the generated sound.
 
 6. Unique Considerations for Image and Audio Tuning:
    In image generation, resolution and style transfer play critical roles. In audio generation, tuning is essential for high-quality outputs and natural-sounding speech.
@@ -43,7 +42,7 @@
    -3. Evaluate the outputs and adjust accordingly, refining until the output meets your expectations.
 
 8. Example Parameter Settings:
-   You illustrated parameter tuning through examples and code, showing how different configurations produce varied results depending on the application—whether
+   Illustrated parameter tuning through examples and code, showing how different configurations produce varied results depending on the application—whether
    it’s text generation, image creation, or audio synthesis.
 
 9. The Bigger Picture: Shaping the Future of LLMs:
