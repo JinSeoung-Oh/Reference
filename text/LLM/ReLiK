@@ -1,3 +1,5 @@
+From https://arxiv.org/pdf/2408.00103 
+
 1. ReLiK (Retrieve and LinK) is a system designed for fast and accurate Entity Linking (EL) and Relation Extraction (RE) tasks. 
    It works through a two-part mechanism: a Retriever and a Reader.
 
