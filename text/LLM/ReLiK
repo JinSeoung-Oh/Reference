@@ -1,0 +1,38 @@
+1. ReLiK (Retrieve and LinK) is a system designed for fast and accurate Entity Linking (EL) and Relation Extraction (RE) tasks. 
+   It works through a two-part mechanism: a Retriever and a Reader.
+
+2. How ReLiK Works:
+   -1. Retriever:
+       The Retriever functions like a smart librarian. It uses a bi-encoder architecture similar to Dense Passage Retrieval (DPR).
+       It creates dense vector representations of both the input text and candidate entities or relations.
+       It then performs similarity matching to identify the best candidates from a large pool using a method called multi-label Noise Contrastive Estimation (NCE),
+       which improves training efficiency by comparing correct candidates against incorrect ones.
+
+   -2. Reader:
+       Once the Retriever has selected potential candidates, the Reader takes over. It processes all candidates in a single pass instead of evaluating them individually,
+       significantly improving speed and efficiency.
+       The Reader uses a Transformer model (DeBERTa-v3) to analyze both the input text and the candidates simultaneously. 
+       It identifies relevant spans (text parts) related to entities or relations, using special tokens to mark these spans.
+
+3. Performance:
+   ReLiK outperforms traditional systems by not relying on a pre-built mention-entities dictionary, making it adaptable to unseen or rare entities.
+   The system shows high performance in both in-domain and out-of-domain tests, handling different types of text effectively.
+   It also demonstrates speed and efficiency, with the base version (ReLiKB) being faster and using fewer parameters than many competitors, 
+   while the larger version (ReLiKL) achieves record accuracy, especially on difficult datasets like KORE 50.
+
+4. Relation Extraction and Closed Information Extraction (cIE):
+   ReLiK was tested on well-known datasets like NYT (with 24 types of relationships) and CONLL04 (with 5 types) for RE tasks. 
+   It also performed well on the REBEL dataset for cIE, handling a large variety of relationship types.
+
+5. Key Advantages:
+   Unlike seq2seq models that build relationships step-by-step, ReLiK processes everything in one pass, enhancing speed and flexibility.
+   It was up to 35 times faster than other systems in some tests, making it particularly useful for large datasets or resource-limited scenarios.
+
+6. Future Directions:
+   The researchers plan to explore additional use cases and challenges like dynamic entity linking for emerging entities and automatic verbalization of entity descriptions.
+
+
+
+
+
+
