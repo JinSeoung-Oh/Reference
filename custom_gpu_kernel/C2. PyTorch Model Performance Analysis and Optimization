@@ -1,0 +1,129 @@
+### From https://towardsdatascience.com/pytorch-model-performance-analysis-and-optimization-10c3c5822869
+
+"""
+Performance optimization is described as an iterative process that involves continually identifying and exploiting opportunities to improve the efficiency of model training.
+The primary focus is on utilizing the PyTorch Profiler, a built-in performance analysis tool, 
+and its integration with the TensorBoard plugin to diagnose and optimize bottlenecks during model training. 
+The text acknowledges that this guide is not a replacement for the official PyTorch documentation but serves
+as a practical demonstration of how to incorporate these tools into daily development workflows.
+"""
+
+## Example
+import numpy as np
+import torch
+import torch.nn
+import torch.optim
+import torch.profiler
+import torch.utils.data
+import torchvision.datasets
+import torchvision.models
+import torchvision.transforms as T
+from torchvision.datasets.vision import VisionDataset
+from PIL import Image
+
+class FakeCIFAR(VisionDataset):
+    def __init__(self, transform):
+        super().__init__(root=None, transform=transform)
+        self.data = np.random.randint(low=0,high=256,size=(10000,32,32,3),dtype=np.uint8)
+        self.targets = np.random.randint(low=0,high=10,size=(10000),dtype=np.uint8).tolist()
+
+    def __getitem__(self, index):
+        img, target = self.data[index], self.targets[index]
+        img = Image.fromarray(img)
+        if self.transform is not None:
+            img = self.transform(img)
+        return img, target
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+transform = T.Compose(
+    [T.Resize(224),
+     T.ToTensor(),
+     T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+train_set = FakeCIFAR(transform=transform)
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=32, 
+                                           shuffle=True)
+
+device = torch.device("cuda:0")
+model = torchvision.models.resnet18(weights='IMAGENET1K_V1').cuda(device)
+criterion = torch.nn.CrossEntropyLoss().cuda(device)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+model.train()
+
+# train step
+def train(data):
+    inputs, labels = data[0].to(device=device), data[1].to(device=device)
+    outputs = model(inputs)
+    loss = criterion(outputs, labels)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+# training loop wrapped with profiler object
+with torch.profiler.profile(
+        schedule=torch.profiler.schedule(wait=1, warmup=4, active=3, repeat=1),
+        on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/resnet18'),
+        record_shapes=True,
+        profile_memory=True,
+        with_stack=True
+) as prof:
+    for step, batch_data in enumerate(train_loader):
+        if step >= (1 + 4 + 3) * 1:
+            break
+        train(batch_data)
+        prof.step()
+
+
+### Optimize given code <-- After analyze (Below method is just example. You have to apply this kind of method based on your analyze about your model train process
+1. Multi-process Data Loading
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=32, 
+                               shuffle=True, num_workers=8)
+
+2. Memory Pinning
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=32, 
+                          shuffle=True, num_workers=8, pin_memory=True)
+
+inputs, labels = data[0].to(device=device, non_blocking=True), \
+                 data[1].to(device=device, non_blocking=True)
+
+3.Increase Batch Size
+To control the memory utilization
+
+4. Reduce Host to Device Copy
+# maintain the image input as an 8-bit uint8 tensor
+transform = T.Compose(
+    [T.Resize(224),
+     T.PILToTensor()
+     ])
+train_set = FakeCIFAR(transform=transform)
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=1024, 
+                                           shuffle=True, num_workers=8,
+                                           pin_memory=True)
+
+device = torch.device("cuda:0")
+model = torchvision.models.resnet18(weights='IMAGENET1K_V1').cuda(device)
+criterion = torch.nn.CrossEntropyLoss().cuda(device)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+model.train()
+
+5. Set Gradients to None
+optimizer.zero_grad(set_to_none=True)
+
+6. Automatic Mixed Precision
+def train(data):
+    inputs, labels = data[0].to(device=device, non_blocking=True), \
+                     data[1].to(device=device, non_blocking=True)
+    inputs = (inputs.to(torch.float32) / 255. - 0.5) / 0.5
+    with torch.autocast(device_type='cuda', dtype=torch.float16):
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+    # Note - torch.cuda.amp.GradScaler() may be required  
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    optimizer.step()
+
+7. Train in Graph Mode
+model = torchvision.models.resnet18(weights='IMAGENET1K_V1').cuda(device)
+model = torch.compile(model)
