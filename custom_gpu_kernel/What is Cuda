@@ -1,1 +1,187 @@
+### From https://developer.nvidia.com/blog/even-easier-introduction-cuda
 
+CUDA C++ is just one of the ways you can create massively parallel applications with CUDA.
+It lets you use the powerful C++ programming language to develop high performance algorithms accelerated by thousands of parallel threads running on GPUs
+
+1. Build add.cpp
+"""
+#include <iostream>
+#include <math.h>
+
+// function to add the elements of two arrays
+void add(int n, float *x, float *y)
+{
+  for (int i = 0; i < n; i++)
+      y[i] = x[i] + y[i];
+}
+
+int main(void)
+{
+  int N = 1<<20; // 1M elements
+
+  float *x = new float[N];
+  float *y = new float[N];
+
+  // initialize x and y arrays on the host
+  for (int i = 0; i < N; i++) {
+    x[i] = 1.0f;
+    y[i] = 2.0f;
+  }
+
+  // Run kernel on 1M elements on the CPU
+  add(N, x, y);
+
+  // Check for errors (all values should be 3.0f)
+  float maxError = 0.0f;
+  for (int i = 0; i < N; i++)
+    maxError = fmax(maxError, fabs(y[i]-3.0f));
+  std::cout << "Max error: " << maxError << std::endl;
+
+  // Free memory
+  delete [] x;
+  delete [] y;
+
+  return 0;
+}
+"""
+
+
+2. Turn this add.cpp into a function that the GPU can run(kernel in CUDA)
+   -Add the specifier __global__ to the function, which tells the CUDA C++ compiler that this is a function that runs on the GPU and can be called from CPU code
+   -These __global__ functions are known as kernels, and code that runs on the GPU is often called device code, while code that runs on the CPU is host code.
+
+"""
+// CUDA Kernel function to add the elements of two arrays on the GPU
+__global__
+void add(int n, float *x, float *y)
+{
+  for (int i = 0; i < n; i++)
+      y[i] = x[i] + y[i];
+}
+"""
+
+
+3. Memory Allocation in CUDA
+   -To compute on the GPU, I need to allocate memory accessible by the GPU. Unified Memory in CUDA makes this easy by providing 
+    a single memory space accessible by all GPUs and CPUs in your system. To allocate data in unified memory, 
+    call cudaMallocManaged(), which returns a pointer that you can access from host (CPU) code or device (GPU) code. 
+    To free the data, just pass the pointer to cudaFree().
+
+   - Eeplace the calls to new in the code above(add.cpp) with calls to cudaMallocManaged(), and replace calls to delete [] with calls to cudaFree.
+
+"""
+  // Allocate Unified Memory -- accessible from CPU or GPU
+  float *x, *y;
+  cudaMallocManaged(&x, N*sizeof(float));
+  cudaMallocManaged(&y, N*sizeof(float));
+
+  ...
+
+  // Free memory
+  cudaFree(x);
+  cudaFree(y);
+"""
+
+
+4. Convert add.cpp to add.cu
+#include <iostream>
+#include <math.h>
+// Kernel function to add the elements of two arrays
+__global__
+void add(int n, float *x, float *y)
+{
+  for (int i = 0; i < n; i++)
+    y[i] = x[i] + y[i];
+}
+
+int main(void)
+{
+  int N = 1<<20;
+  float *x, *y;
+
+  // Allocate Unified Memory – accessible from CPU or GPU
+  cudaMallocManaged(&x, N*sizeof(float));
+  cudaMallocManaged(&y, N*sizeof(float));
+
+  // initialize x and y arrays on the host
+  for (int i = 0; i < N; i++) {
+    x[i] = 1.0f;
+    y[i] = 2.0f;
+  }
+
+  // Run kernel on 1M elements on the GPU
+  add<<<1, 1>>>(N, x, y);
+
+  // Wait for GPU to finish before accessing on host
+  cudaDeviceSynchronize();
+
+  // Check for errors (all values should be 3.0f)
+  float maxError = 0.0f;
+  for (int i = 0; i < N; i++)
+    maxError = fmax(maxError, fabs(y[i]-3.0f));
+  std::cout << "Max error: " << maxError << std::endl;
+
+  // Free memory
+  cudaFree(x);
+  cudaFree(y);
+  
+  return 0;
+}
+
+<-- Compile
+> nvcc add.cu -o add_cuda
+> ./add_cuda
+Max error: 0.000000
+
+
+5. Make add.cu more faster - Make it parallel (add_block.cu)
+   - Key is in CUDA’s <<<1, 1>>>syntax. This is called the execution configuration, and it tells the CUDA runtime how many parallel threads
+     to use for the launch on the GPU
+   - add<<<1, 256>>>(N, x, y);
+   - If I run the code with only this change, it will do the computation once per thread, rather than spreading the computation across the parallel threads
+   - CUDA C++ provides keywords that let kernels get the indices of the running threads. 
+     Specifically, threadIdx.x contains the index of the current thread within its block, and blockDim.x contains the number of threads in the block
+
+"""
+__global__
+void add(int n, float *x, float *y)
+{
+  int index = threadIdx.x;
+  int stride = blockDim.x;
+  for (int i = index; i < n; i += stride)
+      y[i] = x[i] + y[i];
+}
+"""
+<-- Setting index to 0 and stride to 1 makes it semantically identical to the first version.
+
+
+6. With Streaming Multiprocessors(SMs) - add_grid.cu 
+   - Have to check this : https://developer.nvidia.com/blog/even-easier-introduction-cuda
+   - Each SM can run multiple concurrent thread blocks.
+   - The blocks of parallel threads make up what is known as the grid. Since I have N elements to process, and 256 threads per block,
+     I just need to calculate the number of blocks to get at least N threads. 
+     I simply divide N by the block size (being careful to round up in case N is not a multiple of blockSize).
+
+"""
+int blockSize = 256;
+int numBlocks = (N + blockSize - 1) / blockSize;
+add<<<numBlocks, blockSize>>>(N, x, y);
+"""
+
+   - CUDA provides gridDim.x, which contains the number of blocks in the grid, and blockIdx.x, 
+     which contains the index of the current thread block in the grid.
+   - The idea is that each thread gets its index by computing the offset to the beginning of its block
+     (the block index times the block size: blockIdx.x * blockDim.x) and adding the thread’s index within the block (threadIdx.x).
+
+"""
+__global__
+void add(int n, float *x, float *y)
+{
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+  int stride = blockDim.x * gridDim.x;
+  for (int i = index; i < n; i += stride)
+    y[i] = x[i] + y[i];
+}
+"""
+<-- The updated kernel also sets stride to the total number of threads in the grid (blockDim.x * gridDim.x). 
+     This type of loop in a CUDA kernel is often called a grid-stride loop.
