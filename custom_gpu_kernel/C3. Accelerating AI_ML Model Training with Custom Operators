@@ -1,2 +1,175 @@
 ### From https://towardsdatascience.com/accelerating-ai-ml-model-training-with-custom-operators-163ef2a04b12
 
+# Just check toy promblem code and some explain given link
+
+1. Optimization Through Concatenation
+def loss_with_concat(pred, targets_list):
+    bs = len(targets_list)
+    all_targets = torch.concat(targets_list, dim = 0)
+    num_boxes = [targets_list[i].shape[0] for i in range(bs)]
+    all_preds = torch.concat([pred[i,: num_boxes[i]] for i in range(bs)],
+                              dim=0)
+    total_boxes = sum(num_boxes)
+    loss_sum = generalized_box_iou(all_targets, all_preds).sum()
+    return loss_sum/max(total_boxes, 1)
+
+2. Optimization Through Padding - avoiding the use of dynamically shaped tensors
+def collate_with_padding(batch):
+    images = torch.stack([b[0] for b in batch],dim=0)
+    padded_boxes = []
+    for b in batch:
+        p = torch.nn.functional.pad(
+                       b[1], (0, 0, 0, 256 - b[1].shape[0]), value = 0)
+        padded_boxes.append(p)
+    boxes = torch.stack(padded_boxes,dim=0)
+    return images, boxes
+
+def loss_with_padding(pred, targets):
+    mask = (targets[...,3] > 0).to(pred.dtype)
+    total_boxes = mask.sum()
+    loss = generalized_box_iou(targets, pred)
+    masked_loss = loss*mask
+    loss_sum = masked_loss.sum()
+    return loss_sum/torch.clamp(total_boxes, 1)
+
+3. Creating a Custom CUDA Kernel
+   -1. Kernel Fusion
+       If cudaLaunchKernel > 1
+       -1) Each kernel launch requires dedicated communication between the CPU and GPU — something we always try to minimize.
+       -2) Each kernel needs to wait for the previous kernel to be completed before running. Sometimes, this can’t be avoided, 
+           but in some cases, such as ours — where most of the operations are performed “per-pixel”, it can.
+       -3) The use of many independent kernels can have implications on how the GPU memory is used.
+   Optimization through kernel fusion attempts to reduce this overhead by combining these operations into a lower number of kernels
+   so as to reduce the overhead of multiple kernels.
+
+   """
+   #include <torch/extension.h>
+
+   #include <cuda.h>
+   #include <cuda_runtime.h>
+
+   namespace extension_cpp {
+
+   __global__ void giou_kernel(const float* boxes1,
+                               const float* boxes2, 
+                               float* giou, 
+                               bool* mask) {
+     int idx = blockIdx.x * blockDim.x + threadIdx.x;
+     bool valid = boxes2[4*idx+3] != 0;
+     mask[idx] = valid;
+
+     const float epsilon = 1e-5;
+
+     const float* box1 = &boxes1[idx * 4];
+     const float* box2 = &boxes2[idx * 4];
+
+     // Compute area of each box
+     float area1 = (box1[2] - box1[0]) * (box1[3] - box1[1]);
+     float area2 = (box2[2] - box2[0]) * (box2[3] - box2[1]);
+   
+     // Compute the intersection
+     float left = max(box1[0], box2[0]);
+     float top = max(box1[1], box2[1]);
+     float right = min(box1[2], box2[2]);
+     float bottom = min(box1[3], box2[3]);
+
+     float inter_w = max(right - left, 0);
+     float inter_h = max(bottom - top, 0);
+     float inter_area = inter_w * inter_h;
+
+     // Compute the union area
+     float union_area = area1 + area2 - inter_area;
+
+     // IoU
+     float iou_val = inter_area / max(union_area, epsilon);
+
+     // Compute the smallest enclosing box
+     float enclose_left = min(box1[0], box2[0]);
+     float enclose_top = min(box1[1], box2[1]);
+     float enclose_right = max(box1[2], box2[2]);
+     float enclose_bottom = max(box1[3], box2[3]);
+
+     float enclose_w = max(enclose_right - enclose_left, 0);
+     float enclose_h = max(enclose_bottom - enclose_top, 0);
+     float enclose_area = enclose_w * enclose_h;
+
+     float result = iou_val - (enclose_area-union_area)/max(enclose_area, epsilon);
+     // Generalized IoU
+     giou[idx] = result * valid;
+   }
+
+   at::Tensor giou_loss_cuda(const at::Tensor& a, const at::Tensor& b) {
+     TORCH_CHECK(a.sizes() == b.sizes());
+     TORCH_CHECK(a.dtype() == at::kFloat);
+     TORCH_CHECK(b.dtype() == at::kFloat);
+     TORCH_INTERNAL_ASSERT(a.device().type() == at::DeviceType::CUDA);
+     TORCH_INTERNAL_ASSERT(b.device().type() == at::DeviceType::CUDA);
+     int bs = a.sizes()[0];
+     at::Tensor a_contig = a.contiguous();
+     at::Tensor b_contig = b.contiguous();
+     at::Tensor giou = torch::empty({a_contig.sizes()[0], a_contig.sizes()[1]},
+                                     a_contig.options());
+     at::Tensor mask = torch::empty({a_contig.sizes()[0], a_contig.sizes()[1]},
+                                     a_contig.options().dtype(at::kBool));
+     const float* a_ptr = a_contig.data_ptr<float>();
+     const float* b_ptr = b_contig.data_ptr<float>();
+     float* giou_ptr = giou.data_ptr<float>();
+     bool* mask_ptr = mask.data_ptr<bool>();
+
+     // Launch the kernel
+     // The number of blocks is set according to the batch size.
+     // Each block has 256 threads corresponding to the number of boxes per sample
+     giou_kernel<<<bs, 256>>>(a_ptr, b_ptr, giou_ptr, mask_ptr);
+ 
+     at::Tensor total_boxes = torch::clamp(mask.sum(), 1);
+     torch::Tensor loss_sum = giou.sum();
+     return loss_sum/total_boxes;
+   }
+
+
+   // Registers CUDA implementations for giou_loss
+   TORCH_LIBRARY_IMPL(extension_cpp, CUDA, m) {
+     m.impl("giou_loss", &giou_loss_cuda);
+   }
+
+   }
+
+   // Add the C++ definition
+   m.def(“giou_loss(Tensor a, Tensor b) -> Tensor”);
+
+   # define the Python operator
+   def giou_loss(a: Tensor, b: Tensor) -> Tensor:
+       return torch.ops.extension_cpp.giou_loss.default(a, b)
+
+   def loss_with_kernel(pred, targets):
+       pred = pred.to(torch.float32)
+       targets = targets.to(torch.float32)
+       import extension_cpp
+       return extension_cpp.ops.giou_loss(pred, targets)
+
+   """
+
+
+   -2. Conditional Execution
+       The thread-level control that CUDA provides us allows us to add a conditional statement that avoids computation on the invalid bounding boxes
+       """
+       __global__ void giou_kernel(const float* boxes1,
+                                   const float* boxes2,
+                                   float* giou,
+                                   bool* mask) {
+         int idx = blockIdx.x * blockDim.x + threadIdx.x;
+         bool valid = boxes2[4*idx+3] != 0;
+         mask[idx] = valid;
+         if (valid)
+         {
+           const float* box1 = &boxes1[idx * 4];
+           const float* box2 = &boxes2[idx * 4];
+           giou[idx] = compute_giou(box1, box2);
+         }
+         else
+         {
+           giou[idx] = 0;
+         }
+       }
+       """
+
