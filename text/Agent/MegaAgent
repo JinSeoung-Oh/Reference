@@ -1,0 +1,54 @@
+## From https://anonymous.4open.science/r/MegaAgent-81F3/README.md
+## From https://arxiv.org/abs/2408.09955
+## From https://medium.com/@techsachin/megaagent-framework-for-autonomous-cooperation-in-large-scale-llm-agent-systems-dc61320ba775
+
+The MegaAgent framework is designed to handle complex tasks by dividing them into smaller, manageable components across multiple levels of agents.
+It ensures efficient task distribution, execution, and management. 
+
+Below is a summary of its five key components:
+
+1. Multi-Level Task Splitting
+   - Task Division
+     The MegaAgent accepts a prompt and splits it into smaller subtasks, assigning these to different agent groups.
+   - Hierarchy
+     Each subtask is managed by an admin agent, who oversees progress. Admin agents can work independently or recruit other agents to further decompose tasks.
+   - Iterative Process
+     This hierarchical design allows tasks to be broken down iteratively, with new levels created as needed. 
+     This structure ensures the system can handle increasing complexity without overloading any single agent.
+
+2. Action Module
+   - Execution
+     The action module comprises various agent groups, each responsible for specific subtasks. Admin agents break down these tasks further,
+     and agents within the group coordinate and update their progress.
+   - Data Retrieval
+     A data retriever interfaces between the action and storage modules, managing function calls like file operations and checklists.
+     It ensures tasks are automated and that the system can scale efficiently.
+   - Parallelism
+     The action module supports parallel execution, reducing task completion time compared to linear methods.
+
+3. Storage Module
+   - Components
+     The storage module includes a database, files, and checklists, and incorporates Git for version control.
+   - File Management
+     When agents interact with files, they also manage Git commits, ensuring changes are properly merged and tracked. Merge conflicts are resolved by the agents as needed.
+   - Memory Management
+     A memory database stores long-term summaries, allowing agents to recall previous conversations and progress. 
+     The vector database uses embeddings to retrieve similar messages, helping agents dynamically update their tasks.
+   - Task Monitoring
+     The task monitor checks for the existence of output files, verifies content, and assigns rework if necessary.
+
+4. Monitor Mechanism
+   - Oversight
+     The OS agent ensures that output meets expected standards. If discrepancies are found, the agent records an error and prompts a retry.
+   - Checklist Verification
+     Each agent maintains a checklist to track actions. Admin agents review these checklists to confirm task completion,
+     with retries managed by the OS agent if results are unsatisfactory.
+
+5. Communication Mechanism
+   - Communication Structure
+     Agents communicate within a hierarchical structure, only interacting with their direct superiors, subordinates, or within their group.
+   - Function Calls
+     Communication includes file operations and code execution, with messages dispatched in a specified format. This ensures clear and efficient communication within the system.
+
+This framework enables the MegaAgent to efficiently manage complex tasks by distributing workloads across multiple agents and
+levels, ensuring that each task is completed with high accuracy and within a reasonable timeframe.
