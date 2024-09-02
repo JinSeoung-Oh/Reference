@@ -1,0 +1,64 @@
+## From https://towardsdatascience.com/a-visual-guide-to-quantization-930ebcd9be94
+
+1. The “Problem“ with Large Language Models (LLMs)
+   Large Language Models (LLMs) are named for the vast number of parameters they contain, typically reaching into the billions. 
+   These parameters, mostly weights, require substantial storage space, which becomes a challenge during model inference when large amounts of memory are consumed.
+
+2. Representing Numerical Values
+   Numerical values in computing are often represented as floating-point numbers, where each value is defined by a combination of sign, exponent, and fraction (mantissa).
+   The IEEE-754 standard governs the format for representing these floating points. 
+   The precision and range of these values are determined by the number of bits used:
+
+   -1. Precision: The smallest difference between two values that can be distinguished.
+   -2. Dynamic Range: The interval of representable numbers.
+   Given that memory is finite, the number of bits used to represent each value directly impacts the amount of memory required.
+   For instance, representing values in 32-bit floating point (FP32) for a model with 70 billion parameters demands 280GB of memory.
+
+3. Quantization as a Solution
+   To address the memory and computational challenges, we reduce the precision of numerical representations, a process known as quantization. 
+   Quantization aims to reduce the bit-width of parameters, trading off some precision to gain efficiency in memory and computation.
+
+4. Common Data Types and Their Impact
+   -1. FP16 and BF16
+       - FP16 (16-bit floating point): Reduces memory usage but with a smaller dynamic range than FP32.
+       - BF16 (bfloat16): Retains a similar dynamic range to FP32 but with lower precision, often used in deep learning.
+   -2. INT8
+       - INT8 (8-bit integer): Drastically reduces the number of bits, moving from floating-point to integer representation, 
+                               which can lead to faster computations on compatible hardware.
+5. Quantization Techniques
+   -1. Symmetric Quantization
+       - Symmetric Quantization: Maps the range of floating-point values symmetrically around zero in the quantized space. 
+                                 This method uses a linear mapping that is straightforward and efficient.
+   -2. Asymmetric Quantization
+       - Asymmetric Quantization: Maps the range of floating-point values to a shifted range in the quantized space, typically requiring a zero-point calculation. 
+                                  This approach can be more accurate but is also more complex.
+6. Range Mapping and Clipping
+   Outliers in data can cause large ranges, leading to poor precision for smaller values. Clipping can limit the dynamic range to focus on the most common values,
+   reducing the quantization error for non-outliers at the cost of higher errors for outliers.
+
+7. Calibration Techniques
+   Calibration is the process of determining the dynamic range for quantization. 
+   This can vary depending on whether we are quantizing static values like weights or dynamic values like activations.
+
+8. Weights and Biases: Often calibrated using percentile methods, minimizing mean squared error (MSE), or minimizing entropy.
+   - Activations
+     Since they change with input data, their range must be determined either dynamically during inference or statically using a calibration dataset.
+   - Post-Training Quantization (PTQ)
+     PTQ involves quantizing a model after it has been trained. This can be done dynamically, recalculating quantization parameters during inference, 
+     or statically, using a pre-determined calibration dataset. PTQ is effective but may introduce quantization errors if not carefully managed.
+
+9. Advanced Quantization: 4-bit and Beyond
+   Going below 8-bits, such as 4-bit quantization, presents challenges due to increased quantization errors. 
+   Techniques like GPTQ and GGUF have been developed to mitigate these errors.
+   - GPTQ: Focuses on layer-wise quantization using the inverse-Hessian method to weight the importance of each parameter, preserving the model's performance.
+   - GGUF: Allows offloading model layers to the CPU, using block-wise quantization methods.
+
+10. Quantization Aware Training (QAT)
+    QAT incorporates quantization into the training process, allowing the model to learn how to handle lower precision during training. 
+    This tends to produce more accurate results compared to PTQ, especially at very low bit-widths.
+
+11. Cutting-Edge Quantization: 1-bit LLMs and Beyond
+    BitNet represents an innovative approach, using 1-bit quantization for model weights. By reducing weights to just -1 or 1, 
+    BitNet greatly reduces memory usage and computation costs, especially as model sizes grow. 
+    The introduction of 0 in BitNet 1.58b enhances this by allowing ternary weight representation, improving both accuracy and computational efficiency
+
