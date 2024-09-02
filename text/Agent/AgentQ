@@ -1,0 +1,52 @@
+## From https://medium.com/@ignacio.de.gregorio.noblejas/agentq-a-human-beating-ai-agent-85353bfd1c26
+
+AgentQ is a newly announced AI agent by MultiOn that represents a significant leap forward in autonomous web navigation by combining Large Language Models (LLMs)
+with Monte Carlo Tree Search (MCTS) and innovative alignment techniques like Direct Preference Optimization (DPO).
+This advancement allows AgentQ to surpass typical human capabilities in web navigation tasks, achieving a staggering 95% accuracy in real-life booking scenarios, a dramatic improvement over previous benchmarks.
+
+What Makes AgentQ Special?
+AgentQ's uniqueness lies in its ability to "self-heal" or learn from both good and bad decisions, improving its performance over time. 
+This is made possible through an advanced use of alignment techniques that enable the agent to correct its own mistakes,
+making it the first of its kind to achieve such high levels of accuracy and adaptability.
+
+The Technology Behind AgentQ
+1. Monte Carlo Tree Search (MCTS):
+   - Exploration and Exploitation
+     MCTS allows the model to simulate possible outcomes for different actions, helping it choose the best possible action by balancing exploration
+     (trying less certain but potentially rewarding paths) with exploitation (choosing the most likely successful action based on past experience).
+   - Creativity through Exploration
+     This method encourages the model to explore less obvious paths, which might lead to innovative solutions—akin to the famous "Move 37" by AlphaGo in its historic Go match.
+
+2. AI Critic and Reward Mechanism:
+   - AI Critic
+     To address the challenge of sparse and subjective rewards in real-world web navigation tasks, AgentQ introduces an AI critic. 
+     This critic evaluates the model's potential actions and provides feedback, helping the model to choose actions that are most likely
+     to succeed based on both the expected reward and the critic’s feedback.
+   - Non-Differentiable Optimization
+     Unlike traditional neural network training, MCTS in AgentQ involves non-differentiable optimization, 
+     which requires the agent to interact with the web environment actively to learn and improve.
+
+3. Direct Preference Optimization (DPO):
+   - Offline Fine-Tuning
+     After initial training with MCTS, AgentQ uses DPO to refine its decision-making process. 
+     DPO optimizes the model's policy based on preferences between different trajectories, 
+     improving its ability to make better decisions without further costly online interactions.
+
+4. Implications for AI and Web Navigation
+   While AgentQ is not a step toward Artificial General Intelligence (AGI), it represents a significant advancement in creating more autonomous and capable narrow AI agents. 
+   The ability to perform complex web navigation tasks with high accuracy and adaptability positions AgentQ as a pioneering model in this space.
+
+By combining LLMs with MCTS, alignment training, and DPO, AgentQ demonstrates how cutting-edge AI techniques
+can be integrated to create agents that are not only highly effective but also capable of learning and improving over time. 
+This brings us closer to a future where AI can autonomously perform specialized tasks with minimal human intervention, 
+marking a significant milestone in the development of intelligent systems.
+
+For AI executives and analysts, understanding the underlying technologies
+and their potential applications is crucial to staying ahead of the curve in this rapidly evolving field.
+
+
+
+
+
+
+
