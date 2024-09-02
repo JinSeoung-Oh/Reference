@@ -1,0 +1,60 @@
+## From https://medium.com/aiguys/geometric-deep-learning-introduction-46ff511e0bac
+
+1. Symmetry and the Evolution of Deep Learning
+   Hermann Weyl once remarked, “Symmetry, as wide or narrow as you may define its meaning, is one idea by which man through the ages has tried to comprehend and create order,
+   beauty, and perfection.” This timeless observation finds a modern echo in the world of data science and machine learning, 
+   where symmetry plays a pivotal role in unraveling complex problems.
+
+   Over the past decade, we've witnessed a revolution in data science, particularly with the rise of deep learning. 
+   Tasks once deemed impossible, such as mastering the game of Go or predicting protein folding, are now within reach, 
+   thanks to the immense computational power available today. However, 
+   at the core of these deep learning advancements are two fundamental principles: 
+   representation learning and gradient descent optimization, often implemented through backpropagation.
+
+2. The Challenge of High-Dimensional Learning
+   Learning functions in high-dimensional spaces is inherently difficult due to the curse of dimensionality. 
+   As dimensionality increases, the volume of the space increases exponentially, making it challenging to gather enough data to accurately model relationships. 
+   However, not all problems are equally difficult; many have inherent structures and patterns that make them more manageable. 
+   These patterns often arise from the low-dimensional geometry of the physical world.
+
+3. Geometric Deep Learning: The Power of Symmetry and Invariance
+   Geometric Deep Learning (GDL) offers a unified framework that addresses this challenge by leveraging symmetry and invariance. 
+   These principles are not only the foundation for the success of convolutional neural networks (CNNs) and graph neural networks (GNNs), 
+   but they also provide a systematic approach to embedding problem-specific inductive biases into models.
+
+   - 1. Learning in High Dimensions
+        Supervised machine learning typically involves mapping high-dimensional data to labels using a function 𝑓 within a parameterized function class 
+        𝐹, such as neural networks. However, in high dimensions, the number of observations needed to accurately estimate 𝑓 increases exponentially with the dimension 
+        𝑑. Overcoming this requires incorporating geometric priors that reflect the structure of the data domain.
+
+        For instance, images exhibit a natural 2D grid structure, with nearby pixels often being highly correlated. 
+        CNNs exploit this by using convolutional layers that apply small filters across the image, enforcing translation invariance and making the model more efficient.
+
+   - 2. Symmetries, Representations, and Invariance
+        Symmetries refer to transformations that leave certain properties of an object unchanged. 
+        In machine learning, encoding these symmetries into models makes them more robust and efficient. 
+        For example, a face recognition system should recognize a face regardless of its orientation. 
+        Invariance ensures that a model's output remains consistent under certain transformations, like translation or rotation.
+
+   - 3. Isomorphisms and Automorphisms
+        Isomorphisms are mappings that preserve the structure of objects, allowing for a reduction in the complexity of learning by recognizing equivalent structures 
+        in different datasets. Recognizing these mappings can simplify the learning process, enabling more efficient models.
+
+   - 4. Deformation Stability and Scale Separation
+        Deformation stability refers to a model's ability to handle slight changes or distortions in input data, crucial for generalization. 
+        Scale separation involves analyzing problems at different levels of detail, a technique often used in image processing to capture both global and local features.
+
+4. The 5 Gs of Geometric Deep Learning
+   Geometric Deep Learning can be categorized into five key areas, often referred to as the 5 Gs:
+
+   -1. Graphs: GNNs excel at modeling relationships in irregular data structures, such as social networks or molecular structures.
+   -2. Grids: CNNs are powerful for grid-like data, such as images, where they capture hierarchical features through convolutions.
+   -3. Groups: Group-equivariant networks recognize objects regardless of transformations like rotation or translation, reducing the need for extensive data augmentation.
+   -4. Geodesics and Manifolds: These concepts help models respect the intrinsic geometry of data, crucial for non-Euclidean spaces like 3D surfaces.
+   -5. Gauges and Bundles: Advanced mathematical concepts from differential geometry, promising in areas like physics simulations, 
+                           though currently complex and computationally intensive.
+
+5. The Future of Geometric Deep Learning
+   The ongoing integration of these concepts into deep learning models points towards the next frontier in artificial intelligence: 
+   systems that can handle complex transformations and symmetries in a unified architecture. Mastery of these principles could potentially lead to 
+   the development of more generalizable and efficient AI systems, bringing us a step closer to achieving Artificial General Intelligence (AGI).
