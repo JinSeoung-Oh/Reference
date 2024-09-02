@@ -1,0 +1,32 @@
+### From https://medium.com/@ignacio.de.gregorio.noblejas/elevate-llm-performance-by-20-instantly-with-min-p-c961fe1daf3b
+
+1. Simplified Explanation of Min-p Sampling
+   Min-p sampling is a method used in AI models to decide which word (or token) to choose next when generating text.
+   It works by setting a dynamic threshold that depends on how certain the model is about its top choice.
+
+2. Here's how it works:
+   -1. Base Value: You start with a base value, which is a number you choose (called a hyperparameter).
+   -2. Dynamic Threshold: The threshold for rejecting unlikely words is calculated by multiplying this base value with the probability of the most likely word.
+
+3. Example
+   If the most likely word has a probability of 0.47, and your base value is 0.1, the threshold becomes 0.047 (or 4.7%).
+   This means that any word with a probability lower than 4.7% will be ignored by the model.
+
+4. Two Scenarios:
+   -1. Highly Certain Situation (Top Distribution):
+       When the model is very confident about a particular word (like in facts or simple math), the distribution of possible words is sharp, with one word standing out.
+       In this case, min-p will reject all but the top few options, ensuring that the model sticks closely to the most likely correct answer.
+   -2. Uncertain Situation (Bottom Distribution):
+       In creative tasks or when there’s more uncertainty, the distribution is flatter, meaning the model isn't sure which word to pick.
+       Here, min-p sets a lower threshold, allowing more words to remain in consideration, thus preserving the model's ability to be creative.
+
+5. Why Min-p is Effective:
+   -1. Versatility
+       Unlike top-p sampling (which just picks one of the most likely words), min-p adjusts based on the model’s certainty, making it more flexible.
+   -2. Hallucination Prevention
+       Min-p is particularly good at avoiding "hallucinations" (when the model confidently gives a wrong answer) 
+       by being stricter in situations where one word is much more likely than the others.
+
+In Summary: Min-p sampling carefully balances between choosing the most likely word and keeping options open,
+            making it especially useful in both factual and creative contexts. It dynamically adjusts based on the model’s confidence, 
+            which helps prevent errors while maintaining creativity when needed.
