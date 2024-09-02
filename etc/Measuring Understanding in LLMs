@@ -1,0 +1,33 @@
+## From https://towardsdatascience.com/what-do-large-language-models-understand-befdb4411b77
+
+The GPT-3 Era: In the GPT-3 era, understanding in Large Language Models (LLMs) was often broken down into syntactic and semantic categories. 
+               Research highlighted limitations even in syntactic understanding, such as subject-verb agreement, 
+               where performance varied based on the frequency of verbs and sentence structure. LLMs also struggled with semantic tasks, 
+               such as handling negations and reasoning, often giving "brittle" responses sensitive to wording, showing a lack of common sense,
+               and sometimes relying on memorized text instead of true reasoning.
+
+The ChatGPT Era: With advancements since GPT-3, particularly in models tuned for instruction following and conversation, LLMs now perform better in comprehension and reasoning.
+                 However, they still show limitations in abstract reasoning and complex contexts. Multimodal LLMs (MLLMs), 
+                 which integrate text and images, also show only mediocre performance on multimodal benchmarks.
+
+Anthropomorphism vs Anthropocentrism:
+ -1. Anthropomorphism is the tendency to attribute human-like qualities to non-human entities, 
+ -2 .while anthropocentrism is the bias that assumes non-humans cannot possess certain human-like capabilities. 
+ Two types of anthropocentric bias are identified:
+ - Type-I: Assuming an LLM’s failure in a task always indicates a lack of competence, without considering other factors.
+ - Type-II: Assuming that even if an LLM performs as well as a human, differences in approach mean it lacks genuine competence.
+
+An example discussed is the "20 questions" game, where an LLM doesn’t commit to a specific object in advance but generates consistent responses on the fly. 
+This could be seen as a limitation, but it might also reflect an anthropocentric bias in how we evaluate LLMs.
+
+The Problem of Memorization: LLMs tend to repeat patterns from their training data, making it challenging to design tests that assess true understanding
+                             rather than just pattern matching. This problem is illustrated through an adapted Monty Hall problem, 
+                             where an LLM gives a seemingly logical but contextually incorrect answer, showing a reliance on familiar patterns rather than true comprehension.
+
+System 1 vs System 2: Similar to how humans might give quick, incorrect answers to certain cognitive problems due to a reliance on heuristics (System 1), 
+                      LLMs might also rely on memorized patterns rather than deeper reasoning (System 2). 
+                      The challenge is to design tests that differentiate between these two modes of operation in LLMs.
+
+Giving ChatGPT a Chance: Attempts to craft prompts that challenge ChatGPT's reasoning show that while it can sometimes recognize and correct its mistakes,
+it can also produce incoherent responses when pushed too far from familiar patterns. 
+This highlights the difficulty in avoiding both anthropocentric and anthropomorphic biases when evaluating LLMs and suggests the need for new testing approaches.
