@@ -1,0 +1,69 @@
+## From https://pub.towardsai.net/how-nvidia-pruned-and-distilled-llama-3-1-to-create-minitron-4b-and-8b-6646d42c92c6
+
+1. Optimizing Language Models: Minitron's Approach to Pruning and Distillation
+   Recent advances in large language models (LLMs) have revolutionized AI, showcasing unprecedented capabilities across various tasks. 
+   However, deploying these massive models, often with over 70 billion parameters, is prohibitively expensive for many organizations. 
+   As a result, there's growing interest in smaller language models (SLMs) that are more cost-effective for inference tasks. 
+   Yet, creating effective SLMs isn't straightforward—pretraining them from scratch poses significant challenges in terms of data collection and resource-intensive pipelines.
+   A viable alternative is to distill larger LLMs into smaller, efficient models,
+   a process that Minitron—a set of models recently released by NVIDIA—exemplifies through advanced techniques like pruning and distillation.
+
+2. The Minitron Models: Minitron-8B and Minitron-4B
+   NVIDIA's Minitron models, specifically the 8B and 4B versions, are distilled from the Llama 3.1–450B model. 
+   These models aim to balance efficiency with accuracy by reducing the size of AI models through pruning and distillation 
+   without sacrificing too much of their predictive capabilities.
+
+3. Pruning: Reducing Model Complexity
+   Pruning is a technique that reduces a model's size by selectively removing certain components:
+
+   -1. Depth Pruning
+       Involves cutting entire layers from the model. This method can significantly reduce the model size but risks losing critical information if essential layers are removed.
+   -2. Width Pruning
+       Focuses on removing neurons, attention heads, or embedding channels. This method allows for a more granular reduction, 
+       potentially retaining more of the model's functionality.
+   To maintain accuracy after pruning, retraining is often necessary. Minitron uses an innovative approach that estimates
+   the importance of different model components through forward propagation on a small dataset. 
+   This allows for effective pruning without the need for complex backward propagation and gradient calculations.
+
+4. Distillation: Teaching Smaller Models
+   Distillation complements pruning by training a smaller "student" model to mimic the outputs of a larger "teacher" model:
+
+   -1. Classical Knowledge Distillation
+       The student model learns to replicate various internal states of the teacher model, not just the final output. 
+       This approach, although more complex, results in better accuracy as it captures more detailed feedback from the teacher model.
+   -2. SDG Fine-tuning
+       A simpler method where the student model is refined by mimicking the teacher’s final token predictions, often seen in popular AI tutorials.
+  Minitron emphasizes classical knowledge distillation, which provides more comprehensive guidance to the student model during training, particularly after significant pruning.
+
+5. The Workflow: Iterative Pruning and Distillation
+   The process starts with a larger model, such as a 15B parameter version. Minitron evaluates and prunes less critical components, 
+   reducing the model size in stages, such as from 15B to 8B parameters, and eventually to 4B. 
+   After each pruning stage, the model undergoes light retraining using classical knowledge distillation to regain lost accuracy. 
+   This iterative approach allows Minitron to produce smaller, efficient models while maintaining high performance.
+
+   Best Practices in Model Compression
+   Through extensive experimentation, Minitron has distilled several best practices:
+
+   -1. Model Sizing
+       Begin with the largest feasible model, then prune and distill it iteratively to create smaller versions.
+   -2. Pruning Strategy
+       Prefer width pruning over depth pruning, particularly for models up to 15B parameters. A single round of importance estimation typically suffices.
+   -3. Retraining
+       Use distillation loss for retraining, particularly when pruning layers. For significant depth reductions,
+       combine losses from various model components (e.g., logits, intermediate states, embeddings).
+
+6. Fine-Tuning and Pruning: From 8B to 4B
+   Before pruning the 8B model to a 4B version, Minitron fine-tunes the 8B model to adjust for data distribution shifts. 
+   This ensures that the teacher model provides the best possible guidance to the student during distillation.
+
+   -1. Depth Pruning
+       Minitron pruned 16 layers, identifying critical layers by removing them sequentially and observing performance impacts. 
+       The layers most vital to accuracy were retained, while others were removed to achieve the 4B model size.
+   -2. Width Pruning
+       This involved pruning attention heads, embedding channels, and hidden layers. Despite an initial higher loss compared to depth pruning, 
+       retraining helped the model recover effectively, demonstrating the importance of combining pruning with strategic retraining.
+
+7. Conclusion: Efficient and Effective Language Models
+   Minitron's approach to model compression highlights the potential of combining pruning with classical knowledge distillation. 
+   By systematically reducing model size while maintaining accuracy, Minitron offers a scalable solution for deploying powerful 
+   AI models in resource-constrained environments. This method not only makes inference more cost-effective but also broadens the accessibility of advanced AI technologies.
