@@ -1,0 +1,35 @@
+## https://generativeai.pub/ragate-elevating-ai-conversations-with-adaptive-knowledge-retrieval-43795be8773d
+
+1. Introducing RAGate: A Smarter Way to Make Conversations
+   RAGate stands for Retrieval Augmented Gate, a novel mechanism designed to enhance the way conversational systems decide when to retrieve and use external knowledge. 
+   The essence of RAGate lies in its ability to selectively pull in relevant information only when necessary,
+   ensuring that conversations remain clear, relevant, and adaptable.
+
+2. How RAGate Works
+   RAGate can be implemented in three main ways:
+   -1. RAGate-Prompt
+       This method leverages predefined prompts within the Large Language Model (LLM) to determine whether external knowledge is needed. 
+       Essentially, it uses natural language instructions to adjust responses dynamically, without requiring any retraining of the model.
+
+       Example: Imagine you're cooking a dish following a recipe. The recipe also says, "If anything is missing, add spices." 
+                Here, you represent the LLM, and the recipe serves as the RAGate-Prompt, guiding your actions without needing to relearn the cooking process.
+
+   -2. RAGate-PEFT
+       When basic Retrieval Augmentation (RAG) isn't sufficient for a specific use case, fine-tuning becomes necessary. 
+       RAGate-PEFT uses Parameter-Efficient Fine-Tuning (PEFT), specifically with QLoRA, to fine-tune targeted parts of the model,
+       enhancing performance without a complete overhaul.
+
+       Example: Think of this as honing your cooking skills by practicing specific techniques like seasoning or chopping, 
+                rather than relearning how to cook every dish from scratch.
+
+   -3. RAGate-MHA
+       This method employs a specialized neural network called Multi-Head Attention (MHA), a concept introduced in transformer models, 
+       to decide when external knowledge is required. In MHA, we work with three components: Queries (Q), Keys (K), and Values (V).
+
+3. The MHA can be configured in three ways:
+   Using the conversation’s context as queries, keys, and values.
+   Using the concatenated context and external knowledge as queries, keys, and values.
+   Using the context as queries and interacting with external knowledge as keys and values.
+
+The output from MHA is binary, indicating whether or not external knowledge is needed. If the term "Multi-Head Attention" sounds intimidating, 
+think of it as simply stacking multiple layers of the Attention Mechanism, similar to how you stack nodes in a neural network.
