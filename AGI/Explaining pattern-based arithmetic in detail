@@ -1,0 +1,56 @@
+## From https://medium.com/pat-inc/how-2-2-4-works-for-better-agi-e7822d05a5f6
+
+The text you've provided discusses a novel approach to understanding how the brain, and potentially future Artificial General Intelligence (AGI) systems, 
+might handle tasks like arithmetic and language processing without relying on traditional computation. 
+This approach, called Pattern-Based Arithmetic, emphasizes pattern matching over computational operations.
+
+1. Pattern Matching: A Non-Computational Approach
+   Why Pattern Matching Over Computation?
+   The central argument is that the brain does not perform arithmetic or process language through computation as a digital computer does. 
+   Instead, it recognizes and matches patterns stored from prior learning. This perspective stems from semiotics, 
+   the study of signs and symbols as elements of communicative behavior.
+
+   -1. Semiotics and Pattern Recognition:
+       -1) Semiotics: The brain recognizes input as signs, which are matched with stored patterns that include their meanings. 
+                      For example, when you see the numeral "2," your brain retrieves the concept of "two" based on prior knowledge.
+       -2) Pattern Matching: After the brain has learned something, like how to add numbers, it no longer computes the addition each time it sees the numbers "2" and "3."
+                             Instead, it recognizes the pattern "2 + 3" and recalls the result "5" from memory.
+
+2. The Learning Process According to Patom Theory
+   - Diagram 1: Learning to Add Without Computation
+     -1) Step I: The brain receives sensory input, such as seeing the numeral "2."
+     -2) Step II: The brain recognizes this as a sign and matches it with stored patterns.
+     -3) Step III-IV: It links the sign to its meaning (e.g., "2" means two) and categorizes it (e.g., "2" is a number).
+     -4) Step V-VII: Through repeated exposure, the brain develops emergent patterns like "number + number,"
+                     which it can later use without needing to perform any actual computation.
+
+3. Application to AGI: Moving Beyond Computation
+   - Challenges in AGI Development
+     The text argues that one reason AGI hasn't progressed as much as hoped is due to reliance on computational paradigms that don't align with how the human brain works.
+     To advance, AGI should focus on symbolic solutions and pattern recognition, as illustrated by Patom Theory.
+
+    - Role of RRG (Role and Reference Grammar):
+      The RRG linguistic model is highlighted as a framework that can help understand how languages work at a fundamental level,
+      which is crucial for both natural language processing (NLP) and understanding arithmetic as pattern-based rather than computational tasks.
+
+4. Practical Examples: Arithmetic Without Computation
+   - Diagram 2: How Arithmetic Works in Patom Theory:
+     The brain stores patterns, and when faced with an arithmetic problem like "4 + 5 = 9," it doesn't compute the answer from scratch. 
+     Instead, it matches the pattern of "number + number" with stored knowledge.
+     The process is entirely based on recognizing and recalling patterns rather than performing calculations.
+
+    - Error Correction and Larger Numbers:
+      -1) Error Correction
+          The brain uses pattern recognition to ensure consistency and correctness. 
+          For instance, it would recognize that "123 + cat =" doesn't make sense because "cat" isn't a number.
+      -2) Adding Larger Numbers
+          Even with more complex arithmetic, the brain relies on the same pattern-matching processes. Larger numbers don't change the fundamental approach.
+
+5. Conclusion: Emphasizing Pattern Matching for AGI
+   The text concludes by reinforcing the idea that brains do not need to compute in the traditional sense.
+   Instead, they rely on a sophisticated system of pattern matching, which could inspire new approaches to developing AGI. 
+   This non-computational approach could lead to more human-like intelligence in machines, emphasizing learning and pattern recognition over raw computation.
+
+In essence, Pattern-Based Arithmetic and Patom Theory offer a paradigm shift from computation to pattern recognition, 
+suggesting that by emulating the brain's pattern-matching abilities, we might overcome some of the current limitations in AI and AGI development.
+
