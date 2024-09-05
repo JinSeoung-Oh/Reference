@@ -1,0 +1,110 @@
+### From https://towardsdatascience.com/mistral-nemo-4-1x-smaller-with-quantized-minitron-9d6ad7b70981
+
+NVIDIA's Minitron is a method for compressing large language models (LLMs) by pruning the least important weights and retraining via knowledge distillation.
+This allows for significant size reduction while retaining model accuracy. 
+NVIDIA applied Minitron to models such as Llama 3.1 and Mistral-NeMo, reducing Llama 3.1 from 8 billion (B) parameters to 4B, and Mistral-NeMo from 12B to 8B.
+
+1. Why Minitron Matters
+   Minitron is important because it allows models like Mistral-NeMo, which previously couldn't run on consumer-grade GPUs, to become accessible. 
+   For example, a 24 GB GPU can now handle the Minitron version of Mistral-NeMo. 
+   Furthermore, through 4-bit quantization methods, inference costs can be reduced even further. 
+   A 4-bit quantized version of Mistral-NeMo-Minitron could potentially run on just an 8 GB GPU, making high-performance LLMs much more accessible.
+
+2. Minitron Approach Explained
+   The Minitron process is divided into three main steps:
+   -1. Continue Pre-training
+       The teacher model, such as Llama 3.1 8B, is further pre-trained on the same dataset used 
+       for knowledge distillation to align token distributions and improve distillation accuracy. 
+       In the case of Mistral-NeMo, 127 billion (B) tokens were used.
+   -2. Prune the Teacher’s Weights
+       Pruning is done width-wise, meaning the model’s depth (number of layers) is retained, but the hidden dimensions are reduced. 
+       The pruning process uses activation-based importance estimation, analyzing activations from the multi-head attention (MHA), 
+       multilayer perceptron (MLP), and LayerNorm layers. This step is efficient and can even be done on consumer-grade GPUs.
+   -3. Fine-tune via Knowledge Distillation
+       The pruned model, known as the student, is fine-tuned on the full dataset, guided by the teacher model. 
+       NVIDIA used a costly setup of 32 NVIDIA DGX H100 nodes for this step, 
+       training with large datasets: 94B tokens for Llama 3.1 Minitron 4B and 380B tokens for Mistral-NeMo Minitron 8B.
+
+3. Pruning and Weight Importance
+   Minitron uses an “importance estimation” process, which calculates the significance of individual model components (heads, neurons, and embedding channels) 
+   based on their activations. For example, in Mistral-NeMo’s MHA and MLP layers, this step helps to decide which weights can be pruned without degrading performance.
+
+4. Impact of Pruning and Quantization
+   Pruning alone results in significant model compression. However, when combined with 4-bit quantization using Intel’s AutoRound method, 
+   the size and inference costs are reduced even further. For instance, Mistral-NeMo’s 12B model originally occupied 24.5 GB of memory, 
+   but after pruning and quantization, the 4-bit version shrank to just 5.96 GB—24% of its original size.
+
+5. Performance Evaluation
+   NVIDIA evaluated both the pruned Minitron models and their 4-bit quantized versions on several benchmarks, including MMLU, MMLU-PRO, and Arc Challenge. 
+  
+   Key findings include:
+   -1. The 4-bit Mistral-NeMo-Minitron outperformed Llama 3.1 8B on the Arc Challenge benchmark (+3.92 points) and MMLU (+1.09 points), while using 10.1 GB less memory.
+   -2. 8-bit quantization via bitsandbytes resulted in almost no performance loss compared to the unquantized Mistral-NeMo-Minitron.
+   -3. Minitron models, especially when quantized with AutoRound, showed strong resilience to the performance degradation that typically accompanies compression.
+   -4. Asymmetric quantization significantly outperformed symmetric quantization. 
+       For example, the symmetric quantization of Mistral-NeMo-Minitron yielded unstable results, while the asymmetric version performed much better.
+
+6. Quantization Details
+   NVIDIA used Intel’s AutoRound for 4-bit quantization. This process maintains key performance metrics even in highly compressed models, 
+   thanks to adjustable hyperparameters like “bits,” “group_size,” and symmetric/asymmetric quantization. 
+   The quantization reduced model sizes effectively, though AutoRound was slightly less effective than bitsandbytes for specific models.
+   Symmetric quantization, while faster, was less reliable, particularly for Mistral-NeMo-Minitron, where asymmetric quantization proved essential.
+
+7. Final Results and Insights
+   The Minitron-compressed models generally performed very well relative to their original (teacher) models. 
+   Though the Minitron version of Llama 3.1 8B slightly underperformed compared to the full model, it still outperformed other similarly sized models.
+   Meanwhile, the Minitron version of Mistral-NeMo 8B matched or even exceeded the performance of the original Mistral-NeMo 12B in some cases.
+
+   Crucially, the combination of pruning and quantization makes these compressed models capable of running on much smaller hardware, 
+   reducing costs while preserving much of the original model’s accuracy.
+
+8. Quantizing Pruned Models: Challenges and Opportunities
+   Quantizing already pruned models remains a largely unexplored area. While quantization often introduces inaccuracies in smaller models, 
+   NVIDIA’s results showed that Minitron models are strong candidates for 4-bit quantization, with minimal performance loss. 
+   This is a promising development, especially when aiming to combine Minitron’s compression benefits with further size reductions through quantization.
+
+9. Conclusion
+   NVIDIA's Minitron successfully reduces LLM sizes via pruning and knowledge distillation, 
+   enabling these models to run on smaller hardware while maintaining competitive performance. 
+   When combined with advanced quantization techniques like AutoRound, these models become even more accessible, 
+   offering potential for significant cost savings without major accuracy trade-offs. 
+   This approach opens the door for broader applications of LLMs, particularly in environments with limited computational resources.
+
+### To apply NVIDIA’s Minitron approach on a model, follow these steps based on the given text
+    - Step 1: Continue Pre-training the Teacher Model
+      - Goal
+        Pre-train the teacher model on the same dataset that will be used for distillation.
+      - Why
+        This is critical because direct use of models like Mistral-NeMo 12B as a teacher is suboptimal. 
+        There are differences in sub-word token distributions between the original pre-training dataset and the dataset for distillation.
+      - Example
+        NVIDIA used 127 billion tokens to continue pre-training Mistral-NeMo 12B, though this extra pre-training doesn’t improve the teacher’s performance 
+        but prepares it for better distillation.
+
+    - Step 2: Prune the Teacher’s Weights
+      - Method
+        Prune the model width-wise rather than depth-wise. This means keeping the same number of layers but reducing the hidden dimension of the model.
+      - Details:
+        -1) The pruned weights are selected through “importance estimation” using an activation-based strategy.
+        -2) Importance is determined by analyzing activations from the multi-head attention (MHA), multilayer perceptron (MLP), 
+            and LayerNorm layers using a small calibration dataset (e.g., 1,024 samples).
+        -3) This pruning step can be achieved on consumer GPUs for models like Llama 3.1 8B.
+
+    - Step 3: Fine-tune the Pruned Model (Student) with Knowledge Distillation
+      - Goal: Fine-tune the pruned (student) model using the teacher model to transfer knowledge.
+      - Method: NVIDIA uses logit-only distillation by minimizing the forward KL divergence loss between the teacher and student models' predicted probabilities.
+
+    - Training:
+      This is a resource-intensive step, and NVIDIA used 32 NVIDIA DGX H100 nodes for it.
+      Llama 3.1 Minitron 4B was trained with 94 billion tokens, while Mistral-NeMo Minitron 8B was trained with 380 billion tokens, both using large batch sizes.
+      These three steps – pre-training, pruning, and knowledge distillation – allow for model size reduction while preserving performance.
+
+
+
+
+
+
+
+
+
+
