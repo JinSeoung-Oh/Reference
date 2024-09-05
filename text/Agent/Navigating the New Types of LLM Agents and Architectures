@@ -1,0 +1,81 @@
+### From https://towardsdatascience.com/navigating-the-new-types-of-llm-agents-and-architectures-309382ce9f88
+
+This article discusses the rise of AI agents in 2024, highlighting their increasing popularity in the AI ecosystem but limited adoption among consumers and enterprises. 
+The main focus is on defining agents, reviewing their structure and evolution, and addressing common challenges with AI agent architectures. 
+Below is a breakdown of the key ideas, all based on the information provided:
+
+1. Defining AI Agents
+   -1. AI Agents
+       Software systems that chain multiple processing steps, including LLM (Large Language Model) calls, to perform tasks. 
+       They involve conditional logic, decision-making, and working memory between steps.
+   -2. Modern Use
+       New frameworks like LangGraph and LlamaIndex Workflows assist developers in building structured agents, 
+       but widespread adoption is still limited outside the AI ecosystem.
+
+2. The Evolution of AI Agents
+    -1. First Generation (ReAct Agents)
+        Early AI agents, known as ReAct (Reason, Act), were heavily abstracted but struggled with practical usability and effectiveness.
+    -2. Second Generation Agents
+        These agents reduce the "solution space" (the number of possible actions), making them more effective by narrowing down what the agent can do, 
+        leading to more powerful and easier-to-manage systems.
+
+3. Components of Agents
+   -1. Router
+       Directs the agent’s steps based on incoming data, typically powered by an LLM or a classifier. The router constantly decides the next action to take.
+   -2. Components/Nodes
+       Blocks of code that perform small tasks, such as LLM calls, API calls, or application logic. 
+       In frameworks like LangGraph, these are nodes, while in LlamaIndex Workflows, they are steps.
+   -3. Skills
+       Groupings of components that handle specific tasks, such as processing a customer query to check an order’s shipping status.
+   -4. Memory
+       Tracks shared state across components, allowing the agent to carry context through its actions.
+
+4. Agent Architectures
+   Several common agent architectures are used in production:
+
+   -1. Single Router with Functions
+       The router decides which function to call based on input.
+   -2. Single Router with Skills
+       The router can call complex workflows or skill sets composed of multiple components, such as making API calls and generating responses.
+   -3. Complex Branching Architectures
+       These involve multiple branches, states, and LLM calls, requiring more sophisticated orchestration.
+
+5. Agent Frameworks
+   -1. LangGraph
+       Uses nodes and conditional edges to determine the flow of an agent, rather than a single router.
+   -2. LlamaIndex Workflows
+       Utilizes events and event listeners for agents to handle data processing between steps. Each step manages events and broadcasts results to other steps.
+   -3. Other Frameworks
+       CrewAI, Autogen, and Swarm are also evolving in this space, allowing for multi-agent cooperation and more sophisticated architectures.
+
+6. Key Questions for Agent Development
+   -1. Framework vs. Code
+       While frameworks like LangGraph and LlamaIndex provide structure and good tooling, 
+       many teams (like the author's) prefer custom code for greater control over complex systems.
+   -2. Need for an Agent
+       Not all applications require an agent. If your system involves iterative flows, dynamic decision-making, or a state space of actions, an agent may be useful.
+
+7. Common Challenges in Agent Development
+   -1. Planning and Loops
+       Agents often struggle with long-term planning and can get stuck in repetitive loops.
+   -2. Inconsistent Performance
+       The vast solution space (many possible actions and paths) can lead to unpredictable results and higher costs.
+
+8. Solutions to Challenges
+   -1. Narrow Solution Space
+       Clearly defining the agent’s possible actions can reduce complexity.
+   -2. Incorporate Domain Knowledge
+       Adding business heuristics helps agents make better decisions.
+   -3. Orchestrate with Code
+       Using code-based orchestration rather than relying solely on LLMs can enhance determinism and reduce errors.
+
+9. Conclusion
+   AI agents are evolving from abstract, first-generation architectures to more defined and focused second-generation systems. 
+   New frameworks help structure agent development, but developers must carefully consider when to use agents and how to mitigate challenges like planning and performance.
+
+
+
+
+
+
+
