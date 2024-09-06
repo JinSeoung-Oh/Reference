@@ -1,0 +1,49 @@
+### From https://medium.com/@ignacio.de.gregorio.noblejas/the-new-record-setting-100-million-context-window-model-5c7da0fb1978
+
+Magic Dev’s new Long-Term Memory (LTM) model has shattered records by allowing users to input 100 million tokens in a single prompt,
+far surpassing the previous state-of-the-art context window limits by 100 times. 
+This marks a breakthrough in AI, enabling the processing of vast amounts of data, equivalent to 750 novels or 10 million lines of code, all at once.
+The significance of this development lies in its potential to revolutionize how AI models handle large-scale information in real-time.
+
+1. The Limitations of Current Models
+   Current AI models, such as Transformers, are limited by their context window. 
+   Transformers operate with global attention, meaning they need to retain and revisit all previous information when making predictions. 
+   This approach, while effective for capturing long-range dependencies, has significant downsides:
+
+2. Memory grows unbounded with input length, leading to high computational costs.
+   Transformers' performance deteriorates when processing sequences longer than those encountered during training.
+   As a result, context windows are restricted to control memory usage.
+   For example, handling a sequence of 100 million tokens with Llama 3.1 405B would require around 55 terabytes of memory—requiring hundreds of NVIDIA H100 GPUs.
+
+3. Magic Dev’s Breakthrough
+   Magic Dev’s LTM model bypasses these limitations by efficiently managing a 100 million-token context 
+   while providing three orders of magnitude better efficiency than traditional Transformers like Llama 3.1 405B. 
+   The model can process massive datasets, allowing it to handle complex coding tasks, such as creating a calculator or modifying web pages, 
+   all within an extensive codebase. This ability was previously impossible with smaller context windows.
+
+4. Advanced Retrieval and Multi-hop Tracing
+   One of the key advancements is the model's ability to perform multi-hop tracing, meaning it can retrieve and connect facts spread across vast contexts, 
+   even when those facts are distantly related. For instance, in a test, 
+   Magic Dev researchers fed the model 100 books (about 40 million tokens) and inserted a random fact into one of them.
+   The model successfully retrieved this fact from deep within the context, showing unprecedented retrieval accuracy, even with up to six hops.
+
+   This surpasses previous benchmarks like the Needle-in-the-Haystack (NITH) task, which tests long-context retrieval.
+   While other models struggled with multi-hop reasoning, Magic Dev’s model maintained 90% accuracy.
+
+5. State Compression and Hybrid Architecture
+   Magic Dev has likely achieved this performance through a hybrid architecture. Transformers typically do not compress their state, 
+   leading to excessive memory usage. 
+   In contrast, state-space models (like Mamba or TTT) utilize a fixed-size memory that doesn’t expand with longer sequences, 
+   selectively retaining important information while forgetting irrelevant data. 
+   The LTM model may combine this efficient baseline decoding with Transformer-like attention layers to ensure key dependencies are still captured.
+
+6. Impact and Future Implications
+   The success of the LTM model could redefine AI, particularly in fields requiring large-scale context, such as code generation or biological research (e.g., DNA sequences). 
+   It may also challenge the dominance of Transformer-only architectures, encouraging a shift towards hybrid models that balance memory efficiency with retrieval accuracy. 
+   This innovation has the potential to unlock new levels of AI capability, allowing models 
+   to process virtually unlimited information and revolutionize fields that rely on large datasets.
+
+By overcoming the limitations of global attention and memory expansion, Magic Dev’s LTM model could pave the way for unrestricted context windows, 
+fundamentally changing how AI interacts with and processes information.
+
+
