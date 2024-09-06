@@ -1,0 +1,49 @@
+## From https://pub.towardsai.net/inside-gamengen-google-deepminds-new-model-that-can-simulate-entire-1993-s-doom-game-in-real-time-6f2dab764bb5
+
+GameNGen, a groundbreaking model developed by Google DeepMind, designed to simulate real-world environments, 
+particularly video games like DOOM, using a generative AI approach based on diffusion models.
+
+1. Key Challenges:
+  - Generating real-world environments using AI is complex due to the difficulty of gathering and processing real-world data.
+  - Traditional video game engines use predefined rules and player input loops to maintain immersive experiences, making it hard for AI to simulate these conditions in real time.
+  - Existing generative models, while capable of producing images and videos, struggle with interactivity, real-time simulation, and maintaining game flow.
+
+2. GameNGen Overview:
+   - GameNGen is a generative diffusion model built to simulate interactive video games. It leverages a modified version of Stable Diffusion v1.4 to simulate complex game mechanics such as health tracking, enemy attacks, and environmental interactions.
+   - The model shows that it can handle real-time game updates while maintaining a visual quality similar to the original game.
+
+3. Training Process:
+   1) Data Collection through Agent Play:
+      - Since collecting human gameplay data at scale is difficult, an automated agent is trained to play the game and generate diverse training data.
+      - The agent is trained with Proximal Policy Optimization (PPO), using a CNN to process downscaled game frames (160x120 resolution).
+      - The model runs in VizDoom, simulating millions of environment steps to gather gameplay data.
+
+   2) Generative Model Training:
+      - The model is trained from Stable Diffusion 1.4, conditioned on the agent’s actions and observations.
+      - Techniques like noise augmentation and using context frames are applied to maintain continuity in the simulations.
+      - Fine-tuning of the latent decoder focuses on improving visual details, such as the HUD, and reducing artifacts caused by compression.
+
+   3) Agent and Model Integration:
+      - The agent's gameplay is used to generate training data that feeds into the generative diffusion model, 
+        ensuring the model can simulate high-fidelity game states over time.
+      - Experiments focused on refining the conditioning process of the model to enhance its stability and performance in real-time.
+
+4. Simulation Quality:
+   GameNGen’s simulation quality is impressive, often indistinguishable from the real game over short sequences.
+   It achieves visual quality comparable to high-compression JPEG images, with human evaluators struggling to tell the difference.
+   Metrics like LPIPS and PSNR are used to quantify its visual performance, showing significant progress in real-time neural game simulation.
+
+5. Future Potential:
+   GameNGen points towards a future where entire video games could be generated automatically using neural networks, 
+   reducing the need for manually crafted rules and allowing for more dynamic, real-time interactive experiences.
+   Challenges remain in training models and incorporating human input, but the model demonstrates a promising new paradigm for automated game generation.
+
+In summary, GameNGen represents a major step forward in the simulation of real-world environments and games using generative AI, 
+opening up new possibilities for video game development and interactive AI agents.
+
+
+
+
+
+
+
