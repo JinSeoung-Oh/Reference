@@ -1,0 +1,28 @@
+## From https://medium.com/@techsachin/memlong-memory-augmented-retrieval-for-long-text-llm-generation-118081c2c545
+## From https://github.com/Bui1dMySea/MemLong
+## From https://arxiv.org/abs/2408.16967
+
+The authors introduce MemLong (Memory-Augmented Retrieval for Long Text Generation), 
+designed to extend the context window of large language models (LLMs) by leveraging an external retriever for historical information retrieval.
+MemLong stores past contexts in a non-trainable memory bank, and the stored embeddings are used to retrieve chunk-level key-value (K-V) pairs, 
+which are fed back into the model. This process ensures an efficient and lightweight mechanism to handle long contexts while minimizing computation.
+
+Key Concepts:
+1. MemLong Framework: A method that extends LLMs' context window by using a memory and retrieval mechanism. It involves:
+   -1. Adding a memory retrieval component (retrieving historical K-V pairs).
+   -2. Using a retrieval causal attention module to combine local context with memory information.
+
+2. Benefits:
+   -1. Distributional Consistency: Maintains distribution consistency of cached information.
+   -2. Training Efficiency: Requires only the fine-tuning of upper layers of the model, significantly reducing computation.
+   -3. Extended Context-Window: Allows for up to 80k tokens to be processed on a single GPU.
+   -4. Retriever and Dynamic Memory: Retrieves chunk-level indices based on cosine similarity to stored embeddings and dynamically manages memory, ensuring efficiency and avoiding out-of-memory issues.
+
+3. Inference Process:
+   When MemLong receives long input sequences, it breaks them into smaller chunks, retrieves the most relevant K-V pairs,
+   and uses them for upper-layer attention. The attention mechanism is optimized to handle both recent contexts and chunk-level historical information.
+
+Important Insights:
+-1. Memory Efficiency: MemLong reduces computational complexity by freezing lower layers and fine-tuning only the upper layers.
+-2. Generalization: The method improves model performance, particularly for inputs longer than the pre-trained context window, by utilizing an external retriever to maintain consistent attention on past contexts.
+-3. Perplexity Improvements: The model performs better than traditional LLMs at handling long-context sequences, showing better perplexity in various datasets.
