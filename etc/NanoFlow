@@ -1,0 +1,26 @@
+## From https://arxiv.org/abs/2408.12757
+## From https://github.com/efeslab/Nanoflow
+
+The increasing demand for large-scale serving systems for Large Language Models (LLMs) has led to significant focus on improving throughput,
+especially with tens of thousands of GPUs serving hundreds of millions of users.
+Traditionally, methods like data, tensor, and pipeline parallelism have been explored to boost throughput. 
+However, these methods often fail to fully utilize the resources of a single device (compute, memory, network), resulting in sub-optimal performance.
+
+NanoFlow is a novel serving framework that addresses this limitation by exploiting intra-device parallelism. 
+This approach overlaps the use of compute, memory, and network resources within a single device through operation co-scheduling, 
+allowing for more efficient resource utilization.
+
+Key Innovations:
+1. Nano-Batch Splitting: NanoFlow splits inference requests into nano-batches at the operation level. 
+                         This breaks the sequential dependency of operations during LLM inference, enabling overlapping execution.
+2. Operation-Level Pipeline with Execution Unit Scheduling: NanoFlow introduces an operation-level pipeline that partitions
+                                                            the GPU's functional units to execute different operations simultaneously in each unit, 
+                                                            enhancing throughput by overlapping computation and data transfer.
+
+Implementation and Results:
+NanoFlow automates pipeline setup using a parameter search algorithm, which simplifies porting to various LLMs.
+Evaluated on NVIDIA GPUs with models like LLaMA-2-70B, Mixtral 8x7B, and LLaMA-3-8B, NanoFlow boosts throughput by 1.91x compared to state-of-the-art systems, 
+achieving 59% to 72% of the optimal throughput across models.
+
+In summary, NanoFlow significantly enhances LLM serving performance by leveraging intra-device parallelism,
+achieving near-optimal throughput across different models and workloads.
