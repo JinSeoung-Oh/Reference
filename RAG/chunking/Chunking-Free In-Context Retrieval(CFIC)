@@ -1,0 +1,52 @@
+## From https://pub.towardsai.net/revisiting-chunking-in-the-rag-pipeline-9aab8b1fdbe7
+
+1. Key Idea
+   CFIC proposes a method for retrieving relevant information without chunking documents. 
+   It encodes entire documents as hidden states and uses advanced decoding strategies to retrieve precise information while preserving semantic integrity.
+
+2. Comparison of Chunking-Based and Chunking-Free Methods
+   -1. Chunking-Based:
+       - Documents are divided into smaller passages, which can disrupt the natural flow and cause semantic loss.
+       - Often results in noise and inaccuracy, as irrelevant or incomplete information may be retrieved.
+   -2. Chunking-Free:
+       - CFIC encodes the entire document using a transformer (e.g., LLAMA2–7B-chat), preserving continuity and semantic integrity.
+       - Retrieval is done through direct decoding based on the user’s query, bypassing the need for smaller, pre-chunked segments.
+
+3. Key Mechanisms in CFIC:
+   -1. Encoding Entire Documents:
+       - Uses the entire document in the form of hidden states, avoiding the splitting of text, which can break the context.
+   -2. Auto-Regressive Decoding:
+       - Combines encoded document hidden states with the query to generate the most relevant text for the user's request.
+   -3. Constrained Sentence Prefix Decoding:
+       - Ensures that generated text stays faithful to the document by restricting the decoding to valid sentence prefixes from the original document.
+   -4. Skip Decoding:
+       - Once a suitable sentence prefix is identified, CFIC skips decoding intermediate tokens and directly identifies the most probable endpoint (marked by the [eos] token), 
+         increasing efficiency.
+   -5. Multiple Candidate Prefixes and Ranking:
+       - Generates and ranks multiple sentence prefixes based on their likelihood, selecting the most relevant to support the query.
+
+4. Training Strategy
+   - Model Used: LLAMA2–7B-chat.
+   - Supervised Fine-Tuning (SFT):
+     Utilizes training triplets (query, document, evidence) where the model is optimized using the Negative Log-Likelihood (NLL) loss function.
+     Trained with DeepSpeed’s optimization techniques to maximize efficiency.
+
+5. Case Study: CFIC vs Traditional Models in Evidence Retrieval
+   The query was "What hedge fund’s collapse in 1998 highlighted the need for regulation of derivatives?"
+   CFIC-7B: Retrieved precise and detailed evidence about LTCM (Long-Term Capital Management), outperforming GPT-4, GPT-3.5, and LongAlpaca-7B in terms of depth and accuracy.
+
+6. Evaluation
+   CFIC significantly improves retrieval quality on open QA datasets like NarrativeQA and HotpotQA, particularly in F1-scores, compared to traditional chunking-based methods. 
+   Its retrieval is more accurate and contextually relevant.
+
+7. Insights and Challenges
+   -1. Advantages:
+       -1) Improved Semantic Integrity: By encoding entire documents and leveraging auto-regressive decoding, CFIC preserves the semantic flow of the text, improving the accuracy of information retrieval.
+       -2) Efficiency: Skip Decoding and candidate prefix ranking contribute to more efficient retrieval without unnecessary intermediate steps.
+   -2. Challenges:
+       -1) Computational Demand: CFIC requires advanced hardware, like GPUs with large memory, especially when dealing with lengthy documents.
+       -2) Training Data Dependency: The model's performance heavily relies on the quality of the fine-tuning dataset. Poorly constructed training data could limit its ability to generalize across different domains.
+       -3) Complexity of Implementation: CFIC’s sophisticated mechanisms and reliance on custom training might make it more difficult to implement compared to simpler chunking-based systems.
+
+In summary, CFIC offers a significant improvement in document retrieval by eliminating the need for chunking, maintaining semantic coherence, 
+and using advanced decoding strategies. However, its complexity and resource demands may present challenges for widespread adoption.
