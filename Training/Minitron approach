@@ -1,0 +1,29 @@
+## From https://medium.com/syncedreview/nvidias-minitron-compressing-llama-3-1-1671ee500b52
+
+The NVIDIA research team has introduced a novel model compression strategy called the "Minitron approach" in their paper LLM Pruning and Distillation in Practice:
+The Minitron Approach. 
+This method significantly reduces the computational and resource demands required to build large language model (LLM) families
+by combining weight pruning with knowledge distillation. The approach produces smaller, highly efficient models,
+such as the Minitron-4B derived from Llama 3.1 8B and the MN-Minitron-8B from Mistral NeMo 12B.
+
+1. Key Steps in the Minitron Approach:
+   -1. Teacher Correction
+       Fine-tuning the larger teacher model on the target dataset to prepare it for subsequent pruning.
+   -2. Pruning
+       Using an activation-based estimation method, the importance of each layer, neuron, head, and embedding dimension is calculated.
+       Elements are ranked and pruned based on sensitivity data from a small calibration dataset.
+   -3. Model Trimming
+       Weight matrices in the MLP and MHA layers are pruned for neurons and heads, while embedding dimensions are reduced in the MLP, MHA, and LayerNorm layers.
+   -4. Retraining and Knowledge Distillation
+       The pruned model (student) is retrained either through conventional methods using ground truth labels or through knowledge distillation, 
+       where the student model learns from the logits of the unpruned teacher model using KL Divergence loss.
+
+2. Results:
+   The Minitron approach produced the MN-Minitron-8B model, which surpasses similar-sized models across language benchmarks.
+   The Llama-3.1-Minitron-4B model closely matches the performance of its teacher (Llama 3.1 8B) while outperforming the older Minitron-4B.
+   Speed improvements are significant: MN-Minitron-8B achieves a 1.2× speedup over its Mistral NeMo 12B teacher, 
+   while the depth- and width-pruned Llama-3.1-Minitron-4B models provide speedups of 2.7× and 1.8×, respectively, over Llama 3.1 8B.
+
+In summary, the Minitron approach offers a practical, efficient method for compressing large language models while maintaining or enhancing performance,
+making it a key advancement in the field of LLM development.
+
