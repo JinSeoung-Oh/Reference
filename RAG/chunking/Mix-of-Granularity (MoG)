@@ -1,0 +1,36 @@
+## From https://pub.towardsai.net/revisiting-chunking-in-the-rag-pipeline-9aab8b1fdbe7
+
+1. Key Idea
+   The Mix-of-Granularity (MoG) method dynamically adjusts the chunking granularity of data sources (e.g., medical textbooks, knowledge graphs) based on the user's query,
+   improving retrieval accuracy by ensuring relevant and well-contextualized information is retrieved for large language models (LLMs). 
+   Inspired by the Mix-of-Experts (MoE) approach, MoG selects optimal chunk sizes based on the query’s nature.
+
+2. MoG Workflow:
+   -1. Chunking
+       Reference documents are segmented into different granularity levels, from fine-grained (specific details) to coarse-grained (broader context). 
+       This allows the system to capture both detailed and contextual information.
+   -2. Router:
+       -1) Input Encoding: A user’s query is encoded into a vector using a pre-trained model like RoBERTa.
+       -2) MLP: The query vector is processed by a multi-layer perceptron (MLP) that assigns weight vectors to different granularity levels.
+       -3) Weight Generation: Weights are assigned to each granularity level based on training patterns, representing the importance of each chunk type.
+       -4) Combining Relevance Scores: The relevance scores of the retrieved chunks are adjusted based on these weights, with more important chunks receiving higher scores.
+       -5) Training: The router is trained via supervised learning to maximize the semantic similarity of selected segments using Binary Cross-Entropy loss.
+
+3. Retrieval Process:
+   -1. Multi-Level Retrieval: Top-ranked snippets are retrieved from each granularity level based on their similarity to the query.
+   -2. Relevance Scoring: Snippets are scored for relevance based on the query, and the scores are compared across different granularity levels.
+   -3. Weighting and Summing: The router's weights amplify or diminish the relevance scores, adjusting their impact.
+   -4. Top-k Selection: The top-k snippets with the highest weighted relevance scores are selected for final retrieval and passed to the LLM.
+
+4. Evaluation:
+   MoG was tested on Medical Question-Answering (QA) datasets, showing significant improvements in retrieval accuracy, particularly on the PubMedQA dataset. 
+   Smaller models like Qwen1.5 benefited the most from this approach.
+
+5. Insights and Challenges:
+   -1. Advantages: MoG excels at dynamically adjusting chunking strategies, allowing for better retrieval from mixed data sources, enhancing both pertinence and coverage.
+   -2. Challenges:
+       -1) Complexity: The dynamic router increases system complexity and training costs.
+       -2) Manual Granularity Selection: Relying on manually labeled granularity levels may limit adaptability to new domains.
+       -3) Query Adaptability: MoG might struggle with very short or very long queries, highlighting an area for further refinement.
+
+MoG represents a significant step forward in Retrieval-Augmented Generation (RAG) systems, particularly for applications in domains with varied data structures.
