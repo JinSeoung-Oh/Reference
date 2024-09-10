@@ -1,0 +1,28 @@
+## From https://pub.towardsai.net/revisiting-chunking-in-the-rag-pipeline-9aab8b1fdbe7
+
+1. Key Idea
+   LumberChunker dynamically segments long-form texts into contextually coherent chunks using large language models (LLMs), 
+   enhancing information retrieval by maintaining semantic coherence and relevance.
+
+2. LumberChunker Workflow:
+   -1. Paragraph-wise Segmentation: Documents are first divided into individual paragraphs, each given a unique ID.
+   -2. Grouping Paragraphs: Paragraphs are grouped sequentially until a predefined token count threshold (θ ≈ 550 tokens) is exceeded, 
+                            balancing context without overwhelming the model.
+   -3. Identifying Content Shifts: The LLM (e.g., Gemini) analyzes these groups to detect significant content shifts, marking chunk boundaries.
+   -4. Iterative Chunk Formation: New chunks start at the identified shift points to ensure each chunk is contextually coherent.
+   -5. Optimizing Chunk Size: A threshold of 550 tokens ensures that chunks are neither too small (risking loss of context) nor too large (risking overload).
+
+3. Evaluation:
+   LumberChunker was tested using the GutenQA benchmark, showing a 7.37% improvement in DCG@20 over the best competing method.
+   Compared to chunking methods like semantic, paragraph-level, and recursive chunking, LumberChunker consistently outperforms these in terms of retrieval accuracy, particularly with narrative texts.
+
+4. Computational Trade-offs:
+   Recursive Chunking is the fastest, as it avoids LLMs.
+   HyDE maintains constant processing time through limited LLM queries.
+   LumberChunker, Semantic, and Proposition-Level Chunking show increased processing times with larger documents due to LLM reliance. 
+   LumberChunker’s dynamic LLM queries prevent asynchronous optimizations, leading to higher computational costs but superior retrieval performance.
+
+5. Insights:
+   LumberChunker’s dynamic approach excels in handling long-form texts, but its LLM dependence introduces computational overhead, affecting scalability.
+   While it outperforms other chunking methods, optimizing its efficiency and testing its performance with 
+   structured texts like legal documents could be areas for future development.
