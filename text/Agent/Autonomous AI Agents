@@ -1,0 +1,62 @@
+### From https://generativeai.pub/ai-bites-basic-building-blocks-of-autonomous-ai-agents-00de67ad443e
+
+1. Introduction to Autonomous AI Agents
+   Autonomous AI agents are advanced AI systems designed to learn, adapt, and perform tasks without human intervention. 
+   These agents can handle complex operations like customer service or social media management,
+   becoming increasingly popular due to the advancement of large language models (LLMs). The fundamental components of an Autonomous AI Agent are:
+
+   - Perception: The agent's ability to understand input data (e.g., text or images).
+   - Reasoning/Decision Making: The process by which the agent interprets the input and decides what action to take.
+   - Action: The agent executes the determined action, such as sending emails or scheduling posts.
+
+   A key example of this is an AI agent managing social media accounts. It monitors messages, analyzes content to generate replies, 
+   and posts content automatically, ensuring timely responses and content engagement.
+
+2. Why Autonomous AI Agents Are Gaining Popularity
+   The rise of LLMs has greatly simplified the creation of Autonomous AI Agents. Previously, building the decision-making module required custom machine learning models
+   or complex rule-based systems, which were difficult and time-consuming. 
+   LLMs now allow for the rapid development of agents by leveraging existing models and tools, minimizing the need for if/else conditions through function calling.
+
+3. Examples of Autonomous AI Agents:
+   - GPT-Engineer: A framework for building custom GPT-based agents.
+   - BabyAGI: A minimalistic agent that uses GPT to manage and execute tasks autonomously.
+   - AutoGPT: A project leveraging GPT-4 to perform complex autonomous tasks.
+
+4. BabyAGI Overview
+   Key Components of BabyAGI:
+   - 1. Perception: BabyAGI starts by reading an objective and an initial task from environment variables. This input helps the agent understand what it needs to accomplish.
+   """
+   python
+   Copy code
+   OBJECTIVE = os.getenv("OBJECTIVE", "")
+   INITIAL_TASK = os.getenv("INITIAL_TASK", os.getenv("FIRST_TASK", ""))
+   """
+
+   - 2. Reasoning/Decision Making:
+     Task Creation: BabyAGI uses the task_creation_agent to generate new tasks based on the overall objective and previous results.
+   """
+   python
+   Copy code
+   new_tasks = task_creation_agent(OBJECTIVE, enriched_result, task["task_name"], tasks_storage.get_task_names())
+   """
+
+   - 3. Task Prioritization: Tasks are ranked by a prioritization_agent to ensure critical tasks are executed first.
+   """
+   python
+   Copy code
+   prioritized_tasks = prioritization_agent()
+   """
+
+   -4. Action: BabyAGI’s execution_agent carries out the prioritized tasks. The agent repeats this process until it achieves its objective.
+   """
+   python
+   Copy code
+   result = execution_agent(OBJECTIVE, str(task["task_name"]))
+   """
+
+5. A Note on Memory
+   Although BabyAGI primarily operates as a stateless agent, it tracks completed tasks and stores results through basic memory components like results_storage and tasks_storage.
+   However, it does not retain long-term memory across sessions, which is a limitation compared to more advanced agents with memory capabilities.
+
+In conclusion, BabyAGI demonstrates how an autonomous agent can effectively manage tasks through perception, reasoning, and action. 
+While simple in design, it provides a foundation for more sophisticated agents, especially when memory and long-term learning are incorporated.
