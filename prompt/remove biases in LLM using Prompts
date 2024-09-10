@@ -1,0 +1,43 @@
+## From https://generativeai.pub/how-to-remove-biases-in-llm-using-prompts-9893b4909423
+
+Language models (LLMs) have revolutionized human interaction with technology but can inherit harmful biases from their training data,
+perpetuating stereotypes and exacerbating inequalities. 
+These biases often arise from flawed data, such as duplicated information or social biases related to gender, nationality, or other factors. 
+As a result, LLMs can generate biased outputs, skewing decision-making and reinforcing societal stereotypes.
+
+1. Causes of Bias in LLMs:
+   -1. Duplication Bias: LLMs might memorize repeated data instead of understanding the context, leading to irrelevant or incorrect information, known as hallucinations.
+   -2. Social Biases: Training data may reflect real-world biases, causing LLMs to associate certain professions or roles with specific genders or groups.
+
+2. Addressing Bias Using Prompting Techniques:
+   Traditional debiasing methods often require access to model internals, but an alternative approach is Prompt Debiasing. 
+   This involves strategically designing prompts to guide LLMs away from biased outputs.
+
+3. What is Prompt Debiasing?
+   Prompt debiasing uses specific prompting techniques to prevent LLMs from reproducing biases. 
+   Two main strategies are:
+   - 1. Debiasing through Exemplars
+        Exemplars are examples of correct input-output pairs. By carefully choosing and distributing exemplars, LLMs can be guided to produce balanced responses.
+        - Exemplar Distribution
+          Providing a balanced number of positive and negative exemplars (e.g., equal numbers of positive and negative reviews) helps avoid skewed predictions.
+
+   - 2. Exemplar Ordering
+        Alternating the sequence of exemplars (e.g., mixing positive and negative feedback) ensures more balanced outputs.
+        - Debiasing through Instructions
+          Explicit instructions can be added to prompts to guide LLMs to avoid bias. 
+          For example, instructing the model to treat all individuals equally or focus on qualifications rather than personal attributes 
+          like age or nationality helps ensure fairness in responses.
+
+          - Example
+            When evaluating job applications, adding an instruction to "evaluate based on qualifications without considering age or nationality" encourages impartiality.
+
+4. Why is Debiasing Important?
+   Addressing biases in LLMs is essential to avoid perpetuating stereotypes and fostering discrimination. 
+   Biased models can reinforce gender or cultural stereotypes, exacerbate discrimination against marginalized groups, and spread misinformation, leading to harmful consequences.
+
+5. Real-World Applications of Debiasing Techniques:
+   -1. Drafting Reports: Using balanced exemplars and clear instructions can help LLMs generate unbiased reports, capturing diverse stakeholder feedback.
+   -2. Customer Feedback Summaries: Prompt debiasing ensures that both positive and negative customer feedback is fairly represented, providing an accurate picture of customer sentiment.
+   -3. Educational Content Creation: Instruction debiasing allows educators to guide AI in producing content that respects diversity and promotes inclusivity, ensuring fairness in learning environments.
+
+
