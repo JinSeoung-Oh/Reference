@@ -1,0 +1,44 @@
+## from https://medium.com/aiguys/what-is-going-on-inside-openais-strawberry-o1-717773a9964b
+
+OpenAI recently released a new model series code-named Orion (Strawberry),
+including models called o1-preview and o1-mini. While no paper has been released, early testing, model system cards, 
+and analysis suggest that these models represent a significant shift in LLM design, particularly in reasoning and inference processes.
+
+Key Changes in o1
+The main innovation in o1 is that it seems to think more before answering, using much more compute at inference time, 
+which differs from previous LLMs. This change enables the model to plan better, improving its performance on benchmarks like PlanBench, 
+where earlier models struggled.
+
+Is It Just a Glorified Chain of Thought (CoT)?
+Yes and no. While o1 uses Chain of Thought (CoT) methods, it goes beyond that. 
+The model likely incorporates elements from reinforcement learning (RL), similar to AlphaGo. 
+This strategy enables the model to evaluate multiple reasoning paths and select the best one, making it more than just a simple CoT approach.
+
+CoT and RL Integration
+During inference, o1 operates by generating and evaluating Chains of Thought (CoTs), but in a hidden manner. 
+OpenAI has opted not to show the raw CoTs to users, possibly to protect proprietary methods and prevent easy model distillation, 
+as well as to avoid showing undesirable biases. 
+The reasoning process is turned into a retrieval-like task with RL applied to guide the model’s choices.
+
+Inference Time and Compute Optimization
+o1 uses dynamic compute scaling during inference, applying more resources to complex tasks and less to simpler ones. 
+This approach resembles methods like Monte Carlo Tree Search (MCTS), 
+where multiple reasoning paths are simulated to arrive at the best solution.
+
+AGI Status?
+Despite the improvements in reasoning, o1 is not AGI. It still makes errors similar to previous models and struggles
+with tasks designed to challenge deeper reasoning, 
+such as the ARC-AGI benchmark. While o1 demonstrates better reasoning in specific contexts like math,
+it shows no significant improvement in areas like language and coding compared to previous models.
+
+Opinions on o1 Are Divided
+Supporters highlight o1's enhanced reasoning and problem-solving abilities.
+Skeptics argue that o1 has not significantly improved in other areas, like language understanding and coding, 
+and that the changes are incremental rather than revolutionary.
+
+Conclusion
+OpenAI’s o1 models represent a significant development, combining Chain of Thought (CoT) with reinforcement learning (RL) 
+to improve reasoning and decision-making during inference. 
+However, o1 is not AGI, and it still faces challenges in real-world applications 
+where strict correctness and comprehensive reasoning are required. While OpenAI has not invented new methods,
+they have successfully scaled this approach to a new level, similar to their earlier breakthrough with ChatGPT.
