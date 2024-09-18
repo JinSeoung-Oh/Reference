@@ -1,0 +1,38 @@
+### https://levelup.gitconnected.com/ai-emergent-properties-what-makes-ai-suddenly-learn-new-tricks-d03639cf902e
+
+The text explores the concept of emergent properties in large language models (LLMs), 
+where certain capabilities appear unexpectedly when a model surpasses a certain scale in terms of parameters, data, or computation. 
+These emergent properties are nonlinear improvements in task performance that occur suddenly, and they have sparked debate in the AI research community.
+Some researchers support the idea of emergence, while others are skeptical, making it a controversial concept.
+
+A formal definition of emergence is proposed, likening it to phase transitions in physics (e.g., solid to liquid).
+Emergence in LLMs is seen as a structural change in the model that leads to sudden improvements in multiple tasks.
+The authors suggest that these changes involve the model learning new circuits or syntactic rules, similar to changes in molecular structure in physical systems.
+
+The paper presents a study where a GPT-like model is trained on a formal language with specific grammar and type constraints.
+
+The model’s learning process is observed through three tasks:
+-1. Free generation (generating grammatically correct sentences),
+-2. Unscrambling (reordering permuted sentences), and
+-3. Conditional generation (creating sentences with given words while following grammar rules).
+
+The learning process occurs in three phases:
+-1. Grammar acquisition: The model quickly learns basic grammar rules but not more complex tasks.
+-2. Relative type constraints: After around 1,000 iterations, the model’s performance improves dramatically on all tasks, reflecting a sudden understanding of constraints.
+-3. Descriptive type constraints: A slower, continuous phase where the model generalizes what it learned earlier, gaining deeper contextual understanding.
+
+The authors identify interesting phenomena during scaling, such as:
+-1. A delay in transitioning from memorization to generalization as the number of properties (or data variety) increases.
+-2. The learning dynamics remain consistent even as task difficulty changes, indicated by the geometry of the performance curves.
+
+The research also touches on the concept of "grokking", which is related to the model’s ability to generalize after memorization. 
+Further experiments test the model's ability to understand concept classes, 
+where the model must group unseen entities based on shared properties (e.g., humans sharing characteristics like gender, profession). 
+This is visualized as a bipartite graph, where the model connects entities and properties to form concept classes.
+
+The study's merit lies in proposing a phenomenological definition of emergence in neural networks, where structural changes lead to sudden improvements across tasks. 
+The paper acknowledges the need to validate these findings with larger models closer to modern LLMs but re-centers the discussion on emergent properties as a rigorous, 
+measurable phenomenon.
+
+This work contributes to understanding when and why emergent properties arise, which could help manage model scaling and avoid undesired behaviors, 
+opening new perspectives on monitoring structural changes within models.
