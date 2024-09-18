@@ -1,0 +1,43 @@
+### From https://medium.com/@msoczi/lasso-regression-step-by-step-math-explanation-with-implementation-and-example-c37df7a7dc1f
+
+The article introduces LASSO (Least Absolute Shrinkage and Selection Operator) 
+as a modification of linear regression that combines regularization and feature selection 
+to enhance model prediction accuracy and interpretability. Unlike ridge regression, 
+which uses an L2 penalty for regularization, LASSO uses an L1 penalty, encouraging certain coefficients to be reduced to zero,
+effectively selecting relevant features and removing irrelevant ones.
+
+Key Differences between LASSO and Ridge Regression
+Ridge regression adds the L2 penalty, which penalizes large coefficients but keeps all features.
+LASSO adds the L1 penalty, which not only shrinks coefficients but can also drive some to zero, effectively performing feature selection.
+
+No Closed-Form Solution in LASSO
+Unlike linear regression or ridge regression, LASSO does not have a closed-form solution because the L1 penalty 
+makes the objective function non-differentiable at β=0.
+This requires the use of iterative methods like coordinate descent for optimization.
+
+Coordinate Descent Algorithm
+The coordinate descent algorithm updates one parameter at a time, which is more efficient for non-differentiable problems like LASSO. 
+By focusing on one dimension at a time and applying subderivatives to handle non-differentiability, 
+the algorithm optimizes the LASSO objective function.
+
+Feature Selection in LASSO
+As the λ (regularization parameter) increases, LASSO pushes more coefficients towards zero, 
+effectively selecting a smaller subset of features.
+This property allows LASSO to not only regularize the model but also perform automatic predictor selection
+by eliminating irrelevant variables.
+
+Practical Implementation
+The article walks through a step-by-step Python implementation of LASSO using the coordinate descent method. Key steps include:
+-1. Data standardization to ensure zero mean and unit variance.
+-2. Defining the soft-thresholding function, which adjusts coefficients based on their magnitude relative to λ.
+-3. Implementing the coordinate descent algorithm that iterates over each feature and updates coefficients iteratively.
+The implementation demonstrates how LASSO can be applied in practice, efficiently shrinking some coefficients to zero, 
+which reduces model complexity while maintaining or improving prediction performance.
+
+Feature Selection with λ
+As λ increases, more coefficients shrink to zero, demonstrating how LASSO selects relevant predictors
+by penalizing large coefficients and removing unimportant features from the model. 
+This dual purpose of regularization and feature selection makes LASSO especially useful for high-dimensional datasets.
+
+In summary, LASSO offers an effective way to handle overfitting and improve model interpretability by selecting relevant features,
+distinguishing it from ridge regression through the L1 regularization penalty.
