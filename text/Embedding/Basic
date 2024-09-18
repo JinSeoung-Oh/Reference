@@ -1,0 +1,22 @@
+## https://medium.com/decodingml/embeddings-the-cornerstone-of-ai-ml-be7fdde0ac3d
+
+1. What are embeddings?
+Embeddings are dense numerical representations of objects like words, images, or items. They map these objects into a continuous vector space, where similar objects are represented by vectors that are close to each other. In natural language processing (NLP), embeddings capture semantic relationships between words, positioning similar words close to each other in the vector space. Visualization of embeddings often requires dimensionality reduction techniques like UMAP or t-SNE to project high-dimensional data (64 to 2048 dimensions) into 2D or 3D space for easier interpretation.
+
+2. Why embeddings are powerful
+Embeddings convert non-numeric data (e.g., text, images) into numeric values suitable for machine learning models, avoiding issues like the curse of dimensionality found in traditional methods like one-hot encoding. For example, in NLP, embeddings allow the efficient encoding of large vocabularies. This dimensionality reduction preserves semantic relationships, which is particularly useful when feeding models like transformers. In computer vision, convolutional neural networks (CNNs) generate embeddings from images, mapping high-dimensional data into compact, dense vectors for tasks like classification or regression.
+
+3. How embeddings are created
+Deep learning models such as Word2Vec, GloVe, and transformers like BERT create embeddings based on the context and semantics of input data. For text, transformers like BERT use an encoder architecture to project tokens into dense vector spaces. Python libraries like Sentence Transformers provide tools for generating embeddings and calculating their similarities.
+
+For images, embeddings can be created using CNNs. Spectrograms are used to embed audio, while models like CLIP can embed both text and images into the same vector space, allowing cross-modal comparisons.
+
+4. Applications of embeddings
+Embeddings have wide applications, especially in information retrieval tasks like semantic search, where they enable retrieving similar items across data types (text, images, etc.). Other uses include:
+
+Representing categorical variables for machine learning models.
+Recommender systems that encode users and items to determine relationships.
+Clustering and outlier detection.
+Data visualization using tools like UMAP.
+Classification, including zero-shot classification by comparing class embeddings.
+Embeddings are foundational in retrieval-augmented generation (RAG) systems, where they assist in retrieving relevant data for generative models.
