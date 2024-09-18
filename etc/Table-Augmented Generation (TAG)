@@ -1,0 +1,54 @@
+### From https://ai.plainenglish.io/goodbye-text2sql-why-table-augmented-generation-tag-is-the-future-of-ai-driven-data-queries-892e24e06922
+
+The article introduces Table Augmented Generation (TAG), 
+a novel approach aimed at addressing the limitations of current AI methods like Text2SQL
+and Retrieval-Augmented Generation (RAG) for querying databases. 
+TAG offers a more advanced mechanism for generating and answering complex natural language queries 
+by combining the reasoning abilities of large language models (LLMs) with the computational power of databases.
+
+1. Current Challenges with Text2SQL and RAG
+   Text2SQL converts natural language questions into SQL queries,
+   but it struggles with complex queries requiring reasoning or handling unstructured data like text sentiment.
+   RAG attempts to retrieve relevant data from databases but falls short in dealing with large datasets
+   or questions requiring complex computation or reasoning across multiple data points.
+   These methods are not equipped to handle the wide variety of complex business queries that might require
+   insights across different types of data, including structured and unstructured data (e.g., sales figures, customer reviews, market sentiment).
+
+2. Table Augmented Generation (TAG)
+   TAG is designed to bridge the gap between traditional SQL queries and the complex reasoning required by real-world data scenarios. 
+   It introduces an "augmentation" step where an LLM is integrated into the query process to handle non-explicit knowledge
+   or context that the database alone cannot provide.
+
+3. Key Steps in TAG:
+   -1. Query Synthesis
+       Natural language questions are translated into executable database queries, with added LLM calls to augment context. 
+       For example, in a query like “Summarize reviews of the highest grossing romance movie considered a ‘classic,’” 
+       the SQL query is enhanced by a line like LLM(‘{movie_title} is a classic’) = ‘True’, 
+       allowing the LLM to infer what constitutes a "classic" movie, which the database alone cannot determine.
+   -2. Query Execution
+       The query is executed against the database, leveraging the database’s computational strengths for large-scale data retrieval, 
+       which LLMs are not efficient at handling.
+   -3. Answer Generation
+       The AI model uses the retrieved data, along with external knowledge and reasoning provided by the LLM, to generate a comprehensive, 
+       context-rich answer.
+
+4. LOTUS: The Framework Supporting TAG
+  - LOTUS (Leveraging Optimization Techniques for Unifying Semantic Queries) is the underlying framework that enables TAG. 
+    It integrates LLMs into the traditional database query pipeline, making it possible to perform complex semantic queries
+    involving both structured and unstructured data.
+
+5. Key Features of LOTUS:
+   -1. Semantic Operators
+       LOTUS introduces AI-based operators that go beyond standard SQL, enabling natural language-based tasks like sentiment analysis, 
+       ranking, and filtering.
+   -2. Optimized Query Execution
+       LOTUS reduces latency by optimizing how LLM operations are batched and integrated into the database’s native query processing,
+       making complex queries more efficient.
+   -3. Flexibility
+       Developers can build custom pipelines that blend SQL operations with AI reasoning, allowing for more sophisticated querying. 
+       For instance, a financial services use case could retrieve stock data and analyze news sentiment in a single query.
+
+6. Conclusion
+   TAG, powered by the LOTUS framework, offers a more comprehensive solution for querying databases using natural language
+   by integrating LLMs and database computations. It overcomes the limitations of Text2SQL and RAG, providing richer, 
+   more accurate answers for complex, real-world business queries that require reasoning across multiple data types.
