@@ -1,0 +1,46 @@
+## From https://levelup.gitconnected.com/transfusion-is-supercharging-training-multi-modal-llms-like-never-before-a8c112c4194b
+## From https://www.arxiv.org/abs/2408.11039
+
+Transfusion is an innovative multimodal model developed by researchers from Meta, Waymo,
+and the University of Southern California that combines two key techniques for processing mixed-modality data: 
+Next Token Prediction (used for text) and Diffusion (used for images). 
+It aims to merge these methods into a single architecture capable of processing both discrete data (text) and continuous data (images, audio, and video).
+
+Key Components of Transfusion:
+1. Next Token Prediction:
+   This technique, commonly used in language models, involves predicting the next token in a sequence based on preceding tokens, 
+   using autoregressive classification.
+   The model is trained by minimizing cross-entropy loss between predicted and actual tokens.
+   This approach works well for discrete data, such as text and code.
+
+2. Diffusion:
+   For continuous data like images, Denoising Diffusion Probabilistic Models (DDPMs) gradually add noise
+   to the data (forward process) and train the model to reverse this noise addition, reconstructing the original data (reverse process).
+   Diffusion models are powerful for generating high-quality images and are trained by minimizing the mean squared error between predicted and actual noise.
+
+3. How Transfusion Works:
+   Text is tokenized into discrete tokens and processed using causal attention (unidirectional), where each token only has access to previous tokens.
+   Images are processed using variational autoencoders (VAEs) to encode them into latent vectors, which are then arranged as sequences of image patches. 
+   These patches are processed using bi-directional attention, allowing each patch to access all other patches.
+   These different data types are combined into a single sequence for processing by the Transfusion model,
+   which uses both causal and bi-directional attention mechanisms depending on the data type.
+
+4. Training Objective:
+   The model uses a combination of language modeling loss (LM) for text and diffusion loss (LDDPM) for images, with a balancing coefficient λ.
+   This combined loss function ensures that the model is capable of processing both text and image data effectively.
+
+5. Model Inference:
+   During inference, the model alternates between language modeling for text generation and diffusion for image generation.
+   When the model encounters a token indicating the beginning of an image (BOI), it switches to diffusion mode,
+   generates the image, and then returns to language modeling for further text generation.
+
+6. Performance and Evaluation:
+   Transfusion significantly outperforms existing multimodal models like Chameleon, which processes both text and image data as discrete tokens.
+   Transfusion’s use of continuous image representations and separate attention mechanisms leads to better image generation and text processing.
+   On benchmarks such as image generation (FID), image captioning (CIDEr), and text-to-image alignment (CLIP), 
+   Transfusion delivers superior results compared to Chameleon and matches the performance of leading models like LLaMA and DeepFloyd.
+
+7. Conclusion:
+   Transfusion represents a novel approach to multimodal learning by combining text prediction and image diffusion within a single architecture. 
+   It excels in processing both text and images, outperforming previous models in efficiency and accuracy across a wide range of tasks,
+   making it a significant advancement in the field of multimodal AI.
