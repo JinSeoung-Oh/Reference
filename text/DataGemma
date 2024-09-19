@@ -1,0 +1,40 @@
+## From https://pub.towardsai.net/inside-datagemma-google-deepminds-initiative-to-ground-llms-in-factual-knowledge-958a70dc4b94
+## From https://huggingface.co/collections/google/datagemma-release-66df7636084d2b150a4e6643
+
+DataGemma is an innovative system developed by Google DeepMind that addresses one of the major challenge
+s for large language models (LLMs)—grounding their outputs in factual data. 
+The goal is to reduce hallucinations and expand LLM use cases for mission-critical applications.
+DataGemma connects LLMs with Google's Data Commons, a vast repository of real-world data,
+ensuring that AI responses are validated against trusted external sources.
+
+Key Challenges Addressed by DataGemma:
+1. When to use external data
+   LLMs need to determine when to rely on their internal knowledge and when to query external sources like Data Commons.
+2. Selecting the right data source
+   DataGemma simplifies this by accessing a unified, comprehensive data repository, allowing the LLM to avoid managing multiple data sources.
+3. Generating appropriate queries
+   DataGemma uses a universal API that allows natural language queries, handling both text and non-text data formats seamlessly.
+
+Data Commons Overview:
+Data Commons is an open-source platform aggregating public datasets from sources like the United Nations, census bureaus, and environmental agencies.
+With over 250 billion data points, it provides comprehensive coverage, though more detailed in U.S. data than in other countries.
+Data Commons uses a knowledge graph built on Schema.org to ensure the comparability of diverse datasets and offers a natural language interface 
+for easier user interaction.
+
+Techniques Used by DataGemma:
+1. Retrieval Interleaved Generation (RIG):
+   DataGemma cross-checks its responses against external data during generation. 
+   For example, a query about the population of California would generate a response like, 
+   “The population of California is [DC(What is the population of California?) → '39 million'],” ensuring the answer is factually accurate.
+   RIG updates the model’s response in real-time but does not store the external data for future use, meaning each query is fresh.
+
+2. Retrieval Augmented Generation (RAG):
+   RAG retrieves relevant data from Data Commons before generating the model's response. 
+   This ensures the answer is grounded in real-time data, especially for broad or complex queries.
+   DataGemma uses the Gemini 1.5 Pro model to handle large data sets due to its long context window, 
+   allowing for detailed and accurate responses even in cases involving extensive datasets.
+
+Conclusion:
+DataGemma represents a major advancement in ensuring that LLM outputs are based on factual, reliable data. 
+By linking with Data Commons and using RIG and RAG methods, DataGemma reduces hallucinations and enhances the real-world applicability of LLMs. 
+The system is now available on HuggingFace, making it accessible for broader use and further development in grounding LLMs in trusted data sources.
