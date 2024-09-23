@@ -1,0 +1,36 @@
+## From https://medium.com/syncedreview/revolutionizing-autonomous-agents-salesforces-xlam-outperforms-gpt-4-1f7ad6975442
+## https://github.com/SalesforceAIResearch/xLAM
+## https://arxiv.org/abs/2409.03215
+
+Key Features of the xLAM Series
+1. Model Design and Applications
+   - The xLAM models cater to a range of applications:
+     a) Smaller models (1B and 7B parameters) are optimized for on-device deployment.
+     b) Larger models (8x7B and 8x22B) handle more complex tasks.
+
+2. Training Pipeline
+   - The training process includes:
+     a) Data unification: Standardizing various data types (task instructions, tools, format guidelines, few-shot examples, queries, and steps) into a unified format.
+     b) Data augmentation: Enhancing dataset diversity with transformations and generating synthetic data.
+     c) Quality verification: Ensuring high-quality data for training.
+     d) General instruction synthesis and preference data generation further refine the training dataset.
+
+3. Data Unification
+   - Data unification is a standout feature that standardizes different task formats, ensuring compatibility across various environments and datasets. 
+     This allows the pipeline to scale efficiently and adapt to diverse tasks.
+
+4. Data Augmentation Techniques
+   - Two key techniques were employed:
+     a) Prompt format augmentation: Varies the prompt structures to enrich the training pool.
+     b) Instruction-following augmentation: Enhances the model’s ability to handle diverse instruction styles.
+
+5. Specialized Agent Models
+   a) General-purpose xLAM models: Built on Mixtral Instruct models, these provide balanced performance across a wide range of agent tasks, 
+                                   including multi-turn dialogues and function calling.
+   b) Specialized function-calling models: The xLAM-7B-fc-r and xLAM-1B-fc-r models are optimized for function-calling tasks and are based on DeepSeek-Coder-7B-instruct-v1.5 
+                                           and DeepSeekCoder-1.3B-instruct.
+
+6. Performance and Evaluation
+   Experimental results show that xLAM models achieve top-tier performance across various agent benchmarks.
+   Notably, xLAM secured the top position on the Berkeley Function-Calling Leaderboard, outperforming prominent models like GPT-4 and Claude-3 in tool usage tasks. 
+   This underscores the efficiency and potential of xLAM for enhancing AI agent capabilities.
