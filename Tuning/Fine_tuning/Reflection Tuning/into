@@ -1,0 +1,12 @@
+# from https://medium.com/data-science-in-your-pocket/what-is-reflection-tuning-for-llms-4d4e60c74324
+
+
+Reflection Tuning is a recent development in Generative AI that has made the Llama 3.1 70B model the best open-sourced model through Fine-Tuning.
+Fine-tuning is the process of adapting pre-trained language models to specific tasks by training them on smaller, specialized datasets.
+
+Reflection Fine-Tuning is an enhanced form of fine-tuning, where the model reasons through a query, detects mistakes, corrects itself, 
+and then provides the final response. 
+The model uses specific tags such as <thinking>, <reflection>, and <output> to organize its reasoning, error detection, correction, and final answer.
+
+For example, when asked “what is 2+2?”, the model reasons that the answer is 5 but corrects itself within the <reflection> tags, realizing the correct answer is 4. 
+This method has made significant improvements, such as making Llama 3.1 70B the best model, and it can be applied to other LLMs using platforms like unsloth.
