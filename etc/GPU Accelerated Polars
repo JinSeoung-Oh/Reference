@@ -1,0 +1,40 @@
+## From https://towardsdatascience.com/gpu-accelerated-polars-intuitively-and-exhaustively-explained-e823a82f92a8
+
+In this article, the author shares their experience from a recent demonstration by the CUDA and Polars teams, 
+where they introduced a new GPU-accelerated execution engine for Polars. 
+This new feature allows for significantly faster data manipulation, especially when dealing with large datasets of 100GB or more. 
+The article covers the basics of Polars, demonstrates how Polars can be used for common data manipulation tasks, 
+and delves into lazy execution—one of the key optimizations Polars offers compared to other libraries like Pandas.
+
+1. Polars Overview:
+   Polars is a DataFrame library similar to Pandas but optimized for performance. It allows for creating, filtering, and aggregating DataFrames efficiently.
+   The author demonstrates how basic data operations work in Polars, including filtering rows, creating new columns, and aggregating data by groups.
+
+2. Lazy Execution in Polars:
+   -Eager Execution: Executes each operation immediately, similar to how Pandas works.
+   - Lazy Execution: Operations are queued, and the optimal execution plan is devised before actually running the computation. This results in better query optimization and faster performance.
+   The article demonstrates how lazy execution leads to a performance improvement of around 23.75% in the example test case.
+
+3. Introduction of GPU-accelerated Polars:
+   The newly introduced CUDA-powered execution engine allows Polars to leverage the GPU for even faster data manipulation.
+   The author shows how to install the GPU-accelerated version of Polars and modify the code to specify GPU execution using pl.GPUEngine.
+
+4. Performance Comparison:
+   A test comparing eager execution, lazy execution, and GPU-accelerated lazy execution reveals that GPU acceleration offers a dramatic speed improvement.
+   On average, GPU-accelerated lazy execution was 74.78% faster than CPU lazy execution, and 77.38% faster than CPU eager execution.
+
+5. Behind the Scenes of GPU Execution:
+   The Polars query optimizer automatically decides which tasks can be run on the GPU and manages memory between the CPU (using RAM) and the GPU (using vRAM). This memory management is abstracted away, saving time and making it easier to use the GPU for data manipulation without explicit memory handling.
+   The GPU execution engine is especially beneficial for large, parallelizable tasks, while smaller or non-parallelizable tasks may still be handled by the CPU.
+
+6. Future Directions:
+   The NVIDIA and Polars teams are working on enabling more explicit memory control for those who need it, which could be beneficial for scenarios where users are running both data manipulation and machine learning tasks on the same machine.
+
+7. Conclusion:
+   The introduction of GPU-accelerated Polars represents a significant step forward for data manipulation, particularly for users working with large datasets. While the author may still use Pandas for smaller, quick tasks, the speed boost provided by Polars with GPU support makes it an attractive option for more computationally intensive workloads. The combination of lazy execution and GPU acceleration could make Polars a core tool for data scientists and engineers who need both performance and ease of use.
+
+
+
+
+
+
