@@ -1,0 +1,15 @@
+## From https://github.com/HanGuo97/flute
+## From https://blog.stackademic.com/flute-faster-qlora-fine-tuning-with-nf4-models-36ca3dea91be
+
+The text discusses the NormalFloat4 (NF4) data type, commonly used for quantizing large language models (LLMs) during QLoRA fine-tuning. 
+NF4 offers advantages over the INT4 data type and is used by default in bitsandbytes for calibration-free quantization,
+meaning the model is quantized efficiently at loading time. However, NF4 suffers from slow performance in quantized models.
+
+To address this, FLUTE introduces Lookup Table (LUT) quantization, which is more flexible than uniform quantization. 
+In uniform quantization, full-precision weights are scaled into lower-precision intervals, 
+while LUT quantization uses a lookup table to map quantized weights to arbitrary values, enabling more complex quantization techniques. 
+FLUTE supports int4, fp4, and custom learned lookup tables.
+
+FLUTE-quantized models can be deployed using frameworks like vLLM and Hugging Face's accelerate library.
+It integrates with bitsandbytes through a provided function, supporting torch.float16 and torch.bfloat16 input data types with 2-bit, 3-bit, and 4-bit precision.
+Performance optimizations for bfloat16 on Ampere GPUs are still being developed, with certain combinations leading to numerical instability.
