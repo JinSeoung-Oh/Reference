@@ -1,0 +1,45 @@
+## From https://towardsdatascience.com/the-math-behind-kernel-density-estimation-5deca75cba38
+
+1. Part 1: Introduction
+   - KDE offers a smoother alternative to histograms, which often fail to provide clear insights into data distributions.
+   - Through an example, KDE is applied to mixed uniform and normal data, demonstrating the smooth distribution that KDE produces, 
+     compared to the more rigid histogram structure.
+
+2. Part 2: Derivation
+   - KDE starts with estimating the cumulative distribution function (CDF) and derives the probability density function using kernel functions.
+   - The kernel function, 𝑘(𝑢), is applied to each data point, weighted by the bandwidth parameter ℎ. Common kernel functions include Gaussian and uniform.
+   - The choice of bandwidth ℎ plays a crucial role in KDE performance, affecting bias and variance. 
+     A small ℎ can result in a rough estimate (low bias, high variance), while a large ℎ produces a smoother estimate (higher bias, lower variance).
+
+3. Part 3: Properties of KDE
+   - The article discusses how the mean, variance, and bias of the KDE are computed.
+   - By using the Taylor expansion of the density function, the bias and variance of the KDE are derived, leading to an expression for Mean Squared Error (MSE).
+   - The asymptotic mean integrated square error (AMISE) is minimized to find the optimal bandwidth.
+
+4. Part 4: Bandwidth Selection
+   - Bandwidth selection is crucial and several methods are available, including:
+     a) Solve-the-Equation Rule
+     b) Least Squares Cross-Validation
+     c) Biased Cross-Validation
+     d) Direct Plug-in Method
+     e) Contrast Method
+   - Silverman’s Rule of Thumb, a popular method, tends to overestimate the bandwidth for smoother estimates. 
+     However, it does not perform well for bimodal distributions.
+   - Cross-validation techniques, like Leave One Out Cross Validation (LOOCV), provide a more robust selection for smaller datasets or complex densities.
+
+5. Part 5: Kernel Function Selection
+   - Kernel function selection is less critical than bandwidth selection. For second-order kernels, Epanechnikov is considered optimal.
+   - Other kernels, such as Gaussian or linear, offer similar performance but have minimal impact on the final result compared to bandwidth selection.
+
+6. Part 6: Advanced Topics
+   - Adaptive Bandwidths: While adaptive bandwidths improve estimation for varying density regions, they have been found to perform poorly in univariate cases.
+   - Multivariate KDE: Extending KDE to higher dimensions increases computational complexity due to the curse of dimensionality.
+
+7. Real-World Applications
+   - Machine Learning: KDE improves classification algorithms like flexible naive Bayes classifiers.
+   - Traffic Analysis: KDE has been applied to model traffic accident risks in Japan.
+   - Seismology: KDE helps model earthquake risk distribution based on geographic data.
+
+8. Conclusion  
+   KDE is a valuable tool for analyzing univariate data distributions, offering a flexible and powerful alternative to histograms.
+   However, for higher-dimensional data or large-scale problems, alternative methods may be more suitable due to the computational complexity of KDE.
