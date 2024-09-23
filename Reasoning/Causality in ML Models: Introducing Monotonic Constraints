@@ -1,0 +1,73 @@
+## from https://towardsdatascience.com/causality-in-ml-models-introducing-monotonic-constraints-8426e1b5cc34
+
+Causal models are becoming essential for data scientists as they provide reliable estimates for “what-if” scenarios, 
+which is crucial in business decision-making.
+This article explains how adding one line of code can transform a traditional ML model into a reliable tool for answering causal questions.
+
+The dataset used in this article involves house sales data with three variables: 
+- square footage, overall condition, and sale price. In causal ML models, features are categorized as covariates (unchangeable) or 
+  treatments (changeable by decision-makers). 
+In this case, “square feet” is a covariate, and “overall condition” is a treatment feature that can be improved by renovation.
+
+Using traditional ML models like decision trees can lead to unrealistic predictions, 
+as shown when a decision tree predicted a lower sale price after renovating a house. 
+This is where monotonic constraints are introduced. 
+Monotonic constraints ensure that improving the condition of a house results in a non-decreasing sale price prediction.
+
+Monotonic constraints are less restrictive than linear constraints, 
+allowing for more realistic modeling of relationships that are often non-linear but monotonic (e.g., salary increasing with experience).
+In this case, adding monotonic constraints on “square feet” and “overall condition” ensures that 
+improving either feature increases or maintains the house’s price prediction.
+
+Applying these constraints improves the model's predictions and makes them more reliable for business decision-making.
+Additionally, it reduces overfitting, improves out-of-sample performance, and enhances explainability, 
+making monotonic constraints a valuable tool for causal modeling.
+
+In conclusion, monotonic constraints offer a balanced approach, 
+providing reliable predictions for “what-if” scenarios while avoiding overfitting and incorporating real-world knowledge into the model.
+
+### What is Monotonic constraints
+Monotonic constraints are a modeling technique applied to machine learning models to enforce a specific directional relationship between features
+(input variables) and the target variable (output). 
+These constraints do not specify the exact form of the relationship (e.g., linear, quadratic) but instead ensure that as one feature increases or decreases,
+the target variable behaves in a predictable way—either always increasing or always decreasing, depending on the constraint applied.
+
+In more detail, monotonic constraints come in three forms:
+1. +1 (Non-decreasing constraint): When the value of the feature increases, the predicted outcome must stay the same or increase.
+                                   This ensures that the relationship between the feature and the target variable is non-decreasing.
+2. 0 (No constraint): No specific relationship is imposed between the feature and the target variable. 
+                      This is the default behavior in most machine learning models.
+3. -1 (Non-increasing constraint): When the feature value increases, the predicted outcome must stay the same or decrease, ensuring a non-increasing relationship.
+
+Application in the example:
+In the real estate scenario, applying a +1 monotonic constraint to the "overall condition" feature ensures that improving a house's condition
+(e.g., through renovation) results in a house price that either increases or stays the same, 
+but never decreases. 
+Similarly, a +1 monotonic constraint on "square footage" ensures that increasing the size of the house does not reduce its predicted sale price.
+
+For instance, a model without monotonic constraints could mistakenly predict that renovating a house would decrease its value,
+as shown in the initial example where the model predicted a price drop from $360k to $247k after improving the house's condition.
+Monotonic constraints prevent this illogical outcome by enforcing that improved condition always leads to equal or higher house prices.
+
+Advantages of Monotonic Constraints:
+1. Common-sense alignment
+   They ensure that the model predictions align with real-world logic,
+   where certain features naturally have a non-decreasing (or non-increasing) effect on the outcome
+   (e.g., better condition or larger square footage should not lower a house's price).
+2. Improved model interpretability
+   By enforcing these constraints, the model becomes easier to explain, as the direction of the relationship
+   between features and the target is clearly defined and consistent with real-world expectations.
+3. Less overfitting
+   Since monotonic constraints transfer domain knowledge into the model, 
+   they reduce overfitting by introducing reasonable limits on the model’s flexibility.
+
+In conclusion, monotonic constraints guide machine learning models to behave in ways that are aligned with real-world expectations, 
+improving both prediction reliability and model performance in business applications. 
+In this case, they ensure that house condition and square footage changes predict reasonable price outcomes,
+making them highly valuable for causal modeling in decision-making.
+
+
+
+
+
+
