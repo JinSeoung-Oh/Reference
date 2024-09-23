@@ -1,0 +1,41 @@
+## From https://towardsdatascience.com/how-the-llm-got-lost-in-the-network-and-discovered-graph-reasoning-e2736bd04efa
+
+Large Language Models (LLMs) have demonstrated remarkable capabilities, extending beyond text into areas like multimodal understanding and reasoning-based skills, 
+such as math and coding. However, a new focus has emerged: graph data. 
+Graphs are crucial for representing real-world data, such as social networks or molecular structures, 
+where the relationship between entities is as important as the entities themselves.
+Despite the importance of graphs, LLMs have struggled to handle graph-based reasoning effectively.
+
+1. LLMs and Graph Data:
+   LLMs traditionally struggle with structural understanding, performing poorly on tasks like identifying graph cycles or edges. 
+   This is because LLMs don't natively process graph data. Various ways to encode graphs, such as adjacency matrices, impact an LLM's ability to reason about them, 
+   and no single encoding method fits all tasks. Techniques like chain-of-thought (CoT) or 
+   few-shot prompting improve performance for simpler graph tasks but are less effective for complex problems.
+   Fine-tuning models on graph data has shown promise but still yields mixed results.
+
+2. Why Do LLMs Struggle with Graph Reasoning?
+   One hypothesis is that LLMs struggle with spatial reasoning. While humans use cognitive maps to understand spatial relationships and plan actions, 
+   LLMs lack the same ability. Studies have shown that LLMs can handle simple spatial concepts but falter with more complex layouts, 
+   such as interpreting relative positions ("left" or "right"). LLMs are trained primarily on text, 
+   where spatial awareness is less emphasized, leading to difficulties in tasks requiring spatial reasoning or graph topology comprehension.
+
+3. Benchmarking Graph Reasoning in LLMs:
+   Recent benchmarks have been developed to evaluate LLMs on graph reasoning tasks. These benchmarks include diverse topological structures and tasks at the node,
+   edge, and graph levels. In one study, a model fine-tuned on graph data showed significant improvements, 
+   outperforming smaller models and even some larger models like GPT-4 in certain tasks. 
+   However, the fine-tuned model struggled with generalization, particularly on out-of-domain tasks, indicating a lack of comprehensive graph reasoning abilities.
+
+4. Fine-Tuning and Reasoning Intermediates:
+   Fine-tuning on graph data improved LLM performance, but the addition of reasoning intermediates—steps that guide the model through
+   its thought process—further enhanced its capabilities.
+   When the model was provided with these intermediates during training, it showed better understanding and reasoning about graph data, 
+   not just producing the correct answer but also explaining the reasoning behind it.
+
+5. Challenges and Future Directions:
+   LLMs face two key challenges with graph data:
+   -1. They lack exposure to sufficient graph data during training, which hampers their ability to generalize graph reasoning.
+   -2. Their spatial reasoning capabilities are underdeveloped, likely because they are trained on large text corpora rather than spatially structured data.
+
+6. Future research should focus on incorporating more graph data into LLM training datasets and improving spatial reasoning. 
+   With the growing integration of knowledge graphs and LLMs, enhancing graph reasoning will become increasingly important for applications in biology, 
+   finance, social networks, and more.
