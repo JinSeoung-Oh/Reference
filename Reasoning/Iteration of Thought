@@ -1,0 +1,56 @@
+## From https://medium.com/@techsachin/iteration-of-thought-multi-agent-framework-to-enhance-llm-reasoning-capabilities-fb10f7cb7a29
+## https://arxiv.org/abs/2409.12618
+## https://github.com/AgnostiqHQ/multi-agent-llm
+
+The Iteration of Thought (IoT) framework, introduced by the authors, aims to enhance Large Language Model (LLM) responses through dynamic,
+iterative prompting. 
+It builds on methods like Chain-of-Thought (CoT) and Tree-of-Thought (ToT) 
+but takes a step further by utilizing an Inner Dialogue Agent (IDA) to guide the LLM through more refined reasoning paths. 
+This framework introduces adaptive cross-path exploration, improving both accuracy and reasoning efficiency.
+
+1. IoT Components:
+   - Inner Dialogue Agent (IDA)
+     Dynamically generates context-sensitive prompts based on the original query and previous LLM responses. 
+     It adjusts prompts iteratively to improve response quality. Formally, it takes the current query and response and generates a new prompt for the LLM.
+   - LLM Agent (LLMA)
+     The core reasoning component of the LLM, which processes the IDA’s prompts.
+     It generates responses while identifying reasoning gaps, creating a feedback loop to guide further prompts.
+   - Iterative Prompting Loop
+     IDA and LLMA interact iteratively. The IDA generates prompts, and LLMA responds with refined answers.
+     This continues until the answer is satisfactory or a maximum iteration count is reached.
+
+2. IoT Variants:
+   -1. Autonomous IoT (AIoT)
+       The LLM autonomously decides whether it has generated a sufficient response at each iteration. If satisfied, it signals the end of iterations.
+   -2. Guided IoT (GIoT)
+       In contrast, GIoT follows a fixed number of iterations before allowing the LLM to decide if the final answer is reached.
+       This ensures more thorough exploration at the cost of higher computational overhead.
+
+3. Key Results:
+   -1. GPQA (Generalized Question-Answering)
+       AIoT achieved a 14.11% improvement over the baseline IO approach, significantly outperforming both CoT and GIoT, especially in cases requiring minimal iterations.
+   -2. Explorative Problem-Solving (e.g., Mini Crosswords, Game of 24)
+       GIoT outperformed other methods, particularly for complex tasks requiring multi-path exploration, with a 266.4% improvement over CoT in the Game of 24 task.
+   -3. Multi-context Reasoning and Retrieval (HotpotQA-Hard)
+       AIoT showed substantial gains, achieving 0.53 Exact Match (EM) and 0.699 F1 scores, outperforming CoT and even larger models like GPT-4 
+       variants used in AgentLite benchmarks.
+
+4. Strengths and Weaknesses:
+   -1. Strengths
+       IoT provides transparency and explainability in reasoning through its iterative approach. 
+       It combines well with existing methods like CoT, offering potential for hybrid models.
+       AIoT is efficient for autonomous systems, while GIoT excels in thorough reasoning tasks.
+   -2. Weaknesses
+       AIoT may prematurely converge, stopping iterations too early. GIoT, while more exhaustive, 
+       increases the risk of hallucination by forcing unnecessary iterations in some cases.
+
+5. Conclusion:
+   The IoT framework was shown to significantly outperform traditional reasoning approaches like CoT in various tasks. 
+   While GIoT offers deeper exploration, AIoT provides efficiency in simpler tasks. 
+   Both methods consistently performed better than CoT, establishing IoT as a promising framework for complex LLM-based reasoning.
+
+
+
+
+
+
