@@ -1,0 +1,41 @@
+## From https://pub.towardsai.net/demystifying-pdf-parsing-05-unifying-separate-tasks-into-a-small-model-d3739db021f7
+## Have to check given link, if want to check detail things and code
+
+1. Review of Previous Methods:
+   -1. Pipeline-based methods
+       Tasks like text recognition, layout detection, and table understanding are handled by separate models, 
+       resulting in high maintenance costs and limited generalization.
+   -2. OCR-free small model-based methods
+       These models work well for specific tasks (e.g., academic papers or formula recognition) but lack versatility.
+   -3. OCR-free large multimodal model-based methods
+       These models, like TextMonkey, provide higher accuracy but face challenges related to efficiency and cost.
+
+2. New Approaches to Unified Models:
+   - 1. General OCR Theory (GOT):
+        - OCR-2.0 is introduced to unify diverse OCR tasks, handling plain text, formulas, tables, geometric shapes, etc.
+        - GOT employs an end-to-end encoder-decoder architecture to minimize complexity.
+        - The model excels in various OCR tasks like region-focused OCR and multi-page OCR, supporting English and Chinese.
+        - Pre-training involves scene text and document-level data, and post-training enhances features like fine-grained and multi-page OCR.
+        - It outperforms other models in document-level tasks for both English and Chinese text recognition.
+   - 2. DLAFormer:
+        - A transformer-based approach for Document Layout Analysis (DLA), unifying tasks like text region detection, logical role classification, 
+          and reading order prediction.
+        - It defines relationships between regions (e.g., intra-region and inter-region relationships) and treats DLA sub-tasks as relation prediction challenges.
+        - DLAFormer outperforms previous multi-branch models, especially in tasks like graphical page object detection and reading order prediction.
+    - 3. UNIT (Unifying Image and Text Recognition in One Vision Encoder):
+         - UNIT integrates both image and text recognition using a shared Vision Transformer (ViT) backbone.
+         - A lightweight language decoder enhances text recognition, while a vision decoder retains image processing capabilities.
+         - It employs a two-stage training process (intra-scale pretraining and inter-scale finetuning) to handle different input resolutions.
+         - UNIT demonstrates strong performance in both text and image recognition tasks, outperforming models like Donut for OCR tasks.
+
+3. Key Innovations and Insights:
+   - Transformer Flexibility: Shared encoder-decoder structures reduce the need for separate models.
+   - Efficient Parameter Usage: Self-attention mechanisms capture global dependencies with fewer parameters.
+   - Multi-scale Input Handling: GOT and UNIT use multi-scale feature extraction to handle high-resolution details efficiently.
+   - Task Complementarity: Shared features across tasks help these models generalize well without increasing complexity.
+   - Lightweight Components: UNIT introduces lightweight decoders for OCR, and DLAFormer employs Deformable Transformers to keep models compact.
+
+4. Conclusion:
+   The article highlights how small models can integrate multiple tasks efficiently while achieving strong performance. 
+   GOT stands out due to its broader application range and open-source nature, making it ideal for practical use. The article concludes 
+   by suggesting that multi-task integration in small models is likely to become a future trend in document intelligence.
