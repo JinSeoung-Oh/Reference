@@ -1,0 +1,45 @@
+## From https://www.marktechpost.com/2024/09/20/diagram-of-thought-dot-an-ai-framework-that-models-iterative-reasoning-in-large-language-models-llms-as-the-construction-of-a-directed-acyclic-graph-dag-within-a-single-model/
+
+The Diagram of Thought (DoT) framework represents a significant advancement in enhancing reasoning capabilities within large language models (LLMs).
+Building on prior frameworks like Chain-of-Thought (CoT), Tree-of-Thought (ToT), and Cumulative Reasoning (CR), 
+DoT integrates their strengths into a unified model while addressing their computational inefficiencies and complexities. 
+By modeling reasoning as a directed acyclic graph (DAG) within a single LLM, DoT facilitates structured reasoning, 
+making it computationally efficient while capturing the iterative, non-linear nature of human reasoning.
+
+Key Features of DoT:
+1. Directed Acyclic Graph (DAG):
+   - DoT represents reasoning as a DAG, integrating propositions, critiques, refinements, and verifications. 
+     This structure enables more coherent and streamlined reasoning compared to earlier frameworks, which often involved branching or multi-model collaboration.
+
+2. Role-Specific Tokens:
+   - The framework uses role-specific tokens for tasks like proposing, critiquing, and summarizing, 
+     which improves the feedback loop and ensures smooth transitions between reasoning stages.
+
+3. Auto-regressive Next-Token Prediction:
+   - DoT employs this prediction method, allowing seamless shifts between idea proposals and critiques, facilitating an iterative process of reasoning 
+     improvement without needing external interventions.
+
+4. Topos Theory:
+   - DoT is grounded in Topos theory, providing a robust mathematical foundation that ensures logical consistency and sound reasoning outcomes. 
+     This theoretical basis strengthens the framework’s reliability for handling complex reasoning tasks.
+
+5. Single-Model Integration:
+   - Unlike frameworks that rely on multiple models or collaboration, DoT consolidates the entire reasoning process within a single LLM. 
+     This simplification improves training efficiency and inference speed while enhancing the model’s capacity for handling complex reasoning paths.
+
+6. Theoretical and Practical Impact:
+   The Topos-theoretic validation ensures that the reasoning process maintains logical consistency and soundness throughout iterative improvements.
+   Natural language critiques incorporated into the framework enrich the feedback and refine reasoning steps dynamically, enhancing the model’s problem-solving accuracy.
+   The Summarizer role in the framework synthesizes validated propositions into a coherent line of reasoning, providing more reliable and accurate conclusions.
+
+7. Conclusion:
+   The DoT framework presents a mathematically grounded and practically efficient model for complex reasoning within LLMs. 
+   By integrating propositions, critiques, refinements, and verifications into a DAG structure, and eliminating the need for multi-model collaboration, 
+   DoT represents a robust advancement in reasoning-specialized models. Its innovative design demonstrates significant potential for improving LLM capabilities in solving complex, 
+   non-linear reasoning tasks efficiently.
+
+
+
+
+
+
