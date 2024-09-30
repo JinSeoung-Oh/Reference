@@ -1,0 +1,41 @@
+## https://artgor.medium.com/paper-review-training-language-models-to-self-correct-via-reinforcement-learning-4f10785de819
+## https://arxiv.org/abs/2409.12917
+
+SCoRe is a novel approach designed to enhance large language models' (LLMs) self-correction ability by using self-generated data 
+through multi-turn reinforcement learning (RL). 
+Unlike traditional methods that rely on multiple models or external supervision, 
+SCoRe focuses on the model correcting its own mistakes based on its prior responses. 
+Previous methods, such as supervised fine-tuning (SFT), have been ineffective due to distribution mismatches and biased correction behavior, 
+which SCoRe seeks to address.
+
+Key Components of SCoRe
+1. Problem Setup:
+   The goal is to train LLMs to self-correct without external feedback, relying only on self-generated responses.
+   The model solves problems, generates multiple attempts, and receives rewards based on the correctness of its attempts. 
+   However, the reward function is not accessible during testing.
+   The training objective is to optimize a policy over multiple turns using policy gradient reinforcement learning with KL-divergence regularization to ensure gradual,
+   meaningful corrections.
+
+2. Limitations of Supervised Fine-Tuning (SFT):
+   SFT methods, such as STaR and Pair-SFT, fail to significantly improve self-correction. 
+   They tend to amplify initial biases in the model, leading to ineffective corrections.
+   STaR filters model-generated traces, using only successful revisions, while Pair-SFT pairs incorrect and correct responses.
+   Despite some gains, these methods either make conservative corrections (STaR) or suffer from distribution mismatches (Pair-SFT).
+   Pair-SFT improves self-correction marginally, while STaR struggles with identifying when to make meaningful changes.
+   Fine-tuned models often make minimal or no edits, indicating that these methods are too conservative or fail to generalize well to unseen data.
+
+3. SCoRe Approach
+   SCoRe overcomes the limitations of SFT by using a two-stage reinforcement learning strategy:
+    -1. Stage I: The model is explicitly trained to improve its second attempt based on a relatively static first attempt.
+                 KL-divergence regularization prevents the first and second attempts from becoming too similar, 
+                 ensuring that the model doesn’t fall into a mode collapse where it fails to make meaningful corrections.
+    -2. Stage II: Multi-turn reinforcement learning is applied with a reward structure that incentivizes self-correction.
+                  If the model improves on its first attempt, it receives a reward bonus; if the response degrades, penalties are applied. 
+                  This approach ensures the model learns to make significant improvements across attempts.
+4. Results
+   -1. Mathematics Benchmarks: SCoRe improves self-correction by 4.4%, increasing overall accuracy on second attempts by 23%, a 15.6% improvement over the base model and 10.2% over Pair-SFT.
+   -2. Code Generation Tasks: SCoRe boosts performance from 47.3% to 60.6% on the MBPP-R task, a gap comparable to the difference between GPT-3.5 and GPT-4. On the HumanEval dataset, it shows a 12.2% improvement in self-correction, outperforming the base model by 9%.
+   -3. Effectiveness with Compute Scaling: When combined with inference-time strategies like self-consistency decoding (majority voting), SCoRe achieves a 10.5% improvement, surpassing the 7.4% gain from parallel sampling alone.
+
+5. Conclusion
+   SCoRe significantly improves LLMs' ability to self-correct by addressing the distribution mismatch and over-correction issues found in SFT methods. Through multi-turn reinforcement learning, it ensures models make meaningful corrections without falling into the trap of conservative revisions. The approach proves effective across both mathematical and code generation tasks, outperforming traditional fine-tuning methods and demonstrating its robustness with scaling strategies.
