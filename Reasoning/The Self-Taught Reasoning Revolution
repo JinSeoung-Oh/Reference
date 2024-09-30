@@ -1,0 +1,77 @@
+## From https://pub.towardsai.net/teaching-ai-to-think-the-self-taught-reasoning-revolution-b4ca83d29c81
+
+The text introduces OpenAI’s newest o1 model series, which leverages a paradigm known as test-time computation, 
+or “reasoning,” where a model performs additional reasoning steps during inference (real-time interaction with the user).
+This approach allows the model to adapt its reasoning dynamically, making it more flexible and effective, especially when faced with novel or complex problems. 
+However, this comes with drawbacks, such as increased latency (longer time to generate responses) 
+and higher costs due to the need to generate more tokens before arriving at an answer.
+
+1. Key Concepts:
+   -1. Test-time computation in o1 models
+       These models do more than just use pre-learned knowledge; they reason at the moment of interaction. 
+       This helps with problems that are more complex or unfamiliar but slows down the response process.
+   -2. Human-like reasoning limitations
+       One fundamental issue in AI is that models are typically trained to mimic human reasoning patterns. 
+       However, this approach can be flawed because it relies on human intuition, which may not truly represent effective reasoning. 
+       The text highlights that machines could potentially develop reasoning skills independently, moving beyond just copying human strategies.
+
+2. Advancements in AI Reasoning:
+   Traditionally, improving a model's reasoning required large datasets with annotated reasoning steps (human-written explanations of how to solve problems). 
+   This method is expensive and time-consuming, as it relies heavily on human expertise. 
+   A more efficient alternative is self-taught reasoning, where AI learns to reason by examining its own generated steps and improving through feedback loops, 
+   without relying on vast human-annotated data.
+
+3. Self-Taught Reasoning (SCoRe)
+   This approach mirrors the o1 model's method, allowing models to refine their responses through multi-turn interactions. 
+   SCoRe models use reinforcement learning to improve over time, rewarding the model when it corrects its errors, rather than depending on large pre-annotated datasets.
+   The self-generated data allows the model to continuously enhance its performance, aligning with the real-time adaptability seen in the o1 model series.
+
+   -1. Self-Taught Reasoner (STaR) Approach:
+       The STaR approach, introduced by Zelikman et al. (2022), enables AI models to improve their reasoning by learning from a small set of examples 
+       rather than requiring vast datasets of human-annotated reasoning steps. In STaR, the model generates rationales—step-by-step explanations—when attempting
+       to solve problems. If these rationales lead to correct answers, the model fine-tunes itself on these successful examples, 
+       gradually improving its ability to solve more complex tasks.
+
+   -2. Verification for Self-Taught Reasoners (V-STaR)
+       Hosseini et al. (2024) extended the STaR approach by adding a verifier component, which helps the model assess the quality of its own reasoning. 
+       In this method, the model generates multiple reasoning paths (both correct and incorrect solutions) and trains the verifier
+       to distinguish between effective and ineffective strategies. 
+       This process allows the model to select the most accurate and efficient reasoning path during inference, 
+       similar to what OpenAI’s o1 model does by adjusting its reasoning in real-time.
+
+  -3. Quiet-STaR Approach:
+      An additional innovation, Quiet-STaR (Zelikman et al., 2024), introduces a mechanism where the model generates 'internal thoughts' 
+      that aren’t directly outputted to the user but are marked with specific tokens such as <|startofthought|> and <|endofthought|>.
+      These tokens indicate when the model starts and finishes its reasoning process. Quiet-STaR relies on reinforcement learning to evaluate which internal thoughts are helpful for solving problems, optimizing the reasoning process without requiring direct user interaction. This is similar to the o1 model’s test-time computation, where models refine their thinking without needing extensive pre-training.
+
+4. Reinforcement Learning and Real-Time Adaptability:
+   Reinforcement learning plays a critical role in these self-taught approaches, but as Yan LeCun mentioned,
+   it is more of an optimization layer than a groundbreaking foundational method. It serves as a tool to enhance specific areas like reasoning at test-time. 
+   The combination of reinforcement learning with high-quality data and scalable computing resources allows models to “think better” during real-time problem-solving,
+   improving their ability to adapt dynamically to novel tasks.
+
+5. Scaling AI Reasoning:
+   A key concept in AI development is the idea of scaling—removing bottlenecks in training and fine-tuning models to improve their performance. 
+   One bottleneck addressed in these models is the reliance on large pre-annotated datasets. 
+   By shifting the focus from pre-training (where models are trained with massive amounts of data) to test-time computation (where the model reasons in real-time),
+   AI systems can achieve better results on complex tasks without needing excessively large models. 
+   Google DeepMind’s research supports this idea, showing that applying more compute at test-time can sometimes outperform models 
+   that were 14 times larger in pre-training size. This efficiency in test-time computation reflects a more strategic use of computational resources, 
+   rather than simply increasing the size of pre-trained models.
+
+6. Practical Implications of Self-Taught Reasoning:
+   Models using these self-taught reasoning techniques, like the o1 series, STaR, V-STaR, and Quiet-STaR, 
+   can handle more complex tasks that require multi-step thinking, such as strategic planning, data analysis, or nuanced decision-making. 
+   These models are better equipped to tackle new, unforeseen challenges and adapt more flexibly to diverse problems.
+
+   -1. Reduced reliance on human-annotated data
+       By training AI models to reason more effectively on their own, we can reduce the need for large, annotated datasets, saving time and resources. 
+       However, this comes at the cost of increased computational power during inference, a concept known as “test-time compute.”
+
+   -2. Test-time compute
+       Increasing computational resources during inference allows models to perform additional reasoning steps in real-time, improving performance on complex tasks.
+       This concept of test-time compute is becoming a focal point in AI research, suggesting that it may be more efficient to scale compute resources
+       during inference than to focus solely on pre-training large models.
+
+Summary:
+The text emphasizes that OpenAI’s o1 model series and related approaches like SCoRe, STaR, V-STaR, and Quiet-STaR represent a shift in how AI models learn to reason. Instead of relying heavily on human-annotated datasets, these models use reinforcement learning and self-generated reasoning steps to refine their performance in real-time. By focusing on test-time computation, these models can tackle complex tasks more effectively and efficiently, reducing the need for pre-training large models while requiring more computation during inference. This dynamic adaptability enables AI systems to handle unforeseen challenges and multi-step reasoning tasks, pushing the boundaries of what AI can achieve in real-world applications.
