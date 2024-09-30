@@ -1,0 +1,60 @@
+## From https://levelup.gitconnected.com/unlocking-the-power-of-unified-retrieval-and-generation-an-introduction-to-riches-5913e81c5de8
+
+The article introduces RICHES (Retrieval Interlaced with Sequence Generation), 
+a new approach that unifies the retrieval and generation processes within a single large language model (LLM). 
+This method enhances the ability of LLMs to adapt to diverse tasks using simple prompts, removing the need for separate retriever and generator models.
+
+1. Overview
+   RICHES integrates retrieval with sequence generation, allowing the LLM to perform both tasks simultaneously.
+   It uses constrained decoding, which retrieves documents or retrieval keys during the generation process. 
+   The main benefit of RICHES is that it can adapt to new tasks without additional retraining, making it highly flexible.
+
+   For example, in multi-hop question answering (QA), RICHES can think about what needs to be retrieved next, generate a supporting proposition from the evidence, 
+   and complete the task in a single decoding pass. It allows retrieval and generation to interleave seamlessly.
+
+2. Detailed Principles
+   RICHES operates under the idea that LLM decoding resembles a search process. 
+   By constraining this search to known sequences in the corpus, RICHES performs retrieval and generation efficiently in a single pass.
+
+3. Key components include:
+
+   -1. Constrained Beam Decoding
+       Uses a beam search to guide retrieval within a constrained search space, ensuring that retrieved information remains relevant. 
+       Constraints prevent irrelevant sequences from being generated, as visualized in a beam progression chart.
+
+   -2. FM-Index
+       Used for fast substring searches, the FM-index speeds up retrieval by providing continuations during the decoding process. 
+       A pseudo-code example illustrates how tokens are constrained based on the index.
+
+   -3. Adaptive Beam Size
+       Dynamically adjusts the beam size between constrained and unconstrained generation, optimizing retrieval without overrestricting the search space.
+
+   -4. Indexing Strategies
+       Utilizes various retrieval keys (titles, paragraphs, sentences) to optimize retrieval.
+
+   These features allow RICHES to seamlessly interleave retrieval and generation, 
+   leveraging LLMs’ knowledge while addressing their limitations with constrained decoding and adaptive methods.
+
+4. Evaluation
+   RICHES was evaluated on both single-hop and multi-hop QA tasks, showing strong results. 
+   In single-hop tasks, it performed competitively against dense retrievers, though sometimes sacrificing attribution. 
+   For multi-hop QA, RICHES significantly outperformed iterative baseline methods, particularly on Hotpot and Musique datasets, 
+   improving F1 scores by 15 and 11 points, respectively.
+
+5. Case Study
+   A case study on the Hotpot-QA dataset demonstrated RICHES' effectiveness in answering complex multi-hop questions. 
+   For the question, "Who had a baby at 100 in the Bible?", RICHES generated the retrieval key "Sarah’s age at birth of Isaac" and found that
+   "Sarah was 90 years old when Isaac was born." It then generated "Abraham’s age at birth of Isaac" and retrieved
+   that "Abraham was 100 years old when Isaac was born," providing an accurate, well-attributed answer.
+
+6. Conclusion and Insights
+   RICHES successfully unifies retrieval and generation within an LLM, using constrained decoding and adaptive beam search to improve performance. 
+   However, challenges remain:
+
+   -1. Complexity of Constrained Decoding: Managing constraints efficiently, especially with large beam sizes, is challenging. Overly strict constraints might limit generation accuracy.
+   -2. Dependence on FM-Index: While the FM-index is fast, it may introduce latency in large or frequently updated corpora.
+   -3. Data Freshness: Keeping the FM-index up to date in dynamic environments could pose performance issues.
+   -4. Ambiguity Handling: RICHES relies heavily on precise retrieval keys, so ambiguous queries may lead to incorrect retrievals.
+
+   Overall, RICHES offers a promising method for integrating external knowledge into LLMs while streamlining retrieval and generation processes.
+   However, careful implementation is required to handle the challenges of constrained decoding and dynamic corpora.
