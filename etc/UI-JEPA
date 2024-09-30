@@ -1,0 +1,51 @@
+## From https://medium.com/@ignacio.de.gregorio.noblejas/ui-jepa-the-reason-for-apple-intelligences-delay-4915f319095a
+
+This article explores Apple's AI strategy, particularly the delayed release of Apple Intelligence, a suite of AI features, 
+due to a shift toward a new architecture paradigm called UI-JEPA. 
+This new approach is more efficient, cheaper, and capable of running AI models directly on iPhones, 
+in contrast to the state-of-the-art models that typically rely on cloud servers due to their size and computational needs.
+
+1. The Challenge with Generative AI Models
+   Generative AI models, like those used in ChatGPT, require immense amounts of data and parameters to function, 
+   often exceeding what an iPhone can store or process locally. 
+   These models are usually stored and processed in the cloud, leading to latency issues and privacy concerns, which conflict with Apple's privacy-first approach. 
+   To address this, Apple initially attempted to train smaller models (around 3 billion parameters), 
+   but these proved insufficient in providing high-quality AI experiences.
+
+2. Apple's New Approach: UI-JEPA
+   Apple's breakthrough is the UI-JEPA (Joint-Embedding Predictive Architecture), which dramatically improves efficiency. 
+   This architecture avoids generating unnecessary details and instead focuses on the essential representations of concepts. 
+   Unlike traditional models that predict every detail (like generating every feature of an object), JEPA only predicts what is necessary,
+   such as the defining features of an object or concept. This leads to faster, smaller, and more efficient models that can run entirely on iPhones, 
+   addressing both performance and privacy concerns.
+
+3. How JEPA Works
+   JEPA learns by predicting the necessary features of concepts within its latent space, or embedding space, where similar concepts are grouped. 
+   For instance, when given partial data (such as a masked part of an image or video), JEPA predicts only the crucial elements needed to complete the picture, 
+   focusing on what truly defines the concept, rather than generating unnecessary details.
+
+   This process is illustrated through Apple's UI-JEPA, which understands user interactions on iPhones. 
+   The model can watch a user set a timer, for example, and deduce their intent (e.g., “The user is setting a timer using the Clock app”). 
+   It achieves this with only 4.4 billion parameters, far smaller and more efficient than comparable models like Claude 3.5 Sonnet or GPT-4 Turbo.
+
+4. Key Differences from Generative AI
+   Generative AI models predict future outcomes by generating everything, whether necessary or not. 
+   For example, if an LLM predicts an object in a video frame, it generates every minor detail of the object, which makes the model data- and computation-intensive. 
+   JEPAs, on the other hand, focus on predicting just the essential details. This allows them to be smaller and faster while still delivering comparable results.
+
+5. Implications for Apple and AI Strategy
+   This shift to JEPAs could make Apple less dependent on external AI providers like OpenAI and solve the privacy and latency challenges
+   that come with using cloud-based AI. 
+   UI-JEPA offers a glimpse into Apple's long-term AI strategy: build models that fit the iPhone's storage and compute capabilities while preserving privacy. 
+   This approach aligns with Apple's broader focus on user privacy and seamless device performance.
+
+6. Market Impact
+   The development of JEPAs represents a significant technological breakthrough, particularly in constrained computing environments like smartphones. 
+   While markets currently focus on scaling existing AI technologies (like large LLMs), 
+   this article argues that JEPAs could disrupt this trend by offering a more sustainable and efficient way to build AI models. 
+   These models could become a staple for AI progress, especially as energy, chip, and computational constraints limit the scalability of larger models.
+
+7. Conclusion
+   Apple's UI-JEPA marks a potential shift away from the current generative AI paradigm. By focusing on more efficient,
+   smaller models that prioritize essential representations over unnecessary details, Apple may lead a new wave of AI development,
+   particularly in mobile and privacy-centric applications.
