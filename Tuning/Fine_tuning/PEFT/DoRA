@@ -1,0 +1,32 @@
+From https://chat.openai.com/c/bea525d2-853a-4276-bd9c-e73fad4bb981 
+
+LoRA, or Low Rank Adaptation, is a technique introduced to address challenges in fine-tuning large language models (LLMs). 
+When fine-tuning LLMs for specific tasks, it's impractical to train the entire model due to the vast number of parameters. 
+To overcome this, adaptation involves adding an adapter module alongside the original model's weights 
+and training only the adapter module during fine-tuning, leaving the original model frozen.
+
+However, traditional adaptation methods result in additional weights during inference, 
+leading to increased latency. LoRA resolves this by transforming the adapter module into two low-rank matrices, 
+denoted as A and B. Matrix A, initialized with random Gaussian values, and matrix B, initially zeros, are updated during back-propagation.
+
+During fine-tuning, the equation y = W0x + AB is used, where W0 represents the frozen weights,
+A and B are the low-rank matrices, and x is the input. Only the BA layers are fine-tuned, keeping W0 frozen.
+As a result, fewer gradients need to be stored and updated.
+
+LoRA ensures that the number of parameters remains the same as the original model, 
+preventing additional inference latency. Reverting to the original model involves subtracting AB from the fine-tuned model weights.
+
+The method suggests that, with increasing rank (r), the resulting weights become similar to those obtained through traditional fine-tuning.
+However, DoRA (Directional Rank Adaptation) further refines this approach by decomposing the pretrained weights into magnitude and direction components, 
+fine-tuning them separately, and applying LoRA exclusively to the direction matrix. 
+This results in stabilization of the optimization process and comparable performance to traditional fine-tuning methods.
+
+Takeaways
+1. LoRA is a method to fine-tune your LLM without needing to train all of the weight parameters. 
+   It utilizes two low-rank matrices to achieve this without adding extra inference latency.
+2. When decomposing weights into magnitude and direction, we notice that LoRA’s weight updates do not match the updates 
+   from full fine-tuning due to coupling between the magnitude and directions.
+3. DoRA proposes to separate the magnitude and direction, apply weight normalization, and use the LoRA technique on the direction matrix. 
+   This results in similar updates to the full fine-tuning version.
+4. DoRA outperforms LoRA in common sense reasoning and also in understanding image/video-to-text. 
+   It is also robust to changes in rank; in fact, we observe the biggest increase in performance when the rank is low.
