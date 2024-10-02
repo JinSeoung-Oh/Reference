@@ -1,0 +1,47 @@
+## From https://towardsdatascience.com/visionts-building-superior-forecasting-models-from-images-cb06257c7ef9
+
+The main challenge in building a pretrained time-series model is finding high-quality, diverse time-series data. 
+This remains a core issue in scaling models for time-series forecasting.
+
+1. Two Approaches to Building Time-Series Models:
+   -1. Bootstrapping an LLM
+       This method repurposes large language models like GPT-4 or Llama by applying fine-tuning or tokenization techniques specific to time-series tasks.
+       While effective in some cases, this approach doesn't always yield the best results.
+   -2. From Scratch
+       Involves building large-scale time-series datasets and pretraining models from scratch. 
+       This has been more successful, as seen in models like MOIRAI, TimesFM, and TTM, but depends heavily on access to extensive time-series data,
+       thus looping back to the challenge of data availability.
+
+2. Exploring a New Modality: Using Images for Time-Series
+   Interestingly, images are a promising modality for time-series forecasting
+
+   -1. Sequential Information
+       Images, as 2D arrays of pixels, encode trends, seasonality, and stationarity, which are key features in time-series data.
+   -2. Pretrained Vision Models
+       Pretrained computer vision models, such as Vision Transformers (ViTs), can be repurposed for time-series forecasting 
+       by converting time-series data into patchified images.
+
+3. VisionTS: A Pretrained Vision Transformer for Time-Series
+   VisionTS adapts the Masked Autoencoder (MAE), a pretrained Vision Transformer, 
+   for time-series forecasting by converting time-series data into images, applying MAE, and converting the output back into a forecast.
+
+   -1. Key Steps in VisionTS
+       - Convert Time-Series to Images: Time-series data is segmented into patches, forming a 2D matrix (grayscale image).
+       - Apply MAE: The image is fed into the MAE, where some patches are masked and the model attempts to reconstruct the missing parts.
+       - Forecasting: After reconstruction, the output is converted back into a time-series sequence.
+
+   -2. Benchmarking VisionTS
+       VisionTS was tested in various scenarios
+       - Monash Benchmark: Compared against other time-series models, VisionTS ranked second as a zero-shot forecaster, indicating strong potential.
+       - Long Horizon Benchmark: VisionTS outperformed traditional DL/ML models in long-term forecasting and showed further improvements with light fine-tuning.
+       - Impact of Context Length: Longer context lengths improved performance, particularly for high-frequency datasets.
+       - Parameter Size Impact: Interestingly, the Base model (122M parameters) outperformed larger models, which overfitted to image-specific features.
+
+4. Comparison with Statistical Models
+   VisionTS outperformed traditional statistical models, demonstrating its effectiveness, 
+   but the inclusion of more advanced statistical baselines could have provided further insights.
+
+5. Conclusion
+   VisionTS offers a novel and efficient approach to time-series forecasting by leveraging pretrained vision models.
+   It shows strong performance in zero-shot forecasting and even greater potential with minimal fine-tuning, 
+   addressing the challenges of time-series modeling while exploring the utility of images as a complementary modality.
