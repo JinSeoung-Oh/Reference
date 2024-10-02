@@ -1,0 +1,27 @@
+## From https://huggingface.co/papers/2310.11454
+
+The text introduces Vector-based Random Matrix Adaptation (VeRA),
+a novel approach to reduce the number of trainable parameters when fine-tuning large language models, 
+addressing the storage challenges that arise with scaling models or deploying multiple user-specific or task-specific adaptations.
+
+1. Key Features of VeRA:
+   - Parameter Efficiency
+     VeRA reduces the number of trainable parameters by 10x compared to Low-rank Adaptation (LoRA), 
+     which is already a popular method for reducing trainable parameters in large language models.
+   - Methodology
+     Instead of using separate low-rank matrices for each layer, VeRA employs a "single pair of low-rank matrices" shared across all layers, 
+     and then learns small scaling vectors for each layer. 
+     This dramatically reduces the total number of trainable parameters while still allowing effective model adaptation.
+
+2. Performance:
+   - Benchmarks
+     VeRA demonstrates strong performance on standard benchmarks like GLUE and E2E, 
+     showing that the reduction in trainable parameters does not come at the cost of performance.
+
+   - Instruction-following
+     VeRA can be effectively applied in instruction-following tasks, achieving similar performance to LoRA
+     while using only 1.4M trainable parameters when fine-tuning the Llama2 7B model.
+
+In summary, VeRA offers a significant reduction in trainable parameters, achieving similar performance to LoRA while being far more storage-efficient, 
+making it ideal for scaling and deploying large models in resource-constrained environments.
+  
