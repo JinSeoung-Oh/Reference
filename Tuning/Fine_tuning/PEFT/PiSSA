@@ -1,0 +1,32 @@
+## From https://huggingface.co/papers/2404.02948
+
+As large language models (LLMs) grow in size, the cost of fine-tuning the entire model becomes increasingly prohibitive. 
+To tackle this issue, the text introduces a Parameter-Efficient Fine-Tuning (PEFT) method 
+called Principal Singular values and Singular vectors Adaptation (PiSSA). 
+PiSSA optimizes a smaller subset of parameters while maintaining or exceeding the performance of full-model fine-tuning.
+
+1. Key Concepts
+   - PiSSA is inspired by Intrinsic SAID, which suggests that pre-trained, over-parametrized models reside in a space of low intrinsic dimension. 
+     This allows the model to be effectively fine-tuned by focusing on the most essential components.
+
+   - PiSSA's Methodology: It represents a weight matrix 𝑊 as the product of two trainable matrices 𝐴 and 𝐵, plus a residual matrix 
+     𝑊^(𝑟𝑒𝑠) for error correction. The weight matrix 𝑊 is factorized using Singular Value Decomposition (SVD), 
+     where the principal singular values and vectors are used to initialize 𝐴 and 𝐵. The residual singular values and vectors initialize 
+     𝑊^(𝑟𝑒𝑠), which remains frozen during fine-tuning.
+
+2. Comparison to LoRA
+   - LoRA (Low-Rank Adaptation) also uses two matrices, 𝐴 and 𝐵, but initializes them differently—𝐴 with Gaussian noise and 𝐵 with zeros, 
+     while keeping the original matrix frozen. LoRA approximates the weight changes (Δ𝑊) through the product of these matrices.
+
+   - PiSSA's advantage lies in initializing 𝐴 and 𝐵 with principal components from the original matrix 𝑊, 
+     which allows it to focus on the most impactful parts of the model, while freezing the "noisy" components. 
+     This allows faster convergence and better performance than LoRA, which updates "noise" from the beginning.
+
+3. Benefits of PiSSA:
+   - Same Architecture as LoRA
+     PiSSA inherits LoRA’s advantages, including parameter efficiency and compatibility with quantization.
+   - Fast Initialization
+     By using a fast SVD method, PiSSA’s initialization takes only a few seconds, making the transition from LoRA to PiSSA seamless and
+     with minimal computational cost.
+
+In summary, PiSSA offers a more efficient and faster fine-tuning approach by leveraging principal singular values and vectors to focus on the critical parts of the model, leading to faster convergence and better overall performance than LoRA while maintaining a similar architecture.
