@@ -1,4 +1,5 @@
 From https://chat.openai.com/c/bea525d2-853a-4276-bd9c-e73fad4bb981 
+https://arxiv.org/abs/2402.09353
 
 LoRA, or Low Rank Adaptation, is a technique introduced to address challenges in fine-tuning large language models (LLMs). 
 When fine-tuning LLMs for specific tasks, it's impractical to train the entire model due to the vast number of parameters. 
@@ -17,7 +18,8 @@ LoRA ensures that the number of parameters remains the same as the original mode
 preventing additional inference latency. Reverting to the original model involves subtracting AB from the fine-tuned model weights.
 
 The method suggests that, with increasing rank (r), the resulting weights become similar to those obtained through traditional fine-tuning.
-However, DoRA (Directional Rank Adaptation) further refines this approach by decomposing the pretrained weights into magnitude and direction components, 
+However, DoRA (Weight-Decomposed Low-Rank Adaptation) further refines this approach by decomposing the pretrained weights 
+into magnitude and direction components, 
 fine-tuning them separately, and applying LoRA exclusively to the direction matrix. 
 This results in stabilization of the optimization process and comparable performance to traditional fine-tuning methods.
 
