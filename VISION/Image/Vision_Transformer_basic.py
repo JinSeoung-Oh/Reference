@@ -1,4 +1,5 @@
 ## From https://towardsdatascience.com/paper-walkthrough-vision-transformer-vit-c5dcf76f1a7a
+## https://towardsdatascience.com/the-ultimate-guide-to-vision-transformers-0a6df32cb248
 
 """
 The Vision Transformer (ViT) represents a significant advancement in computer vision, traditionally dominated by CNNs. 
@@ -22,6 +23,38 @@ These models, including pre-trained versions, have proven to outperform traditio
 - CNNs: Focus on local feature extraction through hierarchical layers of convolutions.
 - Transformers: Focus on global relationships using self-attention, where each token (like a patch) attends to every other token to capture the context.
 Transformers also use Convolution(like, Conv2d) - Some people said "we free from CNN", but I think it is wrong. We still use CNN for data analyze like feature extraction
+"""
+
+"""
+1. History of ViT:
+   The Vision Transformer was introduced by Google Brain in 2021 with the paper "An Image is Worth 16x16 Words."
+   It was inspired by the success of Transformers in NLP, first introduced in "Attention is All You Need" in 2017.
+   The primary challenge addressed was how to adapt the attention mechanism to images, given that, unlike words, images don’t have a natural tokenization.
+
+2. ViT Architecture:
+   Images are divided into patches (e.g., 16x16 pixels), and each patch is treated as a token.  
+   A Transformer encoder processes these tokens. However, to classify an image, a special token, known as the CLS token, is introduced. 
+   This token is meant to represent the entire image. 
+   Positional encoding is used to provide spatial awareness to the tokens, ensuring the model knows the position of each patch.
+
+3. Fine-Tuning at Higher Resolutions:
+   Fine-tuning refers to adjusting a pre-trained model for a specific task.
+   In the context of Vision Transformers, fine-tuning at a higher resolution means increasing the image resolution while keeping the patch size fixed.
+   This increases the number of patches, and positional embeddings are extended via interpolation to accommodate the new token sequence length.
+
+4. Scaling Laws of ViT:
+   Vision Transformers excel with larger datasets, but they are more data-hungry compared to CNNs. 
+   For small datasets, CNNs tend to perform better due to their built-in inductive biases (like spatial locality and translation invariance).
+   As dataset size increases, ViTs begin to outperform CNNs.
+
+5. What Did the Model Learn?:
+   ViTs learn embedding filters that resemble those learned by CNNs, despite not using convolutions.
+   Positional embeddings show grid-like structures, with the model learning spatial positions on its own.
+   The attention mechanism starts by focusing on nearby tokens in early layers and evolves to capture more global relationships in later layers,
+   allowing the model to reason over the entire image.
+
+Overall, Vision Transformers bring the benefits of attention-based mechanisms to computer vision, allowing for scalable, 
+high-performance models, especially in cases where there is a large amount of data.
 """
 
 import torch
