@@ -1,0 +1,46 @@
+## From https://arxiv.org/abs/2405.17484
+## https://github.com/DaShenZi721/HRA
+
+This text introduces a new fine-tuning method called Householder Reflection Adaptation (HRA), 
+which aims to unify low-rank and orthogonal adaptation techniques for efficiently adapting large-scale pre-trained models
+to specific tasks using a minimal number of trainable parameters.
+
+1. Key Concepts:
+   - Low-Rank and Orthogonal Adaptation
+     Both low-rank adaptation (e.g., LoRA) and orthogonal adaptation (e.g., OFT) are efficient techniques that fine-tune large pre-trained models 
+     using only a small set of trainable parameters. 
+     These techniques follow different technical routes but share the same goal of adapting models to downstream tasks with minimal computational overhead.
+
+   - Householder Reflections (HRs)
+     The proposed method uses Householder reflections, which are a type of orthogonal transformation, to fine-tune models. 
+     The method works by multiplying each frozen weight matrix of the pre-trained model by an orthogonal matrix that is 
+     constructed from a chain of learnable Householder reflections. This makes the adaptation efficient 
+     while maintaining the model's orthogonality properties.
+
+   - HR-Based Orthogonal Fine-Tuning
+     The use of Householder reflections in this fine-tuning method is equivalent to a form of adaptive low-rank adaptation, 
+     combining the benefits of both low-rank and orthogonal techniques. 
+     The orthogonality of the reflection planes defined by the HRs influences the model's capacity and regularization.
+
+   - Regularizing Orthogonality
+     The analysis suggests that regularizing the orthogonality of the reflection planes can enhance the model's performance. 
+     The proposed HRA method includes different implementations that control this orthogonality to achieve better results.
+
+2. Performance:
+   - Fewer Learnable Parameters
+     HRA requires fewer learnable parameters than other state-of-the-art adaptation techniques.
+   - Superior Performance
+     HRA delivers superior performance when adapting large language models and conditional image generators compared to other fine-tuning methods.
+
+3. Conclusion:
+   Householder Reflection Adaptation (HRA) bridges the gap between low-rank and orthogonal fine-tuning techniques
+   by leveraging learnable Householder reflections. It provides a parameter-efficient way to fine-tune large models,
+   achieving high performance with fewer trainable parameters. The regularization of reflection orthogonality
+   further improves its effectiveness in both language and image generation tasks.
+
+
+
+
+
+
+
