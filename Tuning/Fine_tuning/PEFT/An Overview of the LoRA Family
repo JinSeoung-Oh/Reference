@@ -1,0 +1,115 @@
+From https://towardsdatascience.com/an-overview-of-the-lora-family-515d81134725
+
+## Overview
+1. LoRA introduces low-rank matrices A and B that are trained, while the pre-trained weight matrix W is frozen.
+2. LoRA+ suggests having a much higher learning rate for B than for A.
+3. VeRA does not train A and B, but initializes them randomly and trains new vectors d and b on top.
+4. LoRA-FA only trains matrix B.
+5. LoRA-drop uses the output of B*A to determine, which layers are worth to be trained at all.
+6. AdaLoRA adapts the ranks of A and B in different layers dynamically, allowing for a higher rank in these layers, where more contribution to the model’s performance is expected.
+7. DoRA splits the LoRA adapter into two components of magnitude and direction and allows to train them more independently.
+8. Delta-LoRA changes the weights of W by the gradient of A*B.
+9. QLoRA (Quantized Low Rank Adapters) is an efficient fine-tuning approach that significantly reduces memory usage, enabling fine-tuning of a model
+
+## LoRA
+Low-Rank Adaption (LoRA) is a widely utilized technique for training large language models (LLMs). 
+LLMs possess the ability to predict natural language tokens from input, 
+but often require further training for specific tasks like sentence classification or question answering. 
+Traditional fine-tuning involves training numerous parameters, whereas LoRA offers a more efficient approach. 
+It introduces smaller matrices A and B, termed adapters, alongside pre-trained LLM weights.
+These matrices, with dimensions d x r and r x d (where r is typically below 100), are used to modify the output of the original matrix W. 
+By training parameters in A and B, LoRA allows for influencing the model's behavior without modifying W, hence referred to as "frozen."
+LoRA's main advantage lies in training fewer parameters compared to fine-tuning while maintaining comparable performance. 
+It is often initialized with random values for A (mean zero with variance) and zeros for B to prevent random alteration of W's output
+
+## LoRA+
+LoRA+ enhances LoRA by introducing different learning rates for matrices A and B, the adapters used in LoRA. 
+Unlike traditional neural network training where a single learning rate is applied uniformly across all weight matrices, 
+LoRA+ demonstrates the inefficiency of this approach for adapter matrices. 
+The authors advocate for setting a higher learning rate for matrix B compared to matrix A, leading to more efficient training.
+The justification for this lies in the theoretical argument, which is rooted in numerical considerations of neural network initialization, 
+particularly when the model's width (number of neurons) increases significantly. 
+While the mathematical proof of this argument is complex, the intuition suggests that matrix B, initialized with zeros, 
+can benefit from larger update steps than randomly initialized matrix A.
+Empirical evidence supports this approach, showing a small improvement in model accuracy (around 2%) and a twofold speedup in training time 
+for models like RoBERTa or Llama-7b, achieved by setting the learning rate of matrix B 16 times higher than that of matrix A.
+
+## VeRA
+VeRA (Vector-based Random Matrix Adaptation) [3] introduces an innovative approach to significantly reduce the parameter size of LoRA adapters. 
+Instead of training matrices A and B individually, as in traditional LoRA, 
+VeRA initializes these matrices with shared random weights across all layers and adds two new vectors, d and b, which are the only parameters trained thereafter.
+The effectiveness of this approach may seem puzzling at first glance, as the matrices A and B remain untrained. 
+However, it leverages research on random projections, indicating that in large neural networks, 
+only a small fraction of weights significantly impact model behavior. 
+With VeRA, instead of training entire sub-networks, projection vectors are added after the matrices. 
+These vectors, d and b, are trained while matrices A and B remain frozen. Unlike the original LoRA, matrix B is not set to zero but initialized randomly similar to matrix A.
+VeRA drastically reduces the number of parameters compared to full matrices A and B.
+For instance, introducing LoRA layers of rank 16 to GPT-3 yields 75.5M parameters, whereas VeRA reduces this to 2.8M (a 97% reduction). 
+Despite the reduced parameter count, VeRA's performance is only marginally lower than fully fine-tuned models or those employing the original LoRA technique, 
+as demonstrated through evaluations on common benchmarks such as GLUE or E2E with models based on RoBERTa and GPT2 Medium.
+
+## LoRA-FA 
+LoRA-FA, or LoRA with Frozen-A, follows a similar approach to VeRA in reducing parameter size. 
+In LoRA-FA, matrix A is frozen after initialization, effectively acting as a random projection. Unlike VeRA, LoRA-FA trains matrix B while initializing it with zeros, 
+similar to the original LoRA. This approach halves the number of parameters while maintaining performance comparable to standard LoRA.
+
+## LoRA-drop
+LoRA-drop introduces an algorithm to determine which layers in a neural network should be enhanced by LoRA, 
+optimizing computational efficiency. While training LoRA adapters is cheaper than fine-tuning the entire model, adding more LoRA adapters increases training costs.
+LoRA-drop involves two steps. First, a subset of the data is sampled, and LoRA adapters are trained for a few iterations. 
+The importance of each LoRA adapter is then calculated as the output of the adapters (BAx), 
+where A and B are the LoRA matrices and x is the input. High output indicates significant influence on the frozen layer's behavior,
+while low output suggests minimal influence, making the adapter dispensable.
+Based on importance, the most crucial LoRA layers are selected. 
+This can be done by summing importance values until a threshold is reached or by selecting the top n layers with the highest importance.
+Subsequently, full training is conducted on the entire dataset, focusing only on the selected layers. Other layers maintain a fixed set of parameters.
+LoRA-drop enables training a model with a subset of LoRA layers, resulting in marginal accuracy changes compared to training 
+all LoRA layers but with reduced computation time due to fewer parameters needing training.
+
+## AdaLoRA
+AdaLoRA, or Adaptive LoRa, introduces adaptiveness in the rank (i.e., the size) of LoRA matrices to determine their importance across different layers of a neural network. 
+The main challenge addressed is similar to previous methods: determining whether adding LoRA matrices to each layer is beneficial or not,
+as some layers may benefit more from LoRA training than others. AdaLoRA proposes considering the singular values of LoRA matrices as indicators of their importance.
+In essence, matrix multiplication can be viewed as applying a function to a vector in neural networks. 
+AdaLoRA aims to minimize changes in function behavior while reducing matrix parameters. 
+It achieves this by computing the singular values (square roots of eigenvalues) of matrices, which indicate the variance captured by each row. 
+Rows with minimal variance, and thus less contribution, may be set to zero, effectively reducing the rank of the matrices. 
+Unlike LoRA-drop, AdaLoRA can vary the rank of different matrices, allowing adaptors for some layers to have lower ranks while others have higher ranks.
+AdaLoRA decomposes weight matrices using singular value decomposition to efficiently obtain singular values. 
+Additionally, it considers the sensitivity of loss to parameters when deciding where to reduce rank. 
+Parameters with high sensitivity significantly influence loss when set to zero. 
+Empirical evidence suggests that AdaLoRA outperforms standard LoRA approaches in scenarios 
+where the same number of parameters are distributed differently across layers. 
+AdaLoRA's adaptive distribution of trainable parameters improves model performance by focusing resources on layers crucial for the task at hand.
+
+## DoRA
+Weight-Decomposed Low-Rank Adaption (DoRA) introduces a novel perspective by decomposing matrices into magnitude and direction components, 
+akin to breaking down vectors into their length and angle.
+This decomposition extends to higher-order matrices and is applied to weight matrices describing updates within model training steps.
+A comparison between models trained via normal fine-tuning and those employing LoRA adapters reveals a crucial distinction in 
+the relationship between changes in magnitude and direction. Fine-tuning typically exhibits a small negative correlation between these changes, 
+whereas LoRA-trained models show a stronger positive relationship. Ideally, LoRA's training should mirror fine-tuning to achieve comparable performance with fewer parameters.
+DoRA addresses this discrepancy by independently training magnitude and direction. 
+The pretrained matrix W is split into a magnitude vector (m) and a direction matrix (V).
+While the direction matrix is enhanced by B*A following the standard LoRA approach, 
+the magnitude vector is trained independently due to its single dimensionality. 
+This independence allows DoRA to adjust magnitude and direction separately, akin to the relationship observed in fine-tuning.
+By aligning the training process with the characteristics of fine-tuning, 
+DoRA aims to improve LoRA's performance by ensuring a similar relationship between direction and magnitude changes.
+
+## Delta-LoRA
+Delta-LoRA introduces a novel approach to enhance LoRA by addressing the limitations imposed by the pre-trained matrix W. 
+In LoRA, the aim is to avoid tuning W directly due to computational costs, hence introducing smaller matrices A and B. 
+However, these matrices may lack the capability to effectively learn downstream tasks, leading to lower performance compared to fine-tuning.
+To address this, Delta-LoRA proposes updating W using the gradients of AB, representing the difference between AB in consecutive time steps. 
+This gradient, scaled by a hyperparameter λ, determines the extent of new training's influence on pre-trained weights, and is added to W.
+This update introduces additional trainable parameters with minimal computational overhead, leveraging gradients obtained during LoRA training.
+By comparing this method across various benchmarks using models like RoBERTA and GPT-2, Delta-LoRA demonstrates a performance boost over the standard LoRA approach.
+
+## QLoRA
+QLoRA (Quantized Low Rank Adapters) is an efficient fine-tuning approach that significantly reduces memory usage, 
+enabling fine-tuning of a model with 65 billion parameters on a single 48GB GPU while maintaining the performance of full 16-bit fine-tuning. 
+This is achieved by backpropagating gradients through low-rank adapters (LoRA) using a frozen 4-bit quantized pre-trained language model.
+(a) 4-bit NormalFloat (NF4), a new data type that is information theoretically optimal for normally distributed weights
+(b) Double Quantization to reduce the average memory footprint by quantizing the quantization constants
+(c) Paged Optimizers to manage memory spikes.
