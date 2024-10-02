@@ -1,0 +1,82 @@
+## From https://pub.towardsai.net/teaching-rag-to-remember-how-memorag-enhances-question-answering-through-memory-76ba4e6b946f
+## From https://github.com/qhjqhj00/MemoRAG/tree/3a9501f9cb285dafa5fd4dbd742c401e3946868d
+
+MemoRAG is an advanced retrieval-augmented generation (RAG) system designed to handle complex and ambiguous information
+needs more effectively than traditional RAG systems. 
+It introduces a long-term memory mechanism to recall relevant contextual information, 
+significantly improving its performance on tasks that require implicit understanding or unstructured data retrieval. 
+Here’s an in-depth breakdown of the MemoRAG system based on the provided article:
+
+1. Overview
+   MemoRAG addresses a key limitation of traditional RAG systems, which often struggle with implicit or complex queries. 
+   Traditional RAG models rely heavily on lexical and semantic matching, which may not be sufficient for nuanced or unstructured queries.
+   MemoRAG improves retrieval by constructing a global memory of the entire database and using that memory to guide retrieval and answer generation.
+   This allows MemoRAG to recall contextually relevant clues and generate more precise answers.
+
+2. Key Features:
+   - Memory Module
+     MemoRAG uses a memory module to store relevant information based on the context of the query, 
+     improving its ability to retrieve unstructured and complex information.
+   - Global Memory
+     MemoRAG constructs a memory of the entire database, enabling it to recall clues from the stored context.
+   - Enhanced Retrieval
+     Using its memory, MemoRAG can generate clues and draft answers before retrieving the relevant detailed information, improving accuracy.
+
+3. Detailed Mechanism
+   MemoRAG’s process can be broken down into three main steps:
+
+   - Build and Store:
+     -1. Key-Value Cache Generation
+         MemoRAG uses a memory model to create an encoded key-value (KV) cache from the context (e.g., a large document like Harry Potter). 
+         This cache allows for quick recall of relevant information later.
+     -2. Chunking and Embedding
+         The system divides the original document into chunks and generates embeddings for each. 
+         These embeddings are stored using Faiss, a library designed for efficient similarity search.
+     -3. Storage
+         The generated KV cache, Faiss index, and the document chunks are stored in three files: memory.bin, index.bin, and chunks.json.
+
+   - Retrieve and Generate Responses:
+     -1. Recall Clues
+         When a query is made, MemoRAG uses its memory model to recall relevant clues and potential answers.
+     -2. Rewrite Query
+         The system rewrites the query to generate clues and a draft of the answer, guiding retrieval.
+     -3. Retrieve Chunks
+         The system retrieves relevant chunks from the Faiss index using the clue-based query.
+     -4. Generate Final Response
+         MemoRAG then generates a final response using the retrieved chunks and the memory model.
+
+4. Training the Memory Module
+   The memory module is crucial for MemoRAG’s ability to store and recall large amounts of contextual information. 
+   The training process consists of two key stages:
+
+   - Pre-training with Long Contexts:
+     The memory model is pre-trained on long-context data (e.g., from the RedPajama dataset) to learn how to compress raw input into memory tokens. 
+     This compression enables the model to retain important semantic information while discarding less relevant details.
+
+   - Supervised Fine-tuning (SFT):
+     After pre-training, the memory module undergoes supervised fine-tuning on labeled datasets that contain queries and their corresponding answers. 
+     The goal is to generate task-specific clues to guide information retrieval.
+
+   - Evaluation and Results
+     MemoRAG was evaluated using the ULTRADOMAIN benchmark, which includes tasks from diverse domains like law, finance, and education.
+
+Performance: MemoRAG outperformed traditional RAG models, particularly in handling tasks with long input contexts and ambiguous information needs.
+Domains: In tasks such as legal and financial analysis, MemoRAG demonstrated significantly higher accuracy and precision, confirming its capability to manage both straightforward and complex question-answering tasks.
+
+5. Case Study
+   A case study involving the Harry Potter books illustrates how MemoRAG operates. The process involves:
+
+   -1. Clue Generation: MemoRAG generates clues from its memory.
+   -2. Evidence Retrieval: The system uses these clues to retrieve relevant passages from the database.
+   -3. Answer Generation: MemoRAG then generates answers based on the retrieved information.
+This step-by-step approach showcases MemoRAG’s strength in handling complex queries and retrieving unstructured knowledge.
+
+6. Final Thoughts and Comparison with GraphRAG
+   MemoRAG introduces a novel memory-based mechanism that improves retrieval efficiency and accuracy in complex tasks. 
+   Unlike GraphRAG, which focuses on building relationships between entities across documents,
+   MemoRAG creates a global memory of the database to enhance retrieval. This allows it to address ambiguous queries more effectively.
+
+The key advantage of MemoRAG lies in its ability to recall relevant clues from long-term memory, 
+guiding the retrieval of useful information and leading to more comprehensive answers.
+
+In summary, MemoRAG represents a significant advancement in retrieval-augmented generation by integrating memory systems into the retrieval process, enhancing the handling of complex, unstructured, and ambiguous queries.
