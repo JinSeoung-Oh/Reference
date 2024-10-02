@@ -1,0 +1,77 @@
+## From https://towardsdatascience.com/to-mask-or-not-to-mask-the-effect-of-prompt-tokens-on-instruction-tuning-016f85fd67f4
+
+The text discusses two techniques, prompt-masking and prompt-dampening, in the context of fine-tuning large language models (LLMs)
+and the impact of prompt-loss-weight (PLW) on performance.
+
+1. Prompt-Masking
+   This technique eliminates or zero-masks the influence of prompt tokens during training,
+   ensuring that only the completion tokens contribute to the loss function. 
+   In PyTorch, this can be implemented using the ignore_index=-100 parameter in the CrossEntropyLoss function,
+   which forces the loss function to ignore specific tokens, such as prompt tokens.
+   However, this method is not a full solution for prompt-masking, as it only masks tokens after they are located by another method. 
+   Some implementations explicitly create binary masks for this purpose.
+
+2. Prompt-Dampening
+   This is the alternative of assigning a non-zero weight to prompt tokens, allowing for a reduced influence of the prompt tokens
+   rather than eliminating them entirely. 
+   The text raises the question of why we would want to dampen the effect of prompt tokens rather than completely mask them. 
+   It refers to a recent paper titled "Instruction Fine-Tuning: Does Prompt Loss Matter?", 
+   which argues that a small amount of prompt learning may serve as a regularizer, preventing the model from overfitting on the completion text. 
+   This hypothesis is supported by OpenAI, which once exposed the PLW parameter in its fine-tuning API with a default value of 0.1, 
+   indicating that prompt tokens are weighted 1/10th as much as completion tokens.
+
+3. Generation Ratio (Rg)
+   The paper introduces a metric called the Generation Ratio (Rg), which is the ratio of the completion length to the prompt length. 
+   It divides datasets into two categories: short-completion data (Rg < 1) and long-completion data (Rg > 1). 
+   The paper finds that for datasets with small mean generation ratios (R̅g), such as text summarization and QA tasks, 
+   the choice of PLW significantly affects performance. For instance, datasets like SAMSum and XSum have R̅g values close to zero, 
+   meaning the completion is much shorter than the prompt, and here PLW can degrade or improve performance depending on its value.
+
+4. Analysis of Instruction Datasets
+   The text provides generation ratios for several popular instruction datasets on HuggingFace, ranging from 7.6 for Alpaca (general instruction) 
+   to 0.01 for RACE (QA/multiple choice). For datasets like OpenOrca and others with R̅g > 1, the distribution of generation ratios is highly skewed, 
+   meaning the arithmetic mean may misrepresent the data. In such cases, using the geometric mean might be a better approach to summarize the dataset.
+
+5. Case Study
+   -1. RACE Dataset
+       The RACE dataset, with an R̅g of 0.01, is highlighted as an ideal candidate for studying prompt-masking effects due to 
+       the long prompt and short completion structure. The text suggests that varying the weight of prompt tokens (PLW) in tasks 
+       with such datasets could show noticeable effects on model performance.
+
+6. Cross Entropy Loss (CEL) and Maximum Likelihood Estimation (MLE)
+   The document explains how cross entropy loss works in LLMs by comparing the actual next token to the predicted distribution of tokens.
+   It emphasizes that reducing the prompt-loss-weight allows more focus on completion tokens during training. 
+   The relationship between CEL and MLE is highlighted, showing that minimizing CEL during fine-tuning is equivalent to maximizing
+   the likelihood of the token sequence, which forms the basis of LLM training.
+
+7. Prompt-Loss-Weight (PLW)
+   The text discusses the importance of adjusting PLW during fine-tuning, where prompt tokens can have weights between 0 and 1. At PLW=1, 
+   the model uses the full sequence loss, and at PLW=0, only the completion tokens contribute to the loss. 
+   A key takeaway is that a small but non-zero PLW can act as a regularizer, preventing overfitting and maintaining model performance.
+
+8. Fine-tuning with Different PLWs
+   The document discusses experiments that fine-tune models with varying PLWs, 
+   demonstrating that reducing PLW improves both the convergence speed and model performance. 
+   For instance, when PLW=0, the model converged faster and achieved higher accuracy on the RACE dataset compared to using PLW=1, 
+   where prompt loss dominates the full sequence loss.
+
+9. Validation Metrics
+   It stresses the importance of tracking multiple validation metrics, such as both prompt and completion loss, 
+   to find the optimal stopping point during fine-tuning. 
+   It suggests that minimizing full sequence loss on the validation set could lead to suboptimal performance, 
+   especially in datasets with imbalanced prompt-to-completion ratios like RACE.
+
+10. Conclusion
+    The key findings are that (1) tracking the right validation metrics, such as completion loss, can improve fine-tuning results, 
+    (2) lowering PLW can enhance both model performance and convergence speed, 
+    and (3) the optimal PLW depends on the specific dataset and task, meaning experimentation is essential for finding the best configuration.
+
+The text emphasizes that PLW plays a crucial role in fine-tuning LLMs, particularly in instruction-tuning tasks, 
+where prompt and completion tokens have different roles in the model's learning process. 
+Adjusting PLW carefully can lead to better performance, faster convergence, and more robust models across various datasets.
+
+
+
+
+
+
