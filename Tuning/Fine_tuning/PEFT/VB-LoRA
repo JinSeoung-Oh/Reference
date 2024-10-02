@@ -1,0 +1,43 @@
+## From https://arxiv.org/abs/2405.15179
+
+The text introduces VB-LoRA, a novel approach that enhances the Low-Rank Adaptation (LoRA) method
+by addressing the storage and transmission costs associated with parameter-efficient fine-tuning (PEFT) methods
+for large language models (LLMs). 
+As the demand for per-user or per-task model customization grows, LoRA and its variants can face scalability challenges. 
+VB-LoRA proposes a "divide-and-share" paradigm to further reduce the number of stored parameters while maintaining or improving performance.
+
+1. Key Concepts:
+   - Challenges in PEFT Methods:
+     LoRA and similar methods efficiently fine-tune LLMs with fewer parameters but can still incur substantial storage and transmission costs, 
+     especially when scaling across users or tasks.
+
+   - Divide-and-Share Paradigm:
+     VB-LoRA introduces a divide-and-share approach that shares parameters globally across matrix dimensions, modules, and layers. 
+     This strategy breaks the boundaries of low-rank decomposition and enables further parameter efficiency.
+
+   - Vector Bank and Admixture Module:
+     VB-LoRA leverages a vector bank to share parameters and constructs low-rank matrices from this shared resource. 
+     A differentiable top-k admixture module selects and mixes components from the vector bank, allowing for adaptive fine-tuning across tasks.
+
+2. Performance and Impact:
+   - Extreme Parameter Efficiency:
+     VB-LoRA achieves significant parameter savings, using only 0.4% of LoRA's stored parameters when fine-tuning models like the Llama2-13B.
+     Despite this drastic reduction in parameters, VB-LoRA delivers comparable or superior performance to other state-of-the-art PEFT methods.
+
+   - Wide Applicability:
+     VB-LoRA is shown to be effective across various tasks, including natural language understanding, natural language generation, and instruction tuning.
+
+3. Conclusion:
+   VB-LoRA presents a highly parameter-efficient fine-tuning method by leveraging a global parameter-sharing mechanism through
+   a vector bank and admixture module. This enables substantial reductions in stored parameters 
+   while achieving superior performance, making VB-LoRA an excellent solution for scaling LLM customization across users
+   or tasks with minimal storage costs.
+
+
+
+
+
+
+
+
+
