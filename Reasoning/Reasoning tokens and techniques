@@ -1,0 +1,97 @@
+## From https://medium.com/@don-lim/reasoning-tokens-and-techniques-used-in-system-2-llm-models-such-as-openai-o1-bacbf8fd9bec
+
+1. What is the System 2 Model?
+   The System 2 model refers to a more deliberate and analytical thinking process, a concept introduced by Daniel Kahneman in his 2011 book,
+   Thinking, Fast and Slow. In this book, Kahneman distinguishes between two modes of thinking:
+
+   - System 1: Fast, intuitive, and automatic responses, often driven by immediate perception.
+   - System 2: Slow, deliberate, and effortful thinking, used for more complex, thoughtful decisions.
+               System 2 thinking requires more cognitive resources and time but leads to more accurate, reasoned outcomes. 
+               OpenAI's System 2 models, like the recently launched OpenAI o1-preview and OpenAI o1-mini, 
+               attempt to emulate this human-like reasoning in AI, unlike the previously common System 1 models (e.g., GPT-3, GPT-4), 
+               which generate responses quickly based on patterns learned from vast amounts of text.
+
+2. Key Differentiators: System 1 vs. System 2 AI Models
+   - System 1 AI Models
+     These models respond directly to prompts by generating text based on learned language patterns. 
+     They are fast and intuitive but lack depth in reasoning, making them good for simple tasks but inadequate for more complex, nuanced reasoning.
+   - System 2 AI Models
+     These models break down tasks into smaller, logical steps, analyze scenarios, plan, and solve problems by assessing multiple strategies, 
+     similar to how humans think when faced with difficult tasks. While not true "human reasoning," 
+     this structured approach can solve more complex tasks than System 1 models.
+
+   The OpenAI o1 models are being called "reasoning AI models" due to their enhanced ability to engage in multi-step reasoning and planning,
+   making them more effective at handling unseen, complex tasks.
+
+3. Techniques Enabling System 2 AI: Chain of Thought and Reinforcement Learning
+   - 1. Chain of Thought (CoT)
+        One core technique used in System 2 AI models is Chain of Thought (CoT). CoT allows models to break down a problem into smaller, 
+        sequential reasoning steps rather than giving a direct response. This is similar to how a person would reason
+        through a math problem or a complicated decision.
+
+     For instance, rather than directly answering a complex prompt, the model processes intermediate steps like "First," "Next," 
+     or "Let’s test this theory" to reach a thoughtful conclusion.
+
+   - 2. Reinforcement Learning
+     Reinforcement Learning (RL) plays a crucial role in improving the reasoning process of System 2 models. 
+     Instead of trying all possible solutions to a task, RL helps the model prioritize the most promising paths, 
+     focusing on the steps that yield the best outcomes. It does this through a trial-and-error approach, 
+     where the model learns from feedback and optimizes its reasoning process. This type of learning is ideal for tasks with long-term dependencies, uncertainty, or partial information.
+
+     One specific method highlighted is Process Supervision, where human feedback is used to evaluate and improve 
+     each step of the reasoning chain rather than just the final result. 
+     This approach enhances the model’s ability to reason systematically and adjust when mistakes are made.
+
+4. Reasoning Tokens: A Key Concept in System 2 Models
+   Reasoning Tokens are specialized tokens used to guide the System 2 model through its reasoning process. 
+   These tokens act as internal instructions that tell the model how to approach different parts of a problem. For instance:
+
+   <Analyze_Problem>: Directs the model to analyze the problem before responding.
+   <Generate_Hypothesis>: Instructs the model to propose possible solutions or explanations.
+   <Evaluate_Evidence>: Guides the model to assess the available information or data.
+   These reasoning tokens are not visible to users; they are system-level tokens that help the model plan and execute each reasoning step. 
+   They are removed before the final output is presented to the user, but they still play a significant role in guiding the AI’s thought process.
+
+5. Examples of Reasoning in System 2 Models
+   Consider a complex task, such as setting up Wi-Fi in a stadium. The system may use reasoning tokens like:
+
+   <Analyze_Environment>: Understand the layout and obstacles.
+   <Plan_AP_Locations>: Identify optimal locations for access points.
+   <Simulate_Full_Use>: Test how the network performs under full capacity.
+   The model could break down the process into these steps, allowing it to carefully plan and optimize its approach to solving the problem. 
+   This step-by-step reasoning makes System 2 models more suited for tasks requiring in-depth analysis and planning.
+
+6. Other Techniques in System 2 Models
+   - Decision Gates
+     These are checkpoints in the reasoning process that assess whether the model has gathered enough information to make a decision. 
+     If not, it continues reasoning until it reaches a satisfactory conclusion.
+   - System 2 Attention
+     Similar to attention mechanisms in System 1 models, System 2 attention allows the model to focus more on critical steps in the reasoning process,
+     assigning more weight to key parts of the problem and ensuring that important details are not overlooked.
+
+7. Applications and Benefits of System 2 Models
+   System 2 models, or CoT-enabled LLMs, are particularly powerful for:
+
+   -1. Complex reasoning tasks
+       Handling tasks with multiple steps, dependencies, and uncertainties.
+   -2. Long-term planning
+       Useful for tasks that require extensive foresight and planning, such as project management, engineering tasks, and research.
+   -3. Error analysis and decision-making
+       These models are designed to evaluate multiple hypotheses and choose the best one based on a structured reasoning process.
+   
+   For example, a System 2 model could significantly outperform System 1 models in tasks like:
+   -1. Math problem-solving
+       System 2 models can follow multi-step processes to reach accurate solutions.
+   -2. Text deciphering
+       The model could analyze, compare, and cross-reference corrupted or ancient texts, 
+       using reasoning tokens to evaluate different hypotheses about the text’s meaning.
+
+8. Conclusion
+   OpenAI’s System 2 models represent a major leap in AI’s ability to reason through complex tasks. 
+   By breaking down problems, planning multiple steps, and using tools like reasoning tokens and reinforcement learning, 
+   these models emulate human-like reasoning, making them powerful tools for new and difficult problems.
+
+The OpenAI o1-preview and o1-mini models are the first of their kind to commercialize this reasoning-based approach,
+paving the way for more sophisticated applications in fields like engineering, science, and decision-making. 
+As System 2 models evolve, we can expect AI to take on more complex, nuanced tasks, 
+approaching levels of problem-solving previously reserved for human experts.
