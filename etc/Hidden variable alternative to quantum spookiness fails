@@ -1,0 +1,87 @@
+## From https://medium.com/starts-with-a-bang/hidden-variable-alternative-to-quantum-spookiness-fails-2f5fdcc8b38d
+
+
+For much of human history, the assumption was that the Universe operates under deterministic laws, 
+meaning that if you have enough information about a system, you can precisely predict how it will evolve. 
+This notion, rooted in classical physics, is seen in Newton’s laws, Einstein’s theory of relativity, and Maxwell’s equations.
+However, in the late 19th and early 20th centuries, discoveries in quantum mechanics revealed a fundamentally different reality, 
+one where uncertainty and probability govern the outcomes of many processes.
+
+1. The Shift from Determinism to Quantum Uncertainty
+   The first cracks in the deterministic worldview came with the discovery of radioactivity,
+   where the decay of atomic nuclei could not be predicted precisely for individual atoms. 
+   You could determine the statistical probability of decay over time but not predict exactly which atoms would decay and when. 
+   Similarly, experiments like the double-slit experiment showed that individual particles behave probabilistically. 
+   When particles are fired through two slits one at a time, you cannot predict precisely where any single particle will land; 
+   only a statistical pattern of interference emerges after many particles pass through.
+
+   These and other quantum phenomena, such as the behavior of particles in magnetic fields (demonstrating the randomness of spin states), 
+   could only be described statistically. This was a radical departure from the classical idea of precise, predictable outcomes.
+
+2. Quantum Mechanics and the Role of the Observer
+   The new framework for understanding the Universe became known as quantum mechanics. 
+   In this theory, particles are described by wavefunctions, which represent probabilities of different outcomes. 
+   A key feature of this framework is that particles don’t have definite properties, like position or momentum, 
+   until they are measured. Until a measurement occurs, the system exists in a superposition of possible states.
+   Upon measurement, the wavefunction “collapses” into a single outcome.
+
+   This idea forms the core of the Copenhagen Interpretation of quantum mechanics, which emphasizes the probabilistic nature of quantum systems 
+   and the importance of observation in determining outcomes. 
+   This interpretation clashed with the classical view, 
+   which assumed that particles have definite properties regardless of whether they are being observed.
+
+3. The Determinism Debate and Hidden Variable Theories
+   Albert Einstein famously resisted the idea that the Universe is fundamentally probabilistic, 
+   arguing instead that there must be hidden variables—undetected properties that could explain the apparent randomness in quantum mechanics.
+   His discomfort with quantum uncertainty was famously expressed in his remark, "God does not play dice with the Universe."
+   One of the key hidden variable theories was proposed by Louis de Broglie and later expanded by David Bohm. De Broglie’s theory, 
+   known as the pilot wave theory, suggested that particles always have definite positions and are guided by “pilot waves,”
+   which determine their motion. Bohm refined this into what is now known as Bohmian mechanics or the de Broglie-Bohm theory,
+   where particles are guided deterministically by these waves, avoiding the need for randomness.
+   This deterministic interpretation of quantum mechanics provided a counterpoint to the Copenhagen Interpretation. 
+   However, it came at the cost of introducing non-locality, meaning that particles could be instantaneously influenced by distant events, 
+   something that clashed with Einstein’s theory of relativity.
+
+4. The Failure of Bohmian Mechanics and Pilot Wave Theory
+   For decades, Bohmian mechanics stood as a serious alternative to the Copenhagen Interpretation.
+   However, it faced significant challenges. The theory could not explain the results of all quantum experiments, 
+   particularly those involving quantum entanglement and non-locality.
+   In the 1960s, John Bell proposed a test, now known as Bell’s Theorem, 
+   to determine whether any hidden variable theory (like Bohmian mechanics) could reproduce all the predictions of quantum mechanics. 
+   His theorem showed that no local hidden variable theory could replicate the experimental results of quantum mechanics.
+   Experiments testing Bell’s Theorem, conducted in the 1980s and beyond, consistently supported the predictions of quantum mechanics, 
+   ruling out local hidden variable theories. This was a significant blow to deterministic interpretations like Bohmian mechanics. 
+   While some proponents continued to develop non-local versions of hidden variable theories,
+   these required even more complex assumptions and could not avoid quantum “spookiness” (the seemingly instant connection between entangled particles).
+
+5. The Death of Classical Determinism in Quantum Mechanics
+   Further experiments continued to reveal the limitations of hidden variable theories.
+   Notably, in 2006, a set of experiments by Yves Couder and Emmanuel Fort used bouncing oil droplets to simulate quantum behavior.
+   These experiments initially seemed to support pilot wave theory, showing wave-particle duality in a classical system.
+   However, subsequent attempts to replicate the results under more stringent conditions showed that the analogy failed to 
+   match quantum mechanical predictions, particularly in cases involving the double-slit experiment and measurements of which slit a particle passed through.
+   By 2015, these attempts to validate Bohmian mechanics and pilot wave theories had been thoroughly refuted. 
+   Quantum mechanics, with its inherent uncertainty and probabilistic nature, remained the best description of the microscopic world. 
+   Attempts to remove the “spooky” aspects of quantum mechanics—like entanglement and wavefunction collapse—could not match experimental results.
+
+6. Quantum Spookiness and the Copenhagen Interpretation Prevail
+   As much as physicists, including Einstein, hoped to avoid the spooky, non-deterministic nature of quantum mechanics, 
+   no alternative theory has been able to replace the Copenhagen Interpretation. 
+   The entanglement experiments that earned the Nobel Prize in 2022 further solidified this, showing that no hidden variable theory,
+   whether deterministic or not, could explain the quantum world without allowing for non-locality and indeterminacy.
+
+   The conclusion from these decades of research and experimentation is clear
+   - the Universe, at its most fundamental level, does not operate in a deterministic fashion. 
+     Instead, it is governed by probabilities, where outcomes can only be predicted statistically, 
+     and the act of measurement plays a crucial role in determining what actually happens.
+
+7. Conclusion: Embracing Quantum Indeterminacy
+   The deterministic picture of the Universe, which held sway for centuries, has been overturned by the discoveries of quantum mechanics. 
+   The experiments testing hidden variable theories, such as Bohmian mechanics, 
+   have consistently shown that the Universe does not adhere to deterministic laws at the quantum level. 
+   Quantum mechanics, with its inherent uncertainty and probabilistic nature, 
+   accurately describes the behavior of particles and systems on the smallest scales.
+
+As much as some physicists hoped for a deterministic theory that could explain quantum phenomena, 
+the evidence overwhelmingly supports the conclusion that the Universe is fundamentally unpredictable in certain respects.
+This realization, while unsettling to many, has reshaped our understanding of reality and remains one of the most profound insights of modern physics.
