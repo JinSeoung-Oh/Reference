@@ -1,0 +1,36 @@
+## From https://arxiv.org/abs/2406.01775
+
+The text introduces OLoRA, a new enhancement to the Low-Rank Adaptation (LoRA) method, 
+aimed at improving the efficiency of fine-tuning large language models (LLMs).
+LoRA already reduces the number of trainable parameters and computational resources, 
+but OLoRA further improves upon it by incorporating orthonormal matrix initialization through QR decomposition. Here's a breakdown:
+
+1. Key Concepts:
+   - Challenge in Fine-Tuning LLMs:
+     Fine-tuning LLMs is computationally expensive and time-consuming, with significant challenges in terms of convergence times and resource demands.
+
+   - LoRA's Role:
+     LoRA addresses these issues by introducing an efficient fine-tuning method that reduces the number of trainable parameters, 
+     thereby lowering computational costs and reducing the memory footprint during training.
+
+   - OLoRA's Enhancement:
+     OLoRA enhances LoRA by using orthonormal matrix initialization via QR decomposition. 
+     This helps to further accelerate convergence during fine-tuning while maintaining the efficiency benefits of LoRA, 
+     such as a small number of trainable parameters and reduced GPU memory usage.
+
+2. Performance and Impact:
+   -1. Faster Convergence
+       OLoRA speeds up the training process of LLMs by allowing the model to converge more quickly than standard LoRA,
+       making it more computationally efficient.
+   -2. Improved Performance
+       Empirical evaluations show that OLoRA not only converges faster but also improves performance across
+       a variety of language modeling tasks compared to standard LoRA.
+   -3. Accessibility
+       OLoRA’s advancements make LLM fine-tuning more efficient and accessible, potentially encouraging broader adoption
+       in natural language processing tasks and fostering innovation.
+
+3. Conclusion:
+   OLoRA introduces an innovative enhancement to LoRA by incorporating orthonormal matrix initialization, 
+   which significantly accelerates convergence and improves performance in LLM fine-tuning. 
+   This advancement helps reduce computational costs and facilitates more efficient and widespread fine-tuning
+   of large language models for various natural language applications.
