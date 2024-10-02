@@ -1,0 +1,35 @@
+## From https://huggingface.co/papers/2311.06243
+
+The text introduces a new fine-tuning method called Orthogonal Butterfly (BOFT),
+which builds upon Orthogonal Finetuning (OFT) to adapt large foundation models to downstream tasks more efficiently.
+As training large models from scratch is prohibitively expensive, fine-tuning pre-trained models is essential for specific applications.
+
+1. Key Concepts
+   - Orthogonal Finetuning (OFT)
+     OFT is a fine-tuning paradigm that adapts models using orthogonal matrices, which help maintain generalizability.
+     However, OFT requires a large number of trainable parameters because of the high dimensionality of these orthogonal matrices.
+
+   - Efficiency Challenge
+     The text highlights that despite OFT’s good performance, it still involves a significant number of parameters, 
+     making it less practical for resource-constrained scenarios.
+
+   - Solution via Butterfly Structures
+     To improve parameter efficiency, the authors draw inspiration from the Cooley-Tukey fast Fourier transform algorithm, 
+     which efficiently transmits information. Using this idea, 
+     they propose a new parameterization method based on butterfly structures to represent orthogonal matrices in a more compact form.
+
+   - Orthogonal Butterfly (BOFT)
+     The butterfly-based parameterization is applied to OFT, creating BOFT,
+     a novel fine-tuning method that reduces the number of trainable parameters while retaining the benefits of orthogonal adaptation. 
+     BOFT serves as a generalized framework that includes OFT as a special case but is more efficient.
+
+2. Empirical Study:
+   The authors conduct extensive experiments on adapting large models across different domains:
+   -1. Large vision transformers for visual tasks.
+   -2. Large language models for text tasks.
+   -3. Text-to-image diffusion models for image generation tasks.
+
+3. Conclusion:
+   BOFT is a parameter-efficient variant of OFT, offering a general orthogonal finetuning framework that reduces
+   the number of trainable parameters through butterfly structures. It is shown to be effective across a range of models
+   and tasks in both vision and language domains.
