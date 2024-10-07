@@ -1,0 +1,87 @@
+### https://medium.com/@hession520/liquid-neural-nets-lnns-32ce1bfb045a
+
+Liquid Neural Nets (LNNs) represent a novel and intriguing direction in AI/ML research, primarily aimed at enhancing the adaptability,
+compactness, and interpretability of neural networks. 
+LNNs are especially useful in time series prediction tasks, such as weather forecasting, speech recognition, and autonomous driving. 
+One of their standout features is their ability to continue adapting to new inputs even after training,
+making them well-suited for environments where data distributions change frequently or where noise levels are high. 
+Additionally, they are smaller, more interpretable, and more robust compared to traditional neural networks,
+which often require vast amounts of data and computational resources.
+
+1. Origin and Core Concepts
+   LNNs gained significant attention with the 2020 paper "Liquid Time Constant Networks" (LTCNs), which pushed them to the forefront of AI/ML research.
+   This paper focused on enhancing the representational power of individual neurons rather than increasing the scale of the network.
+   Unlike traditional neural nets, which often rely on large architectures to achieve better performance, 
+   LNNs focus on increasing the expressiveness of individual neurons.
+
+   The inspiration for LNNs came from biology, specifically the neural structure of C. elegans, a microscopic roundworm with only 302 neurons. 
+   Despite having such a small nervous system, C. elegans is capable of highly complex behavior. 
+   This inspired Ramin Hasani, the lead author of the 2020 paper, to pursue the idea of building neural networks with "fewer but richer nodes." 
+   The result was LNNs, which aim to do more with less.
+
+2. Liquid Time Constant (LTC)
+   The "liquid" in Liquid Neural Nets refers to their defining feature: the Liquid Time Constant (LTC). 
+   The LTC is an input-dependent parameter that changes the strength of connections between neurons, allowing the network to adapt to new stimuli dynamically.
+   This adaptability is the core reason LNNs can continue learning after training. 
+   The LTC and the weights between nodes are bounded, which ensures that LNNs do not suffer from gradient explosion—an issue often encountered in 
+   traditional recurrent neural networks (RNNs) and other continuous-time recurrent architectures.
+
+   LNNs build on neural ODEs (Ordinary Differential Equations), which model the system dynamics through a series of first-order ODEs connected by nonlinear gates. 
+   ODE-based models are capable of representing much more complex dynamics compared to the activation functions used in traditional neural networks. 
+   This gives each neuron more expressive power, allowing LNNs to model sophisticated behaviors even with a smaller architecture.
+
+3. Technical Mechanics
+   In a neural ODE, the hidden state at any given time can be described by a differential equation:
+   (𝑑/𝑑𝑡)𝑥(𝑡) = 𝑓(𝑥(𝑡),𝐼(𝑡),𝜃)
+   Here, 𝑥(𝑡) is the hidden state, 𝐼(𝑡) represents the inputs at time 𝑡, and 𝜃 are the network parameters.
+   Solving this equation allows us to compute the next hidden state, with the neural network’s output determining the derivative of the hidden state.
+
+   LNNs, however, modify this by introducing the LTC. The state update in an LNN is expressed as:
+   (𝑑/𝑑𝑡)𝑥(𝑡) = 𝜏⋅𝑓(𝑥(𝑡),𝐼(𝑡),𝜃)+𝑏 
+   In this equation, 𝜏(the LTC) and 𝑏 (a bias term) are introduced. 
+   These components work together to ensure stability in the network by counterbalancing each other. 
+   The LTC directly influences the hidden state of the neural network, controlling the strength of the weights between neurons.
+
+   The LTC is not static; it updates over time based on the network’s inputs. Formally, the LTC is updated as:
+   𝜏 = (𝜏_𝑝𝑟𝑒𝑣) / (1+𝜏_𝑝𝑟𝑒𝑣)⋅𝑓(𝑥(𝑡),𝐼(𝑡))
+   This allows LNNs to adapt dynamically to changing input distributions by modifying the connections between nodes in response to new data.
+
+4. Forward Pass and Time Complexity
+   The forward pass through an LNN is performed using an ODE solver. While any ODE solver can be used, the 2020 paper introduces a custom 'fused' ODE solver, 
+   designed specifically for LNNs. 
+   The forward pass works by discretizing the continuous temporal interval and calculating the network’s state at discrete time steps. 
+   The update for the hidden state is determined as:
+   𝑥(𝑡+1) = 𝑥(𝑡) + 𝑓(𝑥(𝑡),𝐼(𝑡),𝜃)⋅Δ𝑡
+   This update is computed for each of the 𝑁 neurons in the network over 𝑇 time steps. 
+   According to the paper, when using the fused ODE solver, the time complexity of an LNN is 
+   𝑂(𝐿×𝑇), where 𝐿 is the number of discretization steps. This is the same time complexity as an LSTM with 𝑁 cells.
+
+5. Training
+   LNNs are trained using Backpropagation Through Time (BPTT), a common training method for recurrent neural networks.
+   BPTT works by unrolling the network across a sequence of time steps, transforming it into a long feedforward network. 
+   The error is aggregated across the sequence and used to update the network weights. 
+   In the context of LNNs, the ODE solver outputs (which represent the hidden states at different time steps) are treated as neural network outputs, 
+   and the BPTT process is applied to train the model.
+
+6. Advantages and Limitations
+   -1. Advantages:
+       a. Adaptability: LNNs can adjust to new input distributions after training, making them highly effective in environments where data changes over time.
+       b. Robustness: LNNs are less affected by noisy data, making them resilient across a variety of tasks.
+       c. Compactness: With fewer neurons needed to model complex behaviors, LNNs require significantly less computational power.
+                       For example, a task that may require thousands of conventional neurons might only require a few LNN nodes.
+       d. Interpretability: The smaller size of LNNs means their structure is more interpretable than large neural networks. 
+                            It is easier to understand the relationships between neurons and weights in LNNs, reducing the "black box" nature common in deep learning models.
+   -2. Limitations:
+       a. Gradient Vanishing: While LNNs avoid gradient explosion, they are still susceptible to the problem of gradient vanishing, 
+                              especially when dealing with long-term dependencies.
+       b. Training Speed: LNNs tend to be slower to train compared to other continuous-time architectures, 
+                          as their forward passes and training involve ODE solvers.
+       c. Dependence on ODE Solver: The accuracy and performance of an LNN depend heavily on the choice of ODE solver,
+                                    adding another variable to their implementation.
+
+7. Conclusion
+   Liquid Neural Nets offer a compelling alternative to traditional neural networks, particularly in the domain of time series prediction. 
+   Their adaptability, robustness, and compactness make them suited for real-world applications with dynamic data. 
+   Although they come with some limitations, such as sensitivity to long-term dependencies and slower training times, 
+   their transparency and expressive power provide a strong foundation for future research. 
+   With ongoing improvements, LNNs could become a critical component of next-generation AI systems.
