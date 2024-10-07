@@ -1,0 +1,84 @@
+## From https://risktrainer.medium.com/models-representation-understanding-4b613d169c4a
+
+1. Representation in Computational Thinking
+   Representation refers to the models we build to simplify and understand processes, rules, and datasets. 
+   Examples include grids for Scrabble (15x15), chess (8x8), or more complex structures like a DAWG (Directed Acyclic Word Graph) for storing dictionaries efficiently.
+   Representation helps organize and document information to make sense of complex systems, be it in board games or algorithms.
+
+   The text emphasizes that understanding how to build a model is crucial for making sense of data. 
+   In the context of this course, representation and model-building are seen as essential skills for computational thinking.
+   The course explores these ideas from various perspectives, pushing students to go beyond surface-level understanding.
+
+2. The Framework for Model Building
+   Model building involves the following four key components that help understand and predict how a system behaves
+
+   -1. Data
+       In this case, data comes from the State Bank of Pakistan's (SBP) Payment Systems Dataset, covering 31 quarters from 2016 to 2024. 
+       Understanding how the data is generated (the “generator function”) is critical to interpreting it correctly.
+   -2. Assumptions
+       These include both explicit (like a 0.1% bank fee on mobile transactions) and implicit (like applying national age 
+       and income distributions to mobile banking customers) assumptions. Assumptions help fill gaps where direct data isn't available.
+   -3. Relationships
+       This involves understanding both explicit relationships (like column relationships in data) and implicit ones
+       (like the effect of exchange rates on eCommerce sales). 
+       Identifying relationships between variables (e.g., mobile banking fees, customer distribution, exchange rates) is key for feature extraction 
+       and forecasting future behavior.
+   -4. Questions
+       Questions define the purpose of the model. These could range from understanding how the data works (relationships), forecasting (trend lines), 
+       or calculating probabilities (distributions). The questions direct how the model is structured and what answers it needs to produce.
+
+3. Representation Challenges
+   Building models in an unstructured environment is difficult because it requires filtering signal from noise, figuring out what matters, 
+   and then using that information to answer specific questions. 
+   For example, understanding income distribution by age bracket is different from age distribution by income bracket, 
+   and knowing which one to use depends on the question.
+
+   The dataset used for the midterm forces students to engage in unstructured model building, where they must figure out how to start, what data to focus on,
+   and how to extract meaningful insights without explicit instructions. This is crucial for learning real-world problem-solving skills.
+
+4. Two Hats, Four Lenses
+   The text suggests two approaches when working with datasets
+   -1. Representation: Understanding the context and generating distributions to simplify data.
+   -2. Signal Compression: Filtering noise to focus only on the useful information needed to answer specific questions.
+   
+   Additionally, four lenses are used to analyze the data:
+   -1. First Order: Presents information as it is.
+   -2. Second Order Change: Looks at trends or changes over time.
+   -3. Distributions: Analyzes patterns of change or behavior.
+   -4. Trend Lines: Forecasts future behavior.
+
+5. Training vs. Inference
+   The process of model building involves two cycles:
+   -1. Training Cycle: This involves pre-work, lectures, and exercises to build the “map” of how data works.
+   -2. Inference Cycle: This is where the map is used to answer questions, similar to how large language models perform inference after being trained.
+
+6. Types of Questions in Model Building
+   -1. Relationship Questions: How do things work? For example, how are mobile banking fees generated?
+   -2. Prediction Questions: What is likely to happen in the future? For example, what is the forecast for mobile banking revenue next quarter?
+   -3. Distribution Questions: What is the probability of an event? For example, what's the likelihood of a certain outcome in eCommerce growth?
+   -4. Trend Questions: How will things change over time? This involves building trend lines and using them for forecasts.
+
+7. Why the Exercise Is Challenging
+   -1. Unfamiliar Territory
+       Many students haven't engaged in unstructured model building before, making it a tough shift from being given data with 
+       clear steps to processing raw datasets with multiple variables.
+   -2. Noise Filtering
+       This dataset contains noise, and students must figure out which pieces of information are important to focus on.
+   -3. No Step-by-Step Guide
+       Unlike a structured task like building a LEGO set, this exercise requires students to determine their own path to understanding the data.
+
+8. The Intent of the Exercise
+   -1. Building Comfort with Representation and Modeling
+       The goal is to get students familiar with the model-building process and representation, 
+       emphasizing that good representation is a key skill in computational thinking.
+   -2. Collaboration and Future Steps
+       This task prepares students for the next stage, such as building a 16-bit CPU, by pushing them to collaborate and think in systems.
+   -3. Seeing the World Systematically
+       Ultimately, the exercise helps students view the world like a system where all parts interact. 
+       This is akin to understanding how large language models or search engines map the world.
+
+9. Conclusion
+   The key takeaway is that while models are approximations of reality, they are functional tools that help us understand, predict, and answer real-world questions.
+   The challenge of representation and model building lies in moving from abstract concepts to hands-on application, 
+   where students must not only manage data but also understand the relationships between variables to draw meaningful conclusions.
+
