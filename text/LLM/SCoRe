@@ -1,0 +1,84 @@
+## From https://medium.com/@devmallyakarar/training-language-models-to-self-correction-via-reinforcement-learning-a-deep-dive-into-score-with-ff85421b4186
+## This article provide very interest thing about self-correction.
+
+1. Self-Correction in LLMs
+   Large language models (LLMs) like GPT often struggle with self-correction, which is important for tasks requiring iterative refinement,
+   such as complex reasoning and programming. 
+   Traditional supervised fine-tuning (SFT) methods don't equip models well for real-time corrections because they train on fixed datasets. 
+   These approaches lead to a mismatch between the training environment and real-world application scenarios, where mistakes can be diverse and unpredictable.
+
+   The main problem with SFT is that it overfits LLMs to a specific dataset and doesn’t train them to identify and correct their unique mistakes 
+   during inference (real-world usage).
+   As a result, models might appear to be making superficial corrections when they encounter errors, but they rarely fix them meaningfully.
+
+2. Challenges of Supervised Fine-Tuning (SFT):
+   -1. Distribution Mismatch
+       SFT trains models on predefined datasets, causing a gap between training data and the model's real-world outputs.
+       The errors a model generates at test time often differ from what it was trained to fix, causing poor performance in self-correction.
+   -2. Minimal Edits
+       SFT trains models to make minimal, "safe" corrections that may look correct but lack depth, preventing meaningful self-correction.
+
+3. SCoRe: Self-Correction via Reinforcement Learning
+   SCoRe introduces a new method to train LLMs using reinforcement learning (RL) for multi-turn corrections, rather than relying on pre-generated corrections.
+   The model learns to improve its own responses iteratively based on real-time feedback it generates, eliminating the distribution mismatch. 
+   This way, the model interacts with its mistakes, refining its outputs with multiple attempts.
+
+   -1. Two-Phase Training Process:
+       a. Phase 1 – Policy Initialization via RL: This stage sets up the model's initial correction behavior using RL. 
+                    The model learns how to make meaningful corrections without reverting to ineffective or trivial edits.
+       b. Phase 2 – Reward Bonus for Self-Correction: SCoRe encourages substantial changes and rewards corrections that truly fix errors, 
+                    rather than small tweaks that don’t solve the underlying problems.
+
+   -2. Key Results and Benchmarks:
+      SCoRe's approach demonstrated significant improvements. In tests with advanced LLMs like Gemini 1.0 Pro and Gemini 1.5 Flash, 
+      the self-correction performance increased by:
+      - 15.6% on the MATH benchmark (for complex mathematical reasoning).
+      - 9.1% on the HumanEval benchmark (for programming and code generation).
+      These gains show that SCoRe effectively enhances the ability of models to detect, analyze, and correct their errors in real-time, 
+      improving the overall robustness and accuracy of LLMs in complex tasks.
+
+4. Why LLMs Struggle with Self-Correction:
+   LLMs were originally designed for single-turn tasks, optimized to give a correct answer on the first pass. 
+   This architecture makes them less capable of handling iterative tasks where responses need ongoing refinement, 
+   such as math proofs or multi-step problem-solving in programming.
+
+   Additionally, LLMs lack intrinsic error detection. In real-world scenarios, a model might not even recognize that it made a mistake,
+   leading to situations where incorrect responses are repeated or not meaningfully corrected.
+
+5. Why SCoRe Is Different:
+   SCoRe teaches LLMs to self-correct using their own mistakes by generating real-time feedback through RL.
+   It uses reward shaping to penalize trivial corrections and encourages deep, substantive revisions that truly fix the problem.
+   This differs from prompt engineering (using specific prompts to coax a better response) or using separate models to verify and refine responses.
+
+   Unlike traditional approaches, SCoRe focuses on enhancing the model's internal capability to recognize and fix its own mistakes,
+   making it a promising direction for future LLM development.
+
+6. Limitations of Current Models:
+   Despite these advances, self-correction remains a challenging problem. Even with SCoRe, LLMs are still prone to vanishing gradients 
+   for long-term dependencies and might struggle with tasks that require retaining information over long sequences. 
+   They also face challenges in complex multi-step tasks where significant reasoning is required at each step.
+
+####
+1. SCoRe Training Overview:
+   SCoRe enhances the self-correction capabilities of large language models (LLMs) by using self-generated correction traces during training, 
+   avoiding the distribution mismatch problem typical of supervised fine-tuning (SFT). 
+   It focuses on training the model with errors it is likely to make in real-world scenarios.
+
+2. Phase 1: Policy Initialization via Reinforcement Learning (RL):
+   The first phase of SCoRe involves initializing the model’s policy through RL, where the model is trained to focus on improving its second-attempt responses. 
+   Traditional models often make shallow corrections or avoid fixing errors. 
+   SCoRe's policy initialization counteracts this by guiding the model to make meaningful revisions rather than trivial adjustments.
+
+   In this stage, regularization techniques prevent the model from over-optimizing its first attempt at the expense of the second. 
+   This ensures the model doesn't fall into behaviors where it avoids corrections altogether. 
+   Instead, the model is encouraged to balance the quality of the first and second attempts, 
+   improving its capacity for substantial corrections while maintaining the quality of its initial responses.
+
+3. Phase 2(Joint Optimization with Reward Shaping): Multi-Turn RL with Reward Shaping:
+   In the second phase, multi-turn RL is used to maximize rewards for meaningful corrections made between the first and second attempts. 
+   The model is trained to correct itself more effectively over multiple turns. 
+   The reward function is crucial here, as it emphasizes improvements between attempts by penalizing unnecessary or trivial changes.
+
+   Reward Shaping ensures that corrections are meaningful, rewarding the model for turning incorrect responses into correct ones while discouraging minor
+   or superficial edits. This structured reward encourages deeper self-refinement, improving the model’s generalization to new tasks and environments.
+
