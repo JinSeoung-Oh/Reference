@@ -1,0 +1,65 @@
+### From https://medium.com/@techsachin/llm-training-over-neurally-compressed-text-better-compression-with-same-learning-over-subword-c7aacdf20856
+
+1. Introduction: Compression in LLMs
+   The paper starts by discussing traditional tokenizers like Byte-Pair Encoding (BPE), which achieve around 4× compression in natural language text.
+   Compression is vital because it helps reduce the amount of data processed during pretraining and inference without increasing computational costs.
+   The goal here is to improve compression beyond traditional methods, and the paper explores using Arithmetic Coding (AC) 
+   to achieve near-optimal compression by assigning probabilities to text continuations.
+
+2. Training with Neurally Compressed Text
+   The high-level approach consists of two models:
+   -1.  M1 is trained on raw byte sequences and used for compressing pretraining corpus text using standard algorithms like AC.
+   -2. The compressed bitstream is split into tokens and used to train M2, which directly reads and writes neurally compressed text.
+
+3. Motivation for Neural-Compressed Text
+   -1. Efficiency
+       Compressed text sequences allow for processing more information with the same computational resources, improving both pretraining and inference.
+   -2. Longer Context Modeling
+       Compressed text enables LLMs to model dependencies across longer contexts compared to raw text models.
+   -3. Equal Distribution of Compute
+       Each token in the compressed sequence represents an equal amount of information, ensuring uniform computational allocation across tokens during training.
+
+4. Challenges in Training Over Compressed Text
+   -1. Learnability: The compressed bitstream from AC can appear as random noise, making it hard for the M2 model to extract meaningful information.
+   -2. Numerical Stability: The model probabilities used in compression must remain consistent between compression and decompression.
+   -3. Multi-Model Inference: Multiple models (M1 and M2) are required, and if M1 is large, it adds overhead during inference.
+
+5. Compression Techniques
+   -1. Lossless Compression: The objective is to encode input sequences into a bitstream while minimizing the expected bitstream length.
+   -2. Arithmetic Coding (AC): Uses a model to compress sequences into a bitstream, encoding the probability of text continuations.
+
+6. Methods and Models
+   -1. Training Data: The C4 dataset (English web text) was used, with shuffled documents of 277,760 bytes in size.
+   -2. M1 Model: A decoder-only transformer model was used for compression. Its final validation performance was 1.457 bits/byte.
+   -3. Compression Techniques:
+       -a. Arithmetic Coding: M1 model probabilities were used to calculate partitions for text continuation probabilities.
+       -b. Static Logits Arithmetic Coding: A weaker model with a static byte unigram was used to simplify learning for M2.
+       -c. Equal Information Windows: To make the compressed text more learnable, the AC encoder was reset after encoding a set number of bits, 
+                                      creating fixed-size windows for the text.
+7. Tokenization of Compressed Text
+   After compression, the bitstream is segmented into tokens for training M2. Token Compression Ratio (LiT/LoT) measures how well AC compression has been weakened. 
+   Equal-Info Windows proved to be the preferred method for weakening the model’s coding component, 
+   resulting in a more learnable compressed text.
+
+8. Training M2 on Compressed Data
+   M2 was trained for 200,000 steps on 26.2 billion tokens. Model sizes ranged from 25m to 2b parameters, excluding embedding parameters. 
+   Hyperparameters were adjusted to optimize training efficiency.
+
+9. Baselines and Evaluation Strategy
+   Two baselines were established: one trained on byte sequences using ByT5, and another on text tokenized with the SentencePiece vocabulary. 
+   Perplexity (bits-per-byte) was used as the evaluation metric to compare models. FLOPs per byte were used to measure the computational cost.
+
+10. Results
+    -1. Failure of Traditional Compression Methods: Baseline methods for training on compressed text failed to outperform naïve models. 
+                                                    Both Arithmetic Coding and Static AC settings performed poorly.
+    -2. Success of Equal-Info Windows: Using Equal-Info Windows significantly improved learnability. 
+                                       This method outperformed the byte-level baseline at larger model sizes, 
+                                       showing that compression becomes more effective with larger model scales.
+    -3. Window Size Performance: 16-bit windows performed the best in terms of bits/byte, followed by 128-bit windows. 
+                                 Larger M2 vocabularies led to a 2× higher token compression rate.
+11. Conclusion
+    Equal Info Windows brought performance on par with popular tokenizers.
+    For models at scale (up to 2 billion parameters), this method achieves comparable results to traditional SentencePiece tokenization.
+    Training on neurally compressed text improves with scale and delivers better perplexity and inference speed benchmarks than byte-level baselines,
+    though it still lags behind subword tokenizers in perplexity for models with the same parameter count. 
+    However, it benefits from shorter sequence lengths, leading to more efficient training and inference.
