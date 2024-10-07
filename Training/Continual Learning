@@ -1,0 +1,73 @@
+## From https://towardsdatascience.com/ai-models-have-expiry-date-9a6e2c9c0a9f
+## It is not new concept, but this article very good lean about basic of CL
+
+1. Introduction to Continual Learning (CL)
+   In a continually changing environment like a garden, the robot trained on static data fails when the environment (flowers blooming) changes. 
+   To solve this, Continual Learning (CL) is proposed, which helps models adapt to new data over time without catastrophic forgetting (losing previous knowledge). 
+   Traditional retraining from scratch is computationally expensive and often impractical, especially without access to historical data.
+
+   The key challenge in CL is balancing stability (preserving old knowledge) and plasticity (adapting to new knowledge). 
+   As the environment changes, the model needs to dynamically update itself without retraining from scratch or losing previous knowledge.
+
+2. Categories of Continual Learning Approaches
+   To achieve continual learning and manage stability vs. plasticity, researchers have identified several approaches:
+
+   -1. Regularization-Based Approach
+       In this method, a regularization term is added to the loss function to balance the effects of old and new tasks.
+       - Example: Weight regularization controls how much parameters can change by penalizing significant variations in the model’s parameters,
+                  ensuring that previously learned tasks are not forgotten while learning new ones.
+
+    -2. Replay-Based Approach
+        This method focuses on revisiting historical data to preserve performance on older tasks.
+        - Example: Experience replay stores a sample of old training data and combines it with new data during training to maintain knowledge of previous tasks 
+                   and prevent catastrophic forgetting.
+        - Challenge: Requires storage and access to previous data, which isn’t always available.
+
+    -3. Optimization-Based Approach
+        These methods manipulate optimization techniques to prevent catastrophic forgetting.
+        - Example: Gradient projection aligns gradients for new tasks with gradients for old tasks so that updates on new tasks don’t negatively interfere 
+                   with past tasks.
+
+   -4. Representation-Based Approach
+       Here, the focus is on learning a robust representation of the data that generalizes well across tasks.
+       - Example: Self-supervised learning allows the model to learn high-quality features from unlabeled data before fine-tuning on task-specific data. 
+                  This allows the model to develop a representation that can handle new tasks without interfering with previously learned tasks.
+
+   -5. Architecture-Based Approach:
+       In this approach, model architecture is adjusted as new tasks arrive.
+       - Example: Parameter allocation dedicates different subspaces or sets of parameters for each new task, preventing interference.
+                  However, the model size can grow with each new task, which may lead to scalability issues.
+
+3. Evaluation of CL Models
+   Evaluating the performance of continual learning models involves multiple aspects:
+   -1. Overall Performance Evaluation: Measures the average performance across all tasks.
+   -2. Memory Stability Evaluation: Assesses how well the model retains knowledge from previous tasks by comparing the performance before and after learning new tasks.
+   -3. Learning Plasticity Evaluation: Compares the performance of the model in the continual learning setting against the optimal performance 
+                                       if it had been jointly trained on all tasks at once. This helps in understanding how well the model adapts to new tasks.
+
+4. Challenges with Continual Learning
+   Despite its benefits, CL isn’t the default choice for all AI researchers due to several factors:
+    -1. Limited Interpretability: It's difficult to interpret how a CL model’s internal representations evolve over time and how exactly the model retains 
+                                  or forgets certain information. This makes CL more challenging to debug and improve compared to retraining from scratch.
+    -2. Benchmarking Limitations: Current research often focuses on synthetic benchmarks that don’t accurately reflect real-world scenarios. 
+                                  This means that while CL methods might perform well on benchmarks, their real-world application could still be limited.
+    -3. Storage vs. Computational Cost: Many papers focus on storage efficiency, but the real bottleneck in many cases is the computational cost of retraining large models. 
+                                        Large models can take thousands of GPU days to retrain, which is a major factor in favor of continual learning approaches.
+
+5. Advantages of Improving Continual Learning
+   CL is particularly useful in several real-world applications:
+   -1. Model Editing: CL could allow for selective updates to certain parts of a model without damaging the rest of the model.
+   -2. Personalization and Specialization: CL can be used to adapt general-purpose models to individual user needs without causing the model to forget previously learned general knowledge.
+   -3. On-Device Learning: For devices with limited computational power, CL enables models to update efficiently as new data arrives without requiring retraining from scratch.
+   -4. Faster Retraining with Warm Start: CL could update only the relevant parts of a model when new data becomes available, making retraining more efficient.
+   -5. Reinforcement Learning: In non-stationary environments (e.g., reinforcement learning settings), CL can help agents continuously learn and adapt to evolving environments.
+
+6. Conclusion: Why Work on Continual Learning?
+   Continual Learning addresses one of the most significant challenges in AI: the changing distribution of data over time. 
+   With growing computational and environmental costs of retraining large models from scratch, 
+   CL offers a more sustainable approach for maintaining and updating models as new data becomes available.
+
+Despite the challenges and complexities of CL, improving these methods could make models more accessible, 
+cost-efficient, and capable of handling dynamic environments. Many areas such as model personalization, on-device learning, 
+and real-time adaptation could greatly benefit from well-developed CL approaches.
+
