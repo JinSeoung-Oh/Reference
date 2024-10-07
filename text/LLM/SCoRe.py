@@ -1,6 +1,7 @@
 ## From https://medium.com/@devmallyakarar/training-language-models-to-self-correction-via-reinforcement-learning-a-deep-dive-into-score-with-ff85421b4186
 ## This article provide very interest thing about self-correction.
 
+"""
 1. Self-Correction in LLMs
    Large language models (LLMs) like GPT often struggle with self-correction, which is important for tasks requiring iterative refinement,
    such as complex reasoning and programming. 
@@ -81,4 +82,120 @@
 
    Reward Shaping ensures that corrections are meaningful, rewarding the model for turning incorrect responses into correct ones while discouraging minor
    or superficial edits. This structured reward encourages deeper self-refinement, improving the model’s generalization to new tasks and environments.
+"""
 
+import torch
+import torch.nn as nn
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from torch.optim import Adam
+from torch.distributions import Categorical
+from nltk.translate.bleu_score import sentence_bleu
+
+class SelfCorrectionModel(nn.Module):
+    def __init__(self, base_model_name="gpt2"):
+        super(SelfCorrectionModel, self).__init__()
+        self.model = GPT2LMHeadModel.from_pretrained(base_model_name)
+        self.tokenizer = GPT2Tokenizer.from_pretrained(base_model_name)
+
+    def forward(self, input_ids, attention_mask=None):
+        return self.model(input_ids, attention_mask=attention_mask, return_dict=True)
+
+    def generate_response(self, prompt, max_length=50):
+        input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids
+        output = self.model.generate(input_ids, max_length=max_length, num_return_sequences=1)
+        return self.tokenizer.decode(output[0], skip_special_tokens=True)
+
+def reward_function(y1, y2, target):
+    """A simple reward function based on BLEU score."""
+    bleu_y1 = sentence_bleu([target.split()], y1.split())
+    bleu_y2 = sentence_bleu([target.split()], y2.split())
+    
+    if y2 == target:
+        return 1.0
+    elif bleu_y2 > bleu_y1:
+        return 0.5
+    else:
+        return -0.5
+
+def policy_gradient_step(log_probs, rewards):
+    """Applies a policy gradient update."""
+    policy_loss = []
+    for log_prob, reward in zip(log_probs, rewards):
+        policy_loss.append(-log_prob * reward)
+    return torch.stack(policy_loss).sum()
+
+def train(model, optimizer, prompt, target, max_iters=1000, max_response_len=50):
+    model.train()
+    for epoch in range(max_iters):
+        # Generate first response (y1)
+        y1 = model.generate_response(prompt, max_length=max_response_len)
+        
+        # Self-correction: Generate a second response based on the first
+        y2 = model.generate_response(y1, max_length=max_response_len)
+        
+        # Calculate reward for the correction
+        reward = reward_function(y1, y2, target)
+
+        # Update policy using policy gradient
+        input_ids = model.tokenizer(prompt, return_tensors="pt").input_ids
+        outputs = model(input_ids)
+        log_probs = Categorical(logits=outputs.logits).log_prob(input_ids.squeeze())
+        loss = policy_gradient_step(log_probs, [reward])
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        if epoch % 100 == 0:
+            print(f"Epoch {epoch}: Reward {reward}, First Response: {y1}, Second Response: {y2}")
+
+def evaluate(model, test_data, max_response_len=50):
+    model.eval()
+    total_reward = 0
+    total_bleu_score = 0
+    count = 0
+    
+    with torch.no_grad():
+        for prompt, target in test_data:
+            y1 = model.generate_response(prompt, max_length=max_response_len)
+            y2 = model.generate_response(y1, max_length=max_response_len)
+            
+            reward = reward_function(y1, y2, target)
+            bleu_score = sentence_bleu([target.split()], y2.split())
+
+            total_reward += reward
+            total_bleu_score += bleu_score
+            count += 1
+            
+            print(f"Prompt: {prompt}")
+            print(f"First Response: {y1}")
+            print(f"Corrected Response: {y2}")
+            print(f"Target: {target}")
+            print(f"Reward: {reward}, BLEU Score: {bleu_score}\n")
+    
+    avg_reward = total_reward / count
+    avg_bleu = total_bleu_score / count
+    
+    print(f"Average Reward: {avg_reward}")
+    print(f"Average BLEU Score: {avg_bleu}")
+
+# Example Usage
+if __name__ == "__main__":
+    model = SelfCorrectionModel()
+    optimizer = Adam(model.parameters(), lr=1e-5)
+    
+    prompt = "What is the capital of France?"
+    target = "The capital of France is Paris."
+    
+    # Train the model
+    train(model, optimizer, prompt, target)
+    
+    # Test data for evaluation
+    test_data = [
+        ("What is the capital of Germany?", "The capital of Germany is Berlin."),
+        ("What is the capital of Japan?", "The capital of Japan is Tokyo."),
+        ("What is the capital of India?", "The capital of India is New Delhi."),
+    ]
+    
+    # Evaluate the model after training
+    evaluate(model, test_data)
