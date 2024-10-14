@@ -1,0 +1,57 @@
+## From https://artgor.medium.com/paper-review-depth-pro-sharp-monocular-metric-depth-in-less-than-a-second-3f3cb7bea39a
+
+Depth Pro is a cutting-edge foundation model for zero-shot metric monocular depth estimation, 
+excelling in producing high-resolution depth maps with sharp details and accurate scaling, without requiring camera metadata such as intrinsics.
+Here’s a breakdown of the key components and innovations introduced in Depth Pro:
+
+1. Key Innovations
+   -1. High-Resolution Depth Maps: Depth Pro generates 2.25-megapixel depth maps in just 0.3 seconds on a V100 GPU. 
+   -2. Multi-Scale Vision Transformer (ViT)
+       Depth Pro leverages a multi-scale vision transformer architecture, ensuring efficient processing and sharp, accurate depth predictions.
+   -3. Real and Synthetic Data Training: The model is trained on a combination of real-world and synthetic datasets to achieve high accuracy across domains.
+   -4. New Boundary Accuracy Metrics
+       Depth Pro introduces evaluation metrics focused on boundary accuracy to improve depth map quality, particularly in capturing fine details and edges.
+   -5. SOTA Focal Length Estimation
+       It includes a focal length estimation head that predicts focal length from a single image, achieving state-of-the-art (SOTA) performance.
+
+2. The Approach:
+   -1. Architecture:
+       -a. Multi-Scale ViT Encoders: Depth Pro uses two ViT encoders for depth estimation:
+           A patch encoder processes image patches for scale-invariant learning.
+           An image encoder provides global context.
+       -b. The network operates on fixed 1536×1536 resolution images, balancing large receptive fields with computational efficiency. 
+           Images are divided into 384×384 patches and processed in parallel, ensuring high efficiency without memory issues.
+   -2. Sharp Monocular Depth Estimation:
+       -a. Training Process: The model is trained on both real and synthetic data using multiple objectives. 
+                             The training prioritizes areas closer to the camera for tasks such as novel view synthesis.
+       -b. Canonical Inverse Depth: The model is optimized for inverse depth to handle noisy real-world data.
+   -3. Two-Stage Training:
+       -a. Stage 1 focuses on generalization across domains using labeled datasets.
+       -b. Stage 2 fine-tunes the model on synthetic datasets to enhance boundary sharpness and fine details.
+   -4. Loss Functions: The training uses MAE (Mean Absolute Error), gradient loss, and Laplace loss to refine depth accuracy, particularly around boundaries.
+
+3. Focal Length Estimation:
+   - Separate Focal Length Estimation Head
+     A small convolutional module predicts the horizontal angular field of view by using frozen features from the depth network and additional features 
+     from a separate ViT image encoder. This module is trained separately to avoid conflicts between depth and focal length estimation.
+   - L2 Loss Function
+     This loss is used for focal length estimation, ensuring robust predictions even with missing or inaccurate EXIF data.
+
+4. Experiments and Results:
+   - Performance: Depth Pro consistently outperforms competitors on several datasets such as Booster, Middlebury, SunRGBD, ETH3D, nuScenes, and Sintel.
+                  It ranks highly in various metrics, including δ1, AbsRel, Log10, δ2, and δ3, confirming its ability to generalize well across different datasets.
+   - Boundary Accuracy: Depth Pro excels at capturing sharp boundaries and thin structures, such as hair and fur, where competitors struggle. 
+                        Its recall rates are consistently higher, even outperforming models like Marigold and PatchFusion.
+   - Focal Length Estimation: On diverse datasets like FiveK, SPAQ, PPR10K, and ZOOM, Depth Pro surpasses state-of-the-art methods. 
+                              For example, on the PPR10K dataset, 64.6% of its predictions had a relative estimation error below 25%, 
+                              compared to just 34.6% for the second-best method.
+
+5. Limitations:
+   Translucent Surfaces and Volumetric Scattering: The model struggles with translucent surfaces and volumetric scattering where the concept of single-pixel depth 
+                                                   becomes ambiguous and ill-posed.
+
+6. Conclusion:
+   Depth Pro represents a major advancement in zero-shot depth estimation, offering high-resolution, sharp, and accurate depth 
+   maps without relying on camera metadata. Its use of multi-scale ViT encoders, combined with an efficient training strategy on
+   both real and synthetic data, allows it to outperform existing models across a wide range of datasets and metrics. Moreover, 
+   its focal length estimation head enhances its utility for real-world applications, particularly in situations where EXIF metadata is unavailable or inaccurate.
