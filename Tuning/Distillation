@@ -1,0 +1,26 @@
+### https://pub.towardsai.net/smaller-faster-smarter-the-power-of-model-distillation-d002662308c7
+## https://github.com/arcee-ai/DistillKit
+
+This article discusses the importance of model distillation in the context of large language models (LLMs), 
+highlighting how OpenAI's decision to hide the reasoning steps in its new o1 models could impact the future of this technique and the open-source community.
+
+1. Model Distillation:
+   - Definition: It's the process of transferring knowledge from a large, complex model (the "teacher") to a smaller, more efficient model (the "student").
+   - How it works: The teacher model predicts token distributions, and the student is trained to mimic this output, 
+                   capturing both correct answers and the underlying reasoning.
+   - Benefits: Smaller models produced through distillation are faster, less expensive, and easier to deploy, while retaining much of the original model's capabilities.
+
+2. OpenAI's New Approach:
+   With the new o1 reasoning models, OpenAI now hides intermediate reasoning steps and only presents summaries in the final output.
+
+3. Implications:
+   This makes it difficult for external developers to understand the model’s decision-making process or access token distributions, 
+   which are crucial for model distillation.
+   The open-source community may struggle to replicate or distill OpenAI’s models into smaller, equally capable versions,
+   widening the gap between proprietary and open-source AI.
+
+4. Concerns for the Future:
+   This decision raises questions about balancing intellectual property protection and scientific progress. 
+   The article expresses hope that companies like Meta will maintain open approaches to AI development, promoting broader accessibility.
+
+In summary, while OpenAI’s changes might enhance safety and control, they create challenges for model distillation and could hinder open-source innovation in AI.
