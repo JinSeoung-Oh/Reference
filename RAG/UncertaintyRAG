@@ -1,0 +1,53 @@
+## From https://medium.com/@techsachin/uncertaintyrag-long-context-rag-using-span-uncertainty-for-similarity-estimation-abc19d0fc783
+## From https://arxiv.org/abs/2410.02719
+
+The paper on UncertaintyRAG presents a novel approach for improving long-context Retrieval-Augmented Generation (RAG) 
+by introducing a Signal-to-Noise Ratio (SNR)-based span uncertainty technique to estimate the similarity between text chunks. 
+This approach aims to enhance model calibration, improve robustness, and mitigate semantic inconsistencies introduced by random chunking.
+
+1. SNR-based Uncertainty Measurement: The paper proposes using SNR to better calibrate the model and reduce errors from random chunk splitting, 
+                                      improving similarity estimation between text chunks.
+2. Unsupervised Learning for Retrieval Models: A new unsupervised learning technique is proposed to train retrieval models that 
+                                               outperform existing open-source embedding models in long-context RAG tasks under distribution shifts.
+3. Data Sampling and Scaling: An efficient data sampling and scaling strategy is introduced to enhance retrieval model training, significantly boosting performance.
+4. In-depth Analysis of Model Performance: The paper demonstrates continuous improvement across key retrieval metrics, highlighting the method's efficacy.
+
+Methodology:
+-1. Span Uncertainty Using SNR
+    The model calculates the self-information of token sequences (chunks) using LLM output probabilities to measure uncertainty. 
+    The SNR of output probabilities quantifies the uncertainty by calculating the SNR for each token in a sliding window, 
+    converting this to a confidence score that measures similarity.
+
+Training Strategy:
+-1. Positive and Negative Sample Construction
+    Data chunks are split into 300-token sequences. For each chunk, the span uncertainty is estimated, and the M samples with the highest BM25 scores are selected. 
+    These are further divided into positive and negative samples for contrastive learning.
+-2. Data Scaling Strategy
+    Using KNN, anchor samples and positive/negative samples are scaled to improve the model's generalization across different datasets. 
+    BM25 scoring is used to select the most relevant samples for training.
+
+Training and Inference:
+-1. Contrastive Learning
+    The model is trained using a contrastive learning approach, where the similarity between chunk embeddings is calculated
+    as the inner product of BERT-based chunk embeddings.
+-2. Inference Process
+    During inference, the document is chunked, and the retrieval model selects the most similar chunks to input into the LLM for answering the query.
+
+Experimental Results:
+-1. Performance
+    The results show that UncertaintyRAG improves retrieval performance for long-context RAG tasks, particularly with 4K context window LLMs.
+    It outperforms strong open-source models like BGE-M3 while using only 4% of the training data.
+-2. Representation Similarity Analysis
+    Representation similarity is assessed across different layers of the model, showing that span uncertainty enhances long-context modeling, 
+    leading to better generalization under distribution shifts.
+-3. Uniformity and Alignment
+    The paper highlights that improving uniformity (distribution of embeddings across space) increases the retrieval model’s performance, 
+    while increasing alignment (similarity between positive pairs) alone does not have a significant impact.
+
+Conclusion:
+UncertaintyRAG offers a lightweight, scalable solution for long-context retrieval in RAG systems, 
+utilizing SNR-based span uncertainty to enhance model calibration and reduce dependence on large labeled datasets. 
+The approach integrates seamlessly into existing LLMs, making it versatile and efficient for long-context tasks under distribution shifts. 
+This method significantly improves performance while maintaining minimal data usage and computational overhead.
+
+By addressing the challenges of random chunking and distribution shifts, UncertaintyRAG provides a robust and scalable solution for long-context retrieval tasks, improving the retrieval model’s generalization and overall performance in a variety of real-world applications.
