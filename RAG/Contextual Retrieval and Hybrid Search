@@ -1,0 +1,53 @@
+### From https://levelup.gitconnected.com/the-best-rag-technique-yet-anthropics-contextual-retrieval-and-hybrid-search-62320d99004e
+
+Combining contextual BM25 with contextual embeddings offers a significant improvement to Retrieval-Augmented Generation (RAG) systems,
+enhancing retrieval accuracy and reducing the potential for hallucinations. 
+
+1. RAG Overview and Challenges
+   RAG is a system designed to augment the capabilities of Large Language Models (LLMs) by retrieving relevant external documents to enhance context 
+   and provide more accurate responses. However, traditional RAG systems often face challenges:
+
+   -1. Context loss when documents are split into smaller chunks.
+   -2. Dependence on embeddings for semantic search, which may miss relevant documents that rely on term-based matching.
+
+2. Contextual Retrieval
+   Anthropic introduced contextual retrieval, a method to retain context when splitting documents for retrieval. 
+   Each document chunk is contextualized by adding relevant information (such as names or time periods) before it is embedded, 
+   ensuring that crucial context is preserved during search and retrieval. 
+   For example, if a chunk mentions "3% revenue growth," adding the company name and time period ensures this context is embedded along with the chunk.
+
+3. Hybrid Search: BM25 and Embeddings
+   While contextual embeddings improve traditional semantic search, a hybrid approach that incorporates BM25 alongside embeddings leads to even better results.
+   BM25 is a term-based algorithm that excels in capturing term frequency and document length relevance, 
+   but it may miss out on semantic meaning. On the other hand, embedding-based search captures the deeper semantic relationships between query and document content.
+
+   - BM25: It manages term saturation and adjusts for document length using parameters k1 (term frequency saturation) and b (document length penalty).
+           These help balance the relevance of short and long documents, but BM25 might struggle with understanding the semantic meaning.
+   - Contextual Embeddings: Represent documents as vectors in a dense space, allowing retrieval based on cosine similarity. 
+                            This method captures semantic overlaps but can overlook exact keyword matches that BM25 would catch.
+
+   The hybrid approach combines both by applying Reciprocal Rank, where the results from BM25 and embedding searches are merged. 
+   The relative weights assigned to each method allow fine-tuning, ensuring the final ranking gives proper weight to both semantic relevance and term-based matching.
+   For example, if BM25 is weighted at 0.2 and embeddings at 0.8, a document ranked lower in BM25 but high in embeddings can still be prioritized.
+
+4. Performance Boost
+   By combining these two methods, the hybrid approach improves both:
+
+   - Precision: Ensuring the most relevant documents or chunks are retrieved.
+   - Recall: Increasing the likelihood that all necessary documents are retrieved, reducing the chance of missing critical information.
+   In Anthropic’s case, this hybrid approach reduced the retrieval failure rate by nearly 49%, significantly improving performance in real-world tasks.
+
+5. Evaluation of RAG Systems
+   Effective RAG systems rely not just on generation quality but also on the quality of the retrieved context. 
+   Two important metrics help evaluate RAG retrieval systems:
+
+   -1. Context Precision: The proportion of retrieved documents that are actually relevant to the query. 
+                          This metric ensures that the added context is useful for the answer and prevents overloading the model with irrelevant content.
+   -2. Context Recall: The proportion of all relevant documents that are successfully retrieved. Low recall suggests the need for better retrieval mechanisms.
+
+6. Conclusion
+   Combining contextual embeddings and contextual BM25 provides a robust hybrid search approach that overcomes the limitations of 
+   both semantic and term-based search methods individually. This combination results in higher precision, recall, and retrieval accuracy, 
+   ultimately improving the effectiveness of RAG systems. The hybrid model balances deep semantic understanding with traditional keyword relevance,
+   unlocking new levels of performance in information retrieval for tasks like answering complex queries or generating context-aware responses.
+
