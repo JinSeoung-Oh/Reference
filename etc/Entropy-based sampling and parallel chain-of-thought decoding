@@ -1,0 +1,48 @@
+## From https://medium.com/@michael_79773/a-new-and-possibly-groundbreaking-method-to-enhancing-language-model-reasoning-with-entropy-based-0d38bcfe9dc5
+
+This article explores a new method for improving the reasoning abilities of large language models (LLMs) 
+by utilizing entropy-based sampling and parallel chain-of-thought (CoT) decoding. 
+The goal is to address common challenges such as hallucinations and shallow reasoning in models like GPT-4 and LLaMA,
+which are crucial for tasks requiring accurate and reliable outputs.
+
+1. Entropy
+   In information theory, entropy measures the uncertainty in predicting the next token in a sequence. Low entropy indicates confidence, 
+   while high entropy shows uncertainty.
+2. Varentropy: This measures the variance in entropy across tokens, giving insight into how consistent the model's uncertainty is.
+3. Entropix Method:
+   The Entropix method uses both entropy and varentropy to guide the model’s token selection during decoding:
+
+    -1. When the model is confident (low entropy/varentropy), it uses standard decoding.
+    -2. When uncertain (high entropy/varentropy), it explores alternative tokens or reasoning paths.
+   
+   This dynamic sampling aims to simulate a chain-of-thought process, encouraging the model to think harder and generate more accurate, 
+   coherent outputs when faced with uncertainty.
+
+4. Code Implementation:
+   The method is implemented using JAX, with key functions calculating entropy and varentropy from the model's logits (predictions).
+   Based on these measurements, the sampling strategy adapts by adjusting parameters like temperature (to increase randomness) 
+   or top-p/top-k sampling (limiting the pool of possible tokens).
+
+   Example output from the model shows how, even when it doesn't immediately reach the correct answer, it engages in a reasoning process to work through the problem.
+
+5. Potential and Limitations:
+   -1. Implications
+       This method encourages more thoughtful, accurate responses, as the model adapts its behavior when uncertain. 
+       It can be integrated into existing models without major changes and may improve smaller models significantly.
+   -2. Challenges
+       Increased computational complexity during inference and the need for further tuning to ensure factual accuracy are key limitations.
+
+6. Future Directions:
+   Fine-tuning for correctness.
+   Combining with supervised or reinforcement learning.
+   Incorporating user feedback to improve reasoning over time.
+
+In conclusion, entropy-based sampling and parallel chain-of-thought decoding offer a promising direction for enhancing LLM reasoning
+by making the model aware of its uncertainty, leading to more human-like, thoughtful outputs. 
+Though experimental, this method could contribute to advancements in reliable, accurate AI reasoning.
+
+
+
+
+
+
