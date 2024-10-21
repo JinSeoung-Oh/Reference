@@ -1,0 +1,53 @@
+## From https://medium.com/@techsachin/agentbank-50000-interaction-trajectories-for-creating-generalized-llm-agents-via-fine-tuning-c606c6b6c38d
+
+AGENTBANK, the largest trajectory-tuning dataset, featuring over 50,000 diverse, 
+high-quality agent interaction trajectories spanning 16 tasks across five distinct agent skill dimensions: 
+reasoning, math, programming, web navigation, and embodied tasks. 
+The authors propose a novel annotation pipeline to scale the trajectory dataset and minimize difficulty bias, 
+surpassing previous methods. They also introduce SAMOYED, a powerful open-source language model suite (7B/13B scale) optimized 
+for agent tasks using trajectory tuning. 
+SAMOYED showcases exceptional generalization and transferable intelligence on unseen tasks.
+
+1. AGENTBANK:
+   Largest dataset of 50k agent interaction trajectories, across 16 tasks in five skill dimensions.
+   Novel annotation pipeline addressing challenges in scaling up trajectory data and reducing difficulty bias.
+   Mitigates the common issue of trajectory collection pipelines skewed toward easier tasks by introducing an "answer forcing" strategy to correct failed interactions.
+
+2. SAMOYED:
+   Fine-tuned on AGENTBANK, SAMOYED outperforms existing models like AgentLM and Agent-FLAN, demonstrating superior generalization on both held-in and held-out tasks.
+   The large-scale trajectory tuning enables SAMOYED to handle unseen tasks more effectively.
+   CodeLlama, particularly, shows strong performance in programming and web navigation tasks, benefiting from its extensive code pretraining.
+
+3. AGENTBANK Trajectory Collection:
+   - Challenges:
+     Scaling up trajectory data is difficult due to low success rates from GPT-4 and other models.
+     Difficulty bias arises when failure trajectories are discarded, skewing the training set toward easier tasks.
+   - Solution: A new trajectory annotation pipeline addresses these challenges by:
+               -1. Using Answer Forcing to generate new trajectories for failed tasks.
+               -2. Applying Heuristic Action Search for discrete-action tasks.
+               -3. Reformatting reasoning steps into action sequences for tasks with ground-truth intermediate steps.
+
+4. SAMOYED Training:
+   The AGENTBANK data is structured into a chatbot-style format (task instruction, observations, and actions). The model is trained using a decoder-only architecture,
+   with loss computed only on the ground-truth actions.
+   Evaluations demonstrate that SAMOYED, tuned on a larger set of trajectories, yields superior performance on agent tasks compared to other models.
+
+5. Key Findings:
+   - Trajectory Tuning Benefits:
+     Scaling trajectory data improves model generalization to unseen tasks.
+     Weaker LLMs, such as Llama-2, benefit more from massive trajectory tuning compared to stronger models like Llama-3 or Mistral.
+
+   - Code Pretraining:
+     CodeLlama, thanks to its code-heavy pretraining, excels in programming and web navigation tasks.
+
+   -Skill Transfer:
+    Most skills, except embodied tasks, transfer well across different skill dimensions, likely due to the unified agent interaction format of AGENTBANK.
+
+6. Limitations:
+   Experiments were only conducted on 7B and 13B models due to resource constraints.
+   The study did not explore more advanced agent mechanisms or multi-agent collaboration frameworks.
+
+7. Conclusion:
+   The paper presents AGENTBANK, the largest and most comprehensive interaction trajectory dataset to date, along with SAMOYED, 
+   a highly optimized open-source LLM suite for agent tasks. SAMOYED significantly outperforms strong baselines, 
+   especially in generalization to unseen tasks, positioning it as a leading model in the agent task domain.
