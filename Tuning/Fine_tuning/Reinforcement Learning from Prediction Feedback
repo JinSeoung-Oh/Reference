@@ -1,0 +1,51 @@
+### From https://medium.com/@techsachin/reinforcement-learning-from-prediction-feedback-llm-fine-tuning-method-to-generate-user-9c7c43041474
+
+The Reinforcement Learning from Prediction Feedback (RLPF) framework introduces a novel method for fine-tuning large language models (LLMs) 
+to generate human-readable user summaries that are effective for personalized downstream tasks. 
+The goal is to move away from traditional, embedding-based user modeling approaches that struggle with extensive user histories, 
+which often introduce noise due to their length.
+
+1. Key Contributions:
+   - Natural Language Summaries for User Modeling: RLPF creates concise, interpretable summaries of user behavior rather than relying on dense, embedding-based representations. These summaries are intended to work effectively with existing LLMs without requiring further specialized training.
+   - No Need for Hand-Crafted Prompts or Reference Summaries: The framework operates without the need for manually crafted prompts or reference data, offering a more scalable and privacy-respecting approach to summarization.
+   - Improvement in Multiple Aspects: RLPF-generated summaries show superior performance over traditional baselines in multiple domains, offering improvements in factuality, readability, and abstractiveness.
+
+2. Core Components of RLPF:
+   - Summarization Model: A model trained to generate succinct summaries from a user’s raw interaction data.
+   - Prediction-Based Reward Model: This model measures the effectiveness of the generated summaries in achieving accurate downstream predictions, such as predicting a user’s future behavior.
+   - Feedback Loop for Refinement: The system includes a feedback loop that continuously refines the summarization model using reinforcement learning (RL). A reward function balances prediction accuracy and summary length, guiding the model towards concise, accurate summaries.
+
+3. Technical Details:
+   - Problem Setup:
+     For each user, all historical interactions are concatenated into a single string, forming the user context 𝑢_𝑖. The summarization model 𝜋_𝜃 generates a summary 
+     𝑠_𝑖 based on 𝑢_𝑖, which is then used as input for an LLM to make downstream predictions.
+     The model’s goal is to minimize the prediction error between the generated summaries and the ground truth labels.
+   - Reinforcement Learning from Prediction Feedback (RLPF):
+     RLPF treats the summarization problem as a Contextual Markov Decision Process (CMDP). States include both the user context and partially generated summary, 
+     while actions represent the choice of tokens in the summary.
+     A reward is computed based on how well the generated summary aids in the prediction of future activities, using a frozen LLM to evaluate the prediction quality.
+   - Reward Computation:
+     The reward function includes two components: a prediction feedback reward 𝑟_𝑝𝑟𝑒𝑑 based on accuracy and a length reward 𝑟_𝑙𝑒𝑛 to encourage conciseness.
+     In the context of future activity prediction, RLPF generates a binary reward by comparing the predicted activity with the actual next activity in the user’s history.
+
+4. Experimental Setup:
+   The experiments utilized four datasets, including Amazon Books, Google Local Review, and MovieLens datasets from different years. 
+   For each dataset, RLPF generates summaries and assesses their effectiveness using a frozen, instruction-tuned Gemini 1.0 model for prediction tasks.
+   - Evaluation Metrics:
+     Predictiveness, factuality, abstractiveness, and readability are assessed using an automatic rater, 
+     and comparisons are made with existing zero-shot and supervised baselines.
+
+5. Key Findings:
+   - Performance Gains: RLPF achieved significant improvements over baseline models in terms of prediction accuracy,
+                        context compression, and overall quality of summaries. It compressed context length by approximately 73.8% while delivering up to 12.4% gains 
+                        in downstream task performance.
+   - Transferability and Generalization: RLPF summaries exhibited strong performance in transferring to new tasks, 
+                                         such as favorite genre prediction and personalized text generation, highlighting its robustness across different datasets 
+                                         and domains.
+   - Intrinsic Evaluation: RLPF consistently outperformed zero-shot summaries in factuality, abstractiveness, and readability across all datasets.
+
+6. Conclusion:
+   RLPF offers a scalable and interpretable approach to user modeling in LLM-powered personalization systems by generating human-readable summaries 
+   that are optimized for predictive tasks. It demonstrates the ability to effectively compress extensive user histories and 
+   enhance downstream performance across various domains. The authors suggest exploring more complex tasks and feedback mechanisms 
+   in future work to extend RLPF’s capabilities.
