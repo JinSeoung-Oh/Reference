@@ -1,0 +1,37 @@
+### From https://venturebeat.com/ai/meta-introduces-spirit-lm-open-source-model-that-combines-text-and-speech-inputs-outputs/
+
+Meta has introduced Meta Spirit LM, its first open-source multimodal language model capable of processing both text and speech inputs and outputs. 
+Developed by Meta’s Fundamental AI Research (FAIR) team, Spirit LM is positioned to compete with OpenAI's GPT-4o and models like Hume’s EVI 2. 
+Unlike traditional voice AI models that rely on separate ASR (automatic speech recognition) and TTS (text-to-speech) components,
+Spirit LM aims to provide a more integrated and expressive AI voice experience.
+
+1. Key Features of Meta Spirit LM:
+   -1. Two Model Versions:
+        -a. Spirit LM Base: Focuses on phonetic tokens for handling and generating speech.
+        -b. Spirit LM Expressive: Goes further by including tokens for pitch and tone, allowing the model to convey emotional cues like excitement or sadness.
+       Expressive Speech Generation: By incorporating phonetic, pitch, and tone tokens, Spirit LM enhances the natural expressiveness of generated speech. 
+       This helps capture nuances like emotional tone and varied intonation, which traditional models often lack.
+
+   -2. Cross-Modal Capabilities: Spirit LM is trained on both text and speech datasets, enabling it to perform tasks like:
+        -a. Automatic Speech Recognition (ASR): Converting spoken language into text.
+        -b. Text-to-Speech (TTS): Converting written text into natural-sounding speech.
+        -c. Speech Classification: Recognizing and categorizing speech based on content or emotional tone.
+
+2. Open-Source Accessibility and Licensing:
+   The model is available under Meta’s FAIR Noncommercial Research License, allowing researchers to use, modify, 
+   and create derivative works for non-commercial purposes only. 
+   This aligns with Meta’s emphasis on open science and aims to spur research and exploration in multimodal AI technologies.
+
+3. Potential Applications:
+   Spirit LM’s ability to integrate emotional cues makes it ideal for developing more engaging virtual assistants and interactive AI systems.
+   Meta envisions the model being used in scenarios like:
+
+   -1. Customer Service Bots: Offering more natural and human-like interactions.
+   -2. Virtual Assistants: Enhancing expressiveness and responsiveness based on user inputs.
+   -3. Broader Research and Future Directions:
+   Meta Spirit LM is part of a broader research agenda at FAIR, which includes updates to models like Segment Anything Model 2.1 (SAM 2.1) 
+   for image and video segmentation. 
+   The overall aim is to contribute to the field of Advanced Machine Intelligence (AMI) while prioritizing accessibility and reproducibility in AI research.
+
+Meta Spirit LM represents an ambitious push towards integrating expressive voice AI in real-world applications. 
+This launch marks a significant step forward in bridging the gap between language and voice capabilities, fostering more natural and engaging AI interactions
