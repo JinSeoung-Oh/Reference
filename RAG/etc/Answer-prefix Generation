@@ -1,0 +1,40 @@
+## From https://techxplore.com/news/2024-10-method-enabling-llms-concisely-accurately.html
+
+Researchers at the Japan Advanced Institute of Science and Technology have introduced a method called Answer-prefix Generation (ANSPRE) 
+to enhance the effectiveness of large language models (LLMs) in open-domain question answering (ODQA).
+Traditional LLMs face limitations in pinpointing exact answer phrases and producing reliable confidence scores, 
+which are critical in domains like healthcare, finance, and law. Moreover, 
+LLMs often generate verbose responses due to their tendency to include contextual information, making it difficult to extract concise answers.
+
+1. Key Contributions of ANSPRE:
+   -1. Answer Prefix Approach:
+       ANSPRE introduces an "answer prefix" in the prompt, which is a text sequence guiding the LLM toward the exact answer phrase. 
+       For example, given the question, "What gambling game, requiring two coins to play, was popular in World War I?", 
+       the answer prefix would be "The gambling game requiring two coins to play that was popular in World War I was ___." 
+       This method leverages LLMs’ causal language modeling to generate precise answers at the blank space.
+
+   -2. Confidence Score Calibration:
+       ANSPRE aggregates confidence scores from different answer phrases generated across multiple retrieved documents. 
+       This process improves the accuracy and reliability of confidence measures, addressing the problem of poorly calibrated confidence scores 
+       in LLM-generated responses.
+
+   -3. Integration with Retrieval-Augmented Generation (RAG):
+       Similar to RAG, ANSPRE combines the generated answer prefix with documents retrieved from a knowledge base. 
+       However, it takes a step further by optimizing the answer generation process using the prefix-based prompting technique.
+
+2. SELF-ANSPRE and Reflective Retrieval:
+   The research team extended ANSPRE by creating SELF-ANSPRE, which combines ANSPRE with Self-Reflective RAG (SEFT-RAG). 
+   SEFT-RAG uses reflection tokens to decide when to retrieve new documents and how to rank the retrieved information based on its utility for answering the question. 
+   The confidence scores from reflection tokens and ANSPRE are combined to generate a final ranking score, improving overall answer quality.
+
+3. Empirical Results and Implications:
+   The researchers tested ANSPRE on three ODQA benchmarks and found that it significantly improved the quality of 
+   answers and confidence scores compared to pre-trained and instruction-tuned LLMs. 
+   Additionally, SELF-ANSPRE outperformed SEFT-RAG alone, demonstrating the effectiveness of integrating answer prefixes and reflective retrieval techniques.
+
+4. Broader Impact:
+   Prof. Nguyen Le Minh, who led the study, emphasized the potential applications of ANSPRE in fields like medical diagnosis, 
+   legal assistance, education, and customer support. By enabling more concise and accurate question answering, 
+   ANSPRE could help build trust in AI systems, paving the way for increased human-AI collaboration in sensitive domains.
+
+This advancement marks a significant step forward in refining LLM-based question answering and could broaden the application of these models across a range of high-stakes industries​
