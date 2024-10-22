@@ -1,0 +1,87 @@
+## From https://towardsdatascience.com/pytorch-optimizers-arent-fast-enough-try-these-instead-61a1350e3eac
+
+1. Adam Optimizer:
+   - Purpose: A popular optimization algorithm in PyTorch, well-suited for various machine learning tasks.
+   - Details: It leverages both the first and second moments of the gradients to adapt the learning rate dynamically.
+   - Performance: The final loss was reduced from an initial 300,000 to around 91.85 in 100 iterations, which is a decent reduction.
+
+   """
+   optimizer_name = "PyTorch Adam"
+   result = pytorch_optimize(x0, model, input_tensor, target, maxiter, loss_tracker, optimizer_name)
+   print(f'Final loss Adam optimizer: {result[1]}')
+   """
+
+2. Sequential Least Squares Programming (SLSQP):
+   - Purpose: A gradient-based optimization algorithm for solving constrained problems effectively.
+   - Details: Models the optimization problem as a parabola and iteratively moves towards the minima based on local information.
+   - Strengths: Fast convergence and effective handling of parameter constraints.
+   - Performance: Achieved a final loss of 3.09, a significant improvement over Adam.
+
+   """
+   optimizer_name = "slsqp"
+   args = (model, input_tensor, target, loss_tracker, optimizer_name)
+   result = opt.minimize(objective, x0, method=optimizer_name, args=args, options={"maxiter": maxiter, "disp": False, "eps": 0.001})
+   print(f"Final loss {optimizer_name} optimizer: {result.fun}")
+   """
+
+3. Particle Swarm Optimization (PSO):
+   - Purpose: A population-based, gradient-free algorithm inspired by the movement of birds in a flock.
+   - Details: Particles (potential solutions) explore the solution space based on their own and their neighbors’ experiences.
+   - Strengths: Works well in non-differentiable and noisy optimization problems with many local minima.
+   - Performance: Achieved a final loss of 1.02, surpassing SLSQP.
+
+   """
+   from pyswarm import pso
+
+   lb = -np.ones(num_params)
+   ub = np.ones(num_params)
+   optimizer_name = 'pso'
+   args = (model, input_tensor, target, loss_tracker, optimizer_name)
+   result_pso = pso(objective, lb, ub, maxiter=maxiter, args=args)
+   print(f"Final loss {optimizer_name} optimizer: {result_pso[1]}")
+   """
+
+4. Covariance Matrix Adaptation Evolution Strategy (CMA-ES):
+   - Purpose: An evolutionary algorithm from 1996, designed for tough optimization problems involving non-convex, discontinuous, or noisy functions.
+   - Details: Uses a population-based approach, gradually learning which parameters work best by sampling and adapting its strategy.
+   - Strengths: Self-adapting and highly versatile, capable of dealing with difficult optimization tasks.
+   - Performance: Achieved a final loss of 4.08, demonstrating its adaptability to complex problems.
+
+   """
+   from cma import CMAEvolutionStrategy
+
+   es = CMAEvolutionStrategy(x0, 0.5, {"maxiter": maxiter, "seed": 42})
+   optimizer_name = 'cma'
+   args = (model, input_tensor, target, loss_tracker, optimizer_name)   
+   while not es.stop():
+       solutions = es.ask()
+       object_vals = [objective(x, *args) for x in solutions]
+       es.tell(solutions, object_vals)
+   print(f"Final loss {optimizer_name} optimizer: {es.result[1]}")
+   """
+
+5. Simulated Annealing (SA):
+   - Purpose: An optimization technique inspired by physical processes such as metal cooling, useful for escaping local minima.
+   - Details: Begins with a "hot" phase where it explores a wide range of solutions and then "cools" to converge to a final solution.
+   - Strengths: Good at exploring and escaping local minima, highly parallelizable.
+   - Performance: Achieved the best result, with a final loss of 0.78 after only two iterations.
+
+  """
+  from scipy.optimize import dual_annealing
+
+  bounds = [(-1, 1)] * num_params
+  optimizer_name = 'simulated_annealing'
+  args = (model, input_tensor, target, loss_tracker, optimizer_name)
+  result = dual_annealing(objective, bounds, maxiter=maxiter, args=args, initial_temp=1.)
+  print(f"Final loss {optimizer_name} optimizer: {result.fun}")
+  """ 
+
+6. Key Insights:
+   Adam is a solid baseline with reasonable performance.
+   SLSQP and PSO offer significant improvements, especially in constrained and non-differentiable scenarios.
+   CMA-ES shines in challenging optimization tasks but can be slower to converge.
+   Simulated Annealing achieved the best loss reduction by efficiently exploring the solution space.
+
+These optimization methods each have their niche, ranging from gradient-based to gradient-free approaches, 
+and varying in their handling of constraints, noise, and local minima. 
+This highlights the importance of choosing the right optimizer based on the problem’s characteristics and requirements.
