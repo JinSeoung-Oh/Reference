@@ -1,0 +1,47 @@
+## From https://medium.com/@ignacio.de.gregorio.noblejas/metas-rlef-turns-any-llm-into-a-sota-coder-597f1aa37e20
+
+Reinforcement Learning from Execution Feedback (RLEF) is a groundbreaking fine-tuning method developed by Meta that turns language models into
+highly efficient and accurate coders by training them to iteratively review and refine their own code based on execution feedback. 
+This process elevates models like Llama 3.1 8B to state-of-the-art status, even surpassing models as powerful as GPT-4 in coding benchmarks like CodeContests. 
+This advancement demonstrates the remarkable capabilities of RLEF for code synthesis tasks, making it a highly scalable and sample-efficient approach.
+
+1. Key Features of RLEF:
+   -1. Iterative Code Refinement:
+       RLEF trains models to generate code solutions and then iteratively improve those solutions by analyzing execution feedback from tools like compilers,
+       unit tests, or interpreters. This method focuses on learning from mistakes, improving code accuracy through each iteration.
+   -2. Superiority over RLHF:
+       Traditional Reinforcement Learning from Human Feedback (RLHF) presents the model with two possible responses and allows it to choose the preferred one. 
+       In contrast, RLEF continuously refines the model’s responses based on real execution outcomes, which are much more deterministic in code-related tasks.
+   -3. Sample Efficiency:
+       RLEF reaches state-of-the-art (SOTA) accuracy of 40% with just three code iterations, whereas other models require far more iterations to reach similar levels 
+       of performance, showcasing its exceptional sample efficiency.
+   -4. Proximal Policy Optimization (PPO):
+       RLEF leverages PPO, a reinforcement learning algorithm designed to update models by balancing two terms: 
+       reward maximization (e.g., improving the code output) and regularization (preventing the model from deviating too much from its base behavior).
+       This ensures stable learning without overfitting.
+   -5. Scalability:
+       RLEF not only achieves great results on mid-tier models like Llama 3.1 8B but also scales effectively to larger models, such as Llama 3.1 70B. 
+       When applied to larger models, the accuracy surges beyond 50%, a significant leap from the previous record of 30%.
+   -6. Inference-Time Compute:
+       RLEF exemplifies the trend toward inference-time compute, where the focus shifts from simply scaling models to enabling them to think more thoroughly 
+       during inference. By giving models more time to reflect on and refine their outputs, RLEF ensures better task performance.
+
+2. How RLEF Works:
+   -1. Task Initiation: The model is given a coding task and generates an initial code solution.
+   -2. Execution Feedback: If the code fails during execution, the model receives feedback indicating where the error occurred.
+   -3. Code Refinement: This feedback is then incorporated into the model's context, allowing the model to retry the task with improved insights.
+   -4. Private and Public Testing: The model first refines its responses based on public tests (to avoid memorizing outputs) and 
+                                   then passes through a final evaluation with private tests.
+   -5. Reward and Update: After evaluating its performance, the model’s policy is updated through PPO based on its success in passing the tests.
+
+3. Major Advantages of RLEF:
+   -1. Accuracy with Fewer Iterations: RLEF significantly reduces the number of attempts required to generate correct solutions, 
+                                       making it far more efficient than traditional methods.
+   -2. Scalable Performance: As the number of iterations increases, RLEF continues to improve without reaching a performance plateau, demonstrating scalability.
+   -3. Sample Efficiency: It achieves top results with fewer computation resources, ensuring that AI models are not only powerful but also efficient.
+
+4. Conclusion:
+   RLEF marks a major step forward in the training and fine-tuning of models for coding tasks. By harnessing execution feedback and allowing models
+   to learn from their own mistakes, RLEF creates more accurate and efficient coders. The scalability, sample efficiency, 
+   and enhanced accuracy make it a promising approach for advancing coding models, 
+   especially as it continues to push the boundaries of what smaller models can achieve compared to their larger counterparts.
