@@ -1,0 +1,37 @@
+### https://generativeai.pub/unleashing-llms-self-awareness-how-seakr-enhances-knowledge-retrieval-in-ra-7a0d6603c8ee
+
+SEAKR introduces an innovative approach to addressing hallucination issues in large language models (LLMs) by leveraging self-aware uncertainty 
+to decide when and how to retrieve and integrate external knowledge. 
+Traditional retrieval-augmented generation (RAG) methods tend to retrieve knowledge for every query,
+which can lead to inefficiency and noise, especially when irrelevant information is integrated. 
+SEAKR aims to optimize this process by introducing self-aware uncertainty estimation—a system that evaluates the model's confidence in 
+its internal states to determine when retrieval is necessary and how to incorporate external data.
+
+1. Key Components of SEAKR:
+   - Search Engine: Retrieves and ranks relevant knowledge snippets from external sources.
+   - LLM with Self-Awareness: The LLM assesses its own uncertainty and determines whether external retrieval is necessary.
+   - Uncertainty Estimator: Quantifies the LLM’s confidence using internal states, particularly through the Gram determinant of hidden token representations.
+
+2. How SEAKR Works:
+   - Self-aware Retrieval: The model first attempts to answer queries without retrieval. 
+                           If it encounters high uncertainty (measured against a threshold), it triggers a retrieval step to gather external knowledge.
+   - Self-aware Re-ranking: Once multiple knowledge snippets are retrieved, SEAKR prioritizes those that best reduce uncertainty, 
+                            ensuring that only the most relevant and accurate snippets are integrated into the final response.
+   - Self-aware Reasoning: SEAKR uses the retrieved knowledge to refine its reasoning and generate more accurate answers by comparing different reasoning strategies 
+                           and selecting the one with the lowest uncertainty.
+
+3. Benefits:
+   - Efficiency: SEAKR avoids unnecessary retrieval steps by dynamically deciding when to retrieve based on uncertainty, 
+                 reducing noise in the knowledge integration process.
+   - Accuracy: By focusing on uncertainty within the model's internal states, SEAKR minimizes the risk of integrating irrelevant or misleading information.
+   - Robustness: SEAKR has demonstrated superior performance on complex question-answering tasks like 2WikiMultiHopQA and HotpotQA, 
+                 showing improved accuracy over traditional RAG methods.
+
+4. Challenges:
+   - Computational Cost: The reliance on internal states for uncertainty estimation may be computationally demanding, limiting SEAKR's scalability.
+   - Applicability: SEAKR is better suited for open-source LLMs due to the need for access to internal states, restricting its use in some proprietary models.
+
+In conclusion, SEAKR enhances the reliability of LLM outputs by making retrieval decisions based on a deeper understanding of the model's uncertainty. 
+This self-awareness leads to more efficient and accurate knowledge integration, setting SEAKR apart from traditional RAG methods. 
+Future work could focus on improving the resource efficiency of the uncertainty estimation process and
+expanding SEAKR's application to a wider range of tasks beyond question answering.
