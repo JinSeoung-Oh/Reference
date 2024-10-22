@@ -1,0 +1,25 @@
+### From https://techxplore.com/news/2024-10-algorithm-advances-graph-complex-networks.html
+
+Professor Nikolaos Sidiropoulos at the University of Virginia has made significant advancements 
+in the field of graph mining with the introduction of a new computational algorithm focused on identifying tightly connected clusters known 
+as triangle-dense subgraphs. 
+This research, conducted in collaboration with Aritra Konar, an assistant professor at KU Leuven, 
+was published in the IEEE Transactions on Knowledge and Data Engineering.
+
+1. Key Highlights of the Algorithm:
+   -1. Focus on Triangle-Dense Subgraphs: Traditional graph mining techniques often concentrate on finding dense connections between pairs of nodes, 
+                                          such as identifying frequently communicating individuals on social media. 
+                                          The new algorithm takes this a step further by examining triangles of connections, or groups of three nodes where each pair 
+                                          within the trio is linked. 
+                                          This approach aims to find clusters where all three elements interact, revealing more meaningful and tightly-knit relationships.
+   -2. Submodular Relaxation Technique: The central innovation of this algorithm lies in using submodular relaxation, which simplifies the problem of locating 
+                                        triangle-dense subgraphs. This method effectively reduces the computational complexity, 
+                                        enabling the algorithm to quickly and efficiently detect these clusters even within large datasets.
+
+2. Applications: The new method is critical in various fields, including:
+   -1. Fraud detection: Identifying suspicious or coordinated activities in financial networks.
+   -2. Computational biology: Analyzing protein interactions or genetic relationships.
+   -3. Social media analysis: Detecting community dynamics or closely interacting friend groups.
+
+Professor Sidiropoulos emphasized the importance of focusing on how groups of three elements interact to uncover deeper patterns in complex systems.
+The algorithm's ability to identify these triangle-dense subgraphs offers new possibilities for researchers working on large-scale data analysis
