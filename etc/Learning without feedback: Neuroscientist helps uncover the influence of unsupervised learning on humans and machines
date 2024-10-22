@@ -1,0 +1,44 @@
+### From https://medicalxpress.com/news/2024-10-feedback-neuroscientist-uncover-unsupervised-humans.html
+
+The research led by Franziska Bröker delves into unsupervised learning in humans and its parallels with machine learning models. 
+Published in Trends in Cognitive Sciences, the study explores how humans, like machines, attempt to make sense of new information through internal predictions. 
+However, without corrective feedback, humans may reinforce incorrect beliefs—a phenomenon termed self-reinforcement—which can either aid 
+or obstruct learning depending on the initial alignment of internal representations with the task requirements.
+
+1. Key Findings:
+   -1. Self-Reinforcement and Learning Traps:
+       Humans, in the absence of external validation, often rely on their internal understanding to make predictions and interpret new information. 
+       This works well when their internal representations (mental models) align with the actual task demands. 
+       However, if their initial assumptions are incorrect, they are prone to reinforcing mistakes, 
+       leading to learning traps where wrong patterns are continually strengthened. 
+       For instance, a person might wrongly classify a woolly goat as a sheep, reinforcing this error without external feedback.
+
+   -2. Importance of Early Feedback:
+       The study highlights that supervision early in the learning process is crucial to establish accurate mental representations. 
+       This is reflected in the representation-to-task alignment framework, which emphasizes that early, 
+       structured feedback enables learners to form accurate mental models. As expertise builds, less supervision is needed. 
+       Without this initial feedback, individuals are likely to overconfidently stick to incorrect conclusions.
+
+   -3. Comparison with Machine Learning:
+       In machine learning, unsupervised learning algorithms can effectively identify patterns without labels,
+       but they often rely on inherent task structures and assumptions that match the underlying data distribution. 
+       In contrast, humans are influenced by cognitive biases and imperfect self-generated feedback, such as confirmation bias, 
+       which can distort unsupervised learning efforts.
+
+   -4. Neural Mechanisms:
+       The study suggests that the brain areas involved in processing external feedback are also activated during inferred feedback. 
+       This internal feedback can trigger a sense of subjective reward, leading learners to self-reinforce their own decisions.
+       Neuroimaging evidence supports the role of neural replay—the brain's reactivation of past experiences during rest periods—as a key mechanism 
+       for refining mental models without external guidance.
+   
+   -5. Implications for Real-World Expertise Development:
+       Practical implications of this research are evident in fields like radiology, where structured feedback diminishes over time. 
+       If expertise were solely dependent on unsupervised learning, consistent improvement would be expected, but evidence suggests otherwise. 
+       Instead, regular, targeted feedback on key decisions seems essential to fostering true expertise, beyond mere experience.
+
+2. Conclusion:
+   The study concludes that unsupervised learning is not inherently good or bad—it is contingent on the alignment between internal understanding and task demands. 
+   Integrating unsupervised mechanisms with periodic, targeted feedback can prevent overconfidence in erroneous conclusions and optimize learning outcomes
+   in educational and professional settings.
+
+This research underscores the need to find the right balance between self-reinforcement and external feedback in both human learning and machine learning algorithm design to foster effective, lifelong learning and avoid reinforcing false patterns
