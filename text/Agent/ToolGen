@@ -1,0 +1,34 @@
+### https://medium.com/@techsachin/toolgen-framework-that-unifies-tool-retrieval-and-execution-in-llms-for-scalable-and-efficient-ai-6db733a980fd
+
+ToolGen is a novel framework that integrates tool retrieval and execution directly into a large language model’s generative process. 
+Traditional methods rely on adding tool descriptions as context or using separate retrieval mechanisms, 
+which are limited by context length and can be inefficient. 
+ToolGen addresses these issues by representing each tool as a unique token within the model’s vocabulary,
+enabling the LLM to generate tool calls and their arguments as part of its language generation capabilities.
+
+1. Key Contributions:
+   - Integration of Tool Knowledge
+     Tools are integrated as virtual tokens within the model, allowing seamless generation of tool-related outputs. 
+     This enables direct invocation of tool calls without requiring additional context, significantly enhancing the efficiency of the process.
+
+2. Three-Stage Training Process:
+   -1. Tool Memorization: Tool descriptions are used to fine-tune the model, allowing it to learn the association 
+                          between tool descriptions and their corresponding tokens.
+   -2. Retrieval Training: The model is trained to predict tool tokens based on user queries, effectively learning to retrieve the appropriate tools.
+   -3. Agent-Tuning: The model is further fine-tuned using task completion trajectories, allowing it to dynamically adapt its predictions based on 
+                     generated actions and feedback.
+
+3. Technical Overview:
+   -1. Tool Virtualization: Tools are mapped to unique tokens using an atomic indexing approach. Each tool is assigned a unique token by expanding the model’s vocabulary, starting with an embedding initialized as the average embedding of its name, ensuring semantic relevance.
+   -2. Iterative Approach for Task Completion: ToolGen follows a step-by-step method, where the model generates thoughts and corresponding tool action tokens iteratively. Each action token triggers the retrieval of specific tool documentation, which the model then uses to generate the necessary parameters.
+   -3. Constrained Beam Search for Inference: During inference, ToolGen uses constrained beam search, limiting output tokens to the predefined tool token set. This approach minimizes hallucination by preventing the model from generating non-existent or irrelevant tools.
+
+4. Experimental Results:
+   -1. Tool Retrieval Performance: ToolGen outperforms traditional retrieval methods in both in-domain and multi-domain settings. It shows superior results compared to baselines like BM25, Embedding Similarity (EmbSim), and BERT-based retrieval models such as ToolRetriever. Evaluation metrics like Normalized Discounted Cumulative Gain (NDCG) indicate that ToolGen consistently achieves better retrieval precision and ranking performance.
+   -2. End-to-End Evaluation: ToolGen demonstrates higher success rates in solving tasks using both ground truth tools and retrieved tools. Metrics such as Solvable Pass Rate (SoPR) and Solvable Win Rate (SoWR) show ToolGen’s efficiency in handling large-scale tool repositories.
+   -3. Hallucination Mitigation: ToolGen’s design significantly reduces hallucination rates, outperforming models like GPT-3.5 and ToolLlama, which were prone to generating non-existent tools. By enforcing constraints on output tokens, ToolGen maintains reliability and consistency in its predictions.
+
+5. Conclusion:
+   ToolGen sets a new standard for scalable AI agents by seamlessly integrating tool retrieval and execution into the LLM’s generative process. 
+   Through its unique virtual token approach and iterative fine-tuning, it surpasses traditional methods in efficiency, cost, and effectiveness. 
+   This unified framework has practical implications for developing more capable and reliable AI systems capable of handling large, diverse tool repositories
