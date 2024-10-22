@@ -1,0 +1,44 @@
+### From https://medium.com/syncedreview/scaling-multi-objective-optimization-meta-fairs-cgpo-advances-general-purpose-llms-090dc5396b07
+
+The paper "The Perfect Blend: Redefining RLHF with Mixture of Judges" introduces Constrained Generative Policy Optimization (CGPO), 
+a novel approach designed to enhance Reinforcement Learning from Human Feedback (RLHF) for multi-task learning (MTL), 
+specifically addressing the challenges of reward hacking and balancing complex objectives.
+
+1. Key Elements of CGPO:
+   - 1. Mixture of Judges (MoJ):
+        A system involving both rule-based and LLM-based evaluators, known as judges, which assess the LLM’s output across different tasks.
+        This mixture ensures that model tuning is principled and balanced, offering better control over multiple objectives such as engagement, 
+        instruction following, and safety.
+
+   - 2. Primal-type Constrained RL:
+        CGPO combats reward hacking by using primal-type constrained RL methods, ensuring that the model doesn’t exploit the reward system by focusing 
+        too heavily on a single objective at the expense of others.
+        The introduction of three new optimizers:
+        -a. Calibrated-Regularized Policy Gradient (CRPG): Ensures calibrated updates by balancing rewards and penalties.
+        -b. Constrained Online Direct Preference Optimization (CODPO): Optimizes preferences within constrained environments.
+        -c. Calibrated-Regularized Reward Ranking Finetuning (CRRAFT): A novel approach to ensure the model is fine-tuned without biasing 
+                                                                       towards specific reward patterns.
+   -3. Multi-Objective RLHF:
+      CGPO extends the RLHF approach to multi-objective optimization, where each task (e.g., general conversation, safety, coding reasoning) 
+      is treated with its own reward models and tuning process.
+      This strategy allows for a Pareto-optimal balance across multiple tasks, expanding the Pareto frontier to achieve 
+      optimal performance across conflicting objectives.
+
+   -4. Adaptability and Scalability:
+       CGPO is designed to be highly adaptable to existing post-training pipelines with minimal hyperparameter adjustments, making it easy to integrate.
+       The approach is also scalable, designed for large models like Llama 3.0 70b, and proved effective across various tasks involving conflicting objectives.
+
+2. Benefits of CGPO:
+   - 1. Balanced Optimization: By ensuring that multiple objectives are optimized concurrently without sacrificing one for another, 
+                               CGPO prevents reward hacking and ensures robust generalization across tasks.
+   - 2. Structured Policy Tuning: The Mixture of Judges system and constrained optimization ensure that models are fine-tuned in a principled and structured way, 
+                                  making the process more efficient and reliable.
+   - 3. Robust Multi-Task Performance: In experiments involving five distinct tasks—general conversation, instruction following, math and coding reasoning, 
+                                       engagement, and safety—CGPO consistently outperformed traditional RLHF methods like PPO and DPO.
+   - 4. Theoretical Guarantees: The system's design offers theoretical backing for achieving Pareto-optimality, making it a strong candidate for handling complex, 
+                                multi-task learning environments in general-purpose LLMs.
+
+3. Conclusion:
+   CGPO represents a significant advancement in the field of RLHF, particularly for multi-task learning, 
+   by addressing key issues such as reward hacking and conflicting objectives. With its adaptable design, novel optimizers, and scalable architecture, 
+   CGPO promises to enhance the post-training performance of large language models (LLMs) across a wide range of tasks.
