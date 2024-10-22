@@ -1,0 +1,23 @@
+## From https://arxiv.org/abs/2410.05258
+## https://www.microsoft.com/en-us/research/publication/differential-transformer/
+## https://www.aidemos.info/differential-transformer-a-breakthrough-in-large-language-model-architecture/
+
+The Differential Transformer (DIFF Transformer) is an enhancement to the traditional Transformer architecture, 
+aimed at addressing inefficiencies in attention mechanisms.
+In standard Transformers, attention is often allocated to irrelevant parts of the input, 
+which can result in issues such as hallucinations and poor focus on relevant information. 
+The DIFF Transformer tackles this problem by introducing a differential attention mechanism.
+
+This mechanism operates by calculating two separate softmax-based attention maps and subtracting one from the other.
+This subtraction effectively cancels out noise and amplifies attention on the most relevant parts of the input. This process leads to several benefits:
+
+-1. Noise cancellation: Similar to how noise-canceling headphones work, it removes irrelevant context, making the model more efficient in processing.
+-2. Sparse attention patterns: The differential approach promotes focusing only on key information.
+-3. Improved in-context learning: The model becomes more accurate and robust, particularly in handling tasks like few-shot learning and long-context modeling.
+
+Experimental results show that the DIFF Transformer outperforms traditional models, such as OpenLLaMA and StableLM, across various tasks, 
+including language modeling, information retrieval, and hallucination mitigation. 
+Additionally, it achieves better results with fewer parameters and less training data, making it more efficient for large-scale AI applications.
+
+Overall, the Differential Transformer is a promising evolution in Transformer-based architectures, 
+particularly for tasks requiring long-context understanding and key information retrieval
