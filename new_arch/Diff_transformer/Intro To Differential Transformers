@@ -1,0 +1,41 @@
+### From https://medium.com/@isaakmwangi2018/intro-to-differential-transformers-a-new-attention-mechanisms-for-large-language-models-llms-9d977b5857ae
+
+The text introduces the Transformer architecture, a key innovation in Natural Language Processing (NLP),
+proposed in the 2017 paper Attention Is All You Need. The traditional Transformer model replaced earlier recurrent models with a self-attention mechanism,
+significantly improving tasks like translation and text generation. 
+However, despite its success, the Transformer has limitations in its ability to allocate attention properly, 
+often focusing on irrelevant context, leading to "attention noise."
+
+To address these limitations, the recently proposed Differential Transformer (DIFF Transformer) introduces a differential attention mechanism. 
+This new approach involves creating two parallel attention maps: one to focus on relevant information and another to capture noise. 
+By subtracting these maps, the model cancels out the noise, much like noise-canceling headphones work in audio processing. 
+This results in a more focused, sparse attention distribution. A key parameter, λ, adjusts the level of noise cancellation.
+
+1. Key Advantages of DIFF Transformer:
+   -1. Reduced Attention Noise: Focuses more on meaningful context by subtracting the noise map, useful in tasks like question answering and summarization.
+   -2. Improved Long-Context Modeling: Enhances performance in tasks that require attention over long sequences, such as document-level language modeling.
+   -3. Enhanced Scalability: DIFF Transformer matches or exceeds the performance of standard Transformers while requiring fewer computational resources 
+                             (about 65% of model size or training tokens).
+   -4. Mitigation of Hallucination: Reduces false information generation in tasks like text generation by focusing attention on factual data.
+   -5. Robust In-Context Learning: More stable when handling examples provided in varying order, 
+                                   improving performance in real-world applications where inputs are not always in a fixed sequence.
+
+2. Experimental Results:
+   -1. Language Modeling: DIFF Transformer achieves lower perplexity, outperforming standard Transformers in predicting the next word more accurately.
+   -2. Key Information Retrieval: Shows better accuracy in extracting specific data points from large texts, particularly when information is buried in long contexts.
+   -3. Activation Stability: Produces fewer activation outliers, allowing effective quantization, making it suitable for low-bit hardware, 
+                             contributing to faster and more efficient inference.
+
+3. Comparison with Standard Transformer:
+   The standard Transformer relies on a single attention map, which treats all context equally, often resulting in over-attention to irrelevant information.
+   In contrast, the DIFF Transformer uses a differential attention mechanism to filter out irrelevant data, 
+   providing more precise focus and reducing computational overhead for similar or better performance.
+
+4. Future Directions and Applications:
+   - Advanced Language Models: Its efficiency could make DIFF Transformer suitable for labs with limited computational resources.
+   - Real-Time Language Understanding: Ideal for chatbots and virtual assistants that require robustness in handling varying input.
+   - Text Generation and Summarization: Especially useful in fields like legal, medical, or technical text generation, where hallucinations need to be minimized.
+
+In conclusion, the DIFF Transformer is a promising advancement, addressing key limitations of standard Transformers
+by focusing on relevant information and reducing noise, improving efficiency, scalability, and performance in various NLP applications.
+
