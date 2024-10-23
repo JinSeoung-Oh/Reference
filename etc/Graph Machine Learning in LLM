@@ -1,0 +1,46 @@
+### From https://isamu-website.medium.com/understanding-graph-machine-learning-in-the-era-of-large-language-models-llms-dce2fd3f3af4
+
+The presentation notes discuss the integration of Graph Machine Learning (Graph ML) with Large Language Models (LLMs), 
+focusing on both historical development and current approaches. 
+The goal is to explore how Graph ML and LLMs can complement each other, and what limitations and potential solutions exist in their combined use.
+
+1. Graph Machine Learning Overview:
+   Graph ML aims to generate vector representations of graphs for machine learning tasks, such as node and edge classification, 
+   despite the complexity posed by potentially exponential numbers of nodes and edges. 
+   One method for this is Random Walks, where nodes in a graph are visited at random, 
+   and their sequences are used to create vector embeddings similar to the word2vec technique in natural language processing (NLP).
+
+   Random Walks help to classify graph nodes by recording sequences of nodes (similar to words in NLP). 
+   Through techniques like Skip-gram, node embeddings are optimized by predicting neighboring nodes based on random walk data.
+
+2. Graph Neural Networks (GNNs):
+   To improve upon simple random walk methods, GNNs are introduced, where a key mechanism is message passing. 
+   In this process, each node aggregates information from its neighbors to update its representation, making nodes aware of their surroundings. 
+   This is done iteratively, allowing for more informed graph-based predictions.
+
+   An example of GNN application is HouseGAN, which generates room layouts based on graph structures, where each node represents a room. 
+   The nodes communicate via message passing to determine spatial relationships, generating a coherent layout.
+
+   GNNs can also incorporate Graph Attention Networks (GATs), where the model learns how much attention to give to different nodes, 
+   reducing biases inherent in manual assumptions about node relationships.
+
+3. Limitations and Enhancements in GNNs:
+   One limitation of GNNs is their inability to effectively scale to very large graphs due to the local nature of their message-passing mechanism. 
+   To overcome this, Graph Transformer Models are proposed. These models adapt transformer architecture, which is successful in NLP, to graph tasks. 
+   For example, Graph Transformers improve node representations by incorporating centrality encoding (node importance based on connections) 
+   and spatial encoding (representing distances between nodes as embeddings).
+
+4. Self-Supervised Learning in Graph ML:
+   Graph Contrastive Learning introduces self-supervised techniques where graphs are perturbed and the model is trained to maintain similar embeddings 
+   to the original graph. Additionally, GraphMAE (Masked Graph Autoencoders) apply masked learning by hiding features of certain nodes and reconstructing them, 
+   which enhances the model's ability to learn graph representations.
+
+5. Role of LLMs in Graph Learning:
+   LLMs can enhance GNN tasks by improving graph feature representations. For instance, LLMs can help encode text or generate better graph features, 
+   integrating natural language data with graph structures. The use of LLMs may improve the performance of GNNs by providing richer,
+   more context-aware embeddings that can complement traditional graph learning methods.
+
+In summary, the integration of LLMs with Graph ML presents exciting possibilities,
+but current limitations in graph size handling and computational efficiency need further research. 
+The presentation emphasizes the evolution from simpler methods like random walks to more advanced GNN and transformer-based models, 
+with self-supervised learning and LLM support offering further potential improvements.
