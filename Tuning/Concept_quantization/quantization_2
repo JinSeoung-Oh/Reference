@@ -1,0 +1,84 @@
+### From https://generativeai.pub/a-guide-to-quantisation-in-llms-2c400c756fb5
+
+The guide provides an in-depth exploration of quantization, its importance, 
+and how it can reduce the resource requirements for deploying large language models (LLMs).
+
+1. What is Quantization?
+   Quantization is a model compression technique that reduces the precision of weights and activations in LLMs, thereby decreasing the overall model size. 
+   It achieves this by converting high-precision data types (e.g., 32-bit floating-point) to lower-precision ones (e.g., 8-bit or 4-bit integers). 
+
+   Quantization helps to:
+
+   -1. Lower memory requirements: Allows models to fit into smaller hardware.
+   -2. Improve deployment flexibility: Enables LLMs to run on a wider range of devices, including those with fewer resources.
+   -3. Speed up inference times: Reducing the precision of computations allows faster processing.
+
+2. How Does Quantization Work?
+   Quantization works by mapping high-precision weights to lower-precision data types using techniques like affine quantization. 
+
+   -1. Mapping weights: Converting 32-bit floating-point values to lower-precision integers (e.g., 4-bit integers).
+   -2. Affine quantization formula: 𝑥_𝑞 = round(𝑥/𝑆 + 𝑍), where 𝑆 is the scaling factor and 𝑍 is the zero-point.
+   -3. Dequantization: During inference, weights are dequantized back to higher precision for computations.
+   -4. Calibration: Performed using a small dataset to determine the range of floating-point values to be quantized.
+
+3. Types of Quantization
+   -1. Post-Training Quantization (PTQ): Quantizes the model after training, which is easier but may reduce accuracy.
+   -2. Quantization-Aware Training (QAT): Simulates quantization during training, allowing the model to adapt to lower precision. 
+                                          QAT requires more resources but generally results in better performance.
+
+4. Python Code Example
+"""
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, AutoTokenizer
+
+model_id = "meta-llama/Llama-2-7b-chat-hf"
+
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.float16,
+)
+
+model   
+ = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    quantization_config=bnb_config,
+    trust_remote_code=True
+)
+model.config.use_cache   
+ = False
+
+from peft import LoraConfig, get_peft_model
+
+lora_alpha = 16
+lora_dropout = 0.1
+lora_r = 64
+
+peft_config = LoraConfig(
+    lora_alpha=lora_alpha,
+    lora_dropout=lora_dropout,
+    r=lora_r,   
+
+    task_type="CAUSAL_LM"
+)
+"""
+
+5. Quantization Techniques for LLMs
+   -1. QLoRA: Combines LoRA and quantization, using 4-bit precision and a specialized NormalFloat (NF4) data type.
+   -2. GPTQ: Employs layer-wise quantization and a mixed INT4/FP16 approach to balance precision and memory savings.
+   -3. GGML/GGUF: Applies quantization for CPU-based models using the k-quant system.
+   -4. AWQ (Activation-Aware Weight Quantization): Keeps important weights at higher precision, minimizing accuracy loss.
+
+6. Pros and Cons of Quantization
+   -1. Pros:
+       Reduces model size and memory usage.
+       Enables deployment on diverse hardware.
+       Accelerates inference and lowers power consumption.
+   -2. Cons:
+       Can result in accuracy loss, especially with aggressive quantization (e.g., 4-bit).
+
+7. Conclusion
+   Quantization is essential for making LLMs more accessible, deployable, and scalable. 
+   Techniques like QLoRA and GPTQ allow for significant memory savings without compromising much on accuracy,
+   making LLMs feasible on more constrained hardware platforms. 
+   This paves the way for broader use of generative AI technologies across industries.
