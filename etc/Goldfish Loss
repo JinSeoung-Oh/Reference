@@ -1,0 +1,52 @@
+### From https://generativeai.pub/be-like-a-goldfish-dont-memorize-mitigating-memorization-in-generative-llms-252a3137ff09
+
+Goldfish Loss is an innovative approach designed to address a key limitation in current AI models: 
+the tendency to memorize and occasionally reproduce sensitive or copyrighted training data.
+The name draws from the popular belief that goldfish have short memories, hinting at a goal of selective forgetting in AI.
+This method provides a mechanism for models to retain knowledge for useful tasks while reducing their capacity to memorize and regurgitate exact text segments, 
+making AI safer and more privacy-compliant.
+
+1. The Memorization Problem in AI
+   Large language models (LLMs) like GPT and LLaMA, though powerful, sometimes memorize training data to an extent where they might replicate word-for-word passages. 
+   This can lead to issues with privacy, copyright, and data security. 
+   For instance, if an AI reproduces an entire passage from a copyrighted book or inadvertently shares sensitive personal data, 
+   it risks violating privacy regulations or intellectual property laws.
+   This memorization risk poses challenges when deploying LLMs in industries where data privacy and transparency are paramount, such as healthcare or finance.
+
+2. Goldfish Loss: How It Works
+   Goldfish Loss was developed to help models "forget" certain details during training. 
+   It does so by introducing a mechanism for selective forgetting through a couple of key techniques:
+
+   -1. Token Dropping
+       During training, the model randomly omits certain tokens (or words) within its data inputs, thereby reducing the likelihood of memorizing entire sequences.
+       This is like skipping over specific answers when studying, to prevent accidental verbatim recall.
+   -2. Sequence Interruption
+       By altering the continuity of some training sequences, the model learns patterns without necessarily recalling every detail in order, 
+       helping it generalize better without strict memorization.
+  
+   These techniques make the model less prone to memorizing long text passages, especially when prompted in ways that might trigger memorized responses.
+
+3. Testing Goldfish Loss: Results and Effectiveness
+   Researchers have tested Goldfish Loss on powerful models like LLaMA-2, finding a significant decrease in the memorization of sensitive data. 
+   For example, when tested with passages from known books, models trained with Goldfish Loss were less likely to reproduce exact text compared to unmodified models. 
+   The evaluation metric, RougeL, which measures the overlap of generated text with the original training data, 
+    showed lower scores — indicating successful "forgetting."
+
+4. Defending Against Data Extraction Attacks
+   While Goldfish Loss has reduced the risk of inadvertent data leaks, researchers have also explored its resilience against adversarial attacks. These include:
+
+   -1. Beam Search Attacks: Attackers use multiple prompts to coax memorized data out of the model.
+   -2. Membership Inference Attacks: These aim to determine if specific data points were part of the training set.
+
+   Although not foolproof, Goldfish Loss has made it more challenging for attackers to extract verbatim content, enhancing security without compromising functionality.
+
+5. Balancing Safety and Performance
+   A major consideration with any training modification is ensuring it doesn’t impact the model’s performance in answering questions or completing standard tasks. 
+   Experiments indicate that models with Goldfish Loss perform comparably on benchmark tests, such as BoolQ, 
+   showing that this technique maintains task effectiveness while safeguarding data.
+
+6. Looking Ahead: Combining Goldfish Loss with Privacy-Preserving Techniques
+   While Goldfish Loss is a promising step toward secure AI, further research is needed to address complex data extraction threats fully.
+   Researchers are exploring ways to combine it with differential privacy and other advanced techniques to build models that are both powerful and secure,
+   supporting an AI future that balances innovation with privacy and ethical considerations.
+
