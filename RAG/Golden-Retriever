@@ -1,0 +1,40 @@
+### From https://ai.plainenglish.io/a-deep-dive-into-golden-retriever-eea3396af3b4
+### https://arxiv.org/pdf/2408.00798v1
+### https://arxiv.org/pdf/2309.12288v4
+
+Golden-Retriever presents a structured and innovative approach to Retrieval-Augmented Generation (RAG) for specialized industrial contexts, 
+where it tackles domain-specific jargon and ambiguous terminology that traditional RAG setups struggle with. 
+Here's a breakdown of how Golden-Retriever enhances retrieval accuracy through its multi-step approach:
+
+1. LLM-Driven Document Augmentation
+   Golden-Retriever first augments documents offline by processing proprietary documents (e.g., PDFs, slides) through OCR and generating summaries with LLMs. 
+   These summaries are stored in the database, adding a layer of semantic enrichment that boosts the relevance of retrieved documents.
+
+2. Jargon Identification
+   Upon receiving a user query, the system pinpoints domain-specific jargon using an LLM to scan and structure unfamiliar terms. 
+   This stage prevents misinterpretation of specialized terms by setting the foundation for accurate retrieval.
+
+3. Context Identification
+   Contextual classification is crucial, especially when ambiguous terms (like “RAG”) might have different meanings depending on the field. 
+   Golden-Retriever uses predefined categories to ensure the system interprets the jargon within the correct context.
+
+4. Jargon Querying
+   With the identified jargon and context, the system queries a jargon dictionary, adding clarity to the user’s question and ensuring terms 
+   are understood within the relevant field.
+
+5. Question Augmentation
+   The augmented query combines refined jargon and context details, transforming ambiguous queries into precise ones that are better suited for RAG, 
+   improving the retrieval of accurate and contextually relevant documents.
+
+6. Query Miss Response
+   Golden-Retriever includes a fallback mechanism when terms are missing in the jargon dictionary, 
+   advising users to check spelling or consult the knowledge base manager. This feature helps maintain high-quality, accurate responses.
+
+7. Evaluation and Results
+   In domain-specific question-answering tests, Golden-Retriever showed higher accuracy than standard LLM and RAG methods, 
+   indicating significant improvement in handling industry-specific queries.
+
+Golden-Retriever’s methodology is particularly valuable for industries with complex knowledge bases, 
+as it enhances query relevance by preemptively addressing ambiguities. 
+However, its reliance on LLM-driven processes can be computationally intensive, potentially limiting scalability.
+
