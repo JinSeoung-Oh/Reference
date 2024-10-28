@@ -1,0 +1,63 @@
+### From https://jrodthoughts.medium.com/inside-meta-ais-new-method-to-build-llms-that-think-before-they-speak-5bd689bbb582
+### From https://arxiv.org/abs/2410.10630
+
+
+This text details recent advancements in training Large Language Models (LLMs) to "think" before producing outputs, 
+inspired by human reasoning methods. 
+The concept of reasoning, which has gained focus since the release of models like GPT-o1, aims to enable LLMs to plan and strategize before responding,
+which could be a breakthrough for generative AI. This approach is illustrated in Meta AI's study on "Thought Preference Optimization" (TPO),
+which trains models to perform internal reasoning before responding without needing labeled thought data.
+
+1. Reasoning and Thought Process in LLMs
+   Traditional LLMs often allocate the same compute resources to all tasks, which limits their effectiveness on complex, reasoning-heavy tasks. 
+   Introducing reasoning processes, such as Chain-of-Thought (CoT) prompting, has shown success in areas like math and logic. 
+   However, these methods lack versatility across other domains, where internal thoughts could also benefit tasks like creative writing 
+   or complex instruction interpretation.
+
+2. Thought Preference Optimization (TPO)
+   TPO is a novel training method designed to teach LLMs to "think" effectively without labeled thought data. 
+   It relies on standard instruction-tuned LLMs and a reward model (or "judge") to indirectly guide the thought process.
+
+   -1. Prompting for Thoughts
+       LLMs are instructed to generate thoughts (internal reasoning) and responses (final output).
+       Two prompt types are used: generic prompts encouraging thoughtfulness and specific prompts guiding structured responses.
+   -2. Evaluating Responses Only
+       Only the response part of the output is evaluated by the reward model, ensuring that the internal thoughts aid response quality without the need 
+       for the reward model to assess thought processes directly.
+   -3. Preference Optimization
+       Using techniques like Direct Preference Optimization, TPO iteratively trains the model to produce thoughts leading 
+       to high-quality responses. To prevent unnecessarily long outputs, mechanisms are included to control response length.
+
+3. Experimental Results and Findings
+   Testing TPO on an 8B parameter Llama-3-Instruct model revealed several benefits:
+
+   -1. Performance Gains
+       TPO outperformed traditional models on benchmarks like AlpacaEval and Arena-Hard, showing improved accuracy in general instruction following.
+   -2. Expanded Utility
+       TPO also showed positive effects in areas outside reasoning, such as language translation and marketing, 
+       suggesting that the internal thought process aids performance across diverse tasks.
+   -3. Efficiency
+       The model demonstrated an ability to condense thoughts, streamlining internal reasoning over time.
+
+4. Additional Observations
+   The research also noted areas for improvement:
+
+   -1. Prompt Type Impact
+       Generic versus specific prompts resulted in different thought patterns, suggesting that a variety of prompts could enhance reasoning capabilities.
+   -2. Math Task Performance
+       TPO’s performance was lower on math-heavy tasks, indicating potential adjustments are needed for optimal reasoning in math-focused applications.
+   -3. Thought Length Control
+       Future research may explore methods to vary thought depth depending on task complexity to optimize resource efficiency.
+
+5. Implications of TPO for AI Development
+   TPO’s success in fostering thoughtful LLMs opens avenues for:
+
+   -1. Handling Complex Problems
+       Enhanced internal reasoning can improve models' capability to handle multi-step problems.
+   -2. Versatility Across Domains
+       TPO’s applicability in various domains suggests that more versatile LLMs can be developed, expanding beyond traditional limitations.
+   -3. Explainability
+       Explicit thought processes offer transparency into model reasoning, aiding in the understanding of AI decision-making.
+
+Meta ’s TPO research reflects a promising step toward creating LLMs capable of thoughtful and strategic responses, 
+potentially transforming AI’s ability to interpret and solve complex tasks autonomously.
