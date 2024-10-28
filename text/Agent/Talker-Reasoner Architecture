@@ -1,0 +1,37 @@
+## From https://medium.com/syncedreview/thinking-fast-and-slow-google-deepminds-dual-agent-architecture-for-smarter-ai-d49a0285473f
+## https://venturebeat.com/ai/deepminds-talker-reasoner-framework-brings-system-2-thinking-to-ai-agents/
+## https://arxiv.org/pdf/2410.08328v1
+
+The development of large language models (LLMs) has enabled AI agents to handle both conversational and complex reasoning tasks. 
+In light of this dual responsibility, a Google DeepMind team has proposed a “Talker-Reasoner” architecture in their paper Agents Thinking Fast and Slow: 
+A Talker-Reasoner Architecture.
+This model is inspired by Daniel Kahneman's dual-system theory, which differentiates between fast, intuitive thinking (System 1) and slow, 
+deliberative thinking (System 2).
+
+In this architecture, the Talker component functions like System 1, rapidly generating intuitive, contextually informed responses, allowing fluid interactions.
+Conversely, the Reasoner component acts as System 2, engaging in deeper reasoning, complex planning, and task execution.
+This separation enables the Talker to maintain seamless user interaction, while the Reasoner processes complex problems in the background. 
+When required, the Reasoner can intervene to ensure thoughtful, calculated decisions, especially for tasks that demand detailed, multi-step reasoning.
+
+The team tested the model using a sleep coaching agent, 
+where the Talker handled real-time conversations and the Reasoner managed detailed planning and adjustments to user guidance. 
+This dual-system framework aims to enhance AI by effectively balancing conversational responsiveness with complex reasoning capabilities,
+potentially leading to more versatile and adaptive agents.
+
+### System1 vs System2
+System 1 and System 2 are terms used to describe two distinct modes of thinking, introduced by psychologist Daniel Kahneman in his book Thinking, 
+Fast and Slow. The concepts help explain how people process information, make decisions, and solve problems:
+
+-1. System 1 (Fast Thinking)
+    This is our intuitive, automatic, and quick-thinking system. It operates almost effortlessly, reacting based on experience, instincts, and learned patterns. 
+    System 1 is great for making quick, snap judgments, but it is more prone to biases and errors. 
+    Examples of System 1 thinking include recognizing faces, understanding simple sentences, or reacting quickly to danger.
+
+-2. System 2 (Slow Thinking)
+    This is our analytical, deliberate, and effortful thinking system. 
+    It takes more time and energy to engage, allowing us to reflect, analyze, and make complex decisions. 
+    System 2 thinking kicks in when tasks require logic, critical thinking, or concentration. 
+    Examples include solving a complex math problem, planning a trip, or evaluating abstract concepts.
+
+In daily life, most decisions are handled by System 1 for efficiency, while System 2 is reserved for more challenging or unfamiliar situations. 
+The balance between these two systems helps us function quickly in routine situations but gives us the ability to handle new or complex problems when necessary.
