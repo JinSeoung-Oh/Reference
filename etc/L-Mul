@@ -1,0 +1,39 @@
+### https://levelup.gitconnected.com/we-have-finally-found-a-solution-to-an-extremely-energy-efficient-ai-73ed2537e53f
+
+The rapid evolution of AI models has brought not only impressive capabilities but also significant energy demands. 
+As of early 2023, the daily electricity usage for running ChatGPT reached around 564 MWh, equivalent to the energy consumption of 18,000 U.S. households. 
+This has led researchers to explore solutions to mitigate the environmental footprint of AI. 
+A recent algorithm, L-Mul (linear-complexity multiplication), proposes a way to approximate floating-point multiplications with integer additions, 
+promising significant reductions in energy consumption and computation costs.
+
+1. Why Do AI Models Consume So Much Energy?
+   Neural networks involve floating-point operations, such as tensor multiplications and linear transformations, which are computationally and energetically expensive. 
+   For instance, multiplying two 32-bit floating-point numbers (FP32) requires about four times the energy of adding 
+   two FP32 numbers and roughly 37 times more than adding two 32-bit integers (Int32). This energy demand arises from the complexity of these operations, 
+   including mantissa multiplications and exponent additions.
+
+2. The L-Mul Algorithm: How Does It Work?
+   The L-Mul algorithm aims to replace costly floating-point multiplications with simpler, energy-efficient integer additions. 
+   In traditional floating-point multiplication, two floating-point numbers are multiplied through a complex process involving mantissa multiplication 
+   and exponent addition. L-Mul simplifies this by replacing the mantissa multiplication with a series of integer additions, 
+   effectively reducing time complexity from quadratic 𝑂(𝑚^2) to linear 𝑂(𝑛) for bit size 𝑛
+   This approach significantly cuts energy usage—by 95% for element-wise floating-point operations and up to 80% for dot products.
+
+3. Practical Benefits for Large Language Models
+   Incorporating L-Mul into AI models can optimize energy use, particularly in the attention mechanisms of transformer models, 
+   without compromising precision or accuracy. When tested on real-world tasks and models like Mistral-7B and Llama-3.1–8B, 
+   L-Mul outperformed other low-energy representations (like FP8) across various benchmarks, from language tasks to visual question answering. 
+   Additionally, L-Mul achieves comparable accuracy when fine-tuning is applied, maintaining model performance while significantly reducing energy costs.
+
+4. Key Advantages of L-Mul
+   -1. Precision and Cost Efficiency
+       L-Mul provides better precision than FP8_e4m3 (a popular 8-bit floating-point format) and requires fewer computational resources than FP8_e5m2, 
+       making it an efficient alternative.
+   -2. Gate-Level Efficiency
+       Digital circuits executing L-Mul require fewer gate-level computations, enhancing both efficiency and accuracy compared to FP8.
+   -3. Adaptability for Fine-Tuning
+       Even models that are fine-tuned using L-Mul maintain accuracy, showcasing its potential for creating energy-efficient, high-performing models.
+
+In essence, L-Mul offers a promising approach to making AI more sustainable, reducing both operational costs and environmental impact. 
+Its successful integration into models like Llama and Mistral points toward a future where AI performance and energy efficiency go hand in hand, 
+making advancements in AI more sustainable and accessible.
