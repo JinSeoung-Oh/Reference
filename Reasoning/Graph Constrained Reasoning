@@ -1,0 +1,51 @@
+### From https://medium.com/@techsachin/graph-constrained-reasoning-framework-for-faithful-reasoning-by-integrating-knowledge-graphs-in-64f021073f1a
+
+This paper introduces Graph-Constrained Reasoning (GCR), 
+a framework that integrates structured knowledge in Knowledge Graphs (KGs) with unstructured reasoning in Large Language Models (LLMs).
+By embedding KG constraints within the LLM decoding process through a structure called KG-Trie, GCR minimizes hallucinations by ensuring KG-grounded reasoning.
+
+1. Introduction of GCR
+   GCR bridges the structured reasoning in KGs and unstructured reasoning in LLMs, enabling efficient, KG-informed reasoning paths.
+
+2. Combining Strengths of Specialized LLMs
+   GCR leverages both a lightweight, KG-focused LLM for structured graph reasoning and a general LLM for inductive reasoning, enhancing overall reasoning performance.
+
+3.Approach
+  -1. Comparison of KG-Enhanced Reasoning and GCR
+      -A. KG-Enhanced Reasoning
+          Utilizes KGs to improve LLM reasoning by identifying reasoning paths in KGs that connect question and answer entities. 
+          Two paradigms—retrieval-based and agent-based—are used, 
+          though both have limitations: retrieval-based methods require additional retrievers, while agent-based ones are computationally heavy.
+      -B. Graph-Constrained Reasoning (GCR)
+          Embeds KG structures within LLM decoding for direct, KG-grounded reasoning. It consists of:
+          -a. KG Trie Construction: Converts KGs into a trie (KG-Trie), encoding reasoning paths as structured indices for LLMs.
+          -b. Graph-Constrained Decoding: Guides LLM decoding using KG-Trie to generate valid reasoning paths.
+          -c. Graph Inductive Reasoning: Integrates multiple paths and hypotheses to formulate final answers.
+
+   -2. Knowledge Graph Trie (KG-Trie) Construction
+       KGs are converted into Tries (prefix trees) using a breadth-first search (BFS) to map reasoning paths as sentences. 
+       These are tokenized and indexed within KG-Trie, allowing efficient, structured access during LLM decoding.
+       Preconstructed KG-Tries reduce the complexity of reasoning by enabling constant-time retrieval and minimizing latency.
+
+   -3. Graph-Constrained Decoding
+       Uses KG-Trie constraints to ensure the LLM only generates valid KG reasoning paths. 
+       After identifying a valid path, the LLM generates hypothesis answers based on this KG-grounded reasoning.
+       Fine-tuning a KG-specialized LLM enhances its KG reasoning capabilities by optimizing it for generating reasoning paths.
+
+   -4. Graph Inductive Reasoning
+       A general LLM synthesizes multiple reasoning paths and hypotheses from the KG-specialized LLM, using inductive reasoning to determine final answers. 
+       Beam-search is used to generate top-K reasoning paths, which improves reasoning efficiency.
+
+4. Experiments
+   -1. Performance and Efficiency: GCR outperforms other KG reasoning methods across datasets, 
+                                   achieving superior accuracy with reduced latency by leveraging KG-Trie and parallel GPU computation.
+   -2. Effectiveness Across LLMs: Fine-tuning lightweight LLMs improves performance, showing they can surpass larger LLMs after training for KG reasoning.
+   -3. Parameter Analysis: Increasing beam size enhances path exploration, with optimal performance at a moderate beam size to balance complexity.
+   -4. Hallucination Prevention: KG constraints significantly reduce hallucinations, achieving 100% faithful reasoning on tested datasets.
+   -5. Zero-Shot Generalizability: GCR demonstrates strong zero-shot performance on unseen KGs, outperforming models like ChatGPT in accuracy on new datasets.
+
+5. Conclusion
+   GCR offers a novel paradigm for reliable KG-grounded reasoning in LLMs, with the KG-Trie encoding KG paths to constrain the LLM’s reasoning process. 
+   This reduces hallucinations, complexity, and improves efficiency by leveraging structured knowledge while integrating inductive reasoning for accurate, final answers.
+
+
