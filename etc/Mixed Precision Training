@@ -1,0 +1,28 @@
+### https://towardsdatascience.com/the-mystery-behind-the-pytorch-automatic-mixed-precision-library-d9386e4b787e
+
+This article does an excellent job outlining the benefits of mixed precision training (MPT) for deep learning 
+and explaining the crucial hardware fundamentals like Nvidia's tensor cores and GPU architecture, 
+which are essential for effective mixed precision. 
+
+1. Understand Hardware Capabilities
+   Ensure your GPUs support tensor cores, as these optimize matrix multiplications essential for deep learning. 
+   Tensor cores allow calculations in reduced precision (FP16), improving speed while keeping acceptable accuracy.
+
+2. Know Your Data Formats
+   Mixed precision uses FP16 for the majority of calculations, reducing memory and speeding up processes. 
+   However, certain operations still require FP32 due to the greater range and precision required for complex calculations (e.g., gradients, accumulations).
+
+3. Loss Scaling
+   Since FP16 has a limited exponent range, the gradients might underflow, leading to zeroed-out values. 
+   Loss scaling addresses this by multiplying the loss by a large factor, preserving gradient values and maintaining model performance.
+
+4. PyTorch AMP Library
+   PyTorch's AMP library automates most MPT tasks, such as casting specific operations to FP16 and managing loss scaling. 
+   By adding just a few lines of code, you can implement MPT, minimizing manual adjustments.
+
+5. Memory Efficiency and Limitations
+   Mixed precision halves memory usage for data, but certain components like optimizer parameters remain in FP32, 
+   so models with large weights might still benefit from additional methods like DeepSpeed’s ZERO optimization.
+
+Applying these strategies should streamline your training process significantly, enabling you to test hypotheses and iterate more efficiently on your models.
+
