@@ -1,0 +1,72 @@
+### From https://levelup.gitconnected.com/rag-that-drafts-how-to-sharpen-ai-with-a-draft-and-refine-strategy-7b9a18207062
+
+Large language models (LLMs) like GPT-3 and GPT-4 have advanced natural language generation significantly but often struggle with providing accurate,
+contextually relevant responses for complex, information-rich queries. 
+Retrieval-Augmented Generation (RAG) was designed to enhance LLMs by pulling relevant information from external sources during generation, 
+but it can become slow and error-prone with long or complex documents.
+
+A new approach, called Speculative RAG, aims to address these issues by using two models:
+  -1. A smaller, specialized LLM for generating initial drafts.
+  -2. A larger, generalist LLM to verify the drafts.
+
+1. How Speculative RAG Works
+   Speculative RAG follows a streamlined two-step process: drafting and verification. 
+   Here's an overview of how this approach improves speed and accuracy.
+
+   -1. Document Clustering: The process starts with clustering retrieved documents based on relevance and similarity.
+                            Each cluster represents different aspects of the topic, allowing a broad spectrum of information to be captured without redundancy.
+   -2. Subset Sampling: Documents are sampled from each cluster to form a subset, ensuring diverse perspectives. 
+                        This diversity reduces the risk of repetitive information while enhancing the model’s grasp of different viewpoints.
+   -3. Parallel Draft Generation: The system leverages a smaller LLM, termed the RAG Drafter, to generate answer drafts from each document subset simultaneously. 
+                                  Each draft includes a rationale to explain its answer, grounding the response in the retrieved data. 
+                                  This parallel approach significantly reduces latency by processing multiple drafts concurrently.
+   -4. Draft Verification: A larger, generalist LLM, known as the RAG Verifier, then evaluates each draft for accuracy, consistency, and relevance. 
+                           It does this without additional instruction-tuning, relying on its pre-trained language understanding to determine the best answer.
+   -5. Final Answer Selection: The best draft, based on a calculated confidence score, is selected as the final response.
+
+2. Key Components
+   -1. Specialist RAG Drafter
+       - Instruction Tuning: This smaller LLM is fine-tuned specifically for summarizing and synthesizing information from documents. 
+                             Instruction tuning ensures it generates accurate, rationale-supported drafts.
+       - Multi-Perspective Sampling: By sampling different documents, the drafter can create drafts that cover varied viewpoints, enhancing the completeness of the answer.
+       - Parallel Processing: The drafter operates on multiple subsets simultaneously, which speeds up the process and increases diversity among generated drafts.
+
+    -2. Generalist RAG Verifier
+        - Self-Consistency & Self-Reflection: The larger LLM assesses each draft’s consistency with the query and evaluates the logic behind the rationale.
+        - Scoring Mechanism: It computes two scores for each draft—self-consistency and self-reflection—to select the most reliable draft.
+
+3. Speculative RAG vs. Traditional RAG Approaches
+   In comparison with other RAG approaches, Speculative RAG shows distinct advantages:
+
+   -1. Standard RAG: All retrieved documents are fed directly into the LLM, increasing token load and latency.
+   -2. Self-Reflective RAG: Uses instruction-tuning for the LLM to assess documents internally, which can be complex.
+   -3. Corrective RAG: Focuses on document quality rather than enhancing the generation process, leading to limited improvements in complex queries.
+
+   Speculative RAG’s method of using diverse drafts and parallel generation allows it to maintain high performance while minimizing the input token load and reducing latency.
+
+4. Experimental Results
+   Tests on four benchmarks—TriviaQA, MuSiQue, PubHealth, and ARC-Challenge—showed that Speculative RAG outperformed traditional RAG systems in terms of accuracy and efficiency. 
+
+   - Accuracy: On the PubHealth dataset, Speculative RAG improved accuracy by 12.97%.
+   - Latency: Across all benchmarks, latency was significantly reduced, as illustrated in Figure 4.
+
+5. Conclusion and Future Directions
+   Speculative RAG provides a robust solution to the speed-accuracy tradeoff in retrieval-augmented generation. 
+   By combining the efficiency of a specialist drafter with the verification strength of a generalist verifier, it improves both response quality and processing speed. 
+   This dual-model approach could set a new standard in knowledge-intensive NLP applications.
+
+Further research could focus on refining the clustering and sampling methods or integrating additional techniques to optimize information retrieval for even more complex scenarios.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
