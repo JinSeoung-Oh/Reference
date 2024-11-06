@@ -1,0 +1,83 @@
+## From https://medium.com/@techsachin/graphusion-zero-shot-llm-based-knowledge-graph-construction-framework-with-a-global-perspective-6aa6d6a6cee3
+
+Graphusion is a zero-shot framework designed for constructing Knowledge Graphs (KGs) from free text using Large Language Models (LLMs). 
+Unlike traditional KGC approaches that focus on extracting knowledge triplets from a local, sentence-based perspective, 
+Graphusion introduces a fusion process to integrate this local information into a coherent global KG. 
+This approach addresses limitations in existing methods by ensuring that knowledge is accurately represented across entire documents
+and not limited to individual sentences or fragments.
+
+1. Key Challenges in Zero-Shot Knowledge Graph Construction
+   Graphusion addresses several challenges that arise in zero-shot KGC
+
+   -a. Input Data: It operates on unstructured free text, rather than predefined entities.
+   -b. Relation Complexity: It deals with multiple relation types that may conflict or vary in complexity.
+   -c. Output Structure: Rather than a binary output, Graphusion produces triplets, making evaluation more challenging due to the need for multi-relational assessments.
+
+2. Graphusion’s Three-Step Process for KGC
+   -a. Step 1 - Seed Entity Generation
+       -1. Purpose: This step extracts relevant, in-domain entities from the text to guide the KG construction process. 
+                    It leverages BERTopic for topic modeling, which identifies representative entities in different topics, ensuring that key concepts are captured as seed entities.
+       -2. Output: A list of high-relevance “seed entities” is generated. These entities form the foundation for guiding subsequent triplet extractions, 
+                   ensuring that the final KG includes meaningful and contextually relevant information.
+
+   -b. Step 2 - Candidate Triplet Extraction
+       -1. Process: Using the seed entities from Step 1, LLMs are instructed to extract in-domain entities and identify possible relations between them.
+       -2. Prompt Design: Graphusion employs a specially crafted prompt to instruct the LLMs to:
+           -1) Identify relevant entities within a given context.
+           -2) Establish the relationship between each pair of entities in a triplet format (<head entity>, <relation>, <tail entity>).
+           -3) Extract additional triplets even when the seed entity does not directly appear in the triplet, thus allowing for comprehensive graph coverage.
+       -3. Output: The extracted triplets form an initial, zero-shot knowledge graph (denoted as ZS-KG) that provides a local, sentence-level view of the text.
+
+   -c. Step 3 - Knowledge Graph Fusion
+       -1. Purpose: The fusion process integrates the local triplets generated in Step 2 into a global KG. This is essential for addressing relational conflicts, 
+                    resolving entity redundancies, and achieving a holistic understanding of entity interactions.
+       -2. Fusion Mechanisms:
+           -1) Entity Merging: Similar entities (e.g., “neural MT” and “neural machine translation”) are merged to prevent redundancy.
+           -2) Conflict Resolution: When conflicting relationships exist (e.g., one triplet labels "neural summarization" as "Used-for" abstractive summarization, 
+                                    while another labels it as a "Hyponym-of" relationship), Graphusion resolves these conflicts by selecting the most contextually accurate relation.
+           -3) Novel Triplet Inference: Graphusion generates new triplets from additional background information if available, ensuring that important, 
+                                        context-specific relationships are captured.
+           -4) Prompt Design for Fusion: The fusion prompt asks the model to unionize entities and edges, merge similar entities, resolve conflicting relationships, 
+                                         and infer new relationships. The fusion step results in a refined global KG that accurately reflects the broader context.
+
+3. Experiments and Evaluation:
+   -a. Knowledge Graph Construction:
+       -1. Dataset: Graphusion was tested on 4,605 academic papers from ACL conference proceedings (2017–2023).
+       -2. Implementation: The framework was applied with four LLMs (LLaMa3–70b, GPT-3.5, GPT-4, and GPT-4o) to assess its performance across different model settings.
+       -3. Baseline Comparison: Results were compared against a local graph model (GPT-4o Local), which is essentially Graphusion without the fusion step.
+       -4. Results: The inclusion of the fusion step significantly boosted performance, with Graphusion (GPT-4o) showing the highest scores in entity and relation accuracy. 
+                    Notably, omitting the fusion step led to a noticeable performance drop from 2.37 to 2.08, underscoring the importance of fusion for relation quality.
+
+   -b. TutorQA Benchmark
+       -1. Purpose: To evaluate Graphusion’s QA capabilities, a new dataset, TutorQA, was introduced. 
+                    TutorQA is a KG-based QA benchmark tailored for scientific contexts, containing 1,200 expert-verified QA pairs across six tasks relevant to NLP education.
+       -2. Tasks: The benchmark covers six unique tasks that test different aspects of KG reasoning:
+           -1) Relation Judgment: Assessing the accuracy of relationships within triplets.
+           -2) Prerequisite Prediction: Identifying foundational entities that need to be understood to grasp a complex topic.
+           -3) Path Searching: Charting a sequence of intermediary entities necessary to understand a target concept.
+           -4) Sub-graph Completion: Expanding the KG by finding hidden associations within subgraphs.
+           -5) Similar Entities Identification: Finding entities related to a central concept, aiding curriculum development.
+           -6) Idea Hamster: Generating project ideas by applying KG entities to real-world scenarios.
+
+   -c. Results: Graphusion’s constructed KG provided substantial improvements across all tasks compared to GPT-4o baselines, both with and without retrieval-augmented generation (RAG). 
+                Specifically, in Task 6, Graphusion produced more relevant and contextually enriched answers, 
+                adding previously uncovered entities like "dependency parsing" and "event extraction."
+
+4. Case Studies:
+   -a. Entity Extraction: Graphusion, using GPT-4o as the backbone, produced more context-specific entities compared to GraphRAG, 
+                          which tended to extract overly generic terms like “benchmark” or “methodology.”
+   -b. Fusion Process: The fusion step demonstrated the ability to merge similar entities and resolve conflicting relations. 
+                       For example, it correctly merged "neural MT" with "neural machine translation" and resolved relational conflicts like “Prerequisite_of” versus “Hyponym_of.”
+                       However, the model occasionally struggled with granularity in entity recognition (e.g., broad terms like "annotated data") and categorizing relations 
+                       with far-off entities (e.g., linking “word embedding” with “computer science”).
+
+5. Link Prediction Task:
+   -a. Objective: Given an entity pair, the model determines if a relation exists between them, helping to validate KG relationships.
+   -b. Evaluation: Using the LectureBankCD dataset across NLP, computer vision, and bioinformatics domains, 
+                   Graphusion outperformed traditional supervised methods in accuracy and F1 scores, demonstrating LLMs' capacity for effective knowledge graph construction
+                   and relation prediction.
+
+6. Conclusion:
+   Graphusion provides a comprehensive solution for scientific KG construction from free text, leveraging LLMs to overcome challenges in traditional KGC by focusing on a global perspective.
+   The proposed TutorQA benchmark further demonstrates Graphusion's applicability in educational and reasoning-based QA contexts. 
+   This framework’s fusion module is crucial for achieving higher-quality knowledge representation and consistency across complex, multi-relational data.
