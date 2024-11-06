@@ -1,0 +1,41 @@
+## From https://levelup.gitconnected.com/causal-inference-an-overview-1254f5654b01
+
+Causality goes beyond correlation by focusing on the cause-effect relationship, crucial for making decisions about interventions rather than just observing associations. 
+For example, in marketing, understanding causality can help attribute campaign effects to client behavior, 
+removing biases like selection bias that arise in observational studies. 
+Randomized controlled trials (RCTs) are ideal for determining causality by splitting subjects into treatment and control groups, 
+though they aren’t always feasible due to costs, time, or ethical considerations.
+
+1. Key Concepts in Causal Inference
+   -1. Directed Acyclic Graphs (DAGs)
+       These are visual models representing causal hypotheses, where nodes are variables, and directed edges indicate causation. 
+       DAGs help clarify causal relationships and confounding factors.
+   -2. Mediators and Confounders
+       A mediator explains why one variable influences another, aiding in understanding causation. 
+       Confounders are variables that affect both the cause and the outcome, potentially biasing results.
+   -3. Backdoor and Frontdoor Paths
+       A backdoor path is an indirect route creating spurious correlations, which can be controlled to isolate the causal effect. 
+       Frontdoor paths are direct causal paths, potentially including mediators, through which causation flows.
+   -4. Instrumental Variables (IV)
+       These variables affect the treatment but influence the outcome only through the treatment itself. 
+       They can help identify causal effects when randomization isn’t possible.
+   -5. D-Separation
+       This is a method to determine whether a path is "blocked" in a DAG, which helps identify causal relationships by controlling certain variables.
+   -6. Matching
+       Used in observational studies to create comparable groups by matching treated individuals with non-treated ones based on similar characteristics. 
+       Propensity score matching is a method for achieving balanced groups based on treatment likelihood.
+   -7. Inverse Probability of Treatment Weighting (IPTW)
+       This approach weights individuals by the inverse of the probability of receiving their treatment or control condition, 
+       aiming to make the sample resemble a randomized trial.
+   -8. Two-Stage Least Squares (2SLS)
+       A method involving regression where an instrumental variable predicts treatment, which then predicts the outcome. 
+       This method helps estimate causal effects when treatment can’t be randomized.
+
+2. Applications and Techniques
+   Each technique offers a way to draw causal conclusions from observational data
+
+   -1. RCTs remain the gold standard for causality.
+   -2. Matching and IPTW adjust for confounding factors by balancing groups in observational data.
+   -3. Instrumental Variables and 2SLS address causality without direct intervention, useful in policy and economic studies.
+
+   These methods are valuable for scenarios where causation insights are necessary but RCTs are impractical.
