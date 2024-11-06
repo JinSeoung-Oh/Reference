@@ -1,0 +1,111 @@
+## From https://medium.com/@sahin.samia/decoding-tokenization-strategies-for-large-language-models-llms-ffc3fa51aff6
+
+Tokenization is the process of breaking down text into smaller units, or tokens, which can be words, subwords, or characters. 
+These tokens allow models to represent language in structured units, enabling them to understand and generate human language more effectively.
+Tokenization not only prepares text for processing but also significantly influences the model's performance, affecting its efficiency, accuracy, and memory usage.
+
+1. Why Tokenization Matters
+   - Foundation for Understanding Language: Tokenization transforms raw text into a format that language models can process. 
+                                            It captures linguistic units (like words or phrases) in ways that enable the model to recognize patterns and make predictions.
+   - Efficiency: Tokenization impacts how efficiently a model processes information. A well-designed tokenization strategy reduces the number of tokens, 
+                 minimizing computational load, memory requirements, and processing time.
+   - Accuracy: Tokenization directly influences a model’s ability to capture context and meaning. Subword-level tokenization, for instance, 
+               helps manage rare words or complex words by splitting them into meaningful components.
+
+2. Key Tokenization Strategies
+   Each tokenization method has unique strengths and weaknesses, making it essential to choose a method based on the specific language and task.
+
+   - 1. Word-Level Tokenization
+        How It Works: Text is split into individual words, treating each word as a single token.
+        -a. Pros:
+            Simple to implement and intuitive.
+            Works well with common words in languages with limited morphology.
+        -b. Cons:
+            Struggles with rare or out-of-vocabulary (OOV) words.
+            Inefficient for morphologically rich languages (e.g., Turkish, Finnish), where words change forms frequently.
+            Can create a large vocabulary, increasing memory usage.
+
+    Example: The sentence “Tokenization helps models understand language” tokenized at the word level would be:
+
+
+  - 2. Character-Level Tokenization
+       How It Works: Text is split into individual characters, each treated as a token.
+       -a. Pros:
+           Eliminates OOV issues since each word is broken down into characters.
+           Useful in languages with complex inflections and morphologies.
+       -b. Cons:
+           Results in long token sequences, increasing computational costs.
+           Loses semantic meaning and context, as individual characters don’t convey the word's full meaning.
+
+    Example: The word “Tokenization” at the character level would be:
+
+  - 3. Subword-Level Tokenization
+       Subword tokenization is the most commonly used approach in modern NLP, balancing between word- and character-level tokenization by breaking words into meaningful components.
+       It captures both common and rare words effectively.
+
+3. Popular Techniques:
+
+   -1. Byte Pair Encoding (BPE): BPE starts with character tokens and iteratively merges the most frequent pairs of characters or subwords to form a new vocabulary.
+       Example: The word “Tokenization” might be split into ["Token", "ization"] by BPE, capturing the root and suffix as distinct tokens.
+
+   -2. WordPiece: Similar to BPE, WordPiece builds a vocabulary by iteratively merging subwords but calculates a score for each pair based on a probabilistic formula. 
+                  This method is often used in models like BERT.
+
+   -3. Unigram: Starts with a large vocabulary and prunes less useful tokens, retaining the ones that maximize the likelihood of the language model. 
+                Unlike BPE or WordPiece, Unigram doesn’t follow fixed merging rules but chooses the most likely segmentation dynamically.
+
+   Advantages:
+   Handles rare or complex words by breaking them into known subwords.
+   Reduces the total vocabulary size compared to word-level tokenization, improving memory efficiency.
+
+4. How BPE Works in Steps:
+   - Initialize Vocabulary: Starts with a character-level vocabulary.
+   - Iterate on Merging: Merges the most frequent pairs of characters or subwords, progressively forming meaningful subwords.
+   - Stop at Desired Vocabulary Size: Continues merging until reaching the specified vocabulary size.
+
+5. Byte-Level BPE
+   How It Works: A version of BPE that encodes text at the byte level rather than the character level. 
+                 It was designed to handle any text, including symbols, emojis, and Unicode characters.
+   - Pros:
+     Manages non-standard text like emojis and special characters.
+     Avoids OOV issues by covering all possible Unicode symbols.
+
+   - Cons:
+     Can be harder to interpret, as byte tokens may not represent human-readable text.
+
+6. Choosing a Tokenization Strategy
+   -1. Word-Level Tokenization: Suitable for simpler applications with limited vocabularies.
+   -2. Character-Level Tokenization: Best for morphologically rich languages or highly creative text.
+   -3. Subword-Level Tokenization: Ideal for balancing vocabulary size and handling rare words.
+   -4. Byte-Level BPE: Effective for handling multilingual text, Unicode characters, and non-standard symbols.
+
+7. Challenges in Tokenization and Solutions
+   -1. Out-of-Vocabulary (OOV) Words: Rare or unknown words are challenging for word-level tokenization.
+       Solution: Subword tokenization methods (e.g., BPE, WordPiece) handle OOV words by breaking them into smaller known tokens.
+   
+   -2. Handling Special Characters and Emojis: Standard tokenizers may ignore or remove symbols.
+       Solution: Byte-level BPE can handle all characters and symbols in Unicode, making it suitable for diverse text inputs.
+
+   -3. Sequence Length: Fine-grained tokenization (like character-level) leads to long sequences, increasing computational demands.
+       Solution: Subword tokenization strikes a balance, breaking down only rare or long words.
+
+   -4. Ambiguity: Homographs or words with multiple meanings create challenges in tokenizing text.
+       Solution: Using contextual embeddings (like BERT) helps disambiguate meanings based on surrounding text.
+
+   -5. Inconsistent Tokenization Across Languages: Multilingual models struggle with differences in morphology and syntax.
+       Solution: Multilingual tokenizers (like multilingual BERT’s WordPiece) or language-specific vocabularies help standardize tokenization across languages.
+
+7. Summary of Considerations for Tokenization
+   Language Complexity: Morphologically complex languages benefit from subword or character-level tokenization.
+   Model Requirements: Transformer models often perform best with subword tokenization to handle diverse vocabularies efficiently.
+   Memory Constraints: Word-level tokenization is memory-intensive, while character-level tokenization can lengthen sequences, making subword-level a balanced choice.
+
+Selecting the right tokenization strategy can improve a model's efficiency, accuracy, and generalization capability. 
+It ensures the model captures language structures, reduces computational demands, and handles diverse vocabulary, ultimately affecting the quality of NLP model outputs.
+
+
+
+
+
+
+
