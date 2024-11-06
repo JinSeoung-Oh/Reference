@@ -1,0 +1,65 @@
+### From https://towardsdatascience.com/beyond-attention-how-advanced-positional-embedding-methods-improve-upon-the-original-transformers-90380b74d324
+
+The exponential progress of AI models in recent years is deeply connected to the advent of the Transformer architecture. 
+Previously, AI researchers had to select architectures specific to each task and then optimize hyperparameters to achieve the best performance. 
+Additionally, traditional models struggled with handling long-range dependencies due to issues like vanishing gradients, loss of context over long sequences, 
+and inability to capture global context due to locality constraints. 
+Moreover, the lack of scalability and parallelization in traditional models slowed down training on large datasets, limiting advancements in AI.
+
+The Transformer architecture revolutionized the field by addressing these issues through its self-attention mechanism. 
+This mechanism enabled models to capture relationships across long sequences and effectively understand global context, 
+while also being highly parallelizable and adaptable across different modalities, 
+such as text, images, and more. In self-attention, each token's query is compared against the keys of all other tokens to compute similarity scores,
+which are then used to weight the value vectors, determining where the current token should focus. 
+However, self-attention treats all tokens as equally important regardless of their order, which means the model lacks information about the sequence of tokens.
+To address this, positional embeddings are used, encoding the position of each token in the sequence and thus preserving the structure of sequential data.
+In this post, we explore different methods for encoding positional information.
+
+1. Attention Mechanism:
+   For a given input sequence 
+   𝑆 = {𝑤_𝑖} where 𝑖 = 1,…,𝑁, each token 𝑤_𝑖 has an embedding 𝐸 = {𝑥_𝑖} 
+   Self-attention incorporates positional embedding into token embeddings to generate query, key, and value representations. 
+   The attention weight between tokens is then computed based on the similarity of their query and key vectors. 
+   This weight determines how much attention each token should pay to the others, allowing tokens to gather information from across the sequence.
+
+   - 1. Absolute Position Embedding:
+        A common approach to positional encoding is adding a positional vector 𝑝_𝑖 to each token embedding 𝑥_𝑖, representing the absolute position of each token in the sequence. 
+        There are two main methods for generating 𝑝_𝑖: sinusoidal positional encoding and learned positional encoding.
+
+     1.a Sinusoidal Positional Encoding
+       Introduced in the "Attention is All You Need" paper, this method uses sine and cosine functions at different frequencies to represent token positions. 
+       By using various frequencies, the Transformer captures both local positional information (relationships between neighboring tokens) and 
+       global patterns (relationships between distant tokens). 
+       This approach does not require additional parameters, which helps generalize to longer sequences. However, its expressiveness is limited.
+
+     1.b Learned Positional Encoding
+       Used in models like BERT and GPT, learned positional encoding assigns an embedding vector to each position in the sequence and learns these embeddings during training. 
+      This method is more expressive, as the model can learn task-specific position encodings, though it introduces more parameters, increasing model size and computational cost.
+
+2. Relative Positional Embeddings
+   Absolute positional encodings focus on the position of each token, but attention mechanisms work by computing the relative importance of other tokens for a given token. 
+   Relative positional encoding addresses this by modifying how key and value vectors are computed, using the relative distance between tokens rather than absolute positions. 
+   This allows generalization to longer sequences while reducing the need for absolute positional information. Models like Transformer-XL and T5 utilize this method.
+
+3. Rotary Positional Embedding (RoPE)
+   RoPE introduces positional information by rotating embedding vectors in a multi-dimensional space based on token positions, 
+   without adding positional information directly to token embeddings. 
+   A rotation matrix is applied to encode positions, enabling relationships between distant tokens to be captured in the attention weights. 
+   Models like LLaMA and GPT-NeoX employ RoPE, allowing positional information to be encoded without explicitly adding it to each layer’s output.
+
+4. Attention with Linear Biases (ALiBi)
+   ALiBi avoids adding positional encodings to word embeddings. Instead, it applies a penalty to attention weight scores proportional to the distance between tokens,
+   allowing each attention head to focus on tokens at varying distances. ALiBi assigns a unique slope to each head, 
+   enabling some heads to focus on nearby tokens and others on distant ones. Models like BloombergGPT and BLOOM use ALiBi to address position awareness without adding extra embeddings.
+
+5. Transformer Extrapolation at Inference Time:
+   Extrapolation refers to the model’s ability to handle input sequences longer than those seen during training. 
+   While Transformers can theoretically handle variable input lengths, position embeddings influence this capability. 
+   For instance, learned positional embeddings struggle with sequences longer than the training length, limiting extrapolation. 
+   ALiBi offers superior extrapolation performance with minimal memory increase, as demonstrated in experiments.
+
+6. Conclusion:
+   Positional encoding in Transformer architectures significantly impacts their ability to interpret sequential data and handle longer sequences. 
+   While absolute positional encodings provide position awareness, they often struggle with extrapolation,
+   leading to the development of methods like relative positional encoding, RoPE, and ALiBi that offer improved extrapolation capabilities. 
+   As Transformers are increasingly used across various applications, refining positional encoding methods will be essential to further enhance their performance.
