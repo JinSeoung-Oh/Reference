@@ -1,0 +1,98 @@
+### From https://medium.com/the-quantastic-journal/retrieval-augmented-classification-llms-as-classifiers-c28d40391738
+
+Classification models are integral to various applications, from spam detection to recommendation systems. 
+Traditional machine learning models handle these tasks well when there's enough labeled data to train on. 
+However, in many real-world scenarios, gathering sufficient data or dealing with complex, niche categories makes training a custom classification model impractical. 
+This is where Large Language Models (LLMs) like GPT and Claude provide an effective alternative. 
+With their vast general knowledge and adaptability, LLMs can be prompted to perform classification tasks without requiring retraining,
+making them a great option in low-data or dynamic environments.
+
+1. Advantages of Using LLMs for Classification
+   - General Knowledge: LLMs are pre-trained on extensive, diverse datasets, enabling them to classify a wide range of text with minimal prompting.
+   - Flexibility: LLMs do not need retraining when the categories change. By adjusting the prompt, LLMs can adapt to new categories or criteria,
+                  making them useful in scenarios where classification needs evolve.
+
+2. Using LLMs as Classifiers
+   To make an LLM classify data, you only need to create a suitable prompt. For example:
+
+"""
+# Instruction
+
+Hey LLM, you are a classifier.
+Choose the most appropriate class and output only your classification.
+
+There are these classes:
+{classes}
+
+# Solve
+
+This is the input to be classified:
+{input}
+"""
+   With this setup, the LLM works as a classifier using zero-shot prompting, performing best when the input and categories are common and well-covered by its training data.
+
+2. Two Common Scenarios:
+   - In Training Distribution: When the classes and input are familiar to the LLM (e.g., sentiment analysis with “Positive”, “Neutral”, and “Negative”), zero-shot classification works well.
+   - Out of Training Distribution: When the categories are unique or personalized (e.g., custom expense categories like “Needs”, “Wants”, “Travel”), zero-shot accuracy drops. In these cases, even the most advanced LLMs may struggle.
+
+3. Retrieval-Augmented Classification (RAC)
+   To improve performance for cases that fall outside the LLM’s training data, Retrieval-Augmented Classification (RAC) combines retrieval with classification.
+   RAC retrieves similar, pre-labeled examples, providing the LLM with more context to better inform its classification decision.
+
+4. How RAC Enhances Classification:
+   - Enhanced Context with Examples: By retrieving similar past examples, the LLM can better understand the decision boundaries, especially for nuanced or domain-specific tasks.
+   - Prompt Augmentation: Including retrieved examples in the prompt helps the LLM distinguish between categories by providing concrete precedents. Here’s an example prompt for RAC:
+
+"""
+# Instruction
+
+Hey LLM, you are a classifier.
+Consider the previously labeled examples when making your classification.
+Choose the most appropriate class and output only your classification.
+
+There are these classes:
+{classes}
+
+Here are some examples of previously labeled data:
+{retrieved_examples}
+
+# Solve
+
+This is the input to be classified:
+{input}
+"""
+
+5. Implementing Retrieval
+   To implement RAC, you’ll need a retrieval system that can index your data and find relevant examples. Options include:
+
+   - Vector Search with Embeddings: Converts data to embeddings and uses a vector database to retrieve similar examples.
+   - Keyword Search: Suitable for simpler, structured data.
+    - Hybrid Search: Combines vector and keyword search for more complex needs.
+
+6. RAC in Practice: A Case Study on Personal Transaction Classification
+   For personal expense categorization, I used RAC to classify transactions into categories like “Needs”, “Wants”, and “Travel.” Here’s how I evaluated different approaches:
+
+7. Zero-Shot Evaluation
+   - GPT 4o-mini: Achieved 38% accuracy, showing that it struggled with my personal categories.
+   - GPT 4o: Reached 63% accuracy, reflecting its more advanced understanding but still limited by the unique labels.
+
+8. K-Nearest Neighbors (KNN) with Vector Retrieval
+   Using vector retrieval to classify unlabeled data based on the mode of similar examples, this approach achieved 64% accuracy. 
+   While it improved over zero-shot, it was still limited for less common categories.
+
+9. RAC Evaluation
+   By combining vector retrieval with LLM classification:
+
+   - GPT 4o-mini with RAC: Achieved 85% accuracy, showing significant improvement due to contextual retrieval.
+   - GPT 4o with RAC: Reached 76% accuracy. Despite benefiting from retrieval, it didn’t perform as well as GPT 4o-mini, possibly due to over-reliance on its inherent knowledge base.
+
+10. Key Takeaways and Further Optimization
+    RAC provides an affordable and efficient solution for domain-specific classification, particularly in low-data environments. 
+    With affordable API calls and managed vector databases like Pinecone, RAC is accessible even for smaller projects. 
+    While RAC significantly boosts accuracy, incorporating an UNKNOWN label can further enhance reliability by allowing the LLM to opt out of uncertain classifications, 
+    reserving human oversight for edge cases.
+
+11. Conclusion
+    LLMs, enhanced with RAC, are an effective alternative for classification tasks where training a custom model is impractical. 
+    By blending the general-purpose capabilities of LLMs with contextually relevant examples, RAC improves classification accuracy for both standard and personalized tasks. 
+    This hybrid approach bridges the gap between general-purpose LLMs and the need for domain-specific insights, offering a practical balance between automation and accuracy.
