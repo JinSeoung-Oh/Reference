@@ -1,0 +1,162 @@
+## https://generativeai.pub/how-react-agents-empower-llms-to-think-and-act-with-simple-python-implementation-a115dcc026d5
+
+1. Overview of the ReAct Pattern
+   The ReAct pattern allows the LLM-based agent to reason about each step of a task and act accordingly, adapting to observations. 
+   Each iteration goes through three main steps:
+
+   -a. Thought - The agent considers what it needs to do based on the user query.
+   -b. Action - It performs a specific action, such as looking up data on Wikipedia or calculating a value.
+   -c. Observation - The result from the action is processed, allowing the agent to adjust its reasoning if necessary.
+
+   This cycle repeats until the agent arrives at the final answer.
+
+2. Step-by-Step Guide
+   -a. Thought - Structuring the Agent’s Reasoning Process
+       We define a prompt guiding the LLM to use the ReAct structure. 
+
+       prompt = """
+       You run in a loop of Thought, Action, PAUSE, Observation.
+       At the end of the loop you output an Answer.
+
+       Use Thought to describe your thoughts about the question you have been asked.
+       Use Action to run one of the actions available to you - then return PAUSE.
+       Observation will be the result of running those actions.
+
+       Your available actions are:
+       calculate:
+       e.g. calculate: 4 * 7 / 3
+       Runs a calculation and returns the number - uses Python so be sure to use floating point syntax if necessary
+
+       wikipedia:
+       e.g. wikipedia: Django
+       Returns a summary from searching Wikipedia
+       """
+
+       This prompt informs the agent of its available actions and the structured flow it should follow.
+
+   -b. Action - Executing Actions Based on Reasoning
+       The agent supports two actions:
+
+       -1. Wikipedia Lookup: We’ll use the httpx library to query Wikipedia’s API.
+       -2. Calculation: We use Python’s eval() function to perform basic calculations, taking precautions against code injection.
+
+       # Wikipedia Lookup
+       import httpx
+
+       def wikipedia(q):
+           response = httpx.get("https://en.wikipedia.org/w/api.php", params={
+               "action": "query",
+               "list": "search",
+               "srsearch": q,
+               "format": "json"
+           })
+           return response.json()["query"]["search"][0]["snippet"]
+
+      # Calculation
+       def calculate(expression):
+           try:
+               result = eval(expression)
+               return result
+           except Exception as e:
+               return f"Error in calculation: {e}"
+ 
+  -c. Observation - Processing and Using Feedback
+        After each action, the agent observes the result. It uses this observation to refine its thought process or to finalize the answer.
+
+        Parsing Agent Responses with Regular Expressions
+        We use regex to detect and parse actions within the agent’s responses:
+
+        import re
+
+        # Pattern to match "Action: action_name: action_input"
+        action_re = re.compile(r'^Action: (\w+): (.*)$')
+
+        This pattern matches actions like wikipedia: Django or calculate: 4 * 7 / 3.
+
+3. Building the ReAct Agent 
+   -1. ChatBot Class
+       The ChatBot class manages the conversation history and communicates with OpenAI’s API.
+
+
+       import openai
+
+       openai.api_key = "your-openai-api-key"
+
+       class ChatBot:
+           def __init__(self, system=""):
+               self.system = system
+               self.messages = []
+               if self.system:
+                   self.messages.append({"role": "system", "content": system})
+    
+           def __call__(self, message):
+               self.messages.append({"role": "user", "content": message})
+               result = self.execute()
+               self.messages.append({"role": "assistant", "content": result})
+               return result
+    
+           def execute(self):
+               completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.messages)
+               return completion.choices[0].message.content
+
+4. Integrating ReAct Logic with a Query Function 
+   The query function iterates through Thought-Action-Observation steps, checking for action prompts and executing them as needed.
+
+
+   def query(question, max_turns=5):
+       i = 0
+       bot = ChatBot(prompt)
+       next_prompt = question
+       while i < max_turns:
+           i += 1
+           result = bot(next_prompt)
+           print(result)
+        
+           # Searching for any Actions Identified
+           actions = [action_re.match(a) for a in result.split('\n') if action_re.match(a)]
+           if actions:
+               action, action_input = actions[0].groups()
+               if action not in known_actions:
+                   raise Exception("Unknown action: {}: {}".format(action, action_input))
+            
+               # Execute the identified action
+               print(" -- running {} {}".format(action, action_input))
+               observation = known_actions[action](action_input)
+               print("Observation:", observation)
+            
+               # Send observation back to the agent
+               next_prompt = f"Observation: {observation}"
+           else:
+               return
+
+   This function runs a loop where:
+
+   The agent’s response is checked for action patterns.
+   Detected actions are executed, and observations are returned to the agent.
+
+5. Defining Known Actions
+   A dictionary maps action names to their respective functions.
+
+
+   known_actions = {
+       "wikipedia": wikipedia,
+       "calculate": calculate,
+   }
+
+   We can test the agent by passing a query.
+
+
+   question = "What is the capital of France?"
+   query(question)
+
+Expected Output:
+   Thought: “I should look up France on Wikipedia.”
+   Action: wikipedia: France
+   Observation: “France is a country in Western Europe… Capital: Paris.”
+   Answer: “The capital of France is Paris.”
+
+6. Conclusion
+   The ReAct agent structure allows LLMs to work in a flexible and iterative way,
+   making decisions dynamically and adjusting to observations. 
+   This approach allows for complex tasks by combining multiple tools and actions, enabling the LLM to reason, act, 
+   and adapt through a structured but flexible workflow.
