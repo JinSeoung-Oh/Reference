@@ -1,0 +1,62 @@
+## From https://pub.towardsai.net/llm-mixer-multiscale-mixing-in-llms-for-time-series-forecasting-f4a230e9522e
+
+Time series forecasting involves predicting future values based on historical data, which is particularly valuable in fields like finance and risk management. 
+However, forecasting is challenging due to the complex, nonlinear, and multivariate characteristics of real-world data. 
+Traditional models often struggle to capture both short-term fluctuations and long-term trends simultaneously.
+
+1. LLMs in Time Series
+   The success of Large Language Models (LLMs) like GPT-3.5 and GPT-4 has prompted researchers to apply LLMs to various domains, including time series forecasting. 
+   LLMs are attractive for time series forecasting because of their capabilities in few-shot and zero-shot learning, knowledge integration, and reasoning over complex patterns. 
+   However, time series data differs significantly from the discrete tokens that LLMs typically handle, presenting new challenges.
+
+   - Solution: LLM-Mixer
+     LLM-Mixer is an approach that adapts LLMs for time series forecasting by decomposing data into multiple temporal resolutions. 
+     This technique enables the LLM to model complex patterns across various time scales, enhancing its ability to capture both short- and long-term dependencies.
+
+2. LLM-Mixer Architecture
+   -1. Data Downsampling and Embedding
+       Time series data is downsampled into multiple resolutions to capture short-term fluctuations and long-term trends. 
+       These representations are enriched with three types of embeddings:
+
+      -a. Token embeddings: Obtained through 1D convolutions to represent the raw data values.
+      -b. Temporal embeddings: Encode information like day, week, or month to represent seasonal or periodic patterns.
+      -c. Positional embeddings: Encodes sequence positions, helping the model understand the order of data points.
+
+3. Past-Decomposable-Mixing (PDM) Module
+   The PDM module processes the multiscale data representations, separating them into trend and seasonal components for each temporal resolution.
+    This targeted decomposition enables the model to handle complex time series with different frequencies and amplitudes more effectively.
+
+4. Pre-trained LLM Processing
+   The multiscale data, accompanied by a task-specific prompt, is fed into a frozen pre-trained LLM. 
+   The LLM leverages its pretrained knowledge and the structured multiscale input to generate forecasts. 
+   The model does not require retraining on the specific time series, making it adaptable across datasets.
+
+5. Forecast Generation
+   A trainable decoder (simple linear transformation) is applied to the LLM's final hidden layer to produce the forecast for the next set of time steps, 
+   completing the LLM-Mixer pipeline.
+
+6. Evaluation and Results
+   -1. Datasets
+       LLM-Mixer is evaluated on standard time series benchmarks for both long-term and short-term forecasting:
+
+   Long-term forecasting: Includes ETT (ETTh1, ETTh2, ETTm1, ETTm2), Weather, Electricity, and Traffic datasets.
+   Short-term forecasting: Includes PeMS (PEMS03, PEMS04, PEMS07, PEMS08) traffic datasets.
+
+7. Performance Metrics
+   Performance is measured using Mean Squared Error (MSE) and Mean Absolute Error (MAE), where lower values indicate better accuracy.
+
+8. Results
+   -1. Long-term Multivariate Forecasting:
+       LLM-Mixer outperforms models like TIME-LLM, TimeMixer, and PatchTST on the ETTh1, ETTh2, and Electricity datasets, 
+       achieving low MSE and MAE values across forecasting horizons (96, 192, 384, and 720 time steps).
+   -2. Short-term Multivariate Forecasting:
+       Consistently achieves low MSE and MAE across PeMS datasets, including PEMS03, PEMS04, and PEMS07. On PEMS08, it outperforms models like iTransformer and DLinear, 
+       capturing essential short-term dynamics effectively.
+   -3. Long-term Univariate Forecasting:
+       On the ETT benchmark, LLM-Mixer achieves the lowest MSE and MAE values across datasets, outperforming methods like Linear, NLinear, and FEDformer.
+
+9. Summary
+   LLM-Mixer leverages multiscale decomposition and LLM-based forecasting to achieve competitive accuracy in time series forecasting. 
+   By capturing both short- and long-term dependencies, LLM-Mixer addresses the inherent challenges of multiscale time series data, 
+   showing that LLMs can be adapted for tasks beyond natural language.
+
