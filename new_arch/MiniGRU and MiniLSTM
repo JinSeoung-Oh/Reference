@@ -1,0 +1,70 @@
+## From https://medium.com/@sahin.samia/were-rnns-all-we-needed-exploring-minigru-and-minilstm-models-for-sequence-modeling-664e4675c339
+
+1. Overview
+   The blog examines the revival of RNNs through a minimalist approach proposed by researchers, 
+   suggesting that simplified versions of classic models like LSTMs and GRUs, called minLSTM and minGRU, could be competitive with Transformers, 
+   especially for long-sequence and resource-constrained tasks. 
+   The paper argues that with a few adjustments, RNNs could bridge the efficiency gap left by Transformers, which are computationally expensive for long sequences.
+
+2. Problem Context: Transformer Dominance and Its Limitations
+   Transformers have revolutionized sequence modeling due to their ability to capture dependencies in data efficiently. 
+   However, their reliance on self-attention, which scales quadratically with sequence length, leads to high computational costs for long sequences.
+   This scalability issue has driven a renewed interest in finding alternatives that are more resource-efficient.
+
+3. The Decline of RNNs
+   Before Transformers, RNNs like LSTMs and GRUs were the primary tools for sequence modeling. While these models handled long-term dependencies well, 
+   they required sequential processing, which made training slow. 
+   Techniques like Backpropagation Through Time (BPTT) further complicated training, leading the field to pivot toward more parallelizable architectures like Transformers. 
+   Yet, the parallelization advantage of Transformers brought new scalability issues.
+
+4. Revisiting RNNs: Minimalist Approach with minLSTM and minGRU
+   The authors of the paper propose a stripped-down version of RNNs that resolves these limitations. 
+
+   -1. Removing Hidden State Dependencies: Traditional RNNs rely on hidden states from previous time steps, making them inherently sequential. 
+                                           By eliminating these dependencies, the minimal models can process sequences in parallel.
+   -2. Simplified Activation Functions: Functions like tanh, commonly used in LSTMs, are removed to reduce computational overhead.
+                                        Replacing them with linear transformations allows faster, more efficient calculations.
+   -3. Output Independence: By designing the models to keep outputs consistent across sequence lengths, minLSTMs and minGRUs maintain stable training dynamics, 
+                            making them more efficient and suitable for long sequences.
+
+5. Technical Breakdown:
+   -1. minGRU removes the reset gate and eliminates hidden-state dependencies, allowing parallel processing of sequences.
+   -2. minLSTM also simplifies its gating structure, ensuring the sum of forget and input gates is constant, which stabilizes outputs over longer sequences. 
+       Removing tanh from the candidate state further reduces complexity.
+
+6. Performance and Efficiency
+1. Training Speed:
+   The parallelizable nature of minLSTMs and minGRUs leads to dramatic speed improvements. 
+   In some cases, these minimal models achieved up to 1,300× speedup over traditional RNNs for sequence lengths of 4096, 
+   making them ideal for applications that need fast training on long sequences.
+2. Memory Efficiency:
+   Despite using parallel scanning, which increases memory usage slightly, the minimal RNNs still require fewer parameters than Transformers and other state-space models, 
+   making them feasible for low-compute environments.
+3. Empirical Performance:
+   On various tasks, including reinforcement learning, language modeling, and selective copying tasks, minLSTMs and minGRUs showed competitive or 
+   superior performance compared to Transformers and other modern architectures. They solved complex sequence tasks effectively while retaining fewer parameters.
+4. Scalability and Stability:
+   Minimal RNNs improved in performance as layers were added. For instance, a three-layer minLSTM significantly boosted accuracy in the Selective Copying Task, 
+   indicating that these models can scale effectively in depth without encountering the instability issues of traditional RNNs.
+
+7. Potential Applications
+   The blog suggests that minLSTMs and minGRUs are promising for scenarios where:
+
+   -1. Long Sequences: Transformers are too expensive or slow for extended sequences.
+   -2. Low-Resource Environments: Limited memory and computation make minimal RNNs ideal.
+   -3. Real-Time Applications: Fast training capability is crucial.
+
+8. Broader Implications:
+   The resurgence of RNNs challenges the field’s focus on over-engineering models. 
+   The minimalist versions of LSTMs and GRUs suggest that simplicity and efficiency might be just as valuable as complexity, particularly for certain applications.
+
+   -1. Edge Computing: minGRUs are suitable for low-power devices, including mobile and IoT environments.
+   -2. Real-Time Processing: Parallel processing enables deployment in real-time scenarios.
+   -3. Reevaluation of Model Complexity: With minimal RNNs providing comparable performance, there is a shift towards rethinking model architecture, 
+                                         valuing efficiency over size and complexity.
+
+9. Conclusion:
+   The success of minimal RNNs indicates that the field may benefit from revisiting and optimizing simpler architectures rather than pursuing increasingly complex models. 
+   While Transformers excel in some areas, they may not always be necessary. In scenarios demanding speed and efficiency, minLSTMs and minGRUs demonstrate that “less can be more.” 
+   The blog posits that the future of AI could involve a hybrid approach where both RNNs and Transformers are leveraged based on specific use cases, 
+   leading to a balanced, efficient sequence modeling ecosystem.
