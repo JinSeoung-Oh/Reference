@@ -1,0 +1,87 @@
+## From https://levelup.gitconnected.com/amazing-things-happen-when-attention-heads-are-supercharged-using-mixture-of-experts-b55a6b9a0ac8
+
+This article explores a new approach to the Attention mechanism called Mixture-of-Head Attention (MoH), 
+which enhances conventional Multi-head Attention by selectively activating only the most relevant heads, 
+thereby improving both efficiency and accuracy. 
+MoH, built on the Mixture-of-Experts (MoE) architecture, has demonstrated improvements across various Transformer-based models, 
+including Vision Transformers (ViTs), Diffusion Transformers (DiTs), and Large Language Models (LLMs).
+
+1. Attention Mechanism Overview
+   In a Transformer, Attention enables the model to focus on relevant tokens within a sequence, enhancing relationships regardless of token distance. 
+   Attention is computed using Queries (Q), Keys (K), and Values (V):
+
+   -1. Query (Q): Represents the current token's perspective.
+   -2. Key (K): Represents each token in the sequence.
+   -3. Value (V): Contains associated information for each token.
+  
+   Attention is often calculated as Scaled Dot-Product Attention, which adjusts for the dimensionality of K to stabilize gradients.
+
+2. Multi-head Attention
+   Multi-head Attention improves upon basic Attention by calculating Attention scores across multiple heads, each specializing in different aspects of the input sequence 
+   (e.g., short- and long-range dependencies). This mechanism splits the model dimension 𝑑 model among heads to reduce computational costs and then projects each head back
+   to the full dimension:
+   
+   𝑑_𝑘 = 𝑑_𝑣 = 𝑑_model / ℎ
+
+   Each head's results are concatenated and linearly transformed to produce the output.
+
+3. Mixture-of-Experts (MoE) Architecture
+   MoE introduces multiple neural networks (experts) that specialize in different tasks. A Gating Network selects the top 𝑘
+   experts for a given input, using a softmax-normalized score to weight each expert's contribution. 
+   MoE-based models are highly scalable and efficient, dynamically activating only the most relevant experts.
+
+4. Mixture-of-Head (MoH) Attention
+   MoH applies the MoE concept to Multi-head Attention by treating each Attention head as an expert. 
+   Instead of activating all heads, MoH uses a Gating Network to select only the top 𝑘 heads, 
+   with outputs being a weighted sum of the selected heads' contributions.
+
+   -1. Shared Heads: A subset of heads always remains active to capture common patterns across tasks.
+   -2. Dynamic Heads: Activated selectively based on the input.
+   MoH thus achieves efficiency by dynamically activating only necessary heads, reducing the computational load.
+
+5. MoH Routing Mechanism
+   Routing scores in MoH balance contributions from shared and dynamically activated heads:
+
+   -1. Shared Head Score: Calculated using a specific projection matrix 𝑊_𝑠 and balancing coefficient 𝛼^(1)
+   -2. Dynamic Head Score: Calculated with projection matrix 𝑊_𝑟 and coefficient 𝛼^(2)
+
+   The model learns 𝛼^(1) and 𝛼^(2) values based on the input token, optimizing the balance between shared and dynamic heads.
+
+6. Load Balance Loss 
+  In MoE architectures, there’s a risk that only a few experts are selected frequently, leading to uneven training. 
+  MoH mitigates this with Load Balance Loss (𝐿_𝑏), which ensures a more even distribution of load across Attention heads. 
+  The loss encourages a uniform distribution of routing scores across all tokens, thus enhancing the training of each head.
+
+7. MoH in Action Across Models
+   1. Vision Transformers (ViT) for Image Classification
+      MoH-ViT replaces the standard Multi-head Attention in Vision Transformers with MoH
+      - Performance: MoH-ViT-B achieves 84.9% Top-1 accuracy on ImageNet-1K with only 75% of heads activated, outperforming TransNeXt at full capacity.
+
+   2. Diffusion Transformers (DiT) for Image Generation
+      MoH-DiT modifies DiT models by replacing Multi-head Attention with MoH for dense prediction tasks like image generation
+      - Findings: MoH-DiT performs better than standard DiT models when using 90% of heads, but underperforms with 75%, 
+                  likely due to the dense nature of image generation tasks, which demands a higher number of active heads.
+
+   3. Large Language Models (LLMs)
+      MoH improves LLM efficiency by selectively activating heads, especially in lower-resource settings
+      - Performance: MoH-LLM-S attains an accuracy of 45.4% with 50% of heads active, surpassing the baseline model's 43.9% accuracy with all heads. 
+                     Interestingly, fewer heads (50%) sometimes outperform more (75%) due to reduced overfitting on smaller datasets.
+
+8. Case Study: MoH in LLaMA3–8B
+   Applying MoH to LLaMA3–8B involves modifying its Attention mechanism:
+   -1. Quantized Routing Scores: Converts routing scores to binary (0 or 1), determining whether a head should be active.
+   -2. Straight-Through Estimation (STE): A technique to handle gradient flow through the non-differentiable step function in quantization, 
+                                          making the model trainable.
+       - Results: MoH-LLaMA3–8B achieves 2.4% higher accuracy than the original LLaMA3–8B with only 75% of heads, 
+                  and it restores performance within a 10 billion token training budget.
+
+9. Comparison with Mixture of Attention Heads (MoA)
+   While MoA also combines MoE with Attention, MoH differs by:
+
+   -1. Allowing for continue-tuning of existing models without full retraining.
+   -2. Maintaining parameter efficiency by keeping the same parameter count as Multi-head Attention.
+
+10. Summary
+    Mixture-of-Head Attention (MoH) efficiently balances computational resources while boosting performance across various Transformer architectures, 
+    such as ViTs, DiTs, and LLMs. MoH outperforms traditional Multi-head Attention, selectively activating heads based on task relevance, 
+    making it ideal for long-sequence and low-resource settings
