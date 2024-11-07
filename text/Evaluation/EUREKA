@@ -1,0 +1,54 @@
+### From https://pub.towardsai.net/inside-eureka-microsoft-researchs-new-framework-for-evaluating-foundation-models-ea7b110260f5
+
+Microsoft Research introduced EUREKA, a new open evaluation framework for large foundation models (LFMs), 
+aiming to overcome limitations of traditional evaluation methods that rely on single-score metrics. 
+EUREKA provides a reusable structure that allows for more detailed insights into LFM performance, 
+supporting comprehensive evaluations in both language and multimodal contexts.
+
+1. Key Features of EUREKA
+   -1. Customizable Evaluation Pipelines
+       EUREKA offers a flexible library for constructing modular pipelines, including components for data preprocessing,
+       prompt templates, model inference, postprocessing, metric computation, and reporting. 
+       This modularity ensures reproducibility and adaptability across different experiments.
+   -2. EUREKA-BENCH
+       A benchmark suite that tests LFMs on challenging language and multimodal tasks, focusing on areas where LFMs generally perform below 80%. 
+       These benchmarks span critical skills, such as spatial reasoning and information retrieval, 
+       providing an effective way to analyze LFM limitations and improvement areas.
+   -3. Granular Analysis
+       Instead of single scores, EUREKA disaggregates results across experimental conditions and data subcategories, 
+       allowing for a detailed understanding of model capabilities and performance nuances.
+
+2. EUREKA-BENCH: Core Benchmarks
+   EUREKA-BENCH includes benchmarks across both language and multimodal domains:
+
+   -1. Multimodal Benchmarks
+       -a. GeoMeter: Evaluates spatial and geometric reasoning with 2D images, testing depth and height perception.
+       -b. MMMU: A multimodal question-answering benchmark requiring models to interpret images across various subjects.
+       -c. Image Understanding: Focuses on object recognition and spatial reasoning, using synthetic data to avoid leakage from public datasets.
+
+   -2. Language Benchmarks:
+       -a. IFEval: Measures a model’s ability to follow structured instruction related to style and format.
+       -b. FlenQA: Assesses long-context question-answering capabilities, challenging models to locate and analyze information within 
+                   extensive passages.
+       -c. Kitab: Tests information retrieval, focusing on factual accuracy in contextually filtered settings.
+       -d. Toxigen: Evaluates safe language generation and toxicity detection.
+
+3. Addressing Evaluation Challenges
+   EUREKA tackles common evaluation challenges:
+
+   -1. Non-Determinism: To account for LFMs’ non-deterministic outputs, EUREKA conducts repeated runs for each experiment,
+                        measuring outcome consistency through entropy and disagreement metrics.
+   -2. Backward Compatibility: EUREKA assesses model updates to ensure backward compatibility, 
+                               identifying any regressions that may reduce performance on specific tasks or data subcategories.
+
+4. Future Directions
+   While EUREKA makes strides in evaluation, future updates aim to address:
+
+   -1. Enhanced Capability Coverage: Expanding benchmarks to include responsible AI, multilingual understanding, advanced reasoning, and planning.
+   -2. Increased Benchmark Diversity: Further exploration into optimal data variety for generalizable insights.
+   -3. Data Contamination and Memorization: Developing methods to detect and mitigate memorization effects in evaluation.
+   -4. Prompt Sensitivity: Improving techniques for optimizing and analyzing prompt impact on model performance.
+
+   In summary, EUREKA offers a detailed, adaptable framework for assessing foundation models. 
+   With its modular structure and comprehensive benchmark suite, EUREKA represents an advanced step forward in the evaluation of LFMs, 
+   laying groundwork for future improvements in understanding and refining these models' capabilities.
