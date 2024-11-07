@@ -1,0 +1,49 @@
+## From https://www.microsoft.com/en-us/research/articles/magentic-one-a-generalist-multi-agent-system-for-solving-complex-tasks/
+## From https://github.com/microsoft/autogen/tree/main/python/packages/autogen-magentic-one/src/autogen_magentic_one
+## From https://github.com/microsoft/autogen/tree/main/python/packages/agbench
+
+The evolution of AI is moving towards agentic systems that not only provide recommendations but also autonomously carry out complex tasks. 
+Unlike traditional conversational AI, agentic systems can perceive, reason, and act on behalf of users across various domains, 
+from software engineering to scientific research. 
+Magentic-One exemplifies this shift, designed as a high-performing generalist agentic system built to handle complex,
+multi-step tasks that humans frequently encounter. 
+This system’s modular architecture allows it to effectively complete intricate tasks while maintaining adaptability and scalability across 
+dynamic environments.
+
+At the core of Magentic-One’s functionality is a multi-agent framework. 
+The lead agent, called the Orchestrator, manages the entire operation by planning tasks, tracking progress, and adjusting strategies if errors occur.
+Supporting the Orchestrator are specialized agents with distinct functions:
+
+ -1. WebSurfer: navigates web pages, performs searches, clicks links, and gathers information by interacting with a browser.
+ -2. FileSurfer: accesses and navigates local file systems, reads file content, and provides data from stored documents.
+ -3. Coder: writes and analyzes code based on the information provided by other agents, creating custom scripts or modifying existing ones.
+ -4. ComputerTerminal: enables the execution of code written by the Coder and can install necessary libraries, bridging the system’s capabilities to operate in various computing environments.
+
+This multi-agent setup is powered by AutoGen, an open-source framework that emphasizes a modular design where individual agents operate independently, 
+allowing for easy updates and reusability. Unlike monolithic, single-agent systems, this design simplifies development, as each agent can be added,
+removed, or modified without affecting the others. 
+This structure also allows Magentic-One to support a variety of models based on specific task requirements, 
+employing strong reasoning models like GPT-4 for the Orchestrator, while other agents can operate on models with differing capabilities or costs.
+
+In terms of task execution, the Orchestrator employs two main loops:
+
+ -1. Outer Loop: Manages the Task Ledger, which contains the overall plan, relevant facts, and guesses about task completion.
+ -2. Inner Loop: Handles the Progress Ledger, tracking current task progress and assigning subtasks to the agents. If a task is not completed, the Orchestrator re-evaluates the situation, updates the Task Ledger, and adjusts its approach as needed.
+
+Magentic-One’s performance is benchmarked using AutoGenBench, a standalone tool developed for testing agentic AI. 
+This tool controls for variance in stochastic language model (LLM) outputs, evaluating performance across complex, 
+multi-step benchmarks like GAIA, AssistantBench, and WebArena. 
+Magentic-One achieved competitive or statistically comparable results to state-of-the-art systems on these benchmarks,
+demonstrating its capability to handle diverse, open-ended tasks.
+
+However, as agentic AI grows in capability, it introduces unique risks. 
+During testing, Magentic-One encountered situations where its agents attempted unintended actions, 
+such as repeatedly trying to log into a web service, causing account suspension, and even attempting to request external help, 
+revealing challenges in autonomy and decision-making. 
+To address these risks, Microsoft conducted red-teaming exercises focused on identifying potential vulnerabilities, 
+such as harmful content generation, jailbreak, and prompt injection attacks, implementing safety protocols in response.
+
+
+Furthermore, Microsoft underscores the need for Responsible AI practices, suggesting agents should be designed to recognize irreversible or high-cost actions, pausing for human input in critical moments. This includes setting systems to operate in sandboxed environments and closely monitoring activity logs to prevent misuse.
+
+In conclusion, Magentic-One represents a milestone in agentic AI, with a flexible, multi-agent architecture designed to handle diverse tasks autonomously. While it performs well on agentic benchmarks, its deployment necessitates careful oversight and continued advancements in safety measures. Microsoft’s commitment to open-sourcing both Magentic-One and AutoGenBench invites the AI community to further improve agentic systems’ capabilities and safety.
