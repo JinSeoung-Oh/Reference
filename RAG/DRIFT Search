@@ -1,0 +1,45 @@
+### From https://www.microsoft.com/en-us/research/blog/introducing-drift-search-combining-global-and-local-search-methods-to-improve-quality-and-efficiency/?fbclid=IwY2xjawGWdiZleHRuA2FlbQIxMQABHcBD8_xHoeEKcjN3zI6fhIV96LU7bEkgwZfONFO_K8qr0CjaCf8xGWkDkA_aem_W1H4dXUk-oNEzidpTy-qkg
+### Fronm https://github.com/microsoft/graphrag/blob/main/graphrag/cli/query.py#L193
+
+GraphRAG is an advanced technique leveraging large language models (LLMs) to create knowledge graphs and summaries from unstructured text, 
+enabling Retrieval-Augmented Generation (RAG) on private datasets. 
+It provides users with a comprehensive global overview of extensive, 
+unstructured document collections and facilitates detailed exploration of localized information.
+By constructing knowledge graphs that connect entities and relationships in the data, 
+GraphRAG enhances semantic structuring, allowing it to answer complex user queries with high precision.
+
+1. Core Components of GraphRAG
+   - Indexing Engine: Breaks down documents into manageable chunks, converts these into a knowledge graph of entities and relationships, 
+     identifies communities, and generates "community reports" for a global overview.
+   - Query Engine: Operates in two modes:
+     -a. Global Search: Aggregates data across the dataset to answer broad questions, synthesizing dispersed information.
+     -b. Local Search: Targets smaller, relevant document subsets, effective for questions with precise answers found in limited text units.
+
+2. DRIFT Search: Enhancing Local Search with Community Insight
+   Developed by Uncharted, DRIFT (Dynamic Reasoning and Inference with Flexible Traversal) expands GraphRAG's local search 
+   by integrating community information for more comprehensive query handling. 
+   DRIFT can retrieve a wider range of facts in response to queries, balancing computational cost with high-quality, context-rich responses.
+
+   - Primer: DRIFT initiates by matching a query against the most relevant community reports, 
+             forming an initial answer and generating follow-up questions to expand the scope.
+   - Follow-Up Phase: Executes refined local searches with new questions until relevant details converge on a final answer. 
+                      This iterative process enables DRIFT to adapt dynamically based on emerging information.
+   - Output Hierarchy: Generates a structured hierarchy of questions and answers ranked for relevance to the initial query, 
+                       combining global insights with refined local data.
+
+3. Effectiveness of DRIFT Search
+   DRIFT search is optimized for capturing both comprehensive and diverse responses, excelling in cases where breadth and depth are necessary. 
+   In a benchmark comparison, DRIFT outperformed traditional local search:
+
+   - Comprehensiveness: Provided complete answers 78% of the time. 
+   - Diversity: Offered varied insights in 81% of cases, ensuring that responses are nuanced and multidimensional.
+
+4. Benchmarking and Availability
+   DRIFT has been tested using a dataset of 5,000+ news articles, where it outperformed local search in 
+   comprehensiveness and diversity across 50 specific, localized queries. DRIFT is available on the GraphRAG GitHub.
+
+5. Future Directions for DRIFT and GraphRAG
+   Future enhancements aim to unify global and local search capabilities, 
+   possibly through a single query interface that adapts to various question types. 
+   Plans also include refining termination logic using a reward-based model, implementing a query router, 
+   and creating a streamlined global search to handle broad data access needs efficiently.
