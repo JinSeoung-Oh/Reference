@@ -1,0 +1,88 @@
+## From https://levelup.gitconnected.com/llms-and-the-student-dilemma-learning-to-solve-or-learning-to-remember-249152b72d82
+## From https://towardsdatascience.com/gsm-symbolic-analyzing-llm-limitations-in-mathematical-reasoning-and-potential-solutions-363b82370a26
+
+This summary dives deeper into whether large language models (LLMs) actually perform reasoning or rely on 
+sophisticated memorization and heuristics for tasks like arithmetic. 
+
+1. Reasoning vs. Memorization
+   A central debate in the study of LLMs is whether their high performance on tasks, especially mathematical problems, 
+   reflects true reasoning or the memorization of patterns in training data. Reasoning would imply a reusable, generalized algorithm, 
+   while memorization would indicate the model is simply storing specific input-output pairs without understanding.
+
+2. Heuristic-Based Problem Solving
+   The studies reveal that LLMs do not employ a singular, robust algorithm for solving arithmetic but instead use a "bag of heuristics."
+   This term refers to rule-based shortcuts or approximations where neurons are triggered by specific patterns in the input, 
+   suggesting LLMs process tasks by recognizing patterns rather than deducing through logical steps.
+
+3. Mechanism in Arithmetic Problem Solving:
+
+   -1. Attention Heads and MLPs
+       Only a small subset of attention heads (less than 5%) is involved in solving arithmetic tasks, 
+       and most work by focusing on operands and operators. Following this, MLP modules process the information, deducing answers in the final layers. 
+       These MLPs act as key-value memories, where specific "key" patterns (like operand configurations) prompt the model to generate 
+       "value" tokens (the answer).
+   -2. Specialized Circuits for Arithmetic
+       Analysis shows LLMs use dedicated circuits for arithmetic tasks, defined as minimal, interconnected components (MLPs or attention heads) 
+       that perform arithmetic computations. 
+       For instance, models like Llama3 and GPT-J show activation in specific circuits when solving arithmetic operations within a defined numerical
+       range (0 to 1000).
+
+4. Heuristic Activation and Faithfulness:
+
+   -1. Experiments track how certain neurons and MLP layers respond to prompts, finding that the circuits for arithmetic computation include 
+       neurons that act as heuristic triggers. These neurons detect arithmetic patterns (e.g., two odd numbers) and 
+       use this recognition to output plausible answers.
+   -2. Fine-Tuning Potential
+       Researchers have found that by tuning these active attention heads and MLP layers, an LLM’s arithmetic performance can improve, 
+       suggesting fine-grained adjustments rather than full retraining can enhance task-specific capabilities.
+
+5. Neurons as Specialized Heuristic Triggers:
+
+   -1. In the arithmetic circuits, specific neurons are responsible for distinct operations (addition, subtraction, etc.), 
+       so that each neuron circuit corresponds to a unique operator. Eliminating certain neurons selectively reduces 
+       the model’s performance on specific operations, underscoring that these neurons act as heuristic "specialists" rather than 
+       contributors to a general reasoning mechanism.
+   -2. Impact on Model Accuracy
+       The selective deactivation of neurons related to specific arithmetic heuristics affects accuracy on those particular tasks, 
+       which shows these neurons' specialized role. However, since LLMs use multiple heuristics per task,
+       deactivating one heuristic does not entirely prevent the model from achieving correct outputs.
+
+6. Limitations of Heuristic Reliance:
+
+   -1. Lack of Complete Generalization
+       The heuristic-based approach does not equate to full generalization, as LLMs cannot always solve arithmetic prompts accurately. 
+       This may occur because either there aren’t enough heuristics to cover all cases, or some heuristics fail to activate when required, 
+       as seen when a neuron meant to respond to even numbers doesn’t do so.
+   -2. Overfitting on Heuristics
+       As LLMs over-rely on specific heuristics, they may achieve high accuracy within a familiar range of tasks but struggle to extend
+       this to unfamiliar cases, showing the limitations of this mechanism for true generalization.
+
+7. Heuristic Evolution During Training:
+
+   -1. Training Checkpoints and Heuristic Maturity
+       During training, the heuristic mechanism becomes increasingly refined. Initial checkpoints show primitive forms of these heuristics, 
+       which gradually solidify across training epochs, while irrelevant or unhelpful heuristics fade. 
+       This progression indicates that LLMs build their problem-solving framework around accumulated heuristics rather 
+       than discovering new computational strategies.
+   -2. Checkpoint Experiments with Pythia-6.9B
+       Experiments with the Pythia-6.9B model reveal that heuristics become more sophisticated through the training process and converge into 
+       a set of rules used consistently by the final model. 
+       This development reinforces the idea that LLMs rely on a collection of memorized, pattern-based strategies rather than 
+       inventing or understanding new methods.
+
+8. Implications for LLM Improvement:
+
+   -1. Architectural Adjustments Needed
+       Fine-tuning or post-training techniques might provide limited improvements for enhancing reasoning capabilities, 
+       as the current architecture inherently promotes heuristic dependency. 
+       To foster genuine reasoning, LLMs may require deeper architectural changes that prevent overfitting on heuristics.
+   -2. Regularization Potential
+       The dependence on heuristics points toward overfitting risks, which might be mitigated through stronger regularization techniques
+       to avoid entrenching the model in specific pattern-recognition habits and possibly encourage broader generalization capabilities.
+
+In summary, the research highlights that LLMs’ arithmetic abilities derive from a blend of memorized heuristic patterns rather than 
+an understanding of mathematical principles. 
+These heuristics develop progressively during training, with final models relying on them almost exclusively, 
+limiting their potential to generalize effectively. 
+Improving LLMs’ mathematical reasoning may necessitate fundamental changes in architecture and training strategies 
+to move beyond pattern-based heuristics.
