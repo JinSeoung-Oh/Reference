@@ -1,0 +1,152 @@
+## From https://towardsdatascience.com/agentic-mesh-the-future-of-generative-ai-enabled-autonomous-agent-ecosystems-d6a11381c979
+## I think Agentic Mesh is not common term. But It is good reference
+
+The Agentic Mesh is a next-generation framework designed to support a vast, interconnected ecosystem of autonomous agents. 
+These agents, powered by Agentic AI, can work independently, 
+using sophisticated reasoning and planning to accomplish complex tasks without human intervention. 
+With Agentic Mesh, agents are able to discover, interact, collaborate, and transact with each other in a secure, structured,
+and scalable environment.
+
+1. Agentic AI and Autonomous Agents
+   Agentic AI refers to AI systems capable of autonomous decision-making. Using advanced reasoning and iterative planning, 
+   these agents pursue specific goals, handling multi-step tasks on behalf of users and other agents. 
+   This independence enables them to adapt and respond to dynamic environments, much like human workers.
+   
+   Autonomous agents built on this technology can manage and execute a range of complex tasks, such as customer support, 
+   accounting, and project management, by integrating AI-driven decision-making with specialized capabilities.
+
+2. The Role of Agentic Mesh
+   Agentic Mesh functions as an ecosystem infrastructure that connects these autonomous agents, enabling them to work together cohesively. 
+   It supports safe discovery, communication, and coordination among agents, ensuring efficient task execution 
+   and secure transactions within a regulated network. This environment addresses key questions in agent ecosystems, such as:
+
+   -1. How do agents find and verify each other?
+   -2. How do they interact and transact securely?
+   -3. How is trust established in their interactions?
+
+3. Core Components of Agentic Mesh
+
+   - 1. Marketplace
+       The Marketplace is the main interface where users interact with agents. It functions like an app store for autonomous agents, providing:
+
+     -a. Discovery Tools: Users search for agents that align with their needs, using filters to sort by capabilities, industry, or policies.
+     -b. Performance Tracking: Users can monitor agent tasks and track outcomes.
+     -c. Feedback Mechanisms: Feedback from users helps ensure agent accountability and reliability.
+     -d. Human Oversight: For tasks requiring regulatory compliance or safety verification, users can monitor and guide agent actions.
+
+   -2. Registry
+       The Registry is a centralized repository containing essential metadata for each agent. It enables structured agent management by maintaining:
+
+       -a. Capabilities: Defines what each agent can do.
+       -b. Ownership Information: Tracks the individual or organization responsible for each agent, fostering accountability.
+       -c. Policies and Security Roles: Lists operational guidelines and safety standards.
+       -d. Lifecycle Information: Tracks the agent’s status, updates, and operational history.
+
+       The Registry also serves as a trust-building mechanism, as it includes certifications and third-party audit results, 
+       allowing users to verify an agent’s compliance with standards.
+
+   -3. DNS System
+       The Domain Name System (DNS) within Agentic Mesh translates human-readable agent names (e.g., “agent.company.com”) to IP addresses. 
+       This makes agents globally accessible by enabling secure location and interaction across the internet, much like conventional websites.
+
+4. Characteristics of Autonomous Agents in Agentic Mesh
+   Agents in the Agentic Mesh ecosystem are governed by six core characteristics that ensure reliability and safety:
+ 
+   -a. Purposefulness: Agents operate within well-defined roles and objectives, ensuring that each action aligns with a specific purpose. 
+                       Purpose sets the boundaries for what an agent can and should do, preventing it from engaging in unrelated 
+                       or inappropriate tasks.
+   -b. Accountability: Ownership of each agent is clearly defined, holding an individual or organization responsible for 
+                       its behavior and performance. Ownership ensures proper governance, allowing authority and control to be established, 
+                       delegated, and enforced as needed.
+   -c. Trustworthiness: Trustworthiness is built on an agent’s consistency, predictability, and compliance with its purpose and policies. 
+                        It includes third-party certifications, audit trails, and adherence to ethical and legal standards, 
+                        enhancing confidence in agent reliability.
+   -d. Autonomy: Agents act independently within their defined purpose and constraints, making decisions without constant supervision. 
+                 This autonomy is crucial for scalability, as it allows agents to operate and adapt in real-time 
+                 while still adhering to their boundaries.
+   -e. Discoverability: Registered agents can be easily found by users or other agents, facilitated by metadata in the Registry. 
+                        Discoverability enables efficient collaboration and selection of agents that meet specific requirements.
+   -d Intelligence: Agents leverage large language models (LLMs) and other AI systems to generate execution plans, reason through complex tasks, 
+                    and interact in natural language. Some agents may also use specialized LLMs tailored to their industry or field, 
+                    allowing them to perform expert-level tasks.
+
+5. Agent Lifecycle Stages in the Agentic Mesh
+   -1. Registration
+       Registration is the initial stage where agents set up their identity and capabilities:
+
+       -a. Configuration: Agents define purpose, ownership, capabilities, and security requirements.
+       -b. Registry Submission: Metadata is submitted to the Registry, making the agent part of the Mesh ecosystem.
+       -c. DNS Registration: DNS associates the agent’s chosen name with its IP address, making it accessible globally.
+       -d. Approval: Human oversight or third-party validation may approve the agent’s registration to verify safety and compliance.
+
+   -2. Discovery
+       Discovery is how agents and users locate registered agents:
+
+       -a. Search and Query: Agents and users query the Registry for agents that match specific criteria.
+       -b. DNS Lookup: Once identified, the agent’s DNS name is resolved to facilitate direct connections.
+       -c. Direct Interaction: Agents initiate connections based on the discovery results to collaborate on tasks.
+
+   -3. Execution
+       Execution is the full process where an agent is selected, plans tasks, and completes them:
+
+       -a. Agent Selection: Users find agents through the Marketplace and select based on their needs.
+       -b. Execution Planning: Agents create an execution plan with the help of LLMs.
+       -c. Task Collaboration: Agents may collaborate with others, initiating sub-tasks as needed.
+       -d. Result Management: The agent reports progress and outcomes back to the user or controlling agent, ensuring transparency.
+
+6. Experience Layers in Agentic Mesh
+   -1. User Experience
+       Focused on the user-facing interactions, the User Experience includes:
+
+       -a. Marketplace: Allows consumers to discover agents, initiate tasks, and track agent performance.
+       -b. Creator Workbench: Allows agent creators to publish agents and monitor their metrics.
+       -c. Policy Workbench: Enables governance professionals to establish policies and certification standards.
+
+   -2. Agent Experience
+       Defines how agents interact with one another:
+
+       -a. Registry Interactions: Agents query the Registry to discover and evaluate other agents based on purpose, policies, and capabilities.
+       -b. Communication Protocols: Agents communicate via APIs, collaborating directly for complex workflows.
+       -c. Standard Primitives: Agents have standard functionalities such as discovery, observability, 
+                                and control interfaces to manage interactions efficiently.
+   
+   -3. Operator Experience
+       Ensures operational resilience, security, and maintenance:
+
+       -a. Infrastructure Console: Provides tools for monitoring and managing agents, ensuring optimal performance and quick troubleshooting.
+       -b. Technical Support: Ensures that agents remain functional and secure, addressing issues as they arise.
+
+7. Autonomous Agent Stack
+   The Autonomous Agent Stack outlines the essential components for operating agents within the Agentic Mesh:
+
+   -a. Communications and APIs: Facilitates agent-to-agent interactions through APIs, handling tasks such as discovery and interaction management.
+   -b. Control and Management: Includes sensors for environmental perception and actuators for interaction, 
+                               enabling agents to control their operations autonomously.
+   -c. Learning and Decisioning: LLMs and machine learning algorithms provide agents with execution planning capabilities, 
+                                 enabling learning from past experiences and data-driven decision-making.
+   -d. Run-Time Environment: Provides the computational infrastructure required for agents to operate safely and consistently.
+   -e. Orchestration and Specialized LLMs: General-purpose LLMs handle task planning, while specialized LLMs enable expert performance 
+                                           in specific fields or industries.
+
+8. Agentic Mesh Interfaces
+   Interfaces in the Agentic Mesh are categorized into Discovery, Observability, and Interactivity:
+
+   -a. Discovery Interfaces: Allow agents and users to retrieve metadata for understanding agent purpose and capabilities.
+   -b. Observability Interfaces: Monitor and track agent performance, usage, and activity logs, crucial for auditing and reliability.
+   -c. Interactivity Interfaces: Facilitate direct task execution and interaction management, enabling dynamic agent control.
+
+9. Trust Mechanisms in the Agentic Mesh
+   Trust is foundational in Agentic Mesh, built on:
+
+   -a. Feedback Mechanisms: Users and agents provide ratings, enabling others to identify reliable agents.
+   -b. Performance Track Record: Agents build credibility by consistently meeting performance expectations.
+   -c. Certification: Agents can be certified by third-party audits, ensuring they meet standards of safety, compliance, and efficiency.
+   -d. Published Trust Metrics: Trust metrics are available in the Marketplace and Registry, providing transparency in agent capabilities 
+                                and reliability.
+
+10. The Road Ahead: A New Era of Collaboration
+    The Agentic Mesh enables businesses and individuals to interact with and rely on autonomous agents across industries and domains, 
+    redefining collaboration and efficiency. By providing a structured, transparent, and secure ecosystem, 
+    the Mesh supports a new generation of automated workflows, positioning agents as vital contributors to future business operations
+    and collaborative ecosystems. This framework has the potential to revolutionize how tasks are handled, 
+    enabling businesses to unlock new efficiencies through the responsible deployment of autonomous agents.
