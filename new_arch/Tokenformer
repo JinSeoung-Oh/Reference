@@ -1,0 +1,55 @@
+## https://medium.com/@aipapers/tokenformer-the-next-generation-of-transformers-d55bb78dff9a
+
+Transformers have revolutionized AI, underpinning large language models and impacting fields like computer vision with Vision Transformers (ViT).
+However, as model sizes grow, training from scratch becomes increasingly costly and environmentally unsustainable. 
+This cost motivates research into more efficient architectures, such as Tokenformer, which reduces training overhead when scaling model parameters.
+
+1. Introduction to Tokenformer
+   The Tokenformer model reimagines the traditional Transformer architecture, allowing for incremental scaling without requiring full retraining. 
+   This is achieved through a fully attention-based architecture that introduces a novel mechanism for parameter-token interactions, 
+   enabling flexibility and reduced computational requirements.
+
+2. Architecture Comparison: Transformer vs. Tokenformer
+   -1. Traditional Transformer:
+       Token interactions are managed through linear projection to produce Query (Q), Key (K), and Value (V) matrices.
+       Self-attention allows tokens to interact with each other, followed by a feedforward network (FFN) to process outputs layer by layer.
+       When scaling up, Transformers require retraining from scratch, which is computationally expensive.
+
+   -2. Tokenformer:
+       Replaces the fixed linear projection with token-parameter attention blocks (Pattention) for parameter interactions, allowing for incremental growth.
+       Maintains self-attention but replaces the FFN with an additional Pattention block for token-parameter interactions.
+       Enables flexible scaling by adding new parameters without retraining from scratch, significantly reducing training costs.
+
+3. Tokenformer Architecture in Detail
+   -1. Pattention Blocks:
+       Pattention blocks compute Q, K, and V matrices, but unlike traditional attention, these matrices are derived directly from parameters rather 
+       than fixed linear projections.
+       The modified softmax and scaling mechanism in Pattention enhance optimization stability by adapting the influence of different parameter values 
+       dynamically.
+
+   -2. Replacing FFN with Sequential Pattention Blocks:
+       Instead of using an FFN, Tokenformer processes output through sequential Pattention blocks with a residual connection to input tokens, 
+       maintaining the benefits of deep learning’s residual learning.
+
+   -3. Incremental Model Growth:
+       Model size can be incrementally increased by adding rows to the key and value matrices in Pattention blocks,
+       allowing for larger models without retraining all parameters.
+       Existing parameters continue to improve through training, which results in faster convergence compared to training a Transformer model from scratch.
+
+4. Results
+   -1. Tokenformer’s Efficiency: The paper shows Tokenformer achieving comparable or even superior performance to traditional Transformers with significantly lower training costs.
+   -2. Training Cost and Performance:
+       For instance, Tokenformer can achieve the performance of a 1.4 billion-parameter Transformer using only 10% of the training tokens.
+       As model sizes scale (e.g., from 124 million to 1.4 billion parameters), Tokenformer’s incremental training allows it to reach high performance levels faster and more efficiently.
+
+5. Conclusion
+   Tokenformer represents a promising architectural shift, offering a cost-effective and scalable solution to Transformer model growth. 
+   By enabling incremental model scaling and reducing dependency on full retraining, Tokenformer not only addresses the financial and environmental 
+   costs associated with model training but also paves the way for sustainable development of large AI models.
+
+
+
+
+
+
+
