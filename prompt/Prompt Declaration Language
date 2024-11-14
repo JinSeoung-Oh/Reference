@@ -1,0 +1,76 @@
+### From https://pub.towardsai.net/lets-simplifying-how-we-talk-to-ai-using-prompt-declaration-language-pdl-b1824c4de833
+## I think PDA.. convert Natural language to code-like thing
+
+In the world of AI, where large language models (LLMs) can create poetry, write code, or answer questions, Prompt Engineering plays a crucial role. 
+Prompt engineering is about designing instructions that help these models understand our goals clearly. 
+However, crafting effective prompts is often challenging due to a concept called "brittleness," 
+where small prompt changes lead to drastically different outcomes.
+
+To address these issues, researchers from IBM and UC Davis developed Prompt Declaration Language (PDL). 
+In this article, we’ll explore PDL’s innovations and how it simplifies interactions with LLMs.
+
+1. Current Challenges in Prompt Engineering Tools
+   Prompt engineering tools like LangChain, AutoGen, and Guidance provide structured ways to work with LLMs, but they come with drawbacks:
+
+   -1. Complexity: Many tools require advanced programming knowledge, making them less accessible.
+   -2. Flexibility: Some tools lock users into specific workflows or programming languages, limiting adaptability.
+
+PDL simplifies this process. It is a declarative language that lets users focus on what they want to achieve, not the exact steps to reach the goal.
+
+2. PDL Basics and How It Works
+   PDL is built using YAML, a human-readable language often used for configuration files. 
+   This choice makes PDL intuitive, even for non-programmers. 
+   A PDL program is structured as blocks, each defining a specific instruction. Here are some foundational blocks:
+
+   -1. model: Directs the LLM to respond or take an action.
+   -2. read: Requests user input.
+   -3.  if and for: Enable conditional and loop functionalities.
+
+   For example, in a chatbot made with PDL, the bot could keep asking questions until the user types "quit." 
+   The simplicity and structure of PDL make it accessible and intuitive while supporting complex interactions.
+
+3. Visual Structure of PDL
+   In the paper, Figure 1 demonstrates PDL’s clean syntax and logical structure, showing both PDL code for a chatbot 
+   and an interpreter trace that follows the conversation’s flow. This clean setup highlights PDL’s efficiency in building dynamic, 
+   interactive AI applications.
+
+4. PDL’s Developer Tools
+   The team behind PDL has provided several tools to enhance its usability:
+
+   -1. PDL Interpreter: A command-line tool that runs PDL programs, even offering a streaming mode to display outputs as they generate.
+   -2. VSCode Integration: Supports PDL coding in VSCode with features like syntax highlighting and error-checking.
+   -3. Jupyter Notebook Support: Adds a %%pdl magic command to run PDL in notebooks, perfect for experimentation.
+   -4. Live Document Visualizer: Offers a visual representation of PDL programs, showing each block and its role in the workflow.
+   -5. Python SDK: Allows Python users to integrate PDL into broader applications easily.
+
+5. Case Studies Showcasing PDL’s Capabilities
+   The researchers highlighted three case studies to demonstrate PDL’s flexibility and potential.
+
+   -1. Retrieval-Augmented Generation (RAG)
+       In RAG, the system pulls relevant information before answering a query. 
+       Using PDL, the researchers created a program that fetched Python examples from a dataset called MBPP. 
+       This context enriched the model's responses, making them more accurate.
+   -2. ReAct Agent
+       The ReAct agent alternates between thinking, acting, and observing based on the prompt. 
+       In one example, the agent used Wikipedia to find answers. The think-act-observe cycle continued until the correct answer was reached, 
+       as demonstrated in Figure 4.
+   -3. Meta-Programming: Generating PDL with LLMs
+       Here, PDL was used to let an LLM generate code for solving math problems from the GSMHard dataset. 
+       This process helped identify errors in about 10% of the dataset, showcasing PDL’s usefulness in verifying data integrity.
+
+6. How PDL Differs from Other Prompt Engineering Tools
+   PDL stands out from other prompt tools by balancing simplicity and power. 
+   Other tools like LangChain, MiniChain, and Guidance offer extensive features but often make prompt engineering more complex. 
+   PDL provides flexibility and control without overwhelming the user. Tools like DSPy and Vieira focus more on automatic prompt generation, 
+   which can limit adaptability. PDL, however, lets users guide LLMs without losing control.
+
+7. Conclusion: PDL Simplifies Prompt Programming
+   PDL offers a declarative, YAML-based syntax that makes working with LLMs easier and more intuitive. 
+   It enables modular code, where users specify what they want rather than dictating how to achieve it, 
+   shifting focus from implementation details to goal-oriented design.
+
+   PDL’s features and tools make it ideal for developers and researchers aiming to leverage LLMs in their applications. 
+   With ongoing developments, such as improvements in speed, accuracy, and security, PDL has the potential to become a widely adopted framework in AI. 
+   As an open-source project, it invites developers to contribute, experiment, and simplify their AI workflows with PDL.
+
+In essence, PDL makes prompt engineering more approachable, bringing powerful AI closer to those looking to explore its capabilities.
