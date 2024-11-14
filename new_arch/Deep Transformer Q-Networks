@@ -1,0 +1,91 @@
+## From https://medium.com/correll-lab/deep-transformer-q-networks-a-paper-analysis-e7efd9379e5f
+
+This article reviews the key elements of the "Deep Transformer Q-Networks for Partially Observable Reinforcement Learning" (DTQN) paper, 
+exploring both the technical foundations of reinforcement learning (RL) and the advancements DTQN offers over traditional architectures 
+in partially observable environments.
+
+1. Background
+  -1. Reinforcement Learning (RL) Overview
+      Reinforcement Learning (RL) involves an agent interacting with an environment to maximize cumulative rewards by learning an optimal sequence of actions.
+      RL typically relies on Markov Decision Processes (MDPs), where:
+
+      -a. The Markov Property ensures that each state's outcome is influenced only by the current state and action, not prior history.
+      -b. Exact Solution Methods like Value Iteration and Policy Iteration can yield optimal policies if the model is known.
+
+  -2. When Model-Free Methods Are Required
+      If transition or reward functions are unknown, model-free methods like Q-Learning are employed, 
+      directly learning values for each state-action pair through environment interaction. 
+      However, Q-Learning struggles with continuous or large state spaces, leading to the development of Deep Q-Learning (DQN), 
+      which uses neural networks to approximate Q-values and handle high-dimensional inputs.
+
+  -3. Partially Observable Reinforcement Learning and POMDPs
+      In many real-world tasks, only partial observations are available, creating the need for Partially Observable Markov Decision Processes (POMDPs).
+      These problems require agents to make decisions based on an inferred belief state, 
+      which is an estimation of the current state based on previous observations.
+
+  -4. Deep Recurrent Q-Networks (DRQNs)
+      For partially observable environments, DRQNs, which combine Q-Learning with recurrent neural networks (e.g., LSTMs), 
+      address the challenge of maintaining a belief state. The LSTM helps retain information over time, 
+      approximating the belief state without explicit tracking.
+
+2. Deep Transformer Q-Networks (DTQN)
+   Building on the success of transformers in sequential modeling, DTQN introduces a transformer-based approach to handle partially observable RL tasks.
+
+   -1. Motivation
+       Transformers, with their self-attention mechanism, excel at modeling long-term dependencies. 
+       DTQN replaces the recurrent components in DRQNs with transformers, using self-attention to retain relevant parts of past interactions. 
+       This approach helps in making decisions based on a more nuanced understanding of an observation sequence.
+
+   -2. DTQN Architecture
+       The DTQN architecture consists of three main components:
+
+       -a. Observation Embedding: Encodes sequences of observations and actions.
+       -b. Transformer Decoder: Processes embeddings using self-attention to handle dependencies across time.
+       -c. Q-Value Head: A linear transformation that computes Q-values for each action based on the decoder output.
+
+   -3. Key Steps:
+       -a. Input Embedding: Encodes the sequence of past and current observations, potentially adding positional encoding.
+       -b. Transformer Decoder: Applies self-attention, LayerNorm, and FeedForward layers to process the embedded sequence.
+       -c. Q-Value Prediction: The Q-values for each action are generated through a linear transformation. 
+                               The action with the highest Q-value is selected, followed by interaction with the environment, 
+                               updating the sequence for the next decision step.
+   -4. Attention in DTQN
+       DTQN leverages self-attention to weigh parts of the observation history according to their relevance for decision-making, 
+       a crucial feature for RL environments that require long-term planning.
+
+3. Experiments and Results
+   -1. Performance Comparison
+       The authors evaluated DTQN against DQN, DRQN, and an attention-based model in various domains, including gym-gridverse and CarFlag. 
+       DTQN generally outperformed or matched DRQN, particularly in environments that demanded higher memory utilization for decision-making.
+
+   -2. Ablation Studies
+       Key findings from ablation studies include:
+
+       -a. Intermediate Q-Values: Training on Q-values for each timestep (not just the final timestep) yielded significant improvements.
+       -b. Positional Encoding: Both learned and sinusoidal encodings were tested, with no marked preference indicated by the results.
+       -c. Gating Mechanisms: Adding gating mechanisms similar to GRUs showed limited impact on performance.
+
+   -3. Observational Insights
+       The attention mechanism in DTQN provided insights into which parts of the agent’s history were most influential in its decisions. 
+       The attention weights allowed researchers to visualize and interpret which past observations were prioritized, 
+       a promising development for explainable AI in RL.
+
+4. Running DTQN Locally
+   The authors provide a repository for running DTQN locally. The setup involves creating a Python 3.8 environment, 
+   installing specific packages (e.g., gym-gridverse, rl-parsers), and optionally using visualization tools like wandb.ai for tracking experiments.
+
+   Example Experiment: CarFlag Domain
+   In the CarFlag environment, DTQN achieved the highest mean return, outperforming DQN and DRQN. 
+   The environment requires the agent to identify the green flag (target) while avoiding penalties associated with incorrect flag choices (red flags). 
+   DTQN’s superior performance reflects its ability to handle complex sequences and partial observability efficiently.
+
+5. Discussion of Results
+   The DTQN paper demonstrates that transformers can outperform or match DRQNs in partially observable environments, 
+   with the added benefit of attention-based explainability. 
+   However, the tested environments were relatively simple. To gauge the full capabilities of DTQN, 
+   it would be beneficial to apply this approach in more complex domains with larger state and action spaces.
+
+6. Conclusion
+   DTQN presents a novel approach to reinforcement learning in partially observable environments by integrating transformers to retain 
+   and prioritize past observations effectively. Its ability to provide interpretable attention weights adds value for explainable AI,
+   although further testing in more complex environments is needed to confirm its scalability and robustness.
