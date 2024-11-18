@@ -1,0 +1,60 @@
+### from https://artgor.medium.com/paper-review-large-language-models-orchestrating-structured-reasoning-achieve-kaggle-grandmaster-4ff8ab49deea
+
+Agent K v1.0: Autonomous Data Science Agent
+
+Agent K v1.0 is an autonomous agent designed to tackle the entire data science lifecycle using experience-based learning, 
+rather than traditional fine-tuning or backpropagation. 
+It leverages a structured reasoning framework with memory-based learning to dynamically adapt and optimize its performance.
+
+1. Key Features
+   -1. Reasoning by Experience
+       -a. Utilizes internal working memory and an external long-term memory database to adapt based on prior tasks.
+       -b. Modeled as a Markov Decision Process (MDP) for dynamic decision-making.
+       -c. Performs three main actions: managing memory, updating working memory, and interacting with the environment.
+
+   -2. Structured Framework:
+       -a. A reward-based policy selectively stores high-utility data and snippets.
+       -b. Can adapt and learn without modifying core model parameters, relying instead on memory-based optimizations.
+
+2. Phases of Operation
+   -1. Phase I: Automation (Task Setup)
+       -a. Fetches tasks from Kaggle and processes raw data into structured input maps based on modalities (e.g., tabular, image, text).
+       -b. Modeled as an MDP, with pipeline stages defined by unit tests that determine progression.
+       -c. Uses nested reasoning to identify and resolve errors via reflection (e.g., generating "META-ERROR-THOUGHTS" for root cause analysis).
+
+   -2. Phase II: Optimization (Task Solution)
+       -a. Applies tools like feature engineering, deep learning, AutoML, and Bayesian optimization for performance maximization.
+       -b. Generates code to iteratively improve metrics and submits predictions to Kaggle for evaluation.
+       -c. Customizes solutions for different modalities, using libraries like Torchvision, Torchtext, and HEBO.
+
+   -3. Phase III: Generalization (Multi-Task Learning)
+       -a. Supports multi-task and continual learning by sharing long-term memory across domains.
+       -b. Builds a curriculum based on task similarity, difficulty, and recency, prioritizing tasks aligned with successful prior cases.
+
+3. Experimental Results
+   -1. Performance on Kaggle
+       -a. Tested on 65 competitions, achieving:
+           - 6 gold, 3 silver, and 7 bronze medals.
+           - Top 38% ranking among Kaggle competitors (Elo-MMR score: 1542).
+           - 92.5% success rate across tasks, matching Kaggle Grandmaster-level performance.
+
+   -2. Task Success:
+       -a. Gold medals in tabular data, computer vision, and NLP.
+       -b. Achieved over 80th percentile in 22 tasks and above the 50th percentile in 62% of competitions.
+
+   -3. Challenges:
+       -a. Faced issues in non-converging losses, incorrect submissions, and class imbalances in a subset of tasks (<20th percentile performance).
+
+4. Notable Contributions
+   -1. Efficient Task Handling:
+       -a. Adapts without computationally expensive methods like fine-tuning.
+       -b. Employs memory-based learning for scalability and generalization.
+
+   -2. High Dimensionality Handling:
+       -a. Excels in multimodal data processing (e.g., tabular, vision, NLP) with structured reasoning.
+
+   -3. Comparison to Humans:
+        - Outperformed 63% of human competitors on Kaggle using automated workflows.
+
+Agent K v1.0 showcases a robust approach to autonomous data science, providing a scalable, 
+memory-driven alternative to traditional machine learning pipelines.
