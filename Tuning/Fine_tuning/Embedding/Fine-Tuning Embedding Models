@@ -1,0 +1,77 @@
+From https://pub.towardsai.net/fine-tuning-embedding-models-achieving-more-with-less-d89082265ba8
+
+1. Introduction
+   The article discusses fine-tuning embedding models for domain-specific data, 
+   emphasizing the competitive performance of huggingface/BAAI/bge-large-en-v1.5 (1024 dimensions) 
+   compared to azure/text-embedding-3-large (3072 dimensions) and azure/text-embedding-3-small (1536 dimensions). 
+   The BGE model stands out due to its flexibility for fine-tuning with the sentence-transformers library.
+
+2. Choosing the Right Model for Fine-Tuning
+   -1. Model Variants:
+       BGE models are available in large, base, and small sizes, with varying parameter counts and resource requirements.
+       Larger models offer better performance but require more memory and computational power.
+
+   -2. Base Model Selection:
+       The BGE-base-en-v1.5 model (109M parameters, 0.41GB memory, 768 dimensions) was selected due to its efficient balance between performance 
+       and resource usage.
+       This choice was practical for the author's GPU (NVIDIA A40 with 48GB VRAM), allowing faster fine-tuning iterations compared 
+       to the large model (335M parameters, 1.25GB memory, 1024 dimensions).
+
+3. Matryoshka Representation Learning (MRL)
+   -1. Key Feature:
+       MRL allows embeddings to be generated at multiple dimensions without significant performance degradation.
+       For this study, embeddings were generated at dimensions 768, 512, 256, 128, and 64.
+
+   -2. Benefits:
+       Improves computational efficiency and reduces memory requirements, making models suitable for resource-constrained environments.
+       Supported by both BGE models and the latest azure/text-embedding-3 models.
+
+4. Training Process
+   -1. Dataset Splitting:
+       20% of the synthetic dataset was used for evaluation.
+       The remaining 80% was reserved for fine-tuning to enhance generalization.
+
+   -2. Loss Functions:
+       -a. MatryoshkaLoss: Encourages learning embeddings at multiple granularities.
+       -b. MultipleNegativesRankingLoss: Ensures semantically similar embeddings for positive pairs and dissimilar embeddings for negative pairs.
+       The combination promotes dimensionally flexible and semantically robust embeddings.
+
+5. Training Setup:
+   -1. Optimizer: AdamW with a learning rate of 2e-5.
+   -2. Epochs: 10, chosen to balance training time and performance without overfitting.
+
+6. Evaluation and Results
+   -1. Fine-tuning significantly enhanced performance:
+       The fine-tuned model at 64 dimensions outperformed the base model at 768 dimensions across all metrics.
+       Best results were observed at 512 and 256 dimensions, showcasing the power of MRL.
+       Fine-tuning resulted in an 8% improvement in NDCG@10 (Normalized Discounted Cumulative Gain at rank 10).
+
+7. Evaluation Process:
+   The InformationRetrievalEvaluator from the sentence-transformers library was used.
+   Queries from the test set were evaluated against the full dataset (both training and test data).
+
+8. Comparison with Top Models
+   -1. Performance Against Azure Models:
+       The fine-tuned BGE-base-en-v1.5 (512) outperformed azure/text-embedding-3-large (3072) at higher cutoffs (e.g., 3, 5, 10).
+       The fine-tuned model remained competitive even at lower dimensions (256, 64), where azure/text-embedding-3-large experienced significant performance drops.
+
+9. Fair Dimensional Comparisons:
+   The fine-tuned model was evaluated at 512, 256, and 64 dimensions against azure/text-embedding-3-large at corresponding dimensions.  
+   The fine-tuned model consistently emerged as the better performer, especially at lower dimensions.
+
+10. Key Metrics and Observations
+    -1. MRL Advantage:
+        The fine-tuned model supports MRL, unlike the base model.
+        Even at reduced dimensions (e.g., 64), the fine-tuned model retained high performance while significantly reducing storage and computation costs.
+
+    -2. Metric Highlights:
+        NDCG@10: Improved ranking quality of top results.
+        MRR@10, Recall@10, MAP@10: Consistent improvements across semantic retrieval benchmarks.
+
+11. Conclusion
+    -1. Impact of Fine-Tuning:
+        Fine-tuning enabled the BGE-base-en-v1.5 model to achieve:
+        -a. 6x to 48x storage reduction compared to top models like azure/text-embedding-3-large.
+        -b. Superior performance across all metrics, including precision and ranking accuracy.
+
+    Faster search times, reduced memory usage, and lower overall operational costs.
