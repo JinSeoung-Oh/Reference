@@ -1,0 +1,58 @@
+### From https://ai.plainenglish.io/neurosymbolic-reasoning-and-personal-knowledge-graphs-for-enhancing-llm-capabilities-9957cba50533
+
+Neurosymbolic AI blends symbolic reasoning with neural networks to address gaps in traditional AI models. 
+By integrating structured logic with the pattern recognition capabilities of neural networks like LLMs,
+these approaches promise more robust reasoning and adaptability.
+
+1. Key Concepts Explored
+   -1. Neurosymbolic AI
+       -a. Combines symbolic AI (rule-based logic and formal reasoning) with neural AI (statistical learning and pattern recognition).
+       -b. Overcomes the limitations of neural models, such as the lack of explicit logical reasoning.
+
+   -2. Historical Foundations
+       -a. Lisp:
+           - Developed in 1958 as a symbolic processing language for AI.
+           - Featured homoiconicity, enabling self-modifying programs for symbolic reasoning.
+
+       -b. Prolog:
+           - Focused on formal logic and deductive reasoning.
+           - Known for solving rule-based problems like diagnostics or legal reasoning using solvers.
+
+2. Enhancing LLMs with Symbolic Reasoning
+   -1. Solvers and Deductive Reasoning
+       -a. Logic solvers complement LLMs in:
+           - Solving constraint satisfaction problems (e.g., scheduling, diagnostics).
+           - Handling multi-step reasoning with logical consistency.
+       -b. Example: Using a solver to deduce medical diagnoses or optimal task schedules, with LLMs generating coherent, 
+                   natural-language explanations.
+ 
+   -2. Graph of Rules
+       -a. A structured network of logical rules enhances reasoning:
+           - Nodes represent rules; edges define relationships or dependencies.
+           - LLMs can traverse these graphs to ensure logical rigor in responses.
+
+       -b. Applications:
+           - Healthcare: Linking symptoms, diagnoses, and treatments.
+           - Modular reasoning: Activating specific rulesets for varied domains.
+
+   - 3. Personal Knowledge Graphs (PKGs)
+        -a. Semantic networks encoding entities and their relationships.
+        -b. Integrated with LLMs for contextual, precise responses.
+        -c. Use-case: Deductive databases (e.g., DataLog) for flexible rule-based modeling, 
+                      improving the representation of complex or evolving relationships.
+
+3. Neurosymbolic RAG and Its Potential
+   -1. Retrieval-Augmented Generation (RAG)
+       -a. Combines LLM-generated fluency with rule-based frameworks for:
+           - Enhanced contextual retrieval.
+           - Logical consistency in outputs.
+
+   -2. Real-World Applications
+       -a. Healthcare: Logical diagnosis and treatment recommendations.
+       -b. Finance and Legal: Precise, rule-compliant responses to complex queries.
+       -c. Personal Productivity: Intelligent task planning and reasoning-based assistance.
+
+4. Why This Matters
+   Integrating neurosymbolic reasoning, RAG, and PKGs can bridge the gap between predictive AI and truly intelligent systems. 
+   These hybrid approaches empower AI to not only generate content but also reason, explain, and evolve its understanding
+    — a crucial step toward Artificial General Intelligence (AGI).
