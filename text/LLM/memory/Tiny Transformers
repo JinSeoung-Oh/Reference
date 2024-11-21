@@ -1,0 +1,143 @@
+### From https://medium.com/aiguys/are-tiny-transformers-the-future-of-scaling-e6802621ec57
+
+1. Introduction
+   The blog delves into memory reduction in large language models (LLMs), a crucial aspect due to their high computational and storage requirements. 
+   Despite numerous attempts to innovate with new architectures (e.g., RetNet, State Space Models, Flash Attention),
+   Transformers remain the dominant architecture. 
+   The blog aims to explore whether recent research has achieved significant breakthroughs in reducing memory without heavily compromising performance.
+
+2. Topics Covered
+   -1. Understanding Attention Memory Requirements.
+   -2. Memory Reduction Techniques:
+       -a. Quantization
+       -b. Knowledge Distillation
+       -c. Approximation of Attention Mechanisms
+       -d. New Architectures as Transformer Replacements
+
+   -3. Specific Research:
+       -a. WHAT MATTERS IN TRANSFORMERS? NOT ALL ATTENTION IS NEEDED
+       -b. PYRAMIDDROP: Accelerating Vision-Language Models
+
+   -4. Concluding Remarks on Redundancy and Old Ideas' Relevance.
+
+3. Understanding Attention Memory Requirements
+   -1. Self-Attention Mechanism:
+       Self-attention allows models to relate tokens across long sequences, critical for capturing complex dependencies.
+       However, it introduces two main challenges:
+       -a. Finite context window limitation.
+       -b. Quadratic scaling of memory and computation with sequence length.
+       -c. Example: For a sequence length 𝑁=32𝐾, attention requires an 𝑁×𝑁 matrix, 
+                 making memory and computation unmanageable.
+   -2. Memory Scaling Breakdown (Example: BERT-Base):
+       -a. Model Parameters: 110M (each parameter = 4 bytes for float32).
+       -b. Attention Scores: 𝑛^2×ℎ×𝑏×4, where:𝑛=512 (sequence length), ℎ=12 (heads), 𝑏=32 (batch size).
+       -c. Intermediate Matrices (Q, K, V): 𝑛×𝑑×𝑏×4, where 𝑑=768.
+       -d. Total Memory: ~0.93GB for training, scaling exponentially with larger models like GPT.
+       -e. Implication: Training LLMs requires extensive infrastructure, 
+                        costing upwards of $100M for data center-scale operations.
+
+4. Memory Reduction Techniques
+   -1. Quantization
+       -a. Overview:
+           Reduces the precision of model weights and activations (e.g., float32 to int8 or float16).
+           Simplifies operations while maintaining acceptable accuracy.
+
+       -b. Process:
+           Collect statistics on weights and activations.
+           Choose appropriate radix points for adjustments.
+           Convert weights into fixed-point formats.
+
+       -c. Results:
+           Extreme quantization (e.g., 1-bit LLMs like BitNet) shows promise, enabling small language models (SLMs) 
+           for lightweight applications.
+
+      -d. Trade-offs:
+          Loss in precision and minor accuracy degradation.
+
+  -2. Knowledge Distillation
+      -a. Definition:
+          Transfers the "knowledge" of a large, pre-trained model (teacher) to a smaller, faster student model.
+
+      -b. Mechanism:
+          The student learns to mimic the teacher's logits, predictions, or intermediate representations.
+
+      -c. Use Cases:
+          Widely applied to create smaller, efficient models like DistilBERT and TinyBERT for edge devices.
+
+      -d. Benefits:
+          Reduced memory usage and inference time with minimal performance drop.
+
+  -3. Approximation of Attention Mechanisms
+      -a. Objective:
+          Address the quadratic scaling problem in self-attention.
+
+      -b. Techniques:
+          - Linformer:
+            Uses low-rank projections to approximate attention matrices.
+            Assumes attention matrices are inherently low-rank, significantly reducing computations.
+
+          - Sparse Attention (e.g., Longformer):
+            Focuses attention on specific subsets of key-value pairs rather than the entire sequence.
+            Patterns include local windows, strided attention, and periodic global views.
+
+          - Impact:
+            Complexity reduced from quadratic (𝑂(𝑁^2) to linear or log-linear (𝑂(𝑁) or 𝑂(log𝑁).
+
+4. New Architectures as Transformer Replacements
+   -a. xLSTM:
+       Combines LSTM and Transformer properties.
+       Effective for time-series data, outperforming Transformers in specific tasks.
+
+   -b. Mamba:
+       Addresses the quadratic scaling problem with linear scalability for sequences up to one million tokens.
+       -1. Features:
+           Filters irrelevant information, retaining relevant details indefinitely.
+           Optimized GPU memory layouts with a recurrent computation design.
+       -2. Result: Achieves a 5x speed improvement over traditional Transformer models.
+
+5. Specific Research Insights
+   WHAT MATTERS IN TRANSFORMERS? NOT ALL ATTENTION IS NEEDED
+   -a. Key Findings:
+       Redundancy exists across Transformer layers, especially in attention modules.
+       Researchers introduced a similarity-based metric to measure redundancy:
+       -1. Cosine similarity between input and output hidden states quantifies module importance.
+
+   -b. Results:
+       Dropping redundant attention and MLP layers yields significant speedups with minimal performance loss:
+
+   -c. Example: Llama-2-70B achieved a 48.4% speedup with only a 2.4% performance drop.
+       Joint pruning of attention and MLP layers enables more aggressive reductions while retaining performance
+       (e.g., Llama-2-13B maintained 90% accuracy after pruning 31 layers).
+
+6. PYRAMIDDROP: Accelerating Vision-Language Models
+   -a. Problem:
+       Vision-language models (LVLMs) suffer from token redundancy, especially for image tokens.
+       Example: Representing an image often involves repeated tokens (e.g., many "Sky" tokens for a sky image), increasing computational costs.
+
+   -b. Solution:
+       -1. PyramidDrop:
+           Retains all tokens in shallow layers to preserve essential information.
+           Gradually drops redundant tokens in deeper layers where redundancy increases.
+
+   -c. Key Observation:
+       By layer 16, only 10% of image tokens are needed to maintain performance.
+       By layer 24, image tokens become almost irrelevant.
+
+   -d. Results:
+       Faster inference and training with minimal accuracy loss.
+       In some cases, reduced token redundancy even improved model performance by forcing better abstraction.
+
+7. Broader Observations
+   -a. Layer-Wise Redundancy:
+       Redundancy increases in deeper layers of Transformer-based models.
+       Inspired by CNN architectures like VGG16, which reduce block size progressively, 
+       the same principle was applied to Transformers (e.g., PyramidDrop).
+
+   -b. Over-Contextualization:
+       Excessive context in LLMs can degrade performance by confusing the model.
+
+8. Conclusion
+   Memory reduction in LLMs involves revisiting old ideas (e.g., pyramidal structures in CNNs) and adapting them to modern architectures.
+   Innovations like PyramidDrop and pruning redundant layers demonstrate that memory efficiency and performance can coexist.
+   The future of LLMs lies in systematically identifying and eliminating redundancies while maintaining critical features, 
+   driving efficiency in both training and inference.
