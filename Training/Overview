@@ -1,0 +1,82 @@
+### From https://towardsdatascience.com/of-llms-gradients-and-quantum-mechanics-bdcaaf940fbb
+
+1. Understanding "Training" in AI
+   In artificial intelligence (AI), training refers to optimizing a statistical model, often a neural network, 
+   to make accurate predictions. This optimization relies on minimizing a "loss function," which quantifies the difference
+   between the model's predictions and the target values. Training can occur under three paradigms:
+
+   -1. Supervised Learning
+       Involves labeled data where predictions are directly compared to true labels 
+       (e.g., identifying whether an image shows a cat or a dog).
+   -2. Unsupervised Learning
+       Works without explicit labels, relying on patterns within the data itself (e.g., predicting the next word in a sentence).
+   -3. Reinforcement Learning
+       Optimizes a sequence of decisions based on long-term rewards from interactions with an environment 
+       (e.g., deciding whether to slow down or speed up at a yellow traffic light).
+
+   Training requires iterative processes (epochs) and sufficient data. A notable empirical observation in AI is that loss follows a power-law relationship with model size, dataset size, and computational resources, suggesting scaling trends that span multiple magnitudes.
+
+2. The Role of Intrinsic Dimension
+   The power-law behavior is linked to the "intrinsic dimension" of the data—the minimal number of features needed
+   to encode data meaningfully.
+
+   -1. Data like pixels in an image may have high-dimensional inputs (e.g., spatial coordinates and RGB values).
+   -2. Not all features are essential; techniques like Principal Component Analysis (PCA) reduce data to its intrinsic dimension 𝑑,
+       which is smaller than the original dimensionality 𝐷.
+
+   Research suggests that the power-law exponent 𝑘 scales approximately as 4/𝑑for common loss functions (e.g., cross-entropy), 
+   emphasizing the relationship between intrinsic data structure and training efficiency.
+
+3. Manifolds in AI
+   -1. A manifold is a geometrical space that appears flat locally but may have complex global curvature. 
+       For example, the Earth is locally flat but globally curved.
+   -2. Neural networks transform high-dimensional input data into lower-dimensional manifolds, 
+       capturing the intrinsic data structure for tasks like classification or regression.
+
+   Manifolds must be differentiable to support calculus, enabling optimization techniques that rely on gradients.
+
+4. Information Geometry and Neural Networks
+   Information geometry studies how statistical models, like neural networks, approximate data-generating functions 𝐹. 
+
+   -1. Neural networks approximate the probability distributions underlying data.
+   -2. The parameters of a model (e.g., weights, biases) define a manifold, with small changes in parameters 
+       leading to corresponding changes in predictions.
+       -a. The Fisher Information Matrix (FIM) is a metric tensor that measures sensitivity in probability distributions 
+           with respect to parameter changes. It defines a "distance" between probability functions and encapsulates 
+           the structure of the parameter space.
+       -b. Gradient descent, a fundamental optimization method, assumes a flat (Euclidean) parameter space. 
+           However, the true space is often curved, and using the natural gradient (incorporating FIM) offers a more accurate
+           optimization pathway.
+
+5. Scaling Laws in Neural Network Training
+   Empirical observations reveal that training efficiency scales as a power law (∝1/𝑁^𝑑), where 𝑁 is the size of the model or dataset.
+   This scaling is influenced by:
+
+   -1. The intrinsic dimensionality of the data manifold.
+   -2. The Fisher information matrix, which governs the interaction between data, model, and loss function.
+
+   These laws impose practical limits on model performance, raising questions about optimization strategies.
+
+6. Quantum Neural Networks and Optimization
+   Quantum neural networks (QNNs) offer an emerging alternative by leveraging quantum effects like entanglement and tunneling.
+
+   -1. QNNs can replace certain layers in neural networks with quantum circuits.
+   -2. The Fubini-Study metric tensor is the quantum analog of the Fisher information matrix, 
+       enabling natural gradient optimization in quantum systems.
+
+   Early experiments suggest that QNNs can outperform traditional methods in simple cases. 
+   However, current quantum computers lack the capacity to handle large-scale models like GPT-4.
+
+7. Implications and Future Directions
+   -1. Natural Gradient Descent
+       While theoretically promising, natural gradient methods are computationally expensive due to the complexity of inverting 
+       the Fisher information matrix. Approximations, such as kernel density estimation, offer practical alternatives.
+   -2. Scaling Challenges
+       As models grow, scaling laws impose diminishing returns. Exploring new architectures or quantum-assisted methods 
+       may help overcome these limits.
+   -3. Quantum Computing
+       Though still in its infancy, quantum neural networks hold potential for breakthroughs in optimization, 
+       particularly for large language models.
+
+   The intersection of AI, information geometry, and quantum computing represents a promising frontier for advancing 
+   training efficiency and achieving deeper insights into the mechanics of neural networks.
