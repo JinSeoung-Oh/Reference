@@ -1,0 +1,74 @@
+### From https://towardsdatascience.com/a-new-method-to-detect-confabulations-hallucinated-by-large-language-models-19444475fc7e
+
+1. Introduction
+   The rapid advancement and deployment of large language models (LLMs) have revealed their remarkable reasoning 
+   and question-answering capabilities. However, a persistent issue is their tendency to "hallucinate," 
+   generating false or arbitrary content. A new method called semantic entropy addresses a specific subset of 
+   hallucinations termed confabulations, which arise from insufficient knowledge. 
+   By quantifying uncertainty in LLM outputs, semantic entropy enhances the reliability of LLM applications in tasks
+   requiring factual accuracy.
+
+2. Key Challenges in Hallucination
+   Hallucinations in LLMs can take various forms:
+
+   -1. Confabulations: Arbitrary claims sensitive to details like random seeds.
+   -2. Errors caused by training on incorrect data.
+   -3. Systematic failures in logic or mathematics.
+   -4. "Lying" or misrepresenting facts to maximize rewards.
+
+   The semantic entropy method focuses exclusively on confabulations, aiming to reduce this major source of error and 
+   improve question-answering reliability.
+
+3. Semantic Entropy: Concept and Computation
+   Semantic entropy measures uncertainty in LLM-generated outputs by analyzing their meanings rather than lexical 
+   or syntactic forms. Key steps include:
+
+   -1. Generate multiple responses: An LLM produces several answers to the same question.
+   -2. Cluster semantically equivalent responses: Using another LLM, answers are grouped based on shared meanings.
+   -3. Calculate entropy over clusters: This reflects the variability in the meanings of the responses, 
+       with higher entropy indicating uncertainty or potential confabulations.
+
+   Unlike naive entropy, which operates on lexical variability (e.g., word differences), 
+   semantic entropy identifies equivalence in meaning, avoiding inflated uncertainty estimates.
+
+4. Using a Second LLM for Semantic Clustering
+   To compute semantic similarity, a second LLM assesses the equivalence of generated answers. 
+   This approach ensures that variations in phrasing do not inflate the entropy score. Additionally:
+
+   -1. A third LLM can be employed to evaluate the correctness of the responses against human-provided answers.
+   -2. This layered use of LLMs enhances the robustness of confabulation detection.
+
+5. Experimental Results
+   Semantic entropy was tested on tasks like question-answering, math problems, and biography generation, 
+   demonstrating superior performance compared to naive entropy and other methods.
+
+   -1. Question Answering and Math Problems:
+       -a. Semantic entropy accurately identified confabulations across 30 tasks.
+       -b. Example: For semantically identical but lexically distinct answers about construction sectors,
+                    naive entropy misclassified them as confabulations, while semantic entropy correctly grouped them 
+                    as valid responses.
+   -2. Biography Generation:
+       -a. Longer outputs were segmented into factual claims, which were labeled as true or false for entropy calculation.
+       -b. Semantic entropy proved effective in detecting confabulations in complex, multi-faceted text.
+
+6. Advantages of Semantic Entropy
+   -1. Focus on Meaning: By clustering semantically equivalent responses, it avoids errors caused by lexical variations.
+   -2. Unsupervised: No need for labeled training data, allowing generalization across tasks and domains.
+   -3. Robust Detection: Outperforms supervised methods that rely on patterns in labeled examples, 
+                         which may fail in novel scenarios.
+
+7. Applications
+   Semantic entropy can improve reliability in several LLM-based tasks:
+
+   -1. Summarization: Ensuring factual accuracy and coherence.
+   -2. Fact-Checking: Identifying and flagging potential hallucinations.
+   -3. Code Generation: Enhancing confidence in programming outputs.
+   -4. Question Answering: Reducing errors in domains requiring precise knowledge.
+
+8. Conclusion
+   Semantic entropy offers a powerful tool for detecting and mitigating LLM confabulations, enhancing trust and reliability 
+   in AI applications. By focusing on meaning rather than surface-level text features, 
+   it addresses a key limitation of naive uncertainty measures. 
+   Future research could explore its integration with practical tasks like summarization, fact-checking, 
+   and even cognitive modeling of intelligence, paving the way for more robust and trustworthy AI systems.
+
