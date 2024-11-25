@@ -1,0 +1,74 @@
+## From https://medium.com/@aldendorosario/ai-research-agents-set-to-transform-knowledge-research-in-2025-plus-top-3-free-tools-d37197726531
+
+1. Stanford STORM - https://storm.genie.stanford.edu/ & https://github.com/stanford-oval/storm
+   Leveraging large language models (LLMs), STORM automates the research and writing process by conducting internet-based research, 
+   organizing information into structured outlines, and producing full-length articles complete with citations.
+
+   -1. Pros:
+       -a. Automated Research and Writing
+           STORM streamlines the creation of detailed articles by automating both the research and writing stages, 
+           saving users significant time and effort.
+       -b. Structured Content Generation
+           The system generates organized outlines and well-structured articles, ensuring clarity and coherence in the final output.
+       -c. Open-Source Accessibility
+           As an open-source project, STORM allows users to customize and adapt the tool to their specific needs,
+           fostering innovation and collaboration within the AI research community.
+
+   -2. Cons:
+       -a. Dependence on Internet Sources
+           STORM’s reliance on internet-based research may lead to the inclusion of outdated or biased information 
+           if not carefully monitored.
+       -b. Quality Control Requirements
+           While STORM automates much of the writing process, the generated articles may still require human review 
+           and editing to ensure accuracy and adherence to specific standards.
+       -c. Technical Setup
+           Implementing STORM locally necessitates familiarity with tools like Git, Python, and Conda, which may present a barrier
+           for users without a technical background.
+
+2. CustomGPT.ai Researcher - https://researcher.customgpt.ai/
+   CustomGPT.ai Researcher is an AI research agent specifically designed to create ultra-high-quality long-form articles based on 
+   deep Google research or custom knowledge bases, such as a company’s proprietary data or other trusted sources.
+
+   -1. Pros:
+       -a. Trustworthy Content Creation
+           By integrating data from reliable sources, CustomGPT.ai minimizes inaccuracies, 
+           making it ideal for industries requiring high content reliability, such as legal, financial, and healthcare sectors.
+       -b. Anti-Hallucination Technology
+           CustomGPT.ai includes advanced algorithms that prevent it from producing speculative or fictitious information, 
+           ensuring content aligns closely with verified sources.
+       -c. Hosted Solution
+           With its no-code interface, non-technical researchers and marketers can easily trigger deep research, 
+           without getting into coding intricacies.
+       -d. SEO-Optimized Content Generation
+           The tool supports Google’s EEAT (Expertise, Authoritativeness, Trustworthiness, and Experience) standards, 
+           creating content that ranks well on search engines by emphasizing quality and authority.
+
+   -2. Cons:
+       -a. Closed Source
+           While the CustomGPT.ai Researcher is free for a limited time, it is a closed-source proprietary project.
+       -b. Longer Generation Time
+           The high-level reasoning and RAG capabilities can take up to 20 minutes to generate a single article, 
+           which may not suit users seeking rapid or lower-quality content.
+       -c. Limited Suitability for Budget Content Projects
+           Given its focus on quality, CustomGPT.ai Researcher is not ideal for projects that require fast, inexpensive, 
+           or basic content generation.
+
+3. GPT Researcher - https://github.com/assafelovic/gpt-researcher
+   GPT Researcher is an autonomous agent designed to conduct comprehensive research on any given task, 
+   utilizing both web and local sources.
+
+   -1. Pros:
+       -a. Autonomous Research Capabilities
+           GPT Researcher automates the research process, efficiently gathering and synthesizing information from various sources 
+           to produce comprehensive reports.
+       -b. Customization and Flexibility
+           Users can customize the agent to focus on specific domains or topics, allowing for tailored research outputs 
+           that meet particular needs.
+       -c. Open-Source Accessibility
+           As an open-source project, GPT Researcher encourages community collaboration and continuous improvement, 
+           providing transparency and adaptability for users.
+
+   -2. Cons:
+       -a. Technical Setup Requirements
+           Implementing GPT Researcher may require technical expertise, including familiarity with Git, Python, and Docker,
+           which could be a barrier for non-technical users.
