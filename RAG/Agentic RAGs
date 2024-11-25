@@ -1,0 +1,69 @@
+### From https://ai.gopubby.com/agentic-rags-extending-rags-to-sql-databases-1509b25ca3e7
+
+1. Introduction
+   The Retrieval-Augmentation-Generation (RAG) paradigm, popular in Generative AI (Gen AI), 
+   is traditionally used for processing unstructured data but can be extended to structured data stored in SQL databases. 
+   This is increasingly relevant in scenarios requiring combined insights from structured (e.g., SQL) and 
+   unstructured (e.g., document repositories) data, such as answering questions that involve both transactional and profile data.
+
+   -1. Example Scenario: Querying for the Top 3 sales agents for a product requires:
+       -a. Retrieving the top sales agents from SQL databases.  
+       -b. Fetching their profiles from document repositories.
+       -c. Generating a contextualized summary.
+
+2. Querying Document Repositories with RAG
+   RAG pipelines for unstructured data follow three main steps:
+
+   -1. Retrieve: Transform user queries into embeddings, compare similarity scores, and fetch relevant documents 
+                 from a vector database.
+   -2. Augment: Add retrieved content to the prompt as context.
+   -3. Generate: Use the augmented prompt to generate a response.
+
+   Data Quality Issues in RAG:
+
+   -1. Accuracy: Ensure factual correctness and grounding.
+   -2. Completeness: Address missing vectors or metadata.
+   -3. Consistency: Avoid embedding inconsistencies due to errors in the vectorization process.
+   -4. Timeliness: Ensure documents in vector databases are up-to-date.
+
+3. Text2SQL: Querying Structured Data
+   Text2SQL enables natural language queries over structured data. 
+   Snowflake's Cortex Analyst provides a managed service for Text2SQL, offering:
+
+   -1. User Intent Validation: Ensures generated SQL matches user expectations through dialogue-based explanations.
+   -2. Semantic Model Mapping: Maps business terms to database schemas, improving reliability.
+   -3. Flexibility: Supports multiple LLMs, including Snowflake-hosted and OpenAI models.
+
+4. Integrating RAG for SQL and Document Repositories
+   To build a unified RAG pipeline:
+
+   -1. Task Decomposition: An AI supervisor agent, leveraging an LLM, breaks down the query into sub-tasks 
+                          (SQL and document queries).
+   -2. Orchestration: The supervisor uses routing logic to assign sub-tasks to specialized agents 
+                      (SQL and document query agents).
+   -3. Execution:
+       -a. SQL Query Agent: Uses Cortex Analyst for Text2SQL.
+       -b. Document Query Agent: Uses Cortex Search for retrieving unstructured data.
+   -4. Contextualization: Retrieved structured and unstructured data is merged with the original prompt to generate a detailed response.
+       -a. Example Architecture:
+           - Supervisor agent coordinates query decomposition.
+           - SQL and document agents handle respective repositories.
+           - Combined RAG pipeline generates the final response.
+
+5. Evaluation Strategy
+   Evaluation focuses on addressing key challenges:
+
+   -1. SQL Queries
+       Evaluate the correctness of Text2SQL conversion and SQL output. 
+       Validation ensures no hallucination in structured outputs.
+   -2 Document Queries: Evaluate output groundedness and correctness using strategies like RAGAS, targeting hallucination reduction in generated text.
+
+   In sequential pipelines (e.g., retrieving sales data first, then summarizing profiles), 
+   steps are evaluated independently for better reliability.
+
+6. Conclusion
+   Integrating RAG pipelines for structured and unstructured data provides a unified framework for complex queries, 
+   enabling secure and governed use of Gen AI on enterprise data. 
+   Tools like Snowflake’s Cortex suite and AWS offerings simplify these implementations, 
+   making it easier to combine AI capabilities with structured and unstructured repositories. 
+   This approach demonstrates the convergence of data and AI platforms, facilitating more powerful, hybrid solutions.
