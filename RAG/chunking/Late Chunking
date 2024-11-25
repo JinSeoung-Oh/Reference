@@ -1,0 +1,80 @@
+### From https://pub.towardsai.net/late-chunking-in-long-context-embedding-models-caf1c1209042
+
+1. Overview
+   Late chunking is an advanced technique for embedding long-context documents that addresses the limitations of 
+   traditional chunking methods in retrieval-augmented generation (RAG) pipelines. 
+   It preserves the broader context and semantic relationships within the entire document, 
+   enhancing the quality of embeddings for downstream tasks like similarity search and retrieval.
+
+2. Key Challenges in Embedding
+   -1. Traditional Chunking Issues
+       -a. Fixed Embedding Dimension
+           Regardless of chunk size (e.g., 5 tokens vs. 5,000 tokens), embedding vectors are of fixed size, 
+           compressing large chunks and losing detailed information.
+       -b. Loss of Context
+           Sentence-level chunking isolates information, losing references (e.g., “the country” may lose its link to "Tunisia").
+
+   -2. Contextual Retrieval:
+       -a. Aims to summarize and augment contextual information within chunks but often sacrifices bidirectional context.
+
+3. How Late Chunking Works
+   -1. Traditional Chunking:
+       -a. Text is divided into smaller chunks before embeddings are computed.
+       -b. Each chunk is embedded independently, and mean pooling is applied to summarize token embeddings within the chunk.
+
+   -2. Late Chunking:
+       -a. The entire document is first passed through a Transformer model to generate token embeddings.
+       -b. Chunking is performed after embeddings are created, ensuring each token contains information from 
+           the entire document context.
+       -c. Final embeddings for chunks are computed via mean pooling of the relevant token embeddings.
+
+4. Advantages of Late Chunking
+   -1. Preservation of Context:
+       -a. Embeddings incorporate bidirectional document context (information before and after a chunk).
+       -b. Better representation of indirect references (e.g., “this city” referring to “Berlin”).
+
+   -2. Efficient Storage:
+       -a. Storage requirements are similar to traditional chunking, unlike late interaction or COBERT-based approaches, 
+           which store individual token embeddings and demand significantly larger storage 
+           (e.g., 2.5 TB for 100,000 documents compared to 5 GB for traditional chunking).
+
+   -3. Improved Performance:
+       -a. Higher Similarities
+           Late chunking consistently outperforms traditional methods in semantic similarity tasks, 
+           especially for indirect references.
+       -b. Bidirectional Information
+           It captures contextual relevance regardless of whether the information precedes or follows a chunk.
+
+5. Practical Example
+   -1. For the word “Berlin”, late chunking better captures indirect references:
+       -a. Direct mention: Similarity scores for both approaches are comparable (~0.849).
+       -b. Indirect reference: Similarity for late chunking remains high (~0.824 vs. ~0.708 for traditional chunking).
+       -c. Pronoun reference (“this city”): Late chunking scores are significantly higher (~0.849 vs. ~0.753).
+
+6. Comparison with Other Methods
+   -1. Traditional Chunking: 
+       -a. Fast but loses inter-chunk context and semantic coherence.
+   -2. Late Interaction/COBERT:
+       -a. Best retrieval quality but requires massive storage for individual token embeddings.
+   -3. Late Chunking:
+       -a. Balances retrieval quality and storage efficiency, making it the most practical choice for large-scale applications.
+
+7. Implementation
+   -1. Late chunking can be implemented with Transformer-based models and involves:
+       -a. Embedding entire documents to retain global context.
+       -b. Chunking the document after embeddings are generated.
+       -c. Using mean pooling for final chunk representations.
+      
+       A practical notebook shared by its creators demonstrates these steps and validates the performance improvements
+       across similarity benchmarks.
+
+8. Applications
+   -1. Long-context embedding models for RAG systems.
+   -2. Improved similarity search for entity-rich or semantically dense documents.
+   -3. Scalable document retrieval systems with context-preserving embeddings.
+
+9. Conclusion
+   Late chunking is a transformative approach for embedding models, resolving critical issues with traditional chunking methods 
+   by preserving global document context. Its bidirectional capability, storage efficiency, 
+   and superior semantic understanding make it a robust choice for long-context tasks in conversational AI, 
+   retrieval systems, and knowledge augmentation pipelines.
