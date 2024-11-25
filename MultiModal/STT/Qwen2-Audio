@@ -1,0 +1,91 @@
+### From https://towardsdatascience.com/exploring-music-transcription-with-multi-modal-language-models-af352105db56
+
+1. Overview
+   Automatic music transcription converts audio into readable music formats, such as sheet music or tablature. 
+   Despite advancements, the task remains challenging due to the need for accurate tempo, pitch, and instrument recognition. 
+   The current state-of-the-art models, such as Magenta’s MT3 and MR-MT3, 
+   utilize Transformer architectures but face limitations in flexibility, resource requirements, and scalability.
+
+2. State-of-the-Art Approaches
+   -1. Magenta Models:
+       -a. Sequence-to-Sequence Piano Transcription (2021):
+           - Uses a T5-inspired Transformer model with 54M parameters.
+           - Treats the task as a sequence-to-sequence problem.
+           - Vocabulary includes note, velocity, time, and EOS tokens.
+       -b. MT3 (2022) and MR-MT3 (2023):
+           - Extend transcription to multi-track, multi-instrument data.
+           - Improved performance on datasets like Maestro, Slakh, and MusicNet.
+   -2. Challenges:
+       -a. Compute
+           MT3 requires high computational resources (32 TPU cores, 1M training steps).
+       -b. Vocabulary Size
+           Specialized token vocabularies are limited, making it difficult to incorporate new instruments or techniques.
+       -c. Flexibility
+           Models require retraining for new tasks or token additions.
+
+3. Emerging Approaches
+   -1. Leveraging Pre-trained Models:
+       - Large-scale pre-trained audio and language models (e.g., OpenAI’s Jukebox, Meta’s MusicGen) offer 
+         better generalizability.
+       - Multi-modal architectures, like GPT-4o, natively handle text, audio, and images.
+   -2. Late Fusion Architectures:
+       - Use pre-trained audio encoders (e.g., Jukebox, Whisper) combined with Large Language Models (LLMs) via projection layers.
+       - Examples include:
+         -a. Llark: Uses embeddings from Jukebox for music transcription.
+         -b. Qwen2-Audio: Incorporates Whisper for voice and basic music analysis.
+   -3. Challenges with Pre-trained Models:
+       - High storage requirements for embeddings (e.g., 2.5 TB for late interaction methods).
+       - Limited public availability of high-quality datasets and pre-trained weights.
+
+4. Proposed Framework
+   -1. Transcription Format:
+       - ABC Notation: A minimalist, text-based format for encoding music.
+         -a. Compact and widely understood.
+         -b. Easy to extend for features like tempo changes, time signatures, or techniques.
+   -2. Dataset Preparation:
+       - Converted MIDI files to ABC notation using libraries.
+       - Example dataset: URMP dataset, annotated with Q&A for tasks like instrument detection and tempo recognition.
+   -3. Evaluation Strategy:
+       - Evaluated transcription quality using custom metrics.
+       - Compared predictions on tempo, metre, pitch, and instrument recognition.
+
+5. Fine-Tuning Techniques
+   - Supervised Fine-Tuning (SFT):
+      -a. Cross-Entropy Loss with Teacher Forcing:
+          -1. Predicts tokens sequentially.
+          -2. Stabilized training but degraded model performance.
+          -3. Issues: Overconfidence in incorrect predictions and garbled outputs.
+   - Reinforcement Learning with Human Feedback (RLHF):
+     -a. Proximal Policy Optimization (PPO):
+         -1. Enables non-differentiable custom loss functions.
+         -2. Custom loss components:
+             Tempo Loss: Penalizes large BPM deviations exponentially.
+             Pitch Loss: Assessed with Levenshtein distance across voices.
+             Metre and Instrument Losses: Account for accuracy in rhythm and instrument classification.
+         -3. Challenges: High memory requirements and limited improvements in performance.
+
+6. Key Insights from Experiments
+   - Pre-trained models like Qwen2-Audio struggled with tempo and instrument detection.
+   - Supervised fine-tuning did not improve results and sometimes degraded performance.
+   - PPO with custom loss functions showed no meaningful progress despite promising theoretical foundations.
+
+7. Future Directions
+   - Enhanced Pre-trained Models:
+     -a. Focus on models with broader training on music-specific datasets.
+     -b. Incorporate larger multi-modal architectures for improved audio-text understanding.
+   - Hybrid Architectures:
+     -a. Combine features of encoder-decoder and decoder-only models.
+     -b. Explore fine-tuning strategies for specific musical nuances.
+   - Custom Evaluation Metrics:
+     -a. Develop more robust scoring mechanisms for transcription tasks.
+     -b. Leverage domain-specific expertise to refine loss functions.
+   - Scalability:
+     -a. Address resource constraints through efficient training techniques like LoRA or quantization.
+
+8. Conclusion
+   While the experiment faced challenges in achieving state-of-the-art transcription performance, 
+   it laid a strong foundation for future work. By leveraging multi-modal models, transfer learning, 
+   and innovative fine-tuning strategies, significant progress can be made toward more accurate and flexible 
+   music transcription systems.
+
+
