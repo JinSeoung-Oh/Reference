@@ -1,0 +1,79 @@
+### From https://medium.com/data-science-in-your-pocket/magentic-one-autogen-langgraph-crewai-or-openai-swarm-which-multi-ai-agent-framework-is-best-6629d8bd9509
+### Plz check given link for recommandation
+
+1. Autogen
+   AutoGen is the most popular and the earliest framework in the space by Microsoft, more suitable for software development tasks
+
+   -1. Features
+       - It majorly involves two agents, the User and the Assistant.
+       - User-Agent & Assistant-Agent Interaction: In Autogen’s user-assistant agent model, the User Agent can provide prompts or requirements, 
+         while the Assistant Agent generates and executes the code.
+       - The Assistant Agent handles not just code generation but also the execution, giving results back to the user or other agents in the setup.
+       - Specializes in multi-agent orchestration for code tasks but can handle other tasks as well.
+       - Human guidance can be provided in between the interactions.
+       - Strong community support from Microsoft.
+
+   -2. Limitations
+       - Not intuitive enough, and not suitable for non-programmers.
+       - A complicated setup, especially with local LLMs; requires a proxy server.
+       - If not a software development task, can be pretty mediocre
+
+2. CrewAI
+   CrewAI is usually the go-to choice for folks to build a quick demo for any Multi AI Agent task given it's very intuitive and easy to set up.
+
+    -1. Features
+        - Very intuitive, and primarily relies on prompt writing.
+        - Creating new agents and adding to the ecosystem is very easy. You can create 100s of agents in minutes
+        - Easy to use for non-technical users.
+        - Works well with most LLM providers and local LLMs, thanks to LangChain integration.
+
+    -2. Limitations:
+        - Limited flexibility and customization.
+        - Suitable for basic use cases and not ideal for complex programming tasks.
+        - There are some bugs during interactions between agents.
+        - Community support is limited
+
+3. Langraph
+   My personal favourite, LangGraph can be used for any Multi-AI Agent tasks and provides a lot of flexibility.
+
+   -1. Features
+       - Built on top of LangChain; based on the idea of Directed Cyclic Graph.
+       - It's not just a multi-AI agent framework, but a lot more.
+       - Very flexible and customizable, supporting nearly any multi-agent orchestration application.
+       - It is an extension of LangChain, hence got great community support.
+       - Works well with open-sourced LLMs and any API
+
+   -2. Limitations:
+       - Lacks thorough documentation.
+       - Not user-friendly for non-programmers or beginner programmers.
+       - Requires decent programming skills, particularly in understanding graphs and logic flows.
+
+4. OpenAI Swarm
+   OpenAI recently released Swarm, and I must say, it’s the easiest Multi-AI agent framework out there if you wish to get started
+
+   -1. Features
+       - Suitable for newbies in Multi-AI Agent
+       - The major focus is on simplifying “Agent creation” and context switching between agents (called Handoffs).
+       - Creating a short demo is super easy
+
+   -2. Limitations
+       - Doesn’t support LLMs other than OpenAI API
+       - Not good for production deployments
+       - Not flexible enough.
+       - Community support is poor. You can't even raise issues on Git Hub
+  
+5. Magentic-One
+   The latest addition to this list is Magentic-One by Microsoft (their 2nd framework) which also, is an attempt to simplify their existing AutoGen framework
+
+   -1. Features
+       - Similar to Swarm, this is suitable for non-programmers and easy to run
+       - Comes with a default pack of 5 agents, one manager agent and other 4 being: WebSurfer navigates and interacts with webpages through a browser, 
+         FileSurfer manages and navigates local files, Coder focuses on writing and analyzing code, 
+         and ComputerTerminal provides console access for running programs and installing libraries.
+       - Built on top of AutoGen, and is more of a generalist framework.
+       - Includes AutoGenBench, a tool specific for analysing agent performance.
+
+   -2. Limitations
+       - Support for open-source LLMs is complicated
+       - Not flexible enough; appears more like an application rather than a framework to me
+       - Documentation and community support is nil as of now
