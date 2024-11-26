@@ -1,0 +1,83 @@
+## From https://towardsdatascience.com/open-the-artificial-brain-sparse-autoencoders-for-llm-inspection-c845f2a3f786
+
+Introduction
+Understanding the internal mechanisms of LLMs is critical as their scale and application grow.
+This article explores Sparse Autoencoders (SAEs), a tool for interpreting features within neural networks, 
+and their potential for diagnosing and intervening in unintended model behaviors. 
+SAEs enable deeper insight into LLMs by breaking down their activation space into disentangled, interpretable components.
+
+1. Features in Neural Networks
+   -1. Definition: Features are fundamental units of neural network representations, 
+                   often abstract concepts such as "beauty" or "sun."
+   -2. Representation in LLMs:
+       -a. Polysemantic Neurons: Neurons often encode multiple features simultaneously, making interpretation challenging.
+       -b. Superimposition Hypothesis: Neural networks use high-dimensional spaces to compress representations, 
+                                       allowing more features than neurons. 
+                                       However, this compression introduces interference between features.
+
+2. Sparse Autoencoders (SAEs)
+   -1. Functionality:
+       SAEs expand neural activations into sparse representations, aiming to disentangle features.
+       Sparse representations have many zero elements, making it easier to map activations to individual features.
+
+   -2. Training:
+       SAEs use a penalty (L1 regularization) to enforce sparsity while reconstructing activations from input text.
+       The learned representations are linear combinations of sparse, interpretable vectors.
+
+   -3. Applications:
+       Identifying monosemantic neurons (single-concept neurons).
+       Enabling causal interventions by altering specific features to study their impact on model behavior.
+
+3. Example Applications
+   -1. Feature Activation and Manipulation:
+       -a. Golden Gate Bridge Example: Blocking a neuron encoding the "Golden Gate Bridge" feature can drastically 
+                                       change the model's response, e.g., describing itself as the bridge.
+   -2. Bias Mitigation:
+       -b. SAEs have been used to adjust features associated with social bias, 
+           demonstrating the potential for ethical model tuning.
+
+4. Evaluating Sparse Autoencoders
+   -1. Challenges:
+       Lack of a ground truth for feature evaluation in natural language models.
+       Interpretation is subjective, requiring manual or automated explanation generation.
+
+   -2. Current Approaches:
+       -a. Synthetic Datasets: Using datasets with known features, such as board games, 
+                               to test how well SAEs capture underlying structures.
+       -b. Automated Interpretation: Leveraging LLMs like GPT-4 to explain neurons by identifying activation patterns 
+                                     across contexts.
+
+5. Geometric Insights from SAEs
+   -1. Layer-wise Representation:
+       Early layers encode atomic features (e.g., single words).
+       Middle layers act as bottlenecks, compressing representations into high-level abstractions.
+       Later layers encode complex, abstract concepts.
+
+   -2. Semantic Geometry:
+       Features exhibit geometric relationships, forming structures akin to embeddings 
+       (e.g., parallelograms representing analogies like man:king = woman:queen).
+       Functional "lobes" are observed where co-occurring features cluster, resembling brain-like modularity.
+
+6. Advancements in SAE Research
+   -1. Sparse Crosscoders:
+       An extension of SAEs that works across multiple layers, simplifying circuits and monitoring fine-tuning.
+
+   -2. Protein-Language Models:
+       SAEs are now being applied to models like AlphaFold, bridging LLM interpretability and structural biology.
+
+7. Benefits and Limitations
+   -1. Benefits:
+       Enables targeted interventions (e.g., bias mitigation).
+       Improves interpretability by disentangling polysemantic neurons.
+       Provides tools for diagnosing unintended behaviors.
+
+   -2. Limitations:
+       Evaluation remains subjective without standardized benchmarks.
+       Computational overhead increases with large-scale applications.
+
+8. Conclusion
+   Sparse Autoencoders offer a promising path toward understanding and refining LLMs. 
+   By disentangling complex representations, they enable not only diagnostic insights but also ethical
+   and performance-oriented interventions. While challenges in evaluation persist, 
+   ongoing research into advanced variants like sparse crosscoders and their applications in domains 
+   like biology suggests a bright future for SAE-based interpretability.
