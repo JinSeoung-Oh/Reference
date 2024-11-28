@@ -1,0 +1,81 @@
+### From https://medium.com/@techsachin/kgr-llm-based-context-enriched-framework-for-knowledge-graph-completion-6e12449cb25d
+
+The Knowledge Graph Reasoning (KGR) framework enhances Knowledge Graph Completion (KGC) 
+by systematically addressing limitations in existing approaches, 
+such as vulnerability to specious relation patterns and the semantic gap between structured KG triples and natural language. 
+KGR integrates retrieval, reasoning, and re-ranking modules to improve the accuracy and interpretability of KGC tasks.
+
+1. Key Contributions
+   -1. Novel KGR Framework: Combines structural and semantic retrieval, large language model (LLM)-based reasoning, 
+                            and fine-tuned re-ranking to predict missing entities in KGs.
+   -2. Context Bridging: Mitigates the semantic gap between structured KG triples and natural language sentences through 
+                         enriched entity contexts.
+   -3. Scalable Candidate Scoring: Introduces an efficient method to rank entities while leveraging LLMs without 
+                                   incurring high computational costs.
+2. Problem Specifications
+   A Knowledge Graph (KG) is represented as 𝐺={𝐸,𝑅,𝑇}, where:
+   - 𝐸: Set of entities.
+   - 𝑅: Set of relations.
+   - 𝑇: Set of triples (ℎ,𝑟,𝑡)
+   - ℎ: Head entity.
+   - 𝑡: Tail entity.
+   - 𝑟: Relation connecting ℎ and 𝑡.
+   The goal of KGC is to infer the missing entity ? in incomplete triples (ℎ,𝑟,? or ?,𝑟,𝑡).
+
+3. KGR Framework: Three-Stage Process
+   -1. Retrieval
+       Gathers relevant knowledge to assist in triple completion.
+
+       -a. Supporting Triple Retrieval
+           - Objective: Identify triples from the KG that are semantically similar to the query triple.
+           - Steps:
+             1) Retrieve triples with the same entity and relation.
+             2) If insufficient, broaden retrieval to include triples with semantically similar entities or identical relations.
+       -b. Textual Context Retrieval
+           - Challenge: Bridge the gap between structured triples and natural language for better LLM understanding.
+           - Solution: Retrieve and provide entity descriptions (e.g., labels, attributes) to contextualize structural KG data.
+       -c. Candidate Answer Retrieval
+           - Employs a base KGC model to rank entities and retrieves the top-𝑛 plausible candidates.
+           - Extracts entity descriptions for these candidates for later stages.
+   -2. Reasoning
+       Uses an LLM to generate potential answers based on retrieved context.
+       -a. Supporting Triple Demonstrations
+           - Process:
+             1) Convert each supporting triple into a natural language question by masking one entity.
+             2) Provide the LLM with the description of the known entity in the triple.
+             3) LLM generates answers based on its semantic understanding and contextual information.
+       -b. Context-Aware Reasoning
+           -a. Combines the query triple, known entity description, and supporting triple demonstrations to guide the LLM.
+           -b. Filters the LLM's outputs, retaining only valid answers that align with the top-ranked candidates 
+               from the base KGC model.
+   -3. Re-ranking
+       Refines the ranking of candidate answers through supervised fine-tuning (SFT) on the LLM.
+
+       -a. Training with LoRA Adaptation
+           - Fine-tunes the LLM to identify the ground truth entity from a candidate set.
+           - Sample Generation:
+             -a. Corrupt training triples by replacing the head or tail entity.
+             -b Add negative samples, including hard negatives, to improve the model's ability to distinguish similar entities.
+           - Input: Includes the query question, retrieved neighbor facts, entity descriptions, and candidate labels/descriptions.
+           - Loss Function:
+             𝐿_(𝑆𝐹𝑇) = −log𝑃(𝑦∣𝑞,𝑁(𝑞),𝑐(𝑞)_𝑒,𝐴,𝑐(𝐴))
+
+       -b. Inference
+           - Combines the top-𝑝 candidates from the base KGC model (𝐴_(𝐾𝐺𝐶))  and the top-𝑛 −𝑝 entities suggested by the LLM 
+             (𝐴_𝐿𝐿𝑀).
+           - Constructs a re-ranked entity list (𝐴_𝑅𝑅) for final evaluation.
+
+4. Advantages of KGR
+   -1. Comprehensive Retrieval: Leverages both structural and semantic knowledge for richer contextual understanding.
+   -2. LLM-Augmented Reasoning: Enhances semantic interpretation and entity disambiguation using entity descriptions.
+   -3. Re-ranking for Precision: Refines candidate ranking with supervised fine-tuning, improving accuracy in 
+                                 distinguishing similar entities.
+
+5. Applications
+   -1. Semantic Search: Enhance search engines with more accurate entity resolution.
+   -2. Recommendation Systems: Improve personalized recommendations through enriched KG reasoning.
+   -3. Question Answering: Bolster AI systems' ability to answer knowledge-driven queries.
+   -4. Data Enrichment: Automate the completion and enrichment of large-scale knowledge graphs.
+
+   KGR represents a robust framework for tackling the complexities of KGC tasks, combining the best of embedding-based 
+   and text-based approaches with the power of large language models.
