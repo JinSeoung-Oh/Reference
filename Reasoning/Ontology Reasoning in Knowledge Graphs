@@ -1,0 +1,82 @@
+### From https://towardsdatascience.com/ontology-reasoning-in-knowledge-graphs-7e563cc5b62a
+
+1. Introduction
+   Large Language Models (LLMs) excel in pattern recognition but often lack the structured reasoning capabilities required 
+   for tasks involving logical rigor, such as those in legal or medical fields. 
+   Ontologies address this limitation by providing formalized structures for reasoning, 
+   enabling LLMs to complement their generative abilities with logical consistency.
+
+   This article demonstrates how to apply ontology reasoning in Knowledge Graphs (KGs) using the 
+   Resource Description Framework (RDF), RDF Schema, and the Web Ontology Language (OWL).
+
+2. Ontology Languages and Frameworks
+   - 1. Resource Description Framework (RDF)
+        -a. Purpose: Provides a data model for expressing information as triples: subject-predicate-object.
+        -b. Example: Describing relationships about Stanley Kubrick using custom (myo:) and DBpedia (dbr:) namespaces.
+   ##########################################################
+   dbr:Stanley_Kubrick myo:director_of dbr:Eyes_Wide_Shut .
+   dbr:Stanley_Kubrick myo:married_to dbr:Christiane_Kubrick .
+   ##########################################################
+
+   -2. Types of Properties:
+       -a. Object Properties: Connect entities (e.g., myo:director_of).
+       -b. Data Properties: Link entities to literal values (e.g., myo:birth_date).
+3. RDF Schema 
+   -1. Adds Context: Introduces class definitions and hierarchies.
+       ###############################################
+       myo:Director rdfs:subClassOf myo:Person .
+       myo:Man rdfs:subClassOf myo:Person .
+       ###############################################
+   -2. Purpose: Enables inheritance of properties and relationships through class hierarchies.
+
+4. Web Ontology Language (OWL)
+   -1. Advanced Reasoning: Defines richer semantics, such as:
+       -a. Disjoint Classes: e.g., myo:Man and myo:Woman cannot overlap.
+       -b. Symmetric Properties: e.g., myo:married_to.
+       -c. Transitive Properties: e.g., myo:influenced.
+
+5. Reasoning with RDF Data
+   Using libraries like rdflib and owlrl, ontology reasoning can generate inferred triples, 
+   enriching the RDF dataset with implicit knowledge.
+
+   -1. Steps for Reasoning:
+       -a. Create RDF Graph:
+           - Parse RDF triples into an rdflib.Graph.
+   -2. Apply Reasoning:
+       -a. Use DeductiveClosure from owlrl to compute logical inferences.
+           ############################################
+           DeductiveClosure(OWLRL_Semantics).expand(g)
+           ############################################
+    -3. Run SPARQL Queries:
+        -a. Extract explicit and inferred knowledge using SPARQL.
+            ######################################
+            classes_query = """
+            SELECT ?subject ?object
+            WHERE { ?subject rdf:type ?object . }
+            """
+            #######################################
+
+6. Key Inferences
+   -1. Classes
+       -a. Subsumption Reasoning: Infers that instances of myo:Director or myo:Man are also instances of myo:Person.
+       -b. Property Domains and Ranges: Infers dbr:Katsuhiro_Otomo and dbr:Satoshi_Kon as 
+                                         myo:Person through their use of myo:influenced.
+   -2. Relationships
+       -a. Transitivity: myo:influenced propagates influence across connected individuals.
+           - E.g., Stanley Kubrick → Katsuhiro Otomo → Satoshi Kon infers Stanley Kubrick → Satoshi Kon.
+       -b. Symmetry: myo:married_to infers reciprocal relationships.
+           - E.g., Stanley Kubrick → Christiane Kubrick also infers Christiane Kubrick → Stanley Kubrick.
+
+7. Applications and Conclusion
+   -1. Applications:
+       -a. Ontological reasoning bridges LLMs’ gaps in structured reasoning.
+       -b. Supports tasks requiring explainability and logical rigor, such as:
+           - Semantic search.
+           - Knowledge enrichment.
+           - Transparent AI in critical domains (e.g., healthcare, law).
+
+8. Conclusion:
+   Integrating ontological reasoning with LLMs enhances their capabilities, making AI systems more robust and reliable. 
+   By leveraging RDF, RDF Schema, and OWL, we can create enriched KGs that provide transparent, 
+   logical connections essential for complex, data-driven tasks.
+
