@@ -1,0 +1,64 @@
+### From https://pub.towardsai.net/inside-t%C3%BClu-3-allen-ais-new-post-training-framework-abbb9533c890
+
+The evolution of Tülu 3, a new framework by Allen AI, marks a shift in focus from pretraining large language models (LLMs) 
+to optimizing their post-training processes. 
+This shift comes at a critical time when pretraining on massive internet-scale datasets has become routine, 
+yet robust, production-ready post-training frameworks remain scarce. 
+Tülu 3 aims to bridge this gap by introducing a comprehensive post-training recipe and championing transparency in LLM development.
+
+1. Key Innovations in Tülu 3
+   -1. Focus on Post-Training:
+       -a. Supervised Fine-Tuning (SFT): Establishes a baseline for instruction following and response generation. 
+       -b. Direct Preference Optimization (DPO): Refines outputs to align with human preferences, ensuring accuracy, fluency,
+                                                 and contextual relevance.
+       -c. Reinforcement Learning with Verifiable Rewards (RLVR): Introduces verifiable outcomes for high-accuracy tasks like mathematics 
+                                                                  and precise instruction following.
+
+   -2. Transparency and Open-Source Approach:
+       Tülu 3 emphasizes open access to its data, evaluation methods, and training procedures.
+       Researchers can reproduce and build upon its models, fostering collaboration and innovation within the AI community.
+
+2. Tülu 3’s Comprehensive Framework
+   -1. Data Curation
+       -a. Public Datasets: Tülu 3 uses datasets like OpenMathInstruct and NuminaMath to enhance mathematical reasoning and other core skills.
+       -b. Synthetic Data Generation: Employs a persona-driven approach to diversify training prompts and mitigate risks 
+                                      of repetitive patterns or "mode collapse."
+       -c. Decontamination: Removes overlapping data from training and evaluation benchmarks to ensure genuine performance assessment.
+
+   -2. Models
+       Tülu 3 offers instruction-following models as open-source resources, demonstrating the efficacy of its post-training recipe.
+
+   -3. Evaluation
+       -a. Tülu 3 Eval: A standardized suite measuring LLM performance across tasks like reasoning, coding, and instruction following.
+       -b. Unseen Evaluation: Assesses model generalization on tasks not present in training, mirroring real-world LLM usage.
+
+   -4. Multi-Stage Training
+       -a. Prompt Curation and Synthesis: Develops targeted prompts to build foundational skills.
+       -b. Supervised Fine-Tuning (SFT): Aligns models with desired behavior for diverse prompts.
+       -c. Direct Preference Optimization (DPO): Ensures outputs meet human preferences in accuracy, style, and context.
+       -d. Reinforcement Learning with Verifiable Rewards (RLVR): Focuses on tasks requiring measurable accuracy,
+                                                                  bypassing subjective feedback for objective verification.
+
+3. Results  
+   Baseline models trained with Tülu 3 demonstrate strong performance across established benchmarks, 
+   emphasizing the framework’s effectiveness in refining pretrained LLMs. 
+   These models excel in both accuracy and stylistic fluency, achieving state-of-the-art results in mathematical reasoning, 
+   instruction following, and contextual tasks.
+
+4. Significance of Tülu 3
+   -1. Democratizing Access to Advanced LLM Technology:
+       -a. Open-sourcing data and methods enables researchers and developers from diverse backgrounds to contribute and innovate.
+
+   -2. Driving Collaboration and Reproducibility:
+       -a. Transparency fosters trust and collaboration, accelerating progress in LLM research.
+
+   -3. Enhancing Production-Ready Models:
+       -a. Tülu 3 sets a new standard for post-training frameworks, paving the way for models that are not just pretrained but also
+           optimized for real-world applications.
+
+5. Conclusion
+   Tülu 3 represents a pivotal moment in the evolution of LLMs, shifting the focus from pretraining to advanced post-training techniques.
+   By combining transparency with a sophisticated multi-stage recipe, Tülu 3 lays the groundwork for open, 
+   collaborative, and impactful LLM development, setting a new benchmark for the future of generative AI.
+
+
