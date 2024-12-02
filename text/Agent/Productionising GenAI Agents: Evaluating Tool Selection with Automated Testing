@@ -1,0 +1,151 @@
+### From https://towardsdatascience.com/productionising-genai-agents-evaluating-tool-selection-with-automated-testing-f668065e69bd
+### From https://github.com/heiko-hotz/genai-agent-tool-selection-testing
+
+
+Generative AI (GenAI) agents are revolutionizing business interactions by performing tasks that go beyond text generation, 
+such as retrieving real-time data, managing external tools, and providing dynamic support. 
+However, the effectiveness of these agents heavily relies on tool selection, 
+where they must identify and execute the correct function for a given user query.
+
+This blog explores the Tool Selection Testing Framework, a systematic approach to evaluating and refining tool selection capabilities 
+in GenAI agents, ensuring their reliability in dynamic production environments.
+
+1. The Importance of Tool Selection
+   Tool selection distinguishes GenAI agents from static conversational AI models by enabling action-oriented capabilities.
+
+   -a. Translating text requires identifying a translation tool and correctly formatting inputs.
+   -b. Weather-related queries demand extracting parameters like location and date to invoke an API.
+
+   Failures in tool selection—such as calling the wrong tool or mishandling inputs—can erode user trust. 
+   Continuous testing mitigates this risk by ensuring agents remain functional and adaptable despite model or environment changes.
+
+2. Key Features of the Testing Framework
+   -1. Structured Dataset for Evaluation
+       The framework uses a dataset of test cases, each simulating real-world interactions. 
+
+       -a. Tool Selection: Verifying that the agent selects the correct tool and arguments.
+       -b. No Tool Needed: Ensuring the agent responds directly when possible.
+       -c. Clarifying Queries: Testing how the agent handles ambiguous requests.
+       -d. Error Handling: Assessing graceful handling of invalid inputs.
+       -e. Not Supported: Checking the agent’s response to unsupported tasks.
+
+       Each test case includes:
+
+       -a. User Query: The input provided to the agent.
+       -b. Ground Truth: The expected response or tool call, with arguments.
+
+  -2. Semantic Evaluation with LLMs
+      Responses are evaluated for exact matches. For nuanced cases where responses differ but are semantically equivalent, 
+      a semantic judge LLM evaluates the output, ensuring flexibility without compromising accuracy.
+
+  -3. Scalable Testing Pipeline
+      The framework supports:
+      -a. Parallel processing for efficiency.
+      -b. Integration with leading models like OpenAI and Gemini.
+      -c. Model-agnostic tooling, enabling compatibility across platforms.
+
+  -4. Reporting and Debugging Insights
+      The framework provides granular insights into test results:
+
+      -a. Success and failure rates.
+      -b. Detailed failure analysis, including mismatched arguments or tool misuse.
+      -c. Semantic explanations for nuanced judgments.
+
+3. Repository Structure
+   See github link
+
+4. Framework Workflow
+   -1. Setup:
+       -a. Specify the model (e.g., OpenAI GPT-4, Gemini).
+       -b. Select a dataset and configure parameters for semantic judgment.
+
+    Example CLI Command:
+
+    bash
+
+    python main.py \
+        --model-type gemini \
+        --dataset datasets/test_dataset.json \
+        --semantic-judge-model gemini-1.5-pro-002
+
+   -2.Tool Registration:
+      -a. Tools are defined in a model-independent format and dynamically registered for compatibility with the selected LLM.
+
+   -3. Test Case Execution:
+       -a. Queries are sent to the LLM, and its responses are recorded asynchronously for efficiency.
+
+   -4. Evaluation:
+       -a. Responses are compared against ground truth.
+       -b. If mismatched, the semantic judge evaluates equivalence.
+
+   -5. Reporting:
+       -a. Results are aggregated into detailed reports, highlighting successes, failures, and semantic judgments.
+
+5. Example Use Cases
+   -1. Tool Selection
+       Scenario: Querying weather for New York.
+
+       -a. User Query: "What's the weather in New York tomorrow?"
+       -b. Tools:
+           - get_weather(location, date)
+           - get_news(topic)
+           - set_reminder(time, message)
+        -c. Expected Output: get_weather(location="New York", date="tomorrow")
+
+      Framework Workflow:
+      -a. Sends query to the LLM.
+      -b. Evaluates correctness of the tool and arguments.
+      -c. Flags mismatches or validates semantic equivalence.
+
+   -2. No Tool Needed
+       Scenario: Responding with internal knowledge.
+
+       -a. User Query: "Who wrote Romeo and Juliet?"
+       -b. Expected Output: "William Shakespeare"
+       -c. Framework checks if:
+           - The LLM refrains from calling tools unnecessarily.
+           - The direct response is correct and coherent.
+
+   -3. Clarifying Queries
+       Scenario: Handling ambiguity.
+
+       -a. User Query: "Translate this."
+       -b. Expected Output: "Could you specify the text and target language for translation?"
+       -c. Framework ensures:
+           - The agent recognizes missing parameters and prompts the user accordingly.
+
+6. Advantages
+   -1. Reproducibility:
+       -a. Tests can be rerun consistently, enabling tracking of improvements.
+   -2. Scalability:
+       -a. Supports adding new tools, datasets, and models with minimal changes.
+   -3. Granular Debugging:
+       -a. Isolates issues in tool selection or argument extraction for targeted fixes.
+   -4. Flexibility:
+       -a. Incorporates semantic evaluation for nuanced comparisons.
+
+7. Key Insights from Testing
+   -1. Common Errors:
+       -a. Incorrect tool selection or argument formatting.
+       -b. Over-reliance on tools when direct responses suffice.
+   -2. Iterative Refinements:
+       -a. Updating prompts or model configurations improves accuracy.
+   -3. Real-World Adaptability:
+       -a. Incorporating diverse datasets ensures robustness across scenarios.
+
+8. Future Directions
+   -1. Expanding Models:
+       -a. Support for additional LLMs and multi-agent setups.
+
+   -2. Enhanced Evaluation:
+       -a. Integrating metrics for task completion time and user satisfaction.
+
+   -3. Dynamic Tool Selection:
+       -a. Adapting to real-time updates in tool catalogs or APIs.
+
+9. Conclusion
+   The Tool Selection Testing Framework equips developers to systematically evaluate and refine GenAI agents, 
+   ensuring reliability in complex, dynamic environments. By leveraging structured datasets, 
+   semantic evaluation, and comprehensive reporting, this framework transforms tool selection testing from a manual, 
+   error-prone process into a scalable, efficient pipeline.
+
