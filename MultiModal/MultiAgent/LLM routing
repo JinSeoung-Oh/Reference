@@ -1,0 +1,121 @@
+### From https://towardsdatascience.com/llm-routing-intuitively-and-exhaustively-explained-5b0789fe27aa
+
+1. Introduction to LLM Routing
+   LLM routing optimizes the selection of the most suitable language model (or set of models) for a given query. 
+   This can lead to significant improvements in cost, performance, and latency for applications powered by LLMs. 
+   The concept revolves around matching queries with the models that are "good enough" without overcommitting resources unnecessarily.
+
+2. Example Motivation:
+   -1. Simple Queries: "What is 2+2?" does not require a large model like GPT-4.
+   -2. Complex Queries: "What is the philosophical basis of existentialism?" might require a larger model for a nuanced response.
+       To address this, routing techniques analyze query complexity and select an appropriate model dynamically.
+
+3. Four Approaches to LLM Routing
+   -1. AutoMix and the LLM Cascade
+       -a. Process:
+           Pass the query to a small, low-cost model.
+       -b. The model:
+           Generates an initial response.
+           Performs self-evaluation to decide if the response is sufficient.
+           If self-evaluation indicates uncertainty, escalate the query to a larger model.
+       -c. Challenges:
+           Self-Evaluation Reliability: Smaller models often fail to recognize when their answers are incorrect.
+           Efficiency: Missteps in self-evaluation may lead to unnecessary escalations, offsetting cost benefits.
+           Solution in AutoMix: AutoMix uses a Partially Observable Markov Decision Process (POMDP):
+
+           -1) POMDP Basics:
+               - A Markov Decision Process (MDP) models a sequence of decisions under uncertainty.
+               - A POMDP extends this by accounting for situations where the "true state" is only partially observable.
+           -2) Implementation in AutoMix:
+               - Treats model self-evaluation as a probabilistic "observation" rather than a definitive result.
+               - Uses Kernel Density Estimation (KDE) to create probability distributions of self-evaluation scores:
+                 Good vs. bad answers are separated into distributions.
+                 KDE evaluates how likely a response is to be correct, based on observed self-evaluation patterns.
+       -d. Advantages:
+           Increases the reliability of routing decisions by using probabilistic reasoning.
+           Flexible to different tradeoffs (cost vs. performance) by adjusting parameters like λ (cost-weighting factor).
+
+   -2. RouteLLM: Bradley-Terry Model with Similarity Matching
+       -a. Key Idea: Use textual encoders to assess query similarity to a training dataset of known queries, 
+                     then predict which model (large or small) is better suited for the new query.
+
+       -b. Steps:
+           -1) Data Collection:
+               - Use datasets like Chatbot Arena, which includes head-to-head comparisons of LLMs evaluated by humans.
+               - Group models into "strong" (large, expensive) and "weak" (small, cheap) categories using metrics like Elo scores.
+
+           -2) Similarity-Based Weighting:
+               - Encode queries into vector embeddings using models like OpenAI’s text-embedding-ada-002.
+               - Measure cosine similarity between the new query and training dataset examples.
+               - Normalize similarities into weights, where:
+                 High weights indicate stronger similarity to examples requiring larger models.
+                 Low weights suggest examples better handled by smaller models.
+
+       -c. Bradley-Terry (B-T) Model:
+           -1) A lightweight probabilistic model used to predict outcomes between pairs (e.g., "strong" vs. "weak").
+           -2) Implementation:
+               - Train B-T coefficients based on the training dataset, with weights influencing each example's contribution.
+               - Use these coefficients to predict the probability of needing a strong model for the query.
+
+       -d. Challenges:
+           -1) Encoders like text-embedding-ada-002 are not specialized for routing tasks, 
+               leading to limited separation between embeddings of queries for large vs. small models.
+           -2) The B-T model struggles when input embeddings do not provide clear separations.
+
+       -e. Advantage:
+           -1) Lightweight and interpretable approach that avoids the need for complex neural networks.
+
+   -3. RouteLLM: BERT Classifier
+       -a. Key Idea: Leverage a BERT-style model to classify whether a query should go to a larger or smaller model.
+
+       -b. Steps:
+           -1) Training Data:
+               - Use datasets of query-model pairs, annotated with whether a query was best served by a strong or weak model.
+       -c. Model Architecture:
+           -1) Append a neural network to the [CLS] token of the BERT model’s output.
+           -2) Train this combined architecture to predict routing decisions directly.
+
+       -d. Fine-Tuning:
+           -1) Fine-tune the entire model on the human preference dataset (e.g., Chatbot Arena).
+
+       -e. Advantages:
+           -1) Uses BERT’s strong understanding of text to make routing decisions.
+           -2) Can generalize better than similarity-based methods, especially for nuanced queries.
+
+   -4. Industrial Example: Unify.ai’s Advanced Router
+       Unify.ai Approach: Unify combines query understanding with real-time metrics like latency and cost to make routing decisions.
+
+       -a. Process:
+           -1) Data Collection:
+               - Start with a list of queries and generate responses from multiple LLMs.
+               - Use a larger LLM (e.g., GPT-4) to rate each response on a quality scale (irrelevant, bad, satisfactory, very good, excellent).
+               - Map quality scores to a 0–1 range.
+           -2) Model and Input:
+               - Represent each LLM as a vector in the model’s vocabulary.
+               - Append this vector to the query embedding and pass it through a BERT-style model.
+               - Predict the quality of the response for a specific query-model pair.
+           -3) Real-Time Metrics:
+               - Track latency, cost, and throughput metrics for all models.
+               - Incorporate these metrics into the routing decision.
+           -4) Reward Function:
+               - Combine predicted quality, latency, and cost into a reward function:
+                 Reward = Quality − 𝜆_1(Latency)−𝜆_2(Cost)
+                 Use this function to balance tradeoffs dynamically.
+           -5) Advantages:
+               - Real-time adaptability to model performance and infrastructure.
+               - Fine-tuned quality predictions ensure optimal query-model pairings.
+
+4. Comparison of Approaches
+   Approach	Strengths	Challenges
+   AutoMix Cascade	Simple to implement; balances cost vs. quality dynamically.	Reliance on self-evaluation accuracy.
+   RouteLLM: B-T Model	Lightweight; interpretable; uses similarity-based weights.	Limited by encoder quality.
+   RouteLLM: BERT Classifier	Strong generalization; leverages pretrained language understanding.	Requires fine-tuning on significant data.
+   Unify.ai Router	Combines query understanding with real-time metrics for cost/quality tradeoff.	Complexity in infrastructure monitoring.
+
+5. Takeaways
+   -a. LLM routing offers exciting possibilities for cost savings and performance improvements.
+   -b. The choice of approach depends on:
+       -1) Data availability: AutoMix and B-T methods work well with limited data, while BERT classifiers require more robust datasets.
+       -2) Application needs: Systems prioritizing latency or cost might benefit from Unify.ai’s industrial strategies.
+   -c. Future developments may involve combining these methods, such as fine-tuning encoders specifically for routing tasks.
+
