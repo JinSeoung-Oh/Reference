@@ -1,0 +1,84 @@
+### From https://towardsdatascience.com/is-reft-all-we-needed-1ab38e457320
+
+The ReFT (Representation Finetuning) technique, introduced in May 2024 by Stanford, represents a paradigm shift in 
+parameter-efficient fine-tuning (PEFT) methods for large language models (LLMs). 
+Unlike existing PEFT methods such as LoRA, prompt tuning, and prefix tuning, 
+ReFT operates by fine-tuning hidden representations in a low-dimensional subspace, grounded in causal abstraction principles. 
+This approach significantly reduces the number of trainable parameters while achieving superior performance across diverse benchmarks.
+
+1. PEFT Techniques
+   -1. LoRA (Low-Rank Adaptation)
+       -a. Core Idea: Adds low-rank matrices to pre-trained model layers, updating only these matrices during fine-tuning.
+       -b. Benefits:
+           - Reduces trainable parameters to <0.3% of the total.
+           - Robust and widely applicable for LLMs and diffusion models.
+
+   -2. Prompt Tuning
+       -a. Core Idea: Adds learnable "soft prompts" to the input, leaving the model weights unchanged.
+       -b. Benefits:
+           - Efficient for multi-task predictions.
+           - Does not require task-specific model copies.
+
+   -3. Prefix Tuning (P-Tuning v2)
+       -a. Core Idea: Learns task-specific prompt embeddings at various layers, enhancing scalability for large models (>10B parameters).
+       -b. Benefits:
+           - Captures multi-scale task-specific information.
+           - Among these, LoRA remains the most widely adopted due to its simplicity and efficiency.
+
+2. Distributed Interchange Intervention (DII)
+   -1. Foundation of ReFT
+       -a. Causal Abstraction: Aligns neural network representations with causal models via interventions.
+       -b. DII Process:
+           - Projection: Maps representations to a low-dimensional subspace using orthogonal projection matrices 𝑅
+           - Intervention: Modifies representations within this subspace using certain operations, such as rotations.
+           - Optimization: Learns 𝑅 through Distributed Alignment Search (DAS), optimizing the subspace to maximize counterfactual outputs.
+       -c. Equation:
+           𝑅(𝑠) = 𝑊(ℎ)+𝑏
+           
+           Where:
+           𝑅: Low-rank projection matrix.
+           𝑠,𝑏: Representations of different inputs.
+           𝑊: Linear transformation applied to hidden states.
+
+####################################################################################################
+3. ReFT (Representation Finetuning)
+   -1. Concept
+       ReFT introduces a causal intervention mechanism into the hidden representations of LLMs, focusing on a lower-dimensional subspace. 
+       It does so by:
+
+       -a. Freezing the original model parameters.
+       -b. Fine-tuning only the parameters of the projection (𝜙 = {𝑅,𝑊,𝑏}
+
+   -2. Key Variant: Low-Rank Linear Subspace ReFT (LoReFT)
+       -a. Projects hidden representations into a low-dimensional space using learnable parameters.
+       -b. Edits representations in this space to maximize task-specific performance.
+
+####################################################################################################
+4. Findings
+   -1. ReFT vs. LoRA:
+       -a. Parameter Efficiency: ReFT reduces trainable parameters by 90%.
+       -b. Performance: Outperforms LoRA and other SOTA methods across benchmarks.
+
+Technique	Trainable Parameters	Performance
+Full Fine-Tuning	100%	Baseline
+LoRA	           ~0.3%	Slightly lower
+ReFT	           ~0.03%	Superior
+
+####################################################################################################
+5. Discussion: Why is ReFT Important?
+   -1. Efficiency:
+       -a. Dramatically reduces fine-tuning costs.
+       -b. Enables fine-tuning on large LLMs (e.g., LLaMA3 8B) using modest hardware (e.g., Nvidia A10 GPU).
+
+   -2. Interpretability:
+       -a. Rooted in causal abstraction principles.
+       -b. Provides insights into hidden representation spaces and their role in task-specific generalization.
+
+   -3. Scalability:
+       -a. Opens doors for fine-tuning even larger models by leveraging distributed subspace operations.
+
+6. Conclusion
+   ReFT stands out as a revolutionary technique for fine-tuning large language models, blending efficiency, interpretability, and performance. 
+   Its ability to intervene directly in hidden representations marks a significant leap forward, 
+   positioning it as a promising tool for advancing both practical applications and theoretical understanding of LLMs.
+
