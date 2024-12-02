@@ -1,0 +1,90 @@
+## From https://ai.gopubby.com/think-big-llm-models-cant-fit-small-gpus-think-again-ebbbb3bd0da7
+
+The article provides comprehensive guidance on optimizing GPU memory usage during large language model (LLM) inference. 
+It introduces and analyzes several cutting-edge techniques, emphasizing actionable insights and practical applications, 
+especially for deploying powerful LLMs like LLaMA-2 70B on hardware with limited GPU resources. 
+The methods are categorized based on their underlying principles and impact on memory usage.
+
+1. vLLMs and PagedAttention
+   -1. Concept: Inspired by virtual memory in operating systems, PagedAttention divides the Key-Value (KV) cache into fixed-size blocks (pages),
+                enabling flexible, non-contiguous memory allocation.
+   -2. Key Mechanisms:
+       -a. Dynamic growth of the KV cache without pre-allocation.
+       -b. Memory sharing across requests for efficient resource utilization.
+   -3. Benefits:
+       -a. Minimizes memory fragmentation.
+       -b. Enables memory-efficient management for larger context windows.
+   -4. Impact: Demonstrated memory reductions between 44.3% and 66.3% depending on context window size.
+
+2. Quantization
+   -1. Concept: Reduces the precision of model weights and activations, lowering memory requirements.
+   -2. Techniques:
+       -a. Quantization Aware Training (QAT): Simulates quantization during training for minimal accuracy loss.
+       -b. Post Training Quantization (PTQ): Quantizes weights/activations post-training with calibration datasets.
+   -3. Variants:
+       -a. Weight-only quantization (e.g., GPTQ) achieves up to 81.25% reduction.
+       -b. Activation quantization (e.g., ZeroQuant) and KV cache quantization (e.g., KVQuant) provide further savings.
+   -4. Impact: Significant reduction in memory footprint, especially for weights and activations.
+
+3. FlashAttention
+   -1. Concept: Optimizes self-attention computations by tiling and streaming, avoiding quadratic memory scaling.
+   -2. Key Features:
+       -a. In-place computation to eliminate large intermediate matrices.
+       -b. Exploits GPU architecture for faster memory access.
+   -3. Impact: Reduces memory by ~13.4%, with potential for compounding benefits when combined with other techniques.
+
+4. CachedAttention
+   -1. Concept: Implements a hierarchical KV cache management system across GPU, RAM, and disk tiers.
+   -2. Features:
+       -a. Intelligent fetching and eviction of KV caches based on need.
+       -b. Asynchronous saving/loading to minimize overhead.
+   -3. Impact: Achieves up to 39% memory reduction and accelerates inference by reducing token generation delays.
+
+5. HCache
+   -1. Concept: Stores and restores hidden states instead of full KV caches, using dynamic scheduling to balance I/O and computation.
+   -2. Benefits:
+       -a. Reduces storage requirements by ~2.16×.
+       -b. Efficiently pipelines data transfers and computations.
+   -3. Impact: Effective for longer context windows, providing scalable solutions for memory management.
+
+6. Knowledge Distillation
+   -1. Concept: Transfers knowledge from a larger teacher model to a smaller student model.
+   -2. Methods:
+       -a. Black Box: Uses only teacher outputs.
+       -b. White Box: Leverages teacher’s intermediate representations.
+   -3. Impact: Reduces model size by 40%, significantly lowering memory demands.
+
+7. Pruning
+   -1. Concept: Removes redundant weights or structures.
+   -2. Types:
+       -a. Unstructured pruning for individual weights.
+       -b. Structured pruning for entire components (e.g., neurons, layers).
+   -3. Impact: Memory savings of 20%-50%, effective for smaller context windows.
+
+8. FastGen
+   -1. Concept: Compresses KV caches adaptively by profiling attention patterns.
+   -2. Impact: Reduces KV cache memory by 40%, particularly beneficial for long sequences.
+
+9. LoRD (Low-Rank Decomposition)
+   -1. Concept: Decomposes large weight matrices into smaller ones for reduced memory usage without sparsity.
+   -2. Impact: Achieves up to 39.58% weight reduction, compatible with quantization for additional savings.
+
+10. GemFilter
+    -1. Concept: Compresses input contexts by selecting top tokens based on attention scores.
+    -2. Impact: Reduces KV cache and activations by up to 70%, particularly for long-context inputs.
+
+11. Summary of Memory Reductions Across Techniques
+    Techniques like Knowledge Distillation and Pruning are most effective for smaller context windows.
+    PagedAttention, CachedAttention, and HCache shine for larger context windows.
+    Combining methods (e.g., Quantization + LoRD or FastGen + FlashAttention) could yield even greater reductions.
+
+12. Practical Considerations
+    -1. CPU Memory for KV Cache Offloading:
+        Adequate RAM and high-bandwidth PCIe (e.g., PCIe 4.0/5.0) are crucial for efficient offloading.
+    Techniques like asynchronous transfers and compression help mitigate latency.
+
+13. Conclusion
+    The article serves as a roadmap for optimizing GPU memory usage in LLMs. While individual techniques offer varying benefits based on context 
+    window sizes, combining methods could unlock new possibilities for deploying large models on resource-constrained hardware. 
+    Readers are encouraged to experiment and share insights for continuous improvement.
+
