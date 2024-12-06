@@ -1,0 +1,36 @@
+### From https://linton.ai/anthropic-announced-model-context-protocol-mcp-yesterday-and-you-should-care-a-lot-fe29d5b2cc28
+
+1. Definition and Background of Model Context Protocol (MCP)
+   -1. MCP Concept and Release: Developed by Anthropic, MCP is a new way to connect AI agents to data sources. It was officially open-sourced on December 5, 2024.
+   -2. Purpose: MCP enables AI agents to leverage data sources more efficiently, removing the need for manual human access.
+   -3. Example: Connecting an AI agent to a Github repository to understand coding context and produce optimized code.
+
+2. Key Components
+   -1. Anthropic introduced three major components of MCP:
+       -a. MCP Specification and SDK: Standards and tools for connecting AI systems to data sources.
+       -b. Local MCP Support in Claude Desktop Apps: Enables MCP functionality in local environments.
+       -c. Open Source Repository of MCP Servers: Allows anyone to run and use MCP servers.
+
+3. MCP’s Core Functionality
+   -1. Connecting AI to Data: MCP serves as a bridge between AI agents and various data storage systems, such as Salesforce, Github, or Slack.
+   -2. Enhanced AI Capabilities: AI agents using MCP can retrieve and process data more effectively, outperforming human capabilities in speed and accuracy.
+
+4. Early Adoption and Use Cases
+   -1. Adopters: Companies like Block and Apollo have already integrated MCP into their systems.
+   -2. Development Tools: Platforms like Zed, Replit, Codeium, and Sourcegraph leverage MCP to enable AI agents to retrieve relevant information,
+                          understand coding tasks, and produce more refined code with fewer iterations.
+
+   -3. Notable Quote:
+       -a. Dhanji R. Prasanna, CTO at Block, stated:
+           “Open technologies like the Model Context Protocol are bridges that connect AI to real-world applications, ensuring innovation is accessible, 
+           transparent, and collaborative. We’re excited to use MCP to build agentic systems that free people to focus on creative tasks.”
+
+5. Implications and Getting Started
+   -1. Transformational Potential: MCP marks a foundational shift in how organizations interact with data, emphasizing automation and efficiency through AI agents.
+   -2. Documentation: Comprehensive resources and a Quickstart guide are available at modelcontextprotocol.io.
+   -3. Path for Developers: Enthusiasts can explore MCP through paths like Python, with community resources growing rapidly.
+
+6. Final Remarks
+   MCP represents a major step forward in bridging AI and practical applications, fostering collaboration and innovation. 
+   While the name “Model Context Protocol” might lack clarity, its impact is significant, and renaming it to something like “Agent Intelligence” could better convey 
+   its transformative potential.
