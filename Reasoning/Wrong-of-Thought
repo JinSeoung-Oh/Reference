@@ -1,0 +1,85 @@
+### From https://medium.com/@techsachin/wrong-of-thought-llm-reasoning-framework-with-multi-perspective-verification-and-wrong-d3972c3fe0f2
+### From https://arxiv.org/abs/2410.04463
+
+1. Background and Motivation
+   Current Large Language Model (LLM) reasoning approaches typically rely on a single verification perspective. 
+   This often leads the model to ignore previously discovered errors and force it to restart the reasoning process from scratch each iteration. 
+   As a result, the logical improvements made over multiple reasoning attempts are limited.
+
+   To address these shortcomings, the authors introduce Wrong-of-Thought (WoT), a framework that enhances LLM reasoning by incorporating multi-perspective verification and
+   by utilizing information about previously made errors (wrong information).
+
+2. Key Contributions
+   -1. Identification of Drawbacks in Iterative Reasoning:
+       -a. Iterative reasoning often improves answers step-by-step (as in Chain-of-Thought, Equation-of-Thought, or Program-of-Thought), but it uses a single verification approach.
+       -b. Ignoring previously identified wrong reasoning paths is inefficient and limits logical improvement.
+   -2. Introduction of Wrong-of-Thought (WoT):
+       -a. WoT addresses these issues through two main components:
+           - Multi-Perspective Verification (MPV)
+             Instead of relying on one verification method, WoT employs multiple verification techniques to accurately refine reasoning processes and results.
+           - Wrong Information Utilization (WIU)
+             WoT feeds back the identified wrong reasoning steps from previous attempts to alert the LLM and prevent it from repeating similar mistakes.
+       These enhancements allow LLMs to refine logic more effectively and achieve better final answers.
+
+3. Wrong-of-Thought (WoT) Framework
+   WoT builds upon the X-of-Thoughts (XoT) framework. Specifically, it adds new modules and methods:
+
+   -1. Planning and Solving (XoT Base):
+       As per XoT, the system first decides on a reasoning method—Equation-of-Thought (EoT) or Program-of-Thought (PoT)—based on the input question. 
+       A solver then produces a reasoning chain, and an external executor (e.g., a calculator or code runner) computes a preliminary result.
+
+   -2. Multi-Perspective Verification (MPV):
+       WoT introduces a triple-check mechanism to verify reasoning from different angles. It includes:
+       -a. Assertion Verification:
+           Extract intermediate variables from the LLM’s reasoning chain and represent them as “Assertion Statements.”
+           Use external tools or rule-based executors to verify these assertions.
+       -b. Process Verification:
+           Give the LLM the current reasoning steps (without results) and ask it to re-validate each step.
+           The LLM checks if each step aligns correctly with the question’s data, ensuring that the logic and variable assignments are consistent.
+       -c. Result Verification:
+           Provide the LLM with both the reasoning process and the computed result.
+           Instruct the LLM to re-solve the problem. If the recomputed answer matches the previous result, the verification passes; otherwise, it fails.
+       The final decision is made by “voting” among these three verification methods. If at least two verification methods confirm the result, it is considered correct.
+
+   -3. Wrong Information Utilization (WIU):
+       After identifying an incorrect solution, WoT doesn’t discard this incorrect reasoning. 
+       Instead, it reintroduces these wrong reasoning steps as a warning for subsequent attempts.
+       Formally, the next reasoning attempt incorporates the previously found errors (Wrong Information), making the LLM aware of past mistakes. 
+       This encourages the model to avoid similar logical pitfalls and to refine the solution more effectively.
+
+4. Experimental Results
+   The authors evaluate WoT on eight datasets and with five different LLMs. Key observations include:
+
+   -1. Superior Performance:
+       -a. WoT outperforms all baseline methods, showing an average improvement of 2.8% over XoT across five LLMs.
+       -b. On smaller parameter open-source models (like Mistral-7B-Instruct and Qwen1.5–7B-Chat), WoT still achieves significant improvements, indicating its robustness.
+   -2. Solving Hard Problems More Effectively:
+       -a. On GSM-Hard, a dataset of difficult reasoning questions, WoT improves performance by an average of 5.7% over baselines, 
+           showcasing its strong capability in tackling complex challenges.
+   -3. Utilizing Wrong Information Boosts Performance:
+       -a. Incorporating wrong reasoning steps from previous attempts leads to substantial performance gains.
+       -b. For EoT and PoT reasoning methods, performance improved by about 8% after utilizing wrong information.
+       -c. For CoT (Chain-of-Thought), incorporating wrong info from two prior steps boosted accuracy by 13.1%.
+   -4. Multi-Perspective Verification Yields More Accurate Judgments:
+       -a. Process Verification and Result Verification outperform the original Assertion Verification.
+       -b. On EoT, using MPV improves Acc by 6% and F1 by 5.7%. On PoT, Acc improves by 5% and F1 by 3.8%.
+       -c. Removing MPV from WoT reduces performance by an average of 1.8%.
+   -5. Reduced Reasoning Steps:
+       -a. WoT reduces the average number of reasoning steps by 8% compared to XoT, indicating more efficient convergence to correct solutions.
+   -6. Shifts in Reasoning Methods for Hard Questions:
+       -a. When dealing with GSM-Hard, WoT changes the distribution of chosen reasoning methods, relying less on CoT and more on PoT for complex problems.
+
+5. Limitations
+   -a. WoT relies on external rule executors to implement Assertion Verification. How to apply a similar verification strategy for purely natural language reasoning 
+       without structured assertions remains an open question.
+   -b. Incorporating multiple verification perspectives and wrong information consumes more tokens and thus may incur higher computational costs.
+
+6. Conclusion
+   -a. The Wrong-of-Thought (WoT) framework addresses key limitations in LLM reasoning by:
+       - Introducing Multi-Perspective Verification (MPV) to accurately refine reasoning.
+       - Utilizing Wrong Information (WIU) from previous incorrect attempts, preventing models from repeating the same mistakes.
+
+   As a result, WoT achieves more accurate, efficient, and resilient reasoning. While the additional complexity and token overhead may present trade-offs, 
+   WoT represents a significant step forward in evolving LLM reasoning from single-perspective refinement to a more holistic and iterative improvement approach.
+
+
