@@ -1,0 +1,108 @@
+### From https://towardsdatascience.com/dragin-dynamic-retrieval-augmented-generation-based-on-the-information-needs-of-large-language-dbdb9aabc1ef
+
+1. Introduction to DRAGIN (Dynamic RAG)
+   Modern Large Language Models (LLMs) let us query complex topics interactively. 
+   Traditional Retrieval Augmented Generation (RAG) involves retrieving external information once at the start of the generation process. 
+   While this works for simple or straightforward queries, it fails to adapt dynamically as the user’s needs evolve or as the complexity of the task unfolds.
+
+   -1. Analogy:
+       Imagine you can only ask your professor for guidance once before solving a problem. 
+       If the problem gets more complex later, you can’t ask again, making the solution process difficult. 
+       Conversely, if you can re-approach the professor whenever a new question arises, you can solve complex problems more effectively. 
+       DRAGIN proposes a dynamic retrieval strategy, allowing multiple retrievals as needed, rather than relying on a single pre-processing retrieval.
+
+       As tasks become more complex and multi-dimensional, this dynamic approach (DRAGIN) becomes increasingly valuable.
+
+2. Limitations of Traditional RAG
+   -1. Problems with LLMs:
+       -a. Hallucinations: LLMs might generate fabricated information.
+       -b. Datedness: LLMs struggle to incorporate up-to-date info since their training may be outdated.
+       -c. Proprietary Knowledge Gaps: LLMs lack access to specialized or private data.
+
+   -2. Traditional RAG:
+       RAG addresses these issues by retrieving external information to ground LLM outputs. 
+       However, traditional RAG often uses a single retrieval step before generation. This is suitable for simple tasks but not for long, 
+       multi-step problems that may evolve as the LLM generates new content.
+
+3. Evolution Towards Dynamic Retrieval
+   To handle complex, multi-step reasoning:
+
+   -1. Fixed Retrieval Methods:
+       -a. IRCoT (Fixed Sentence RAG): Retrieves info for each generated sentence.
+       -b. RETRO and IC-RALM (Fixed Length RAG): Trigger retrieval every n tokens.
+       These methods might over-retrieve (introducing noise) or remain too rigid in their rules.
+
+   -2. Dynamic Retrieval Methods:
+       -a. FLARE (Low Confidence RAG): Dynamically retrieves when the LLM’s confidence is low.
+  
+   However, query formulation for retrieval typically focuses only on the last few tokens or sentences, 
+   which may not capture the broader context or real-time information needs of the LLM’s generation process.
+
+4. Introducing DRAGIN
+    DRAGIN = Dynamic Retrieval Augmented Generation based on Information Needs
+    DRAGIN aims to address both “when to retrieve” and “what to retrieve” more intelligently than existing approaches.
+
+    It introduces two key frameworks:
+    -1. RIND (Real-time Information Needs Detection): Decides when to retrieve, based on the LLM’s token-level uncertainty, importance, and semantics.
+    -2. QFS (Query Formulation based on Self-Attention): Decides what to retrieve by leveraging self-attention scores across the entire generated context, not just recent tokens.
+
+5. Detailed Mechanism of DRAGIN
+   Scenario Example: Suppose you ask the LLM about a brief introduction to Einstein. As the LLM begins to answer, 
+                     it might reach a point where it tries to recall specific details (like which university he worked at), encountering uncertainty.
+
+   -1. RIND (Real-time Information Needs Detection):
+       -a. Measures uncertainty (entropy) of generated tokens.
+       -b. Looks at the influence of each token on subsequent ones via self-attention scores.
+       -c. Checks if the token is semantically meaningful (e.g., not a stop word).
+      
+       If a token (e.g., “university”) is crucial and uncertain, RIND triggers retrieval at that token’s position.
+
+   -2. QFS (Query Formulation based on Self-Attention):
+       Once retrieval is triggered, QFS determines which tokens from the entire context are most important.
+
+       -a. Extract attention scores from the last layer.
+       -b. Identify top-n tokens with highest attention scores.
+       -c. Use these tokens to form a query (e.g., “Einstein 1903 secured job”) for external retrieval.
+
+    -3. Integrate Retrieved Information:
+        Using the formed query, DRAGIN retrieves relevant documents (e.g., “In 1903, Einstein secured a job at the Swiss Patent Office.”).
+        This newly retrieved information is integrated into the LLM’s generation process using a designed prompt template. 
+        The LLM then continues generation, now more accurately and confidently.
+
+    This process can be repeated multiple times, triggering new retrievals only when needed, thus maintaining a balance between accuracy and efficiency.
+
+6. Technical Details
+   A. RIND Computations:
+      -1. Uncertainty:
+          Compute entropy:
+          𝐻(𝑡_𝑖) = −∑_𝑣 𝑝_𝑖(𝑣)log𝑝_𝑖(𝑣)
+          where 𝑝_𝑖(𝑣) is the probability of token 𝑣 at position 𝑖.
+      -2. Influence: Evaluate self-attention across tokens. A token’s max attention score is considered. If this score is high, the token is influential.
+      -3. Semantics: Employ a binary indicator to filter out stop words. Only consider tokens that carry semantic weight.
+
+      RIND combines these signals to decide if retrieval is necessary.
+
+   B. QFS Computations: When retrieval is triggered at token 𝑡_𝑖
+      -1. Extract top-n important tokens from the entire context using self-attention.
+      -2. Sort them by attention score and restore their original order.
+      -3. Construct query 𝑄_𝑖 from these tokens.
+
+   C. Retrieval Integration: Once documents 𝐷_𝑖1,𝐷_𝑖2,𝐷_𝑖3 are retrieved, a prompt template (designed by authors) is used to guide the LLM on how to integrate 
+                             this new info and continue generation accurately.
+
+7. Limitations
+   DRAGIN depends heavily on self-attention scores, which may not be accessible via certain closed APIs or black-box LLM services.
+   Additional retrieval steps might affect inference time and cost, though the paper suggests the overhead is minimal due to early detection of uncertainty.
+
+8. Conclusion
+   DRAGIN extends the capabilities of traditional RAG by dynamically and intelligently deciding when and what to retrieve based on real-time information needs. 
+   This approach aims to solve complex queries more effectively, reduce hallucinations, and adapt as the problem evolves throughout the generation process.
+
+   In an era where LLM-based tasks grow increasingly sophisticated, DRAGIN’s dynamic retrieval approach represents a logical and necessary evolution of the RAG paradigm.
+
+
+
+
+
+
+
