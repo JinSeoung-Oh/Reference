@@ -1,0 +1,129 @@
+### From https://pub.towardsai.net/ai-innovations-and-trends-07-anthropic-rag-chonkie-and-a-hybrid-rag-system-9c8a6e1663ed
+
+1. Overview
+   The provided text discusses three distinct and advanced approaches within the field of Retrieval Augmented Generation (RAG):
+
+   -1. Anthropic’s RAG Solution: Contextual Retrieval
+       This method tackles the issue of context insufficiency when documents are split into smaller chunks for retrieval.
+
+   -2. Chonkie: A Lightweight and Fast RAG Chunking Library
+       An open-source tool that provides various strategies for creating chunks of text.
+
+   -3. A Hybrid RAG System (KDD Cup ’24 Top Rankings)
+       A system integrating multiple external components to improve the accuracy, domain expertise, and overall reasoning capabilities of large language models.
+
+2. Anthropic’s RAG Solution: Contextual Retrieval
+   -1. Problem Addressed:
+       Standard RAG approaches often split documents into smaller chunks, enabling more efficient retrieval. 
+       However, these smaller chunks frequently lose critical contextual information. 
+       For example, a chunk stating, “The company’s revenue grew by 3% over the previous quarter” does not clarify which company or which quarter it refers to. 
+       Such lack of context makes effective retrieval and usage of the chunked information challenging.
+
+   -2. Prior Attempts and Their Limitations:
+       Adding general document summaries to each chunk, which yielded only minimal improvements.
+       Hypothetical document embeddings.
+       Summary-based indexing, which Anthropic notes performed poorly in evaluations.
+
+   -3. Contextual Retrieval Method:
+       Anthropic proposes “Contextual Retrieval,” a preprocessing technique that prepends short, 
+       chunk-specific contextual explanations to each chunk before generating embeddings and creating the BM25 index. 
+       By embedding these contextualized chunks (referred to as “Contextual Embeddings”), the system retains richer context. 
+       This method, combined with a reranking step, significantly enhances retrieval precision, reducing the frequency of retrieval failures caused by insufficient context.
+
+   -4. Key Steps: Generating Context:
+       Anthropic uses a prompt-based approach, instructing Claude (a large language model) to generate succinct chunk-specific contexts. 
+       The prompts ensure that each chunk is situated within the larger document, thus improving search retrieval accuracy.
+
+       Provided Prompts:
+
+       DOCUMENT_CONTEXT_PROMPT = """
+       <document>
+       {doc_content}
+       </document>
+       """
+
+       CHUNK_CONTEXT_PROMPT = """
+       Here is the chunk we want to situate within the whole document
+       <chunk>
+       {chunk_content}
+       </chunk>
+
+       Please give a short succinct context to situate this chunk within the overall document for the purposes of improving search retrieval of the chunk.
+       Answer only with the succinct context and nothing else.
+       """
+
+   -5. Ranking with BM25:
+       After contextualization, Anthropic uses BM25 indexing. BM25 is a ranking function building on TF-IDF concepts and is effective for queries containing unique 
+       or technical terms. It focuses on lexical matching, making it suitable for precision in retrieval tasks.
+
+   -6. Key Steps: Quick and Low-Cost with Prompt Caching:
+       Anthropic employs “prompt caching” to reduce retrieval latency and cost. Once a document and its prompts are loaded into the cache, 
+       the system can reference them without reloading for subsequent queries. This decreases latency by over twofold and cuts costs by up to 90%.
+
+   -7. Commentary and Limitations Within the Text:
+       While prompt caching optimizes repeated retrieval, it does not reduce the number of queries needed. For dynamic knowledge bases that frequently update,
+       cached context can become outdated, posing challenges for maintaining accuracy over time.
+
+3. Chonkie: A Lightweight and Fast RAG Chunking Library
+   Open-Source Code: https://github.com/bhavnicksm/chonkie
+
+   -1. Purpose:
+       The text references Chonkie as a new chunking library that provides various methods to split text. 
+       It aims to make chunk creation more flexible, efficient, and potentially faster.
+
+   -2. Chunking Methods Provided by Chonkie:
+       -a. TokenChunker: Splits text into fixed-size token chunks.
+       -b. WordChunker: Splits text by word count.
+       -c. SentenceChunker: Splits text into sentence-based chunks.
+       -d. SemanticChunker: Splits text into chunks based on semantic similarity.
+       -e. SDPMChunker (Semantic Double-Pass Merge): Uses a semantic approach in two passes to achieve coherent chunk formation.
+
+   -3. Performance Note:
+       The text mentions that Chonkie has conducted comparative experiments showing faster speed. 
+       The code is not complicated, and interested readers can examine the source code for more details.
+
+4. A Hybrid RAG System: KDD Cup ’24 Top Rankings
+   - Open-Source Code: https://gitlab.aicrowd.com/shizueyy/crag-new
+
+   -1. Context:
+       The text then shifts focus to a hybrid RAG system that achieved top rankings in Meta’s KDD Cup 2024. 
+       This system is more engineering-focused and addresses three main issues current large language models (LLMs) face:
+
+       -a. Lack of Domain Expertise: LLMs struggle with highly specialized fields like law or medicine.
+       -b. Hallucinations: LLMs can produce incorrect information, such as misjudging which number is larger when comparing values 
+                           like 3.11 vs. 3.9.
+       -c. Static Knowledge: LLMs do not update their knowledge with real-time data, limiting their accuracy in fast-changing domains (e.g., finance, sports).
+
+   -2. Hybrid Approach and System Design: 
+       This system uses external knowledge bases, numerical calculation tools,
+       and a reasoning module to enhance complex reasoning capabilities in a hybrid RAG setting. 
+       When queries are dynamic (fast-changing), the system outputs “I don’t know” to avoid hallucinations on hard problems.
+
+   -3. System Components:
+       -a. Web Page Processing:
+           - Removes HTML/JS noise and extracts plain text and tables from web pages using Trafilatura and BeautifulSoup as a backup.
+           - Splits text into semantic chunks and converts tables into Markdown for easier handling.
+       -b. Attribute Predictor:
+           - Classifies questions (e.g., simple vs. complex, static vs. dynamic) using In-Context Learning and SVM classification.
+           - Adapts the retrieval and reasoning strategy according to the question type.
+       -c. Numerical Calculator:
+           - Extracts numerical values from text and tables.
+           - Performs arithmetic operations using Python to avoid numerical errors, essential in finance or other data-sensitive domains.
+       -d. LLM Knowledge Extractor:
+           - Uses the model’s internal knowledge to complement external references.
+           - Particularly effective for static domains where pre-trained knowledge can fill gaps when retrieved documents are outdated.
+       -e. Knowledge Graph Module:
+           - Queries structured databases to find entity relationships.
+           - Initially considered a function-calling approach but currently relies on a simpler rule-based method due to 
+             resource constraints.
+       -f. Reasoning Module:
+           - Integrates all gathered information.
+           - Employs Zero-Shot Chain-of-Thought (CoT) to break down complex reasoning tasks into smaller steps, improving accuracy.
+
+   -4. Commentary and Limitations:
+       While this hybrid RAG system offers improved reasoning and accurate computations, it is more complex, 
+       potentially increasing computational costs and latency. The rule-based approach to querying knowledge graphs limits flexibility, 
+       and the system still struggles with real-time data changes, defaulting to “I don’t know” for dynamic queries. 
+       Future enhancements could involve more dynamic data integration and more flexible function-calling mechanisms.
+
+
