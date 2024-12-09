@@ -1,0 +1,90 @@
+### From https://towardsdatascience.com/perception-inspired-graph-convolution-for-music-understanding-tasks-4d2ba1be48e7
+
+1. Overview
+   In Music Information Research (MIR), traditional methods rely on audio or symbolic data (e.g., MIDI, scores) 
+   to understand and process music. Although successful, common strategies often borrow from domains like 
+   computer vision (treating music as images/pianorolls) or natural language processing (treating music as token sequences), 
+   which may not fully capture music’s multi-dimensional and hierarchical nature. 
+   Recent approaches model a musical score as a graph and apply Graph Neural Networks (GNNs), 
+   enabling more nuanced music understanding tasks.
+
+2. Modeling Music Scores as Graphs
+   When constructing a graph from a music score, each note is a node. Edges represent various musical relationships:
+
+   -1. Onset Edges: Connect notes sharing the same start time.
+   -2. Consecutive (Next) Edges: Connect a note to another if the second note begins exactly when the first one ends.
+   -3. During Edges: Connect a note to another whose onset happens during the first note’s duration.
+   -4. Rest (Silence) Edges: Connect the last notes before a rest to the first notes after it.
+   
+   This graph-based representation captures temporal and structural relationships that are crucial for more sophisticated analysis.
+
+3. Introducing MusGConv
+   MusGConv is a new graph convolutional block designed specifically for music score data. 
+   It leverages music perception principles, focusing on two fundamental musical dimensions—pitch and 
+   rhythm—and incorporates both absolute and relative features:
+
+   -1. Absolute Features: Node-level information like a note’s pitch, spelling, and duration.
+   -2. Relative Features: Edge-level information capturing relationships between notes, such as pitch intervals or onset time differences.
+   -3. MusGConv integrates into existing GNN architectures, enhancing their understanding of musical structure without 
+       increasing complexity significantly. It provides a mechanism for the model to switch between absolute and relative representations, 
+       depending on what is more suitable for the task.
+
+4. Why Relative and Absolute Representations Matter 
+   Transposing a piece of music changes the absolute pitches of notes but preserves the relative intervals between them. 
+   Thus, relative features (intervals and relative timing) help the model focus on musical patterns invariant to pitch shifts, 
+   while absolute features ground the model in the specific details of a given score. 
+   MusGConv captures both aspects, making it more robust and context-aware.
+
+5. Message Passing in GNNs and MusGConv
+   In GNNs, message passing is the process through which nodes aggregate information from their neighbors, 
+   iteratively refining their representations. This involves:
+
+   -1. Initialization: Each node starts with certain features (e.g., pitch, onset).
+   -2. Message Generation: Nodes produce messages for their neighbors, often a transformation of node and edge features.
+   -3. Aggregation: Each node aggregates incoming messages using a permutation-invariant function (sum, mean, or max).
+   -4. Node Update: The aggregated result updates the node’s feature vector, often through a neural network layer.
+   -5. Iteration: These steps repeat for multiple layers or iterations.
+
+   MusGConv modifies standard message passing by explicitly incorporating relative musical features as edge features. 
+   For example, edge features might represent pitch-class intervals or onset differences. 
+   If no edge features are provided, MusGConv computes them as differences in node features. 
+   In experiments, the version using edge features is referred to as MusGConv(+EF).
+
+6. Practical Applications and Tasks
+   MusGConv was tested on various music understanding tasks, each representing a distinct type of graph learning problem:
+
+   -1. Voice Separation (Link Prediction):
+       Voice separation involves identifying monophonic voice lines within polyphonic music. 
+       This can be framed as a link prediction task—predicting edges that represent consecutive notes in the same voice.
+       Replacing GNN blocks with MusGConv blocks improved accuracy, likely because relative pitch intervals help identify coherent voices.
+
+   -2. Composer Classification (Graph-Level Classification):
+       Given a musical excerpt, the task is to classify its composer. 
+       Here, the entire graph must be pooled into a single vector representation. Using MusGConv improved performance, 
+       suggesting that combining relative and absolute features helps capture distinctive compositional styles.
+
+   -3. Roman Numeral Analysis (Subgraph Classification):
+       Roman numeral analysis assigns harmonic labels (Roman numerals) to chords. This is a complex, multi-task scenario. 
+       The architecture includes an onset contraction layer, converting simultaneous notes into a sequence. 
+       Using MusGConv did not significantly improve results in this particular setup,
+       possibly due to the overall complexity of the task and model architecture overshadowing the benefits of MusGConv’s feature design.
+
+   -4. Cadence Detection (Node Classification):
+       Cadence detection identifies phrase endings in music. Each note node is classified as cadence-related or not. 
+       Incorporating MusGConv improved performance, likely because relative features helped the model discern subtle patterns 
+       in voice leading and harmonic progressions that precede cadences.
+
+7. Results
+   Experiments across these tasks showed that MusGConv often outperforms standard GNN approaches. 
+   However, the improvements vary by task. For simpler or more interval/pitch-sensitive tasks 
+   (voice separation, composer classification, cadence detection), MusGConv was more effective.
+   For more complex tasks (Roman numeral analysis), it did not yield a clear advantage.
+
+8. Summary and Discussion
+   MusGConv introduces a simple, perception-inspired modification to graph convolution for music scores. 
+   By combining absolute and relative musical features, it can improve GNN performance in many music understanding tasks.
+   However, its effectiveness depends on the complexity of the task and the extent to which relative pitch and timing features matter. 
+   While MusGConv is a valuable tool, it’s one of many available graph convolutional methods, 
+   and its use should be evaluated on a case-by-case basis.
+
+
