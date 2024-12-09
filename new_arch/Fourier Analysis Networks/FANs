@@ -1,0 +1,116 @@
+### From https://levelup.gitconnected.com/fourier-analysis-networks-fans-are-here-to-break-barriers-in-ai-1c521c6656bc
+
+1. Introduction
+   -1. Core Issue:
+       Most current neural network architectures, such as Multi-Layer Perceptrons (MLPs), Kolmogorov-Arnold Networks (KANs), and even Transformers, 
+       struggle to model periodicity directly from data. 
+       While MLPs dominate much of today’s AI infrastructure and are grounded in the Universal Approximation Theorem, 
+       they do not inherently capture periodic patterns efficiently. The result is poor performance on data or tasks that have strong periodic components.
+
+   -2. Solution - Fourier Analysis Networks (FANs):
+       A new approach published on arXiv introduces Fourier Analysis Networks (FANs), which embed principles of Fourier analysis directly into their architecture. 
+       By doing so, FANs can model periodic functions more naturally and outshine MLPs, KANs, and Transformers on tasks requiring periodic understanding, 
+       while also performing strongly on non-periodic tasks.
+
+2. Background: Fourier Analysis
+   -1. Fourier Analysis:
+       Fourier Analysis decomposes any (periodic) function into a sum of sine and cosine terms at various frequencies. 
+       The Fourier Series represents a periodic function f(x) with:
+       𝑓(𝑥) = 𝑎_0 + (∑ 𝑛=1 to ∞)[𝑎(𝑛)cos(2𝜋𝑛𝑥/𝑇) + 𝑏(𝑛)sin(2𝜋𝑛𝑥/𝑇)]
+       where 𝑇 is the period, and 𝑎(𝑛),𝑏(𝑛) are Fourier coefficients.
+
+       For non-periodic functions, the Fourier Transform generalizes this concept, expressing functions in terms of continuous frequency components.
+
+3. Constructing a Fourier Analysis Network (FAN)
+   -1. Idea:
+       Instead of trying to approximate periodic functions using MLP layers (which rely on polynomial-like transformations), 
+       FANs incorporate the sine and cosine terms directly into the network’s layers. This ensures periodicity is built-in.
+
+    -2. From Fourier Series to Neural Layers:
+        Start with the Fourier Series representation. Introduce learnable parameters for the coefficients 𝑎(𝑛) and 𝑏(𝑛). 
+        In the neural network form, these become weight matrices associated with sine and cosine terms.
+
+        Initially, one might think:
+        𝑓_𝑠(𝑥) = (∑ 𝑛=1 to 𝑁)[𝑤^(𝑐) (𝑛)cos(2𝜋𝑛𝑥/𝑇) + 𝑤^(𝑠) (𝑛)sin(2𝜋𝑛𝑥/𝑇)]
+        By vectorizing this, we get input transformations (for frequencies) and output transformations (for coefficients) that are learned during training.
+
+    -3. Deep FAN Layers:
+        Just like stacking MLP layers, we can stack these “Fourier layers.” But a problem arises if we only apply frequency transformations at the input 
+        and coefficient transformations at the output. The intermediate layers might ignore the Fourier coefficients, focusing solely on frequency terms.
+
+        -1. Solution:
+            Decouple and apply both input and output transformations at every layer. Each layer produces a combination of periodic (sine and cosine) 
+            and non-periodic transformations. This ensures that all layers refine both the frequency information and the Fourier coefficients simultaneously.
+
+            A FAN layer 𝜙(𝑥) combines:
+
+            -a. Input Transformation (𝑓^(𝑖𝑛))
+            -b. Output Transformation (𝑓^(𝑜𝑢𝑡))
+
+        The final FAN network is formed by stacking these layers, ensuring periodic modeling at each stage.
+
+4. Comparing FANs to MLPs
+   -1. Traditional MLP Layer:
+       Φ(𝑥) = 𝜎(𝑊^(𝑚) 𝑥 + 𝐵^(𝑚))
+       An MLP layer applies a linear transformation followed by a nonlinear activation (e.g., GELU, ReLU).
+
+   -2. FAN Layer: In contrast:
+       𝜙(𝑥) = 𝜎([cosine terms, sine terms, non-periodic terms])
+       The FAN layer explicitly includes cosine and sine transformations of the input, making periodic modeling intrinsic.
+
+   -3. Fewer Parameters and FLOPs: FAN layers can reduce parameters compared to MLP layers. FANs also tend to use fewer floating-point operations (FLOPs), 
+                                   especially when configured with a specific ratio of periodic (d_p) to output dimension (d_output).
+
+5. Performance and Benchmarks
+   -1. Periodicity Modeling: FANs converge faster and achieve superior performance over MLPs, KANs, and Transformers in tasks that require modeling periodic functions. 
+                             Gated FANs (an extension that learns a gating parameter to balance periodic and non-periodic components) achieve similar performance 
+                             but even faster convergence.
+
+   -2. Symbolic Formula Representation: FANs outperform baselines as the number of parameters grows. They handle purely periodic, partially periodic, 
+                                        and even non-periodic functions better than MLPs and other architectures.
+
+   -3. Time Series Forecasting: Transformers augmented with FAN layers (replacing MLP layers) outperform standard Transformers, LSTMs, 
+                                and Mamba models on time series forecasting tasks.
+
+   -4. Language Modeling: A FAN-based Transformer surpasses vanilla Transformers, showing improved zero-shot cross-domain performance and reduced parameter counts 
+                          (14.16 million fewer parameters) while maintaining or improving accuracy.
+
+6. Why FANs Excel
+   FANs leverage the Universal Approximation Theorem similar to MLPs but add an advantage by building periodicity into the architecture.
+   Many real-world tasks have hidden periodic components (for example, certain logical or mathematical reasoning tasks), and FANs can exploit these patterns.
+
+   As a result, FANs not only excel at explicitly periodic tasks but also show strong performance in tasks not obviously periodic. 
+   Their ability to generalize and find hidden periodic structures in data gives them a performance edge.
+
+7. Practical Implementation
+   From Scratch with PyTorch: The text outlines a step-by-step process to implement FANs:
+
+   -1. Synthetic Data Generation: For a demonstration, generate data from a known periodic function, e.g.:
+       𝑦 = sin⁡(2𝜋𝑥) + cos(3𝜋𝑥)
+       Add noise and split into training/validation sets.
+
+   -2. FAN Layers: Implement a FAN layer that computes cosine, sine, and non-periodic transformations of the input, with learnable weights.
+                   A gating mechanism can be added for Gated FAN.
+
+   -3. FAN Model: Stack multiple FAN layers to form a deep FAN model.
+
+   -4. MLP Baseline: Implement an MLP for comparison.
+
+   -5. Training Loops & Evaluation: Use MSE loss, AdamW optimizer, and train both FAN and MLP on the synthetic dataset. Compare results visually and numerically.
+
+   -6. Results:
+       FAN converges faster and fits the periodic function more accurately than MLP.
+       Gated FAN achieves even better convergence and performance.
+
+8. Conclusion
+   FANs incorporate Fourier series concepts into neural architectures, directly encoding periodicity into the network’s layers. 
+   They outperform traditional MLPs, KANs, and Transformers on periodic and partially periodic tasks while reducing parameter counts and FLOPs.
+
+   Given their robust performance and generalizability, FANs appear as a promising new foundational component in future neural architectures, 
+   potentially transforming how complex periodicity and other patterns are learned.
+
+9. In summary:
+   Fourier Analysis Networks (FANs) are a novel neural network architecture designed to inherently model periodic patterns. 
+   By blending Fourier analysis with neural layers, FANs excel in tasks where periodicity is crucial and maintain strong performance across a wide range of applications. 
+   They are efficient, parameter-light, and compatible with standard frameworks like PyTorch—making them both theoretically appealing and practically deployable.
+
