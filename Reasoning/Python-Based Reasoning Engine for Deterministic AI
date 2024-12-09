@@ -1,0 +1,78 @@
+### From https://medium.com/enterprise-rag/python-based-reasoning-engine-for-deterministic-ai-25722f9047e8
+
+1. Overview
+   As Large Language Models (LLMs) become more prevalent, ensuring deterministic behavior and enforcing rules and guardrails 
+   around unstructured, stochastic inputs has gained importance. 
+   The described system introduces a Python-based reasoning and validation framework, 
+   inspired by Pydantic, that enables developers and non-technical stakeholders to create complex rule engines for data validation
+   and decision-making. Its goal is to bring old, deterministic ideas back into the LLM era,
+   offering ways to integrate structured rule sets and stateful reasoning alongside AI-driven workflows.
+
+2. Key Concepts
+   -1. Rule Engines & Validation Framework:
+       The framework simplifies building rule-based systems that validate or reason about data. 
+       It allows domain experts to input natural language rules, which can then be translated into executable Python structures. 
+       Developers maintain oversight, and once the rules are approved, the system runs them automatically.
+
+   -2. Neurosymbolic Integration:
+       While LLMs provide flexibility and generative capabilities, the framework adds deterministic checks and reasoning steps. 
+       This hybrid (neurosymbolic) approach ensures AI-driven operations remain grounded in well-defined business rules and constraints.
+
+   -3. Business Use-Cases & Extensibility:
+       This system is not tied to a specific data model or database type; it can operate on JSON-based graph data, 
+       relational databases, or NoSQL stores. Common enterprise challenges—such as enforcing standard operating procedures (SOPs), 
+       compliance rules, and validation checks—can benefit from turning human-readable policies into enforceable code. 
+       Domains like logistics, mining, or quality assurance can quickly implement rule-based validation engines that
+       non-technical users help define.
+
+3. Architecture Components
+   The reasoning system is analogized to a chess game:
+
+   -1. Data Structure (Chess Pieces): 
+       Represents the entities and their attributes, e.g., employees, their qualifications, or puzzle elements (wolf, goat, cabbage).
+   -2. Rules (Chess Rules): 
+       Define allowed actions, constraints, and conditions, e.g., minimum age requirements, “goat cannot be left alone with cabbage.”
+   -3. Reasoning Framework/LLM (Chess Player): 
+       Provides the logic or decision-making process that navigates possible states given the rules.
+   -4. Agent (Hand Moving Chess Pieces): 
+       An actor that applies the chosen moves. In the system, it can be an automated process or a human operator facilitating state changes.
+   -5. State Machine (Chess Board State): 
+       Keeps track of all current states, transitions, and the outcomes of applied rules. 
+      It ensures that the system’s decisions reflect the current data and rule compliance.
+
+4. Validation Engines vs. Reasoning Engines
+   -1. Validation Engines:
+       These engines validate if data conforms to certain rules. They do not maintain state or make decisions. 
+       For example, checking if employees meet minimum age requirements and have necessary documents is a stateless validation 
+       of data against predefined rules.
+
+   -2. Reasoning Engines:
+       Reasoning engines go beyond validation to navigate problems step-by-step, considering potential moves and outcomes. 
+       They maintain a state machine and can use agents to transition between states. 
+       In a puzzle scenario, the reasoning engine attempts different moves to reach a solution while respecting the rules.
+
+5. Case Studies
+   -1. Validation Example (Mining Company):
+       A mining company needs to validate that employees have correct age, role, and documents. 
+       Rules and data are represented in JSON, and the validation engine returns which constraints are violated.
+       This automates compliance checks and reduces developer effort.
+
+   -2. Reasoning Example (River Crossing Puzzle):
+       The classic wolf-goat-cabbage puzzle illustrates how a reasoning engine differs from simple validation. 
+       The system encodes rules (e.g., the goat can’t be left with the cabbage without the farmer) and uses a state machine 
+       to find a sequence of moves that solves the puzzle. 
+       The engine can be extended with new rules (e.g., adding a chicken, changing carrying capacity) and tested to see 
+       if solutions remain possible. This dynamic reasoning approach highlights how arbitrary rule changes can make or break 
+       the solvability of a problem.
+
+6. Development & Human-in-the-Loop Integration
+   -1. Non-Technical Input: 
+       Domain experts can insert rules in natural language. The system translates these into code structures, 
+       detects conflicts, and proposes solutions.
+   -2. Developer Oversight: Developers approve the generated rules, ensuring accuracy and logic.
+   -3. Faster Iteration: This approach reduces development time, allowing rules to be introduced, validated, and deployed quickly.
+
+7. Performance and Flexibility
+   Since the reasoning and validation steps rely on symbolic processing rather than heavy computation or large-scale LLM inference, 
+   they run extremely quickly (fractions of a millisecond). 
+   The system can be integrated with LLMs for initial rule generation or debugging suggestions but doesn’t rely solely on them.
