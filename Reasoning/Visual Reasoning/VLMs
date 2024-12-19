@@ -1,0 +1,112 @@
+### From https://medium.com/aiguys/visual-reasoning-for-llms-vlms-454eae446022
+
+1. Introduction: From Language-Only AI to Vision-Language Integration  
+   -a. Motivation:
+       Current large language models (LLMs) have reached a plateau in performance improvements through mere text-based pretraining. 
+       We’ve nearly exhausted high-quality text corpora, and simply scaling LLMs with more text no longer yields substantial gains. 
+       The real world, however, is not composed of words alone. A significant portion of human cognition involves visual, 
+       spatial, and multimodal understanding—integrating what we see, hear, and physically interact with, not just what we read.
+
+2. Next Logical Step: Visual Data
+   To move beyond the limitations of purely text-based models, integrating vision data is critical. 
+   Large Vision-Language Models (VLMs) are the next frontier, designed to handle and reason about both images and text. 
+   By training big “foundational models” on multimodal data (images paired with text), we can unlock richer, more nuanced capabilities. 
+   This includes improved understanding of visual context, the ability to describe images, ground language understanding in the physical world, 
+   and ultimately perform more complex tasks that resemble human cognitive abilities.
+
+3. Pre-Training of Large Vision Encoders
+   -a. Vision Transformers (ViT):
+       An important development in computer vision was the introduction of Vision Transformers (ViT). 
+       ViTs apply the Transformer architecture, initially developed for language tasks, directly to image patches. 
+       This unlocks a method for building large-scale, versatile vision encoders analogous to how LLMs encode language.
+
+4. AIMv2
+   Apple researchers introduced AIMv2, which trains a vision encoder together with a multimodal decoder capable of predicting both image patches and text tokens.
+   The key innovation here is that the model uses a simple, autoregressive training approach (like language models) 
+   without relying on complex techniques such as contrastive learning (used in CLIP). 
+   Essentially, AIMv2 suggests that we can train vision models similarly to LLMs by feeding them large amounts of multimodal data 
+   and letting them learn general representations.
+
+   -a. Implication:
+       This simplifies the training pipeline. Instead of managing separate contrastive losses or building specialized vision-only encoders, 
+       we can use a unified approach more akin to standard LLM pretraining. 
+       The result: strong performance in tasks like classification, grounding, and multimodal understanding.
+
+5. The Problem of Too Many Image Tokens
+   -a. Token Explosion in Vision:
+       Images are typically broken down into multiple tokens (patches) for models like ViT.
+       A single high-resolution image can result in hundreds or thousands of tokens. 
+       Processing so many tokens leads to high computational costs, growing quadratically with image size. 
+       This becomes a bottleneck for both training and inference.
+
+6. Redundancy in Deeper Layers:
+   Empirical studies show that while all visual tokens are needed in the early layers (where the model learns basic features), 
+   many tokens become redundant in deeper layers. For instance, a large portion of the image might just be sky or background, repeatedly encoded. 
+   This redundancy suggests opportunities for token reduction, compression, or selective sampling.
+
+7. Implications for Efficiency:
+   If we can identify and reduce redundant tokens—much like summarizing similar concepts in language—VLMs can become far more efficient. 
+   Techniques like token pruning, dynamic token selection, or hierarchical image representations can speed up both training and inference without losing performance.
+
+8. Inference in Vision-Language Models (VLMs)
+   -a. Deployment Challenges:
+       Even deploying LLMs alone is challenging—enormous models are computationally heavy, making them hard to run on edge devices like smartphones. 
+       VLMs, which combine large language and vision components, are even more resource-intensive. 
+       Efficient inference methods are essential to bring VLM capabilities to mobile or embedded systems.
+
+9. BlueLM-V-3B Example:
+   BlueLM-V-3B is a model tailored for mobile deployment. It uses a carefully chosen architecture (2.7B parameter LLM + a 400M parameter vision encoder) 
+   along with techniques like 4-bit weight quantization to reduce size and speed up inference. 
+   It can run on mobile chips (like the MediaTek Dimensity 9300) and still achieve real-time generation speeds.
+
+9. Adaptive Image Resolution and Batch Processing:
+   Instead of processing each image at a fixed high resolution, BlueLM-V-3B dynamically chooses resolutions and uses batching strategies. 
+   By splitting images into patches and handling them in parallel, it achieves 10% faster processing. 
+   Downsampling and intelligent token reduction also help manage long token sequences that arise from high-res images.
+
+10. Two Paths For Faster Inference
+    -a. Balancing LLM Size and Visual Tokens: 
+        Research by Bosch and Carnegie Mellon University highlights a key trade-off: given a fixed inference budget (computational limit), what’s the best strategy?
+
+       -1. Option 1: Fewer Visual Tokens, Bigger LLM
+           Results show that for certain tasks (especially those that require image understanding but not a high level of visual detail), 
+           it’s more inference-optimal to drastically reduce the number of visual tokens (even to a single token that represents the entire image) 
+           and invest in a larger language model. The language model then uses its strong reasoning capabilities, 
+           guided by minimal but carefully chosen visual information.
+
+       -2. Option 2: More Visual Tokens, Smaller LLM
+           If detailed image information is critical or if text is also involved (around 50 text tokens), having a few more visual tokens can be beneficial. 
+           In other words, the presence of text context changes the dynamics. With textual guidance, a moderate number of visual tokens pays off.
+
+11. Implication:
+    This suggests a future where visual preprocessing compresses images into highly distilled representations before feeding them into the LLM. 
+    The “just one token” idea is extreme, but even moderate compression can yield huge efficiency gains without sacrificing accuracy too much.
+
+12. Use Case of VLMs: The Dawn of GUI Agents
+    -a. GUI Agents (e.g., Claude 3.5 Computer Use):
+        Historically, AI agents interacted with digital systems via APIs or code. But many software systems are closed-source and do not provide APIs. 
+        A new paradigm involves using GUI agents that simulate user interactions—clicking, typing, scrolling—just like a human. 
+        This approach leverages vision-based methods to “see” screenshots of the interface and understand where to click or what to do next.
+
+    -b. Visual Memory for GUI Interactions: These agents maintain a history of screenshots (like a replay buffer), 
+        giving them a sense of continuity and context. As they execute tasks step-by-step, 
+        they reference the historical visual states to make informed decisions, navigate interfaces, and solve complex tasks without direct code access.
+
+    -c. Privacy Concerns: While this approach is powerful, it raises privacy issues. The agent effectively “sees” your desktop, all open apps,
+        and potentially sensitive data. Striking a balance between capability and security will be crucial, 
+        and new policies and safeguards will likely emerge as these systems mature.
+
+13. Conclusion
+    -a. Progress and Promise: Vision-Language Models represent the natural next step after LLMs. 
+        They can unlock AI agents that understand and interact with the world in ways that text-only models cannot. 
+        The field is at its infancy. Just as LLMs rapidly evolved from simple models to GPT-4 levels of sophistication, 
+        we can expect VLMs to similarly undergo rapid improvements.
+
+    -b. Challenges Ahead:
+        -1. Efficiency: Reducing image token counts and optimizing inference.
+        -2. Deployment: Running powerful VLMs on mobile devices or edge computing platforms.
+        -3. Privacy: Ensuring that agents operating on user interfaces do so securely and ethically.
+        -4. Model Architecture: Finding the best trade-offs between model size, data representation, and inference speed.
+        -5. Takeaway: We’re witnessing the early stages of multimodal AI. As research advances, we’ll see more complex, 
+            capable VLMs that integrate smoothly into our digital lives—handling tasks that require a combination of vision,
+            language, and general reasoning. While the road ahead has hurdles, the potential impact on efficiency, versatility, and applicability is immense.
