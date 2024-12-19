@@ -1,0 +1,304 @@
+## From https://medium.com/@amosgyamfi/best-5-frameworks-to-build-multi-agent-ai-applications-1f88530ef8d8
+
+Top 5 Multi-Agent AI Frameworks
+Now we’ll explore five leading frameworks for building multi-agent systems. 
+These frameworks streamline development, offering pre-built integrations and simplified workflows.
+
+1. Phidata: Multi-Agent AI
+   -a. What is Phidata?
+       Phidata is a Python-based framework for turning LLMs into agents. It supports multiple LLM providers (OpenAI, Anthropic, Cohere, etc.) and 
+       databases (Postgres, Pinecone, LanceDb). 
+       With Phidata, you can build anything from basic AI agents to advanced systems using function calling, structured outputs, and fine-tuning.
+
+   -b. Key Features of Phidata:
+       -1. Built-in agent UI: Run agents locally or in the cloud with ready-made UIs.
+       -2. Easy Deployment: Deploy to GitHub or AWS for production use.
+       -3. Monitoring: Track sessions, API calls, and tokens. Adjust settings as needed.
+       -4. Templates: Use pre-configured codebases for faster development.
+       -5. AWS Integration: Seamlessly run your system on AWS.
+       -6. Model Independence: Bring your own model from multiple providers.
+       -7. Multi-Agents: Orchestrate teams of agents working together.
+
+   -c. Build a Basic AI Agent With Phidata and OpenAI
+       Goal: Create a financial analysis agent that uses Yahoo Finance data.
+
+       Step-by-Step:
+       -1. Setup a Virtual Environment
+           ```
+           python -m venv venv
+           source venv/bin/activate
+           ```
+      
+       -2. Install Dependencies
+           ```
+           pip install -U phidata openai
+           pip install python-dotenv
+           pip install yfinance
+
+       -3. Create the Agent
+           ``` 
+           # financial_agent.py
+           import openai
+           from phi.agent import Agent
+           from phi.model.openai import OpenAIChat
+           from phi.tools.yfinance import YFinanceTools
+           from dotenv import load_dotenv
+           import os
+
+           load_dotenv()
+           openai.api_key = os.getenv("OPENAI_API_KEY")
+
+           finance_agent = Agent(
+               name="Finance AI Agent",
+               model=OpenAIChat(id="gpt-4o"),
+               tools=[
+                   YFinanceTools(
+                       stock_price=True,
+                       analyst_recommendations=True,
+                       company_info=True,
+                       company_news=True,
+                   )
+               ],
+               instructions=["Use tables to display data"],
+               show_tool_calls=True,
+               markdown=True,
+           )
+
+           finance_agent.print_response("Summarize analyst recommendations for NVDA", stream=True)
+           ``` 
+       
+       -4. Run the agent:
+           ``` 
+           python3 financial_agent.py
+           ``` 
+
+   -d. Build a Multi-AI Agent With Phidata
+       -1. Install DuckDuckGo support:
+
+       ``` 
+       pip install duckduckgo-search
+       ``` 
+
+       ``` 
+       # multi_ai_agent.py
+       from phi.agent import Agent
+       from phi.model.openai import OpenAIChat
+       from phi.tools.duckduckgo import DuckDuckGo
+       from phi.tools.yfinance import YFinanceTools
+
+       web_search_agent = Agent(
+           name="Web Search Agent",
+           role="Search the web for information",
+           model=OpenAIChat(id="gpt-4o"),
+           tools=[DuckDuckGo()],
+           instructions=["Always include sources"],
+           show_tool_calls=True,
+           markdown=True,
+       )
+
+       finance_agent = Agent(
+           name="Finance Agent",
+           role="Get financial data",
+           model=OpenAIChat(id="gpt-4o"),
+           tools=[
+               YFinanceTools(stock_price=True, analyst_recommendations=True, company_info=True)
+           ],
+           instructions=["Use tables to display data"],
+           show_tool_calls=True,
+           markdown=True,
+       )
+
+       multi_ai_agent = Agent(
+           team=[web_search_agent, finance_agent],
+           instructions=["Always include sources", "Use tables to display data"],
+           show_tool_calls=True,
+           markdown=True,
+       )
+
+       multi_ai_agent.print_response(
+           "Summarize analyst recommendations and share the latest news for NVDA", stream=True
+       )
+       ```
+
+       -2. Run:
+       ```
+       python3 multi_ai_agent.py
+       ```
+
+      -3. A Reasoning AI Agent With Phidata
+          You can create an agent that explicitly “thinks” out loud—i.e., shows its reasoning steps before giving a final answer.
+
+          ```
+          # reasoning_ai_agent.py
+          from phi.agent import Agent
+          from phi.model.openai import OpenAIChat
+
+          task = "Create a SwiftUI view that allows users to switch between the tab bar and sidebar views using TabView and .tabView(.sidebarAdaptable) modifier. Put the content in TabSidebar.swift"
+
+          reasoning_agent = Agent(
+              model=OpenAIChat(id="gpt-4o-mini"),
+              reasoning=True,
+              markdown=True,
+              structured_outputs=True,
+          )
+          reasoning_agent.print_response(task, stream=True, show_full_reasoning=True)
+       ```
+
+2. OpenAI Swarm
+   -a. What Is Swarm?
+       Swarm is an experimental, open-source framework for multi-agent orchestration by OpenAI. 
+       It is lightweight and focuses on “handing off” conversations from one agent to another. However, it is still in development and not production-ready.
+
+   -b. Features:
+       -1. Handoff Conversations: Agents can pass tasks to one another.
+       -2. Scalability: Simple design for building large multi-agent systems.
+       -3. Client-Side Privacy: Runs on the client side, no state retained by the framework.
+       -4. Educational Resources: Example use cases included in its GitHub repo.
+
+   -c. Installation:
+
+       ```
+       pip install git+https://github.com/openai/swarm.git
+       ```
+
+       ```
+       from swarm import Swarm, Agent
+
+       client = Swarm()
+       mini_model = "gpt-4o-mini"
+
+       def transfer_to_agent_b():
+           return agent_b
+
+       agent_a = Agent(
+           name="Agent A",
+           instructions="You are a helpful assistant.",
+           functions=[transfer_to_agent_b],
+       )
+
+       agent_b = Agent(
+           name="Agent B",
+           model=mini_model,
+           instructions="You speak only in Finnish.",
+       )
+
+       response = client.run(
+           agent=agent_a,
+           messages=[{"role": "user", "content": "I want to talk to Agent B."}],
+           debug=False,
+       )
+
+       print(response.messages[-1]["content"])
+       ```
+
+3. CrewAI
+   -a. CrewAI is a more enterprise-ready platform, trusted by large companies, offering:
+       -1. Extensibility: Connect to 700+ apps (Notion, Zoom, Stripe, etc.).
+       -2. Tools for Developers and Designers: Both code-based and no-code solutions.
+       -3. Deployment: Move quickly from development to production.
+       -4. Agent Monitoring and Training Tools: Optimize your agents’ performance.
+
+   -b. Installation
+       ```
+       pip install crewai
+       pip install 'crewai[tools]'
+       pip freeze | grep crewai
+       ```
+
+   -c. Initialize a CrewAI project:
+       crewai create crew your_project_name
+       Choose a model provider (OpenAI, Anthropic, xAI, Mistral) and a model (e.g., gpt-4o-mini). For a multi-agent system:
+
+       ```
+       crewai create crew multi_agent_crew
+       crewai run
+       ```
+
+4. Autogen
+   Autogen is an open-source framework enabling multi-agent collaborations and LLM-driven workflows.
+
+   -a. Features:
+       -1. Cross-language Support: Python, .NET, etc.
+       -2. Local Agents: Run experiments locally for privacy.
+       -3. Async Messaging: Agents communicate asynchronously.
+       -4. Distributed Scaling: Build large networks of agents.
+       -5. Extensibility: Plug in your own components easily.
+
+   -b. Installation:
+       ```
+      pip install 'autogen-agentchat==0.4.0.dev6' 'autogen-ext[openai]==0.4.0.dev6'
+       ```
+
+   -c. Example Code:
+       ```
+       import asyncio
+       from autogen_agentchat.agents import AssistantAgent
+       from autogen_agentchat.task import Console, TextMentionTermination
+       from autogen_agentchat.teams import RoundRobinGroupChat
+       from autogen_ext.models import OpenAIChatCompletionClient
+
+       import os
+       from dotenv import load_dotenv
+
+       load_dotenv()
+
+       async def get_weather(city: str) -> str:
+           return f"The weather in {city} is 73 degrees and Sunny."
+
+       async def main() -> None:
+           weather_agent = AssistantAgent(
+               name="weather_agent",
+               model_client=OpenAIChatCompletionClient(
+                   model="gpt-4o-mini",
+                   api_key=os.getenv("OPENAI_API_KEY"),
+               ),
+               tools=[get_weather],
+           )
+
+           termination = TextMentionTermination("TERMINATE")
+           agent_team = RoundRobinGroupChat([weather_agent], termination_condition=termination)
+
+           stream = agent_team.run_stream(task="What is the weather in New York?")
+           await Console(stream)
+
+       asyncio.run(main())
+       ```
+
+5. LangGraph
+   LangGraph leverages graph-based concepts within the LangChain ecosystem to define agent workflows using nodes (steps) and edges (transitions).
+
+   -a. Features:
+       -1. Graph-Based Workflows: Represent complex multi-step tasks as nodes and edges.
+       -2. Free & Open-Source: MIT licensed.
+       -3. Streaming Support: Observe intermediate steps.
+       -4. Persistence & Cycles: Pause, resume, or loop workflows easily.
+       -5. Enterprise-Ready: Used by large companies like Replit for coding agents.
+
+   -b. Installation:
+       ```
+       pip install -U langgraph
+       pip install langchain-anthropic
+       export ANTHROPIC_API_KEY="YOUR_API_KEY"
+       ```
+
+   -c. A LangGraph agent typically involves:
+       -1. Initializing your LLM and tools.
+       -2. Defining nodes (agent actions).
+       -3. Connecting nodes with edges.
+       -4. Running the graph to perform tasks.
+
+6. Conclusion
+   Building AI agents that leverage memory, knowledge bases, tools, reasoning, and multi-agent collaboration is not only possible but increasingly streamlined 
+   thanks to these frameworks. Whether you choose Phidata for its user-friendly UI and AWS integration, CrewAI for enterprise deployments,
+   or LangGraph for graph-based workflows, you can rapidly prototype and deploy agents that do more than just chat—they can perform tasks, 
+   make decisions, coordinate among themselves, and become valuable assistants in various enterprise settings.
+
+As you explore these frameworks, keep in mind:
+
+The importance of memory and persistence: Better context handling leads to more human-like interactions.
+The power of tools: Agents can go beyond language generation, actually performing actions like database queries or API calls.
+The evolving ecosystem: New frameworks and updates are continuously emerging, making it easier and more efficient to build sophisticated AI agents.
+By following the examples, experimenting with code, and integrating advanced memory and reasoning capabilities, you can build agents that feel more like autonomous collaborators than simple Q&A bots.
+
+
+
