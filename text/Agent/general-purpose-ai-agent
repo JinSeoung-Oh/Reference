@@ -1,0 +1,127 @@
+### https://towardsdatascience.com/build-a-general-purpose-ai-agent-c40be49e7400
+
+-1. Step 1: Select the Right LLM
+    -a. Key Considerations:
+        -1. Performance on Core Tasks: Choose a model that excels at coding, tool calling, and reasoning. Relevant benchmarks:
+        -2. Reasoning: MMLU (Massive Multitask Language Understanding)
+        -3. Tool Use: Berkeley’s Function Calling Leaderboard
+        -4. Coding: HumanEval, BigCodeBench
+        -5. Context Window: Larger context windows (e.g., 100K tokens) are beneficial for agentic workflows since they often require long contexts.
+
+   -b. Model Types:
+       -1. Frontier models: GPT4-o, Claude 3.5
+       -2. Open-source models: Llama3.2, Qwen2.5
+       -3. Larger models typically yield better results, but smaller local models can be useful for simpler use cases.
+
+-2. Step 2: Define the Agent’s Control Logic
+    -a. Goal: Turn a basic LLM into an agent by crafting a specialized system prompt.
+
+    -b. Common Agentic Patterns:
+        -1. Tool Use: Decide when the agent calls external functions vs. when it relies on internal knowledge.
+        -2. Reflection: Have the agent self-check and refine answers before user output.
+        -3. ReAct (Reason-then-Act): Agent reasons step-by-step, takes an action, observes results, and repeats if needed.
+        -4. Plan-then-Execute: Agent plans the solution steps upfront, then executes them in sequence.
+      Tip: Start with either ReAct or Plan-then-Execute for a general-purpose agent.
+
+   -c. Prompt Engineering:
+       Set rules on how the model formats thoughts, decisions, and final answers. For example, you might define instructions like:
+       -1. “Message:” for the user input
+       -2. “Thought:” for agent reasoning steps
+       -3. “Function Name:” and “Function Input:” for tool calls
+       -4. “Final Answer:” for the user-facing output
+
+-3. Step 3: Define the Agent’s Core Instructions
+    -a. Purpose: Override default LLM behaviors and specify the agent’s desired style and constraints.
+
+    -b. Possible Instructions:
+        -1. Agent Name & Role
+        -2. Tone & Brevity
+        -3. Tool Usage Policy: When and how to invoke tools.
+        -4. Error Handling: What to do if tools fail or return no results.
+        -5. Capabilities & Limits: Supported languages, operations, formatting rules (e.g., always use Markdown for code).
+    By spelling out these rules in the system prompt, you ensure the agent consistently adheres to your design.
+
+-4. Step 4: Define and Optimize Tools
+    -a. Tools give the agent its powers. Examples:
+        -1. Code Execution: Run Python code, evaluate data.
+        -2. Web Search: Query the web for current info.
+        -3. File Access: Read or write to files.
+        -4. Data Analysis: Query databases or run analytics.
+
+    -b. For Each Tool:
+        -1. Name: A unique, descriptive identifier.
+        -2. Description: When to use it and what it does.
+        -3. Input Schema: How the agent should structure parameters.
+        -4. Output Handling: The format of returned data.
+
+    -c. Optimization:
+        You might refine the tool’s descriptions or behaviors if the agent misuses it. 
+        Clear instructions and thorough documentation help the LLM pick the right tool at the right time.
+
+-5. Step 5: Decide on a Memory Handling Strategy
+    LLMs have limited context windows. As conversations and tool outputs grow, you risk losing important info.
+
+   -a. Common Strategies:
+       -1. Sliding Memory: Keep only the last k turns.
+       -2. Token-Based: Retain only the last n tokens.
+       -3. Summarized Memory: Summarize past interactions so the agent can recall key details without storing everything verbatim.
+    You can also mark certain pieces of context as “long-term memory” for the agent to remember critical user details over many turns.
+
+-6. Step 6: Parse the Agent’s Raw Output
+    Even with careful prompt engineering, the LLM’s response is raw text. You’ll need a parser to:
+
+    Identify the agent’s chosen action (tool call or final answer).
+    Extract structured data (e.g., JSON) from the LLM output.
+    Convert it into a machine-readable format for your application.
+    Note: Some models provide structured outputs natively (e.g., OpenAI function calling). Otherwise, implement a custom parser.
+
+-7. Step 7: Orchestrate the Agent’s Next Step
+    After parsing, you can set up logic (the “orchestrator”) to handle the next step:
+
+   If the LLM requests a tool call, execute the tool and feed the result back to the LLM.
+   If the LLM provides a final answer, return it to the user.
+   This loop continues until a final answer is reached. The orchestrator:
+
+   -1. Manages tool execution.
+   -2. Handles errors.
+   -3. Keeps the conversation flowing smoothly.
+```
+def orchestrator(llm_agent, llm_output, tools, user_query):
+    """
+    Orchestrates the response based on LLM output and iterates if necessary.
+
+    Parameters:
+    - llm_agent (callable): The LLM agent function for processing tool outputs.
+    - llm_output (dict): Initial output from the LLM, specifying the next action.
+    - tools (dict): Dictionary of available tools with their execution methods.
+    - user_query (str): The original user query.
+
+    Returns:
+    - str: The final response to the user.
+    """
+    while True:
+        action = llm_output.get("action")
+
+        if action == "tool_call":
+            # Extract tool name and parameters
+            tool_name = llm_output.get("tool_name")
+            tool_params = llm_output.get("tool_params", {})
+
+            if tool_name in tools:
+                try:
+                    # Execute the tool
+                    tool_result = tools[tool_name](**tool_params)
+                    # Send tool output back to the LLM agent for further processing
+                    llm_output = llm_agent({"tool_output": tool_result})
+                except Exception as e:
+                    return f"Error executing tool '{tool_name}': {str(e)}"
+            else:
+                return f"Error: Tool '{tool_name}' not found."
+
+        elif action == "return_answer":
+            # Return the final answer to the user
+            return llm_output.get("answer", "No answer provided.")
+
+        else:
+            return "Error: Unrecognized action type from LLM output."
+```
