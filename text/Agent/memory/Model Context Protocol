@@ -1,0 +1,48 @@
+### From https://pub.towardsai.net/model-context-protocol-puppeteer-ai-agents-browse-the-web-like-humans-cea7d85f004d
+### Just with Antropic
+
+The Model Context Protocol (MCP) is a standardized framework that allows AI models to access and utilize data and tools from various sources, 
+enabling them to manage long-term context. 
+Instead of treating each resource as a one-off integration, MCP provides a universal “plug” through which AI assistants 
+can connect to multiple data sources—like Google Drive, Slack, or GitHub—without the need for custom code each time.
+
+1. Key Features:
+
+   -a. Standardized Data Access:
+       MCP standardizes how AI connects to different data sources, eliminating the need to write unique connectors for each platform.
+
+   -b. Two-Way Secure Connection:
+       AI and data sources communicate securely in both directions. Data sources share their content with AI, and AI can return processed results, 
+       ensuring privacy and integrity.
+
+   -c. Contextual Awareness:
+       By leveraging comprehensive context from various data sources, AI can provide more accurate, relevant, and personalized responses. 
+       This helps in tasks like understanding code histories in software projects or referencing business documents to give better analysis.
+
+2. Modularity and Scalability:
+   MCP is based on a server-client model. Data sources act as MCP servers, and AI applications function as MCP clients. 
+   This modular approach allows developers to easily add, remove, or extend data sources as needed.
+
+   -a. How It Works:
+       -1. The MCP server (like WhatsApp or GitHub) provides information and capabilities it can offer 
+           (e.g., searching through chat histories or fetching code repositories).
+       -2. The AI assistant (MCP client) registers these capabilities and uses them when needed.
+       -3. When a user requests something that involves external data, the assistant uses the MCP-provided tools to fulfill the request,
+           without having to worry about the specific technical details of each service.
+
+   -b. Practical Example: Integrating MCP into Claude Desktop involves adding server configurations to a JSON file, then enabling “Develop Mode.”
+                          You can connect tools like Puppeteer for automated browser actions or a filesystem server to handle local files. 
+                          Once connected, the assistant can navigate websites, fetch documents, and interact with repositories through a single, standardized protocol.
+
+3. Conclusion
+   MCP is an open-source innovation that lets AI become a more capable and long-term partner. By simplifying data integration and enhancing context management, 
+   it allows developers and businesses to build advanced, context-aware AI solutions that can evolve with changing needs. 
+   In essence, MCP lays the groundwork for a future where AI doesn’t just answer questions—it actively collaborates, remembers, and adapts.
+
+
+
+
+
+
+
+
