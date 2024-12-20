@@ -1,0 +1,121 @@
+### From https://pub.towardsai.net/prompt-injection-attacks-on-large-language-models-bd8062fa1bb7
+
+1. Introduction: The Note That Changed Everything
+   A quiet day in the lab turns chaotic when the narrator finds a mysterious envelope labeled 
+   “Top Secret: The Prompt Injection Playbook.” This piques their curiosity as a Ph.D. in AI and cybersecurity. 
+   The note concerns "Prompt Injection Attacks," where attackers manipulate Large Language Models (LLMs) to produce unintended, often harmful outputs.
+
+2. Why It Matters:
+   LLMs, while powerful, can be tricked into revealing confidential information or generating dangerous instructions through carefully crafted prompts.
+   Understanding prompt injection is crucial to safeguarding these models from malicious exploitation.
+
+3. What’s an LLM Anyway?
+   LLMs are powerful models trained on massive text datasets. They can generate text, answer questions, write code, and even debate trivial topics. However, they are susceptible to manipulation if attackers know how to push their prompts in a certain way.
+
+4. Reason to Care:
+   If LLMs can be tricked (prompt injection), attackers might steer them toward harmful outputs. This could lead to serious breaches in security and reliability.
+
+5. Prompt Injection Attacks on Large Language Models
+   The text dives into the realm of prompt injection, where attackers cleverly craft inputs to bypass safety mechanisms. 
+   It’s compared to whispering “sweet nothings” into the model’s ear to produce unwanted results.
+
+   -a. Chapter 1: The Sneaky Snake — Direct Prompt Injection
+       Direct Prompt Injection is straightforward: attackers directly craft the prompt to fool the LLM into unwanted behavior.
+
+       -1. Technique 1: Specialized Tokens Attackers insert strange symbols or tokens (#XYZ@@s3cr3tKEY%) to confuse the model.
+           - Why it Works: LLMs seek patterns. Odd tokens can trick them into misinterpretation.
+           - Defenses: Input sanitization, adversarial training.
+
+       -2. Technique 2: Refusal Suppression Attackers tell the model not to refuse requests. 
+                        They use role-play or gentle persuasion to get the model to share restricted info.
+           - Why it Works: LLMs try to be helpful and may drop refusal lines.
+           - Defenses: Output filtering, reinforcement learning to maintain refusals even under pressure.
+
+       -3. Attackers Love Role-Playing:
+           By asking the model to “imagine” scenarios or relax its rules (e.g., pretending it’s from the year 3023), attackers bypass safety protocols.
+           - Defenses: Ethical reasoning and recognizing harmful contexts.
+
+       -4. Humorous Anecdote: The narrator once tried to bypass their own safety nets and the model responded with a witty refusal.
+
+       Conclusion (Chapter 1):
+       Direct prompt injection relies on clever phrasing. Defenders have tools like sanitization and adversarial training. Next is Indirect Prompt Injection.
+
+   -b. Chapter 2: The Trojan Code — Indirect Prompt Injection
+       Indirect Prompt Injection doesn’t just trick a single prompt. It poisons the model’s very foundations, 
+       like a saboteur planting traps long before they’re triggered.
+
+       -1. Technique 1: Data Poisoning Attackers contaminate the training data so the model learns harmful patterns.
+           - Example: Slipping “exploding flowers” into many “flower” samples leads the model to associate “flower” with dangerous instructions.
+           - Defenses: Dataset cleaning, adversarial training, trusted sources.
+
+       -2. Technique 2: Website Code Injection Attackers exploit training data that referenced certain domains.
+                        They buy expired domains and fill them with malicious content, tricking the model into producing harmful info.
+           - Defenses: Domain reputation scanning, sandboxing external content.
+
+       -3. Technique 3: Prompt Chaining Attackers slowly escalate queries from benign to malicious, leveraging the model’s memory and context.
+           - Defenses: Conversation analysis, teaching models to spot escalation patterns.
+
+       -4. Humorous Anecdote:
+           The narrator accidentally introduced poisoned pizza recommendations. Lesson: double-check training sets.
+
+       Conclusion (Chapter 2):
+       Indirect attacks highlight that harm can be hidden in training data or domains. Vigilance and cleaning are key.
+
+  -c. Chapter 3: The Overloaded Mind — Context Overload
+      Context Overload overwhelms the model with excessive or irrelevant info, making it lose track of safety protocols.
+
+      -1. Technique 1: Flooding with Excessive Tokens Attackers bury malicious requests under mountains of unrelated text. 
+                       The LLM, swamped, might miss the harmful part.
+          - Defenses: Input size limits, attention prioritization, sliding window mechanisms.
+
+      -2. Technique 2: Repetition and Irrelevance Repeated or irrelevant details create false normalcy, causing the model to comply with harmful requests.
+          - Defenses: Redundancy detection, harmful pattern recognition.
+
+      -3. Humorous Anecdote:
+          Testing a model with a huge sandwich recipe prompt ended in gibberish and partial source code leaks.
+
+      Conclusion (Chapter 3):
+      Overload shows that too much info confuses even the smartest systems. Manage context carefully.
+
+  -d. Chapter 4: The Chained Maestro — Conversational Attacks
+      Conversational attacks exploit multi-turn dialogue. Attackers build trust over time, slowly steering the model off course.
+
+      -1. Technique 1: Crescendo (Art of Escalation) Start innocently and gradually ask more dangerous queries.
+          - Defenses: Long-term context awareness, conversation auditing.
+
+      -2. Technique 2: GOAT (Generative Offensive Agent Tester) A dynamic adversarial agent adapts mid-conversation to outsmart the model.
+          - Defenses: Meta-conversational awareness, stricter input-validation checkpoints.
+
+      -3. Technique 3: Objective Concealing Start (OCS) Attackers hide their intent at the start and reveal it later.
+          - Defenses: Intent analysis, ethical anchoring.
+
+      -4. Humorous Anecdote:
+          A scenario where the narrator’s harmless cookie queries end up asking for “uncrackable vault” suggestions.
+
+      Conclusion (Chapter 4):
+      Conversational attacks show the importance of maintaining ethical awareness throughout a conversation.
+
+  -e. Chapter 5: The Multimodal Mirage — Cross-Modal Manipulations
+      Attackers combine text, images, and audio to trick multimodal models. They exploit how models fuse different input types.
+
+      -1. Technique 1: Typographic Visual Prompts Images with weird fonts or spacing fool the model.
+          - Defenses: Visual prompt sanitization, enhanced visual training.
+ 
+      -2. Technique 2: Non-Speech Audio Injections Silent or noisy audio confuses text interpretation.
+          - Defenses: Input validation, safety alignment across modalities.
+
+      -3. Technique 3: Cross-Modal Misdirection A benign text paired with a malicious image or audio can bypass checks.
+          - Defenses: Metadata scrubbing, independent modality processing.
+
+      -4. Humorous Anecdote:
+          A banana image with a sign “END THE WORLD” led to anarchist smoothie recipes.
+
+      Conclusion (Chapter 5):
+      Multimodal attacks are complex, requiring cross-modal defenses and careful calibration.
+
+6. Final Summary
+   The user’s text provides a vivid exploration of prompt injection attacks on LLMs, categorized into direct, indirect, context overload, conversational, 
+   and multimodal attacks. Each chapter explains tactics, examples, and potential defenses. 
+   The overarching message: as LLMs grow in capability and complexity, so do the inventive tricks of attackers. 
+   Defenders must employ robust preprocessing, adversarial training, domain scanning, context management, 
+   and multi-turn conversation audits to keep these models secure and ethical.
