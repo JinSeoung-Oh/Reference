@@ -1,0 +1,90 @@
+### From https://medium.com/@florian_algo/ai-innovations-and-trends-10-lazygraphrag-zerox-and-mindful-rag-ca5fbeded913
+
+## LazyGraphRAG
+   LazyGraphRAG integrates best-first search from vector RAG with breadth-first search from GraphRAG to improve query performance.
+
+   -a. Key Features
+       -1. Indexing: Uses lightweight NLP for indexing concepts and co-occurrences, avoiding heavy computation during the indexing phase.
+       -2. Query Decomposition: Delays the use of LLMs to the query phase by breaking down queries into subqueries for better efficiency.
+       -3. Performance: Matches vector RAG in indexing costs (0.1% of GraphRAG) while surpassing other methods in query handling performance.
+
+   -b. Comparison with GraphRAG
+       Indexing: GraphRAG requires LLMs to extract entities and relationships upfront, while LazyGraphRAG postpones this to save costs.
+       Query Processing: GraphRAG answers queries directly from pre-processed community summaries, 
+                         but LazyGraphRAG enhances precision by using LLMs during the query phase.
+
+## Zerox
+   Zerox is a multimodal document processing tool designed to convert files like PDFs or images into Markdown using LLMs.
+
+   -a. Process Overview
+       -1. Input: Accepts PDFs, DOCX, or images as input files.
+       -2. Image Conversion: Converts input files into individual images.
+       -3. LLM Processing: Processes each image with a multimodal LLM to generate Markdown.
+       -4. Combination: Combines Markdown from all images into a single cohesive document.
+
+------------------------------------------------------------------------------------------
+from pyzerox import zerox
+import os
+import json
+import asyncio
+
+
+###################### Example for OpenAI ######################
+model = "gpt-4o-mini" ## openai model
+os.environ["OPENAI_API_KEY"] = "" ## your-api-key
+
+
+# Define main async entrypoint
+async def main():
+    file_path = "https://omni-demo-data.s3.amazonaws.com/test/cs101.pdf" ## local filepath and file URL supported
+
+    ## process only some pages or all
+    select_pages = None ## None for all, but could be int or list(int) page numbers (1 indexed)
+
+    output_dir = "./output_test" ## directory to save the consolidated markdown file
+    result = await zerox(file_path=file_path, model=model, output_dir=output_dir,
+                        custom_system_prompt=custom_system_prompt,select_pages=select_pages, **kwargs)
+    return result
+
+
+# run the main function:
+result = asyncio.run(main())
+
+# print markdown result
+print(result)
+------------------------------------------------------------------------------------------
+
+   -b. Default System Prompt
+       The default prompt instructs the LLM to convert each page into Markdown, excluding any explanations or omitted content.
+
+class Prompts:
+    """Class for storing prompts for the Zerox system."""
+
+    DEFAULT_SYSTEM_PROMPT = """
+    Convert the following PDF page to markdown.
+    Return only the markdown with no explanation text.
+    Do not exclude any content from the page.
+    """
+------------------------------------------------------------------------------------------
+
+## Mindful-RAG
+   Mindful-RAG refines knowledge graph-enhanced RAG systems by addressing issues in intent recognition and context alignment.
+
+   -a. Key Improvements
+       Intent Identification: Recognizes the purpose of the query (e.g., "Who is Niall Ferguson’s current wife?").
+       Context Alignment: Aligns responses with contextual constraints such as time and relationships (e.g., distinguishing between current and past spouses).
+       Relation Filtering: Filters candidate KG relations based on intent and context relevance.
+       Feedback Mechanism: Incorporates intent-based feedback to ensure results align with the identified query intent.
+
+   -b. Case Study
+       Using the query "Who is Niall Ferguson’s wife?":
+
+       Mindful-RAG identifies "Niall Ferguson" and "wife" as key entities and tokens.
+       Aligns responses with the intent to find the current spouse, distinguishing between current and former relationships.
+       Successfully returns "Ayaan Hirsi Ali" as the correct answer by contextually ranking relations in the knowledge graph.
+
+   -c. Key Takeaways
+       LazyGraphRAG simplifies and optimizes GraphRAG by deferring LLM use, lowering indexing costs, and improving query performance.
+       Zerox leverages multimodal LLMs for document parsing with a simple process, delivering precise Markdown outputs.
+       Mindful-RAG enhances KG-based RAG accuracy through intent-focused and context-aware retrieval, ensuring better alignment with complex queries.
+
