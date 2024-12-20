@@ -1,0 +1,176 @@
+### From https://medium.com/@techsachin/chain-of-continuous-thought-novel-paradigm-with-enhanced-llm-reasoning-in-continuous-latent-space-e9461d427c40
+
+1. Background and Motivation
+   Large language models (LLMs) typically reason in the “language space,” producing chains-of-thought (CoT) in natural language as they solve complex reasoning tasks.
+   However, expressing reasoning strictly through language may not be optimal or necessary. 
+   It can introduce verbosity, inefficiency, and potentially limit the complexity or flexibility of the model’s internal reasoning process.
+
+2. Key Idea
+   Coconut (Chain of Continuous Thought) explores a paradigm where parts of the reasoning occur in a latent (continuous) vector space, 
+   rather than as explicit language tokens. 
+   Instead of every reasoning step being formed as human-readable tokens, Coconut allows the model to “think” silently using hidden states, 
+   which the model can process without generating language output.
+
+3. Method Overview
+   -a. Language Mode vs. Latent Mode:
+       Coconut introduces a simple modification to the reasoning process. The model alternates between:
+
+       - Language mode: The model operates as usual, autoregressively generating tokens (words).
+       - Latent mode: The model uses its last hidden state directly as the next input embedding, effectively producing a series of continuous latent vectors 
+                      (continuous thoughts) without mapping them to language tokens.
+
+   -b. Special Tokens:
+       Coconut uses two special tokens:
+
+       - <bot> (begin of thought): signals the start of latent reasoning mode.
+       - <eot> (end of thought): signals the end of latent reasoning mode.
+      
+       Once the model enters latent mode (after reading <bot>), it no longer uses token embeddings for subsequent steps, 
+       but instead recycles the last hidden state as the next step’s input embedding until <eot> is encountered, 
+       at which point it returns to processing standard token embeddings.
+
+4. Intuition:
+   This setup provides an “unconstrained” continuous reasoning space, where the model’s internal computations can be more efficient, 
+   flexible, and compact than language-based reasoning. The continuous thought is fully differentiable and can be back-propagated through.
+
+5. Training Procedure
+   -a. Multi-Stage Curriculum:
+       To train Coconut, the authors leverage existing language CoT data. They adopt a staged training approach:
+
+       - Initial Stage:
+         The model is trained on standard language reasoning chains (regular CoT) to familiarize it with the reasoning patterns. 
+         At this point, the model purely sees question → reasoning steps in language → answer.
+
+       - Subsequent Stages:
+         After the initial stage, the training proceeds through multiple stages. At the k-th stage:
+         -1. The first k reasoning steps of the CoT are replaced by latent reasoning steps.
+         -2. A hyperparameter c controls how many latent thoughts correspond to one language reasoning step. 
+             For instance, if c = 2, each language reasoning step is replaced with 2 latent steps.
+         -3. With each stage, a larger portion of the reasoning chain is replaced by continuous thoughts, 
+             gradually “internalizing” more of the reasoning into latent space.
+         -4. The optimizer is reset at the start of each new stage to stabilize training.
+
+   -b. Final Stage(s):
+       After progressively replacing increasing portions of the language reasoning chain with latent thoughts, 
+       the final stages may even remove all remaining language reasoning steps, leaving only continuous thoughts for reasoning.
+
+6. Loss Function and Objective:
+   During training, the model predicts the answer at the end of the sequence. 
+   -a. The loss is only computed on certain targets
+       the questions and the final answer remain visible, but the continuous thoughts are masked from direct supervision. 
+       This setup encourages the continuous thoughts to form useful internal computations that help predict the correct answer, 
+       rather than merely compressing the removed language reasoning steps.
+
+   -b. Training Details
+       - Differentiability:
+         The latent reasoning steps (continuous thoughts) are just hidden states, so gradients can flow through them seamlessly.
+
+   -c. Multiple Forward Passes:
+       For each example in a stage where n latent thoughts are inserted, the model runs n + 1 forward passes:
+       - one for each latent step to produce the next continuous thought, plus a final pass to compute the loss on the remaining text. 
+         This is computationally more expensive, and while KV caching can help reduce overhead, the sequential nature poses challenges for parallelism.
+
+7. Inference Process
+   During inference, Coconut’s decoding process resembles a normal language model’s, 
+   except that in latent mode the model directly feeds the last hidden state as the next embedding instead of sampling a token.
+
+   Start from the question, followed by a <bot> token to enter latent mode.
+   The model generates a series of continuous thoughts internally until encountering <eot> (or a chosen stopping condition).
+   After <eot>, the model returns to language mode and can produce the final answer token-by-token.
+
+8. Terminating Latent Mode:
+   One option is a binary classifier trained on latent states to decide when to emit <eot>.
+   Another simpler option is to fix a constant number of latent steps (padding latent thoughts) before <eot>.
+   Both approaches yield comparable results.
+
+9. Experiments
+   -a. Base Model:
+       All experiments start from a pre-trained GPT-2 model.
+
+   -b. Datasets and Tasks:
+       - Math Reasoning (GSM8k):
+         The model undergoes several training stages. For each language reasoning step, 2 latent thoughts (c = 2) are inserted. 
+         Over multiple stages, more and more of the language reasoning is replaced by continuous thoughts. 
+         Finally, a stage with all reasoning replaced by continuous thoughts helps handle long-tail reasoning distribution.
+
+   -c. Logical Reasoning (ProntoQA and ProsQA):
+       For these logic-based datasets, one continuous thought per reasoning step (c = 1) is used. 
+       The reasoning chain can have up to 6 steps, so the model undergoes 6 additional training stages after the initial stage.
+       Eventually, the model reasons fully in latent space in the final stage.
+
+10. Baselines and Coconut Variants
+    -a. Baselines:
+        - CoT:
+          The model is trained and tested with full language reasoning chains.
+
+        - No-CoT:
+          The model sees only questions and answers (no reasoning chain) during training and must produce the answer directly at test time.
+
+        - iCoT:
+          Internalizing CoT approach: gradually remove language reasoning steps, so the model eventually learns to produce answers without visible reasoning. 
+          Different from Coconut, iCoT still uses language tokens for reasoning during training but reduces them stage by stage.
+
+   -b. Pause token:
+       Similar to No-CoT but with special <pause> tokens inserted between question and answer. 
+       This supposedly gives the model “computation time” without language reasoning.
+
+   -c. Coconut Variants:
+       - w/o curriculum:
+         Directly train Coconut from the final stage data (questions + answers + latent thoughts) without progressive introduction of latent reasoning.
+
+       - w/o thought:
+         Use a multi-stage schedule that removes language steps gradually, but never replace them with continuous thoughts. 
+         This is effectively a stricter version of iCoT with a different schedule.
+
+11. Pause as thought:
+    Instead of latent vectors, insert <pause> tokens where continuous thoughts would be. 
+    The multi-stage training remains the same, but these are still language tokens, not continuous vectors.
+
+12. Results
+    -a. Reasoning Accuracy and Efficiency:
+        - On GSM8k (a math reasoning benchmark), Coconut outperforms other architectures, including the latest iCoT baseline. 
+          The improvement is more pronounced as more reasoning steps are internalized into latent space.
+        - Increasing c (the number of latent thoughts per replaced language reasoning step) leads to incremental improvements in performance, 
+          demonstrating a “chaining effect” in the latent space similar to how CoT works in language space.
+
+    -b. Logical Reasoning Tasks:
+        On datasets like ProntoQA and ProsQA, Coconut and its variants show substantial improvements in reasoning capabilities. 
+        Tasks that require extensive planning benefit greatly from latent reasoning. Coconut’s fully latent reasoning stages achieve especially high accuracy.
+
+13. Understanding Latent Reasoning in Coconut
+    -a. Experimental Setup:
+        Coconut’s inference process can be adjusted at runtime to control how many latent steps are used. 
+        For example, by placing <eot> earlier or later, we can have 0, 1, 2, … continuous thoughts.
+        Metrics include final answer correctness and the quality of the underlying reasoning path. 
+        Reasoning paths are classified into categories like “Correct Path,” “Longer Path,” “Hallucination,” “Wrong Target,” “Correct Label,” 
+        and “Incorrect Label,” depending on how well they follow the shortest solution path or whether they produce disconnected or incorrect reasoning.
+
+   -b. Interpolating Between Latent and Language Reasoning:
+       As we increase the number of latent steps (k), both final answer accuracy and the fraction of correctly reasoned paths improve. 
+       This suggests that more latent reasoning steps lead to better internal exploration of solution strategies and less hallucination.
+
+   -c. Case Studies and Interpreting the Latent Search Tree:
+       By analyzing how the model handles ProsQA tasks, researchers find that continuous thoughts let the model explore multiple reasoning branches in parallel, 
+       akin to a breadth-first search (BFS) in the latent space.
+       The model can assign probabilities to different next steps, effectively prioritizing promising routes and pruning unpromising ones.
+       Early latent steps maintain diversity (exploring multiple solution avenues), while later steps converge onto the most promising solution, 
+       as evidenced by narrowing probability distributions.
+
+14. Conclusion
+    -a. Coconut proposes a fundamentally new approach to reasoning with LLMs:
+        Instead of relying solely on language tokens to represent intermediate reasoning steps, continuous latent vectors (continuous thoughts) 
+        serve as internal mental scratchpads.
+        This latent reasoning space can facilitate more flexible, efficient, and potentially more powerful reasoning than language-based CoT.
+        The multi-stage training curriculum progressively shifts from language reasoning to latent reasoning, allowing the model to internalize 
+        the complex reasoning strategies.
+        Experiments demonstrate that Coconut enhances reasoning performance in both math and logic tasks. 
+        Latent reasoning can be understood as the model performing a kind of implicit search in a continuous space, 
+        akin to BFS but guided by the model’s internal probabilities.
+        Ultimately, Coconut shows that reasoning need not be confined to language space, opening a path toward more powerful and efficient LLM reasoning strategies.
+
+   -b. In Summary:
+       Coconut is a novel paradigm where an LLM learns to solve problems by combining language-based input and output with internally generated continuous thoughts 
+       that guide the reasoning process. 
+       This approach outperforms traditional methods in complex reasoning tasks and provides new insights into how LLMs can organize their thought processes
+       beyond the constraints of language tokens.
+
