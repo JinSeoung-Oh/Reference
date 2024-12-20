@@ -1,0 +1,28 @@
+### See given link : https://towardsdatascience.com/optimizing-connections-mathematical-optimization-within-graphs-7364e082a984
+
+1. Centrality & Similarity
+   Graph analysis leverages the tools and techniques developed in graph theory to gain insights and make informed decisions in different domains, 
+   such as social networks, transportation networks, computer networks, biology, and many others.
+
+   Centrality and similarity are two core concepts in graph analysis. You might have heard of the PageRank algorithm used by Google Search. 
+   PageRank is a centrality algorithm used to measure the importance or influence of nodes in a network, particularly in web page ranking and hyperlink analysis. 
+   It assigns a numerical score to each node based on the number and quality of incoming links, helping identify key nodes in a network.
+
+   Betweenness centrality is another measure of centrality. 
+   The node with the highest betweenness centrality acts as the most important bridge among all the other nodes. 
+   To find the betweenness centrality of a node, we need to look at all the pairs of nodes and see how many times each node appears on the shortest path 
+   between two other nodes. The node who appears on the most shortest paths is the one with the highest betweenness centrality.
+
+
+2. Graph with nodes and betweenness centrality for every node. 
+   In social networks or real-world systems, nodes (e.g. people, places, or entities) with high betweenness centrality play a crucial role 
+   in maintaining communication and connections between different parts of the network. 
+   They act as important mediators, ensuring efficient communication and keeping the network connected.
+
+   It can also be useful to find out how similar certain nodes are. 
+   This can be done by calculating node similarity. Jaccard Similarity is often used for unweighted graphs. 
+   It calculates the similarity between two nodes based on the number of common neighbors they share, divided by the total number of unique neighbors they have.
+
+Node similarity is used in collaborative filtering techniques to recommend items to users based on the similarity of their preferences with other users. 
+It can also be used to predict missing or future links in a network or for detecting clusters and communities.
+
