@@ -1,0 +1,100 @@
+### From https://medium.com/@hirok4/derivation-of-training-loss-in-diffusion-model-844840352950
+
+1. Introduction
+   Diffusion models have a forward process (adding noise step-by-step) and a reverse process (removing noise step-by-step). 
+   The model aims to learn the reverse process distribution 
+   𝑝_𝜃(𝑥_(0:𝑇)) that matches the forward process distribution 𝑞(𝑥_(0:𝑇))
+
+   The training objective is derived from a variational lower bound on the data log-likelihood.
+   The forward and reverse processes are described as follows:
+
+   -a. Forward process: A Markov chain gradually adds Gaussian noise to data according to a variance schedule 
+       𝛽_1, … ,𝛽_𝑇
+   -b. Reverse process: Defined as a Markov chain with learned Gaussian transitions that tries to invert the forward noising process.
+
+2. Notation:
+   -a. 𝑥_0 is the original data (e.g., image)
+   -b. 𝑥_(1:𝑇) are noisy versions of 𝑥_0
+   -c. 𝑝_𝜃(𝑥_(0:𝑇)) is the reverse process distribution (a Markov chain of Gaussians).
+   -d. 𝑞(𝑥_(1:𝑇)∣𝑥_0) is the forward noising distribution.
+
+   From the paper, the integral ∫𝑝_𝜃(𝑥_(0:𝑇))𝑑𝑥_(1:𝑇)is intractable. 
+   A formula transformation is used, likely leveraging the known forward process distributions to handle the complexity of the reverse process integral.
+
+3. Variational Bound on Negative Log Likelihood
+   The training objective is based on minimizing the variational upper bound on the negative log-likelihood of the data:
+   𝐸_𝑞[−log 𝑝_𝜃(𝑥_0)] ≤ 𝐸_𝑞[−log 𝑝_𝜃(𝑥_0)]+𝐷_𝐾𝐿(𝑞(𝑥_(1:𝑇)∣𝑥_0)∥𝑝_𝜃(𝑥_(1:𝑇)∣𝑥_0))= 𝐿
+   Using Jensen's inequality, this can be decomposed into a sum of KL divergences and a final term that relates to the discrete decoder at the end of the chain.
+
+   The upper bound on − log 𝑝_𝜃(𝑥_0) is given by the variational lower bound. The paper decomposes this bound into terms 
+   𝐿_0,𝐿_1, … ,𝐿_𝑇
+
+   -a. Key steps:
+       -1. Write joint distribution as a product of conditional distributions.
+       -2. Apply Jensen’s inequality to get the variational bound.
+       -3. Decompose terms to isolate KL divergences and a final data term.
+
+4. Forward and Reverse Processes
+   -a. Forward process 𝑞(𝑥_𝑡∣𝑥_(𝑡−1))=𝑁(𝑥_𝑡; np.root(1−𝛽_𝑡)𝑥_(𝑡−1),𝛽_𝑡 𝐼) is fixed and does not depend on 𝜃
+   -b. The approximate posterior:
+       𝑞(𝑥_(𝑡−1)∣𝑥_𝑡,𝑥_0) = 𝑁(𝑥_(𝑡−1);𝜇^~_𝑡(𝑥_𝑡,𝑥_0),𝛽^~_𝑡 𝐼)
+      where 𝜇^~_𝑡 and 𝛽^~_𝑡 are derived from the forward process parameters.
+
+   In the derivation, the paper uses properties of Gaussian distributions and their combinations to simplify terms.
+
+5. Loss Terms
+   Define 𝐿 as the sum of several terms 𝐿_0,𝐿_1, … ,𝐿_(𝑇−1),𝐿_𝑇
+   These correspond to KL divergences and the data term:
+
+   𝐿=𝐿_0 + 𝐿_1 + ⋯ + 𝐿_(𝑇−1) + 𝐿_𝑇 
+   
+   -a. 𝐿_𝑇 is constant w.r.t. 𝜃 and can be ignored during training if 𝛽_𝑡 are fixed constants.
+   -b. For 𝐿_(1:𝑇−1), the paper sets the reverse process covariance to fixed constants 𝜎^2_𝑡 I. 
+   
+   This leads to a simplified form:
+   𝐿_(𝑡−1) = 𝐸_𝑞[𝐷_𝐾𝐿(𝑞(𝑥_(𝑡−1)∣𝑥_𝑡,𝑥_0)∥𝑝_𝜃(𝑥_(𝑡−1)∣𝑥_𝑡))]
+   
+   To minimize this, the model 𝑝_𝜃 must predict the mean of the posterior 𝜇^~_𝑡(𝑥_𝑡,𝑥_0)
+
+
+6. Reparameterization trick: They use a parameterization predicting 𝜖 (the added noise) instead of 𝜇
+   Given 𝑥_𝑡, the model tries to predict 𝜖 such that:
+  
+   𝜇_𝜃(𝑥_𝑡,𝑡) = 1/np.root(𝛼^ˉ_𝑡(𝑥_𝑡−(𝛽_𝑡/np.root(1−𝛼ˉ_𝑡))𝜖_𝜃(𝑥_𝑡,𝑡)))
+   
+   This transformation simplifies training. The network 𝜖_𝜃 is trained to predict the noise 𝜖
+
+   -a. 𝐿_0 involves a discrete decoding term from a Gaussian into a discrete distribution. 
+       The paper approximates it by ignoring certain weights and edge effects.
+
+7. Final Simplified Training Objective
+   The final training loss often used in practice simplifies to predicting 𝜖 directly. This yields a loss function like:
+
+   𝐿_simple = 𝐸_(𝑡,𝑥_0,𝜖)[∥𝜖−𝜖_𝜃(𝑥_𝑡,𝑡)∥^2]
+
+   where 𝑥_𝑡 = np.root(𝛼ˉ𝑡)𝑥_0 + np.root(1−𝛼ˉ_𝑡)𝜖
+   This simpler loss was found to produce good results empirically, removing weighting terms from the original derived formula.
+
+8. Appendix: Derivation of 𝑞(𝑥_(𝑡−1)∣𝑥_𝑡,𝑥_0)
+   The text shows a derivation for mean and variance of the Gaussian 
+   𝑞(𝑥_(𝑡−1)∣𝑥_𝑡,𝑥_0):
+                    𝑞(𝑥_(𝑡−1)∣𝑥_𝑡,𝑥_0)∝𝑞(𝑥_𝑡∣𝑥_(𝑡−1),𝑥_0)𝑞(𝑥_(𝑡−1)∣𝑥_0)
+
+   Gven:
+        𝑞(𝑥_𝑡∣𝑥_(𝑡−1))=𝑁(𝑥_𝑡; np.root(1−𝛽_𝑡)𝑥_(𝑡−1),𝛽_𝑡 𝐼)
+        𝑞(𝑥_(𝑡−1)∣𝑥_0)=𝑁(𝑥_(𝑡−1); np.root(𝛼ˉ_(𝑡−1))𝑥_0,(1−𝛼ˉ_(𝑡−1)𝐼)
+
+   where 𝛼ˉ_(𝑡−1)=∏_(𝑠=1 to 𝑡-1)(1−𝛽_𝑠)
+   The product of these Gaussians results in:
+
+   𝑞(𝑥_(𝑡−1)∣𝑥_𝑡,𝑥_0) = 𝑁(𝑥_(𝑡−1); 𝜇^~_𝑡(𝑥_𝑡,𝑥_0),𝛽^~_𝑡 𝐼)
+
+  They use Gaussian identities for product of distributions, calculating the combined mean and variance from the two input Gaussians.
+  The derived mean and variance 𝜇^~_𝑡,𝛽^_𝑡 are used in the simplified training objectives.
+
+9. Conclusion
+   The text describes how diffusion model training loss is derived from a variational perspective, 
+   starting with the log-likelihood bound and decomposing it into KL and data terms. 
+   By fixing certain parameters and carefully reparameterizing the model to predict noise 𝜖, a simpler and more effective training loss emerges. 
+   Although the paper’s details are intricate, this summary captures the main transformations and justifications behind the final training objective 
+   used in diffusion model training.
