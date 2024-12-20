@@ -1,0 +1,46 @@
+### From https://medium.com/syncedreview/nvidias-hybrid-combining-attention-and-state-space-models-for-breakthrough-performance-of-small-015098576740
+
+Hymba: A Hybrid-head Architecture for Small Language Models
+
+1. Overview: Hymba is a novel small language model architecture introduced by an NVIDIA research team to overcome the limitations of transformer-based 
+             and state space model (SSM)-based language models. By incorporating both attention and SSM mechanisms in parallel within each layer, 
+             Hymba can efficiently leverage the high-resolution recall capabilities of attention and the constant complexity advantages of SSMs.
+
+2. Key Motivations:
+   -1. Transformer Challenges:
+       Transformers deliver high performance but at a substantial computational and memory cost due to their quadratic complexity and large KV caches.
+   -2. SSM Shortcomings:
+       State space models (SSMs), like Mamba, are hardware-friendly and have constant time complexity, but struggle with memory recall, 
+       limiting their performance across diverse language tasks.
+
+3. Hymba’s Hybrid-Head Approach
+   Hymba combines attention heads and SSM heads in the same layer, allowing them to process the same inputs simultaneously. 
+   This results in:
+
+   -1. Parallel Processing: Layers benefit from both attention and SSM properties at once.
+   -2. Enhanced Flexibility: Provides better handling of different information flows and memory patterns.
+   -3. Improved Performance: Achieves higher accuracy while reducing KV cache size and increasing throughput.
+
+4. Meta Tokens: Hymba introduces learnable meta tokens that are prepended to the input sequence. 
+                These tokens interact with all subsequent tokens, even under sliding window attention. 
+                They appear to act as a compressed form of world knowledge, boosting performance on both general and memory-intensive tasks.
+
+5. KV Cache Sharing and Sliding Window Attention
+   Common practice involves sharing KV caches among attention heads. 
+   Hymba extends this concept to share KV caches between layers, exploiting the high correlation in KV caches of consecutive layers. 
+   Additionally, it employs sliding window attention for most layers to further reduce cache costs.
+
+6. Results:
+   -1. Performance Gains:
+       For commonsense reasoning tasks, a Hymba-1.5B model surpasses a Llama-3.2–3B model by 1.32% in average accuracy.
+
+   -2. Efficiency Improvements:
+       Hymba cuts cache size by 11.67× and boosts throughput by 3.49× compared to transformers and previous hybrid models.
+
+   -3. State-of-the-Art Achievements:
+       Evaluations show that Hymba achieves new SOTA performance across various tasks, delivering exceptional results in both accuracy and efficiency.
+
+7. Conclusion: 
+   Hymba demonstrates that hybrid-head architectures can significantly improve the trade-offs between performance, 
+   memory usage, and computational costs in language models. 
+   This work sets a new benchmark for small LMs and highlights hybrid-head architectures as a promising direction for future research in efficient LMs.
