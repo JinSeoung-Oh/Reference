@@ -1,0 +1,92 @@
+### From https://ai.gopubby.com/reinforcement-learning-agents-for-industrial-control-systems-b917b513f0c4
+
+1. Introduction
+   This article discusses the concept of agentic AI—intelligent systems that can independently execute tasks—and positions it relative to current trends 
+   in generative AI (Gen AI). 
+   While much attention has focused on LLM-based agents for natural language processing tasks, 
+   the text underscores that some tasks may be better suited to other machine learning techniques, such as reinforcement learning (RL).
+
+   A reference architecture for agentic AI platforms is presented, highlighting the need for an orchestration layer that decomposes tasks into sub-tasks 
+   and executes them via specialized agents. 
+   However, these systems currently rely heavily on large language models (LLMs) for reasoning, and their performance is thus limited by LLM capabilities.
+   Memory management and integration with enterprise systems (e.g., CRMs) are also important components. 
+   The main focus of the article is to explore how LLMs can refine RL agent rewards and policies, thereby integrating RL more closely into the agentic AI landscape.
+
+2. AI Agents and Limitations of LLM Agents
+   AI agents today are often synonymous with LLM agents: systems prompted to perform NLP tasks such as document processing, summarization, and retrieval.
+   However, certain tasks—particularly those involving continuous decision-making or control—may benefit from RL approaches rather than just LLM-based methods. 
+   For instance, tasks that require dynamic adaptation, optimization, and real-time control can be better handled by RL agents.
+
+3. Reinforcement Learning for Industrial Control Systems
+   The article then introduces reinforcement learning (RL) as a suitable paradigm for controlling complex systems like those found in manufacturing 
+   and industrial settings. RL agents learn optimal policies through trial and error, guided by a reward function that incentivizes desirable outcomes. 
+   This approach has become popular in tackling problems ranging from robotic arms in factories to air conditioning (HVAC) controls in buildings.
+
+   -a. Limitations of Traditional Control Theory:
+       -1. Traditional control systems rely on model-driven control, focusing on solving linear equations.
+       -2. Real-world systems are often non-linear, making linear models inadequate or overly complex to derive.
+       -3. Some systems are too complex or unknown to model precisely.
+       -4. Simulation of large-scale, non-linear systems is difficult, limiting the applicability of classic control theory.
+
+   -b. Why ML/RL Helps:
+       -1. ML, especially RL, does not require explicit system modeling. Instead, it can learn patterns from data, even for complex, non-linear systems.
+       -2. RL’s reward-driven approach lets it adapt to real-time changes, making it an effective solution for many control problems where classical methods struggle.
+
+4. RL Agents and LLM Integration
+   The text highlights that while RL is powerful, integrating LLMs can further refine RL policies. 
+   One way is by having LLMs assist in designing or fine-tuning the RL reward functions. 
+   This pairing leverages LLM’s generative and reasoning capabilities to improve the reward signals that guide RL training.
+
+   -a. Observation:
+       -1. RL rewards and policies are separate functions. The RL agent aims to maximize rewards, 
+           but the nature of the reward function greatly influences the final policy.
+       -2. LLMs can help explore different reward configurations, identifying more optimal reward structures to achieve desired behaviors in RL agents.
+
+5. LLM-Based Fine-Tuning of RL Reward Functions
+   The article proposes a method where LLMs and RL are brought together to improve RL reward and policy functions. The steps include:
+
+   -a. Initial Prompt to LLM:
+       Provide the LLM with the RL problem scenario and initial reward/policy structure.
+
+   -b. Generate Candidate Reward Functions:
+       The LLM generates new reward function candidates, guided by a “temperature” setting that balances novelty and reliability.
+
+   -c. Validate and Evaluate:
+       Check the generated reward functions against the use-case accuracy and relevance.
+
+   -d. Memory Update:
+       Store the results of each iteration back into the LLM’s memory so it can learn from previous attempts.
+
+   -e. Repeat Until Convergence:
+       Keep refining and evaluating until an improved reward function is found.
+
+   -f. Adopt the Best Reward Function:
+       Once a top-performing reward function emerges, update the RL agent to use it.
+
+6. Practical Example: HVAC Optimization
+   A concrete use-case is discussed: optimizing HVAC (heating, ventilation, and air conditioning) systems in buildings using RL. 
+   Here, RL replaces legacy PID controllers, aiming to reduce energy consumption while maintaining comfort.
+
+   -a. Scenario:
+       -1. Sensors measure indoor/outdoor temperature and humidity.
+       -2. Actuators (valves) control cooling, heating, re-heating, and humidification.
+       -3. The RL agent must learn how much to open these valves under various conditions to minimize energy use without violating comfort thresholds.
+
+   -b. Reward Function: A reward function can combine parameters like:
+       -1. Setpoint Closeness (SC): Encourages maintaining temperature/humidity near the desired setpoint.
+       -2. Energy Cost (EC): Penalizes excessive energy usage.
+       -3. Tolerance Violation (TV): Strongly penalizes going out of acceptable comfort bounds.
+
+   By applying the LLM-based reward fine-tuning, different policies can be tried:
+   -1. A “safe” policy with high penalty for violation, ensuring comfort at high energy cost.
+   -2. A “business first” policy that prioritizes staying near setpoints.
+   -3. An “energy optimal” policy that reduces consumption even if it relaxes other criteria slightly.
+
+7. Conclusion
+   In a world where AI agents are often equated with LLM-based NLP tasks, this article illustrates that other agentic tasks—like industrial control—benefit 
+   from different ML approaches. RL, in particular, shines for control optimization scenarios. 
+   By leveraging LLMs to fine-tune RL reward functions, one can further refine and optimize these RL agents.
+
+   The outlined methodology and example (HVAC optimization) showcase the promise of combining LLMs with RL, 
+   potentially extending to a broad spectrum of RL-driven agentic tasks.
+
