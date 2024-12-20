@@ -1,0 +1,163 @@
+### From https://arxiv.org/abs/2404.13501
+
+1. What is the Memory of LLM-based Agent
+   -a. Basic Knowledge
+       -1. Task
+           The final target that the agent needs to achieve
+       -2. Enviroment
+           - In a narrow sense, environment is the object that the agent needs to interact with to accomplish the task
+           - More broadly, environment can be any contextual factors that influence the agent’s decisions
+       -3. Trial and Step
+           - Trial : The complete agent-environment interaction process
+           - Step : each interaction turn
+
+  -b. Definition of the Agent Memory
+      -1. Narrow Definition
+          Only relevant to the historical information within the same tria
+      -2. Broad Definition
+          In a broad sense, the memory of the agent can come from much wider sources, for example, the information across different trials 
+          and the external knowledge beyond the agent-environment interactions
+
+   -c. Memory-assisted Agent-Environment Interaction
+       -1. Memory Writing operation
+           Aims to project the raw observations into the actually stored memory contents
+       -2. Memory Management operation
+           Aims to process the stored memory information to make it more effective
+           - Summarizing high-level concepts
+           - Merging similar information to reduce redundancy
+           - Forgetting unimportant or irrelevant information to remove its negative influence
+           This operation corresponds to the second phase of the agent-environment interaction process
+      -3. Memory Reading  operation
+          Aims to obtain important information from the memory to support the next agent action
+          It corresponds to the third phase of the agent-environment interaction process
+
+2. Why We Need the Memory in LLM-based Agent
+   -a. Perspective of Cognitive Psychology
+       - In human mental processes such as attention, languageuse, memory, perception, problem-solving, creativity, and reasoning,
+         memory is widely recognized as an extremely important one
+       - A major goal of LLM-based agents is to replace humans for accomplishing different tasks
+         To make agents behave like humans, following human’s working mechanisms to design the agents is a natural and essential choice
+         So, memory is important 
+
+   -b. Perspective of Self-Evolution
+       To accomplish different practical tasks, agents have to self-evolve in dynamic environments
+        -1. Experience accumulation
+            An important function of the memory is to remember past error plannings, inappropriate behaviors, or failed experiences, 
+            so as to make the agent more effective for handling similar tasks in the future
+        -2. Environment exploration
+            By remembering historical information, the memory can help to better decide when and how to make explorations with Environment
+        -3. Knowledge abstraction
+            Another important function of the memory is to summarize and abstract high-level information from raw observations, which is the basis for the agent
+            to be more adaptive and generalizable to unseen environments
+
+   -c. Perspective of Agent Applications
+       -1. Without memory, the agent does not know the context, and cannot continue the conversation
+       -2. Without memory, the agent may easily step out of the role during the simulation process 
+
+3. How to Implement the Memory of LLM-based Agent
+   -a. Memory Sources
+       -1. Inside-trial Information
+           In the agent-environment interaction process, the historical steps within a trial are usually the most relevant and informative signals 
+           to support the agent’s future actions. Almost all the previous works use this information as a part of the memory sources.
+       -2. Cross-trial Information
+           For LLM-based agents, the information accumulated across multiple trials in the environment is also a crucial part of the memory, 
+           typically including successful and failed actions and their insights, such as failure reasons, common action patterns to succeed, and so on.
+       -3. External Knowledge
+           An important characteristic of LLM-based agents is that they can be directly communicated and controlled in natural languages. 
+           As such, LLM-based agents can easily incorporate external knowledge in textual forms to facilitate their decisions.
+
+   -b. Memory Forms
+       -1. Memory in Textual Form
+           Textual form is currently the mainstream method to represent the memory contents, which is featured in better interpretability, 
+           easier implementation, and faster read-write efficiency
+            -1) Complete agent-environment interactions
+                - This method stores all the information of the agent-environment interaction history based on long-context strategies
+            -2) Recent agent-environment interactions - Caching the memory 
+                - This method stores and maintains the most recently acquired memories using natural languages, 
+                  thereby enhancing the efficiency of memory information utilization according to the Principle of Locality
+            -3) Retrieved agent-environment interactions
+                - Unlike the above method which truncates memories based on time, this method typically selects memory contents based on their relevance, 
+                  importance, and topics. It ensures the inclusion of distant but crucial memories in the decision-making process, thereby addressing the
+                  limitation of only memorizing recent information
+            -4) External knowledge
+                - To obtain more information, some agents acquire external knowledge by invoking tools, 
+                  with the aim of transforming additional relevant knowledge into their own memories for decision-making
+       -2. Memory in Parametric Form
+           -1) Fine-tuning Methods
+               - Integrating external knowledge into the memory of agents is beneficial for enriching domain-specific knowledge on top of its general knowledge.
+                 To infuse the domain knowledge into LLMs, supervised fine-tuning is a common approach, which empowers agents with the memory of domain experts
+           -2) Memory Editing Methods
+               - Unlike fine-tuning methods that extract patterns from certain datasets, knowledge editing methods specifically target and adjust 
+                 only the facts that need to be changed
+
+   -c. Memory Operations
+       -1. Memory Writing
+           - After the information is perceived by the agent, a part of it will be stored by the agent for further usage through the memory writing operation, 
+             and it is crucial to recognize which information is essential to store. 
+       -2. Memory Management
+           -  The memory in the agent can also be managed by reflecting to generate higher-level memories, merging redundant memory entries, 
+              and forgetting unimportant, early memories.
+           - Type : Merging, Reflection, Forgetting
+       -3. Memory Reading
+           - When the agents require information for reasoning and decision-making, the memory reading operation will extract related information 
+             from memory for usage
+           - ** How to access the related information for the current state is important **
+             Due to the massive quantity of memory entities, and the fact that not all of them are pertinent to the current state, 
+             careful design is required to extract useful information based on relevance and other task-orientated factors
+
+4. How to Evaluate the Memory in LLM-based Agent
+   -a. Direct Evaluation
+       This type of approaches regards the memory of the agents as a stand-alone component and evaluates its effectiveness independently
+       -1. Subjective Evaluation
+           In subjective evaluation, there are two key problems, that is, (1) what aspects should be evaluated and (2) how to conduct the evaluation process
+           - Coherence : This aspect refers to whether the recalled memory is natural and suitable for the current context
+           - Rationality : This aspect aims to evaluate whether the recalled memory is reasonable
+
+       -2. Objective Evaluation
+           In objective evaluation, previous work(memory) usually defines numeric metrics to evaluate the effectiveness and efficiency of the memory module.
+           -1. Result Correctness
+               This metric measures whether the agent can successfully answer pre-defined questions directly based on the memory module
+           -2. Reference Accuracy
+               This metric evaluates whether the agent can discover relevant memory contents to answer the questions
+           -3. Time & Hardware Cost
+               The total time cost includes the time leveraged for memory adaption and inference 
+               (Ex. the difference from the end time to the start time of memory operations can be considered as the time consumption)
+
+   -b. Indirect Evaluation
+       -1. Conversation
+           Performance of the conversation tasks with human can reflect the effectiveness of different memory modules
+       -2. Multi-source Question-answering
+           Multi-source questing-answering can comprehensively evaluate the memorized information from multiple sources, including inside-trial information, 
+           cross-trial information, and external knowledge. It focuses on the integration of memory utilization from various contents and sources
+       -3. Long-context Applications
+           Beyond the above general applications, in many scenarios, LLM-based agents have to make decisions based on extremely long prompts. 
+           In these scenarios, the long prompts are usually regarded as the memory contents, which play an important role in driving agent behaviors.
+
+5. Memory-enhanced Agent Applications
+   -a. Role-playing and Social Simulation
+   -b. Personal Assistant
+   -c. Open-world Game
+   -d. Code Generation
+   -e. Recommendation
+   -f. Expert System in Specific Domains
+
+6. Limitations & Future Directions
+   -a. More Advances in Parametric Memory
+       - Although textual memory possesses the advantages of being interpretable and easy to expand and edit, 
+         it also implies a sacrifice in efficiency compared to parametric memory
+       -  parametric memory boasts a higher information density, expressing semantics through continuous real-number vectors in a latent space, 
+          whereas textual memory employs a combination of tokens in a discrete space for semantic expression
+          --> parametric memory offers a richer expressive space, and its soft encoding is more robust compared to the hard-coded form of token sequences
+   -b. Memory in LLM-based Multi-agent Applications
+       - One pivotal aspect that emerges in the cooperative scenarios is memory synchronization among agents. 
+         This process is fundamental for establishing a unified knowledge base, ensuring consistency in decision-making across different agents
+       - Another important aspect is the communication among agents, which heavily relies on memory for maintaining context and interpreting messages
+   -c. Memory-based Lifelong Learning
+       Lifelong learning is an advanced topic in artificial intelligence, extending the learning capabilities of agents across their life-long span
+       - lifelong learning is temporal, necessitating that an agent’s memory captures temporality. 
+         This temporality could cause interactions between memories, such as memory overlap
+       - It needs to store a vast amount ofmemories and retrieve them when needed, possibly incorporating a certain mechanism for forgetting
+
+        
+          
+         
