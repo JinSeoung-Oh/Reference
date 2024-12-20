@@ -1,0 +1,75 @@
+### From https://artgor.medium.com/paper-review-reverse-thinking-makes-llms-stronger-reasoners-ceff83c857ef
+
+1. Concept and Motivation
+   RevThink is a method designed to improve an LLM’s reasoning abilities by training it to reason both forward (from question to answer) 
+   and backward (from answer back to the question). 
+   Traditional methods focus on forward reasoning only—starting with a question and working step-by-step toward the answer. 
+   RevThink adds an additional layer: given an answer and partial context, the model learns to determine how one might have arrived at that answer from the start, 
+   effectively enabling “reverse reasoning.” This backward reasoning step provides a complementary perspective that strengthens 
+   the model’s overall problem-solving skills.
+
+2. How RevThink Works:
+   -a. Data Augmentation with a Teacher Model:
+       -1. Start with a dataset of question-answer pairs.
+       -2. A larger, more capable “teacher” model is used to generate detailed forward reasoning steps for each question 
+           (showing how the question leads to the answer).
+       -3. The teacher also generates a “backward question”—a reversed version of the original problem that starts 
+           from the answer and asks for missing information—along with the backward reasoning steps that solve this reversed query.
+       -4.Example:
+          Original question: “John has 3 apples, and Emma has 2 apples; how many apples do they have in total?”
+          Forward reasoning: Summarize the steps that lead to the answer (e.g., “3 + 2 = 5”).
+          Backward question: “John and Emma have 5 apples in total. If Emma has 2, how many does John have?”
+          Backward reasoning: Steps that logically deduce John’s share, starting from the total.
+
+  -b. Filtering the Augmented Dataset:
+      -1. Not all teacher outputs are used. The forward reasoning is first checked to ensure it produces the correct answer.
+      -2. Then, consistency checks verify that the backward reasoning aligns with the forward reasoning.
+      -3. Only samples with correct, consistent forward and backward reasoning are retained. This ensures the final training data is clean and reliable.
+
+  -c. Student Model Training:
+      -1. A smaller “student” model is trained on the filtered, augmented dataset.
+      -2. The student’s training involves three interrelated tasks:
+          - Forward Reasoning: From the original question to the answer (as usual).
+          - Backward Question Generation: From the original question, generate the reversed question.
+          - Backward Reasoning: From the backward question, generate the reasoning steps leading to the original known quantities.
+      These three objectives are combined in a multi-task learning setup. While the model only uses the original question at test time 
+      (no backward questions are given then), learning to produce backward questions and reasoning during training 
+      indirectly improves its forward reasoning performance.
+
+3. Results and Key Findings:
+   -a. Improved Reasoning Performance
+       RevThink boosts reasoning accuracy by an average of 13.53% compared to baseline methods. 
+       This significant gain shows that backward reasoning data provides a strong complementary training signal.
+
+   -b. Sample Efficiency
+       Even with just 10% of the training data, RevThink outperforms a strong baseline called SKD (Self-Knowledge Distillation). 
+       This efficiency suggests that the backward reasoning signals help the model generalize better from fewer examples.
+
+   -c. Importance of Backward Reasoning
+       Training the model to produce backward questions alone does help somewhat, but the biggest improvements come when the model also learns backward reasoning. 
+       Backward reasoning helps the model understand the logic connecting questions and answers from both directions, reinforcing its forward reasoning capabilities.
+
+   -d. Comparison to Other Multi-Task Methods
+       Alternative approaches like instruction-based multi-task learning or using task prefixes (where each task type is indicated by a special prompt) 
+       are less effective than RevThink’s fully integrated multi-task approach. 
+       The seamless integration of the three tasks into one model objective leads to superior results.
+
+   -e. Scalability and Generalization
+       RevThink scales well. Larger student models trained using RevThink show further accuracy improvements. 
+       Remarkably, a smaller model (Mistral-7B) trained with RevThink outperforms a much larger model (Mistral-8x22B) by 8.36%, 
+       underscoring how effective the reverse reasoning mechanism is.
+
+    Additionally, RevThink generalizes well to out-of-domain data. 
+    This implies the backward reasoning training helps the model develop more robust and flexible reasoning capabilities that transfer beyond 
+    the exact conditions it was trained on.
+
+4. Conclusion
+   Reverse-Enhanced Thinking (RevThink) is a novel strategy for improving LLM reasoning by training models to reason backward as well as forward. 
+   By generating and leveraging backward questions and reasoning, RevThink achieves:
+
+   -a. Stronger overall reasoning accuracy.
+   -b. Greater sample efficiency.
+   -c. Robust improvements even in smaller models.
+   -d. Better generalization to new datasets.
+
+   This approach highlights the value of looking at reasoning tasks from multiple directions and integrating them into a single, cohesive training objective.
