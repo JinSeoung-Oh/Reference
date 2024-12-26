@@ -1,4 +1,5 @@
 ## From https://huggingface.co/spaces/HuggingFaceH4/blogpost-scaling-test-time-compute
+## From https://github.com/huggingface/search-and-learn/blob/main/scripts/test_time_compute.py
 
 1. Overview
    Recent advancements in Large Language Models (LLMs) have mainly come from scaling train-time compute 
