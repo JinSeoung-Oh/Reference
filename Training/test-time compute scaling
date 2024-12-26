@@ -1,0 +1,183 @@
+## From https://huggingface.co/spaces/HuggingFaceH4/blogpost-scaling-test-time-compute
+
+1. Overview
+   Recent advancements in Large Language Models (LLMs) have mainly come from scaling train-time compute 
+   (i.e., using bigger and bigger clusters to pretrain extremely large models). 
+   However, as these costs become prohibitively large, there is growing interest in scaling test-time compute, 
+   often by using dynamic inference strategies that let a model “think longer” on more challenging inputs.
+
+   A notable example is OpenAI’s “o1” model, which appears to improve at math tasks when given more time (compute) at inference. 
+   Building on emerging research—particularly from DeepMind—this blog post shows how to implement a variety of test-time search techniques 
+   with open-source models and process reward models (PRMs). The main strategies are:
+
+   -1. Self-Refinement
+   -2. Search Against a Verifier
+
+   The focus here is on the search-based approaches, which involve generating multiple candidate answers and scoring them with a verifier 
+   (such as a learned reward model).
+
+2. Key Topics and Contributions
+   -1. Compute-Optimal Scaling
+        -a. Showing how to implement DeepMind’s proposed recipe for test-time scaling to boost a model’s ability to solve math problems.
+        -b. Adaptively allocating test-time compute on harder problems can allow smaller models to rival or even outperform larger ones.
+
+   -2. Diverse Verifier Tree Search (DVTS)
+       -a. A new technique that extends verifier-guided tree search by explicitly improving diversity.
+       -b. Useful in scenarios where standard beam search collapses to a single high-score solution prematurely.
+ 
+   -3. Search and Learn Toolkit
+       -a. A lightweight toolkit for implementing search strategies with LLMs (optimized for the vLLM inference engine).
+
+   The blog post demonstrates how a 1B or 3B parameter Llama-based model can outperform much larger models (like an 8B or even 70B model!) 
+   on the MATH-500 benchmark, provided it has enough test-time compute budget.
+
+2. Search-Based Test-Time Compute Strategies
+   -1. Self-Refinement
+       -a. Models iteratively refine their own answers in multiple steps, identifying and fixing mistakes.
+       -b. Although powerful on some tasks, it typically requires the model to have specialized fine-tuning or prompting mechanisms for self-reflection.
+
+   -2. Verifier-Guided Search
+       -a. Generate many candidates and use a verifier (reward model) to pick the best.
+       -b. More flexible than self-refinement because it does not rely on specialized built-in refinement capabilities.
+       -c. Common approaches under verifier-guided search include:
+           -1) Best-of-N
+           -2) Beam search
+           -3) Diverse Verifier Tree Search (DVTS)
+
+3. Experimental Setup
+   -1. Policy Model
+       -a. Primary model: meta-llama/Llama-3.2-1B-Instruct (1B parameters).
+       -b. Chosen because its smaller size makes test-time scaling effects more pronounced.
+   -2. Process Reward Model (PRM)
+       -a. RLHFlow/Llama3.1-8B-PRM-Deepseek-Data (8B parameters).
+       -b. Trained with process supervision, which gives step-level feedback during the reasoning process (rather than just final-answer supervision).
+   -3. Dataset
+       -a. MATH-500 subset of the MATH benchmark (challenging math problems covering seven subjects).
+       -b. Each problem is tested using different sampling strategies and seeds (up to 5 seeds).
+   -4. Evaluation
+       -a. Accuracy measured by whether the predicted final answer matches the ground truth, up to equivalence checks in symbolic math (e.g., 1/3 vs 3/9)
+       -b. Used SymPy-based canonical form checks to compare expressions.
+------------------------------------------------------------------------------------------------------------------------------------------------
+1. Majority Voting: A Simple Baseline
+   -1. Method: Generate 𝑁 solutions (at temperature 𝑇=0.8) and pick the most frequently occurring final answer.
+   -2. Implementation Detail:
+       -a. The MATH benchmark requires solutions in a LaTeX box like \boxed{answer}.
+       -b. A crucial prompt format from Meta’s example significantly improved results (compared to a naive system prompt).
+       -c. Canonical Form Trick:
+           - Converting each generated answer to a canonical form to avoid counting equivalent expressions as different.
+#########################################
+from latex2sympy2 import latex2sympy
+from sympy import latex, simplify
+
+def get_canonical_form(expression: str) -> str:
+    parsed_expr = latex2sympy(expression)
+    simplified_expr = simplify(parsed_expr)
+    return latex(simplified_expr)
+
+def find_majority_answer(answers: List[str]) -> str:
+    canonical_groups = defaultdict(int)
+    canonical_to_original = {}
+
+    for answer in answers:
+        canonical_form = get_canonical_form(answer)
+        
+        # Increment count for the canonical form
+        canonical_groups[canonical_form] += 1
+        
+        # Track the original answer for this canonical form
+        if canonical_form not in canonical_to_original:
+            canonical_to_original[canonical_form] = answer
+    
+    # Find the canonical form with the largest count
+    max_count = max(canonical_groups.values())
+    for canonical_form, count in canonical_groups.items():
+        if count == max_count:
+            # Return the first occurring group in case of a tie
+            return canonical_to_original[canonical_form]
+#########################################
+   -5. Finding: Accuracy improves with increasing 𝑁, but plateaus around 𝑁=64
+   -6. Reason: If the model consistently makes the same mistakes, majority voting cannot overcome those errors just by generating more samples.
+
+2. Best-of-N
+   Instead of picking the most frequent answer, use a reward model (verifier) to pick the best single answer out of 𝑁
+
+   -1. Vanilla Best-of-N
+       -a. Generate 𝑁 solutions.
+       -b. Score each with the reward model.
+       -c. Pick the highest-scoring final answer.
+   -2. Weighted Best-of-N
+       -a. Again generate 𝑁 solutions.
+       -b. For each unique final answer, sum up the reward model scores of every occurrence of that answer.
+       -c. Pick the final answer whose total summed score is highest.
+
+3. Scoring with PRMs
+   -1. Process Reward Model (PRM) gives a sequence of step-by-step scores (not just a single final score).
+   -2. Common ways to reduce the sequence of step-level scores to a single value:
+       -a. min (lowest step score), prod (product of step scores), last (the final step score).
+   -3. Consistent with DeepMind’s findings, last tends to work best.
+   -4. Result: Weighted Best-of-N outperforms vanilla Best-of-N, especially at larger 𝑁. However, improvements eventually saturate.
+
+3. Beam Search with PRMs
+   Beam Search systematically explores partial solutions in a tree structure, guided at each step by the reward model’s scores:
+
+   -1. Maintain 𝑁 active paths (called “beams”) at a time.
+   -2. Iteration:
+       -a. From each active path, sample 𝑀 next steps at some temperature (e.g., 𝑇=0.8).
+       -b. Score each partial solution using the PRM (again using the “last” step’s score for evaluation).
+       -c. Keep the top 𝑁 partial solutions (beams) overall.
+   -3. Repeat until End-of-Sequence (EOS) or a maximum depth (e.g., 40 steps).
+   -4. Key Observations
+       -a. Beam search can find correct solutions more efficiently than Best-of-N:
+           - With a compute budget of 𝑁=4, beam search performs on par with Best-of-N at 𝑁=16.
+           - Matches an 8B model’s performance with only 𝑁=32 expansions on a 1B policy.
+       -b. At large 𝑁 on relatively easier problems, beam search can “collapse” (lacking diversity if an intermediate step is assigned a high reward).
+
+4. Diverse Verifier Tree Search (DVTS)
+   DVTS is an extension of beam search that aims to preserve diversity at larger compute budgets 𝑁 
+   Its steps are:
+   -1. Split into multiple independent subtrees: 𝑁/𝑀 subtrees if there are 𝑁 beams in total and each subtree has beam width 𝑀
+   -2. Within each subtree, pick the partial solution with the highest PRM score.
+   -3. Expand each selected partial solution by generating 𝑀 new steps
+   -4. Continue until EOS or maximum tree depth.
+
+   Outcome
+   -1. At small 𝑁, standard beam search is stronger.
+   -2. At large 𝑁, DVTS often outperforms beam search due to better solution diversity, especially for relatively simpler or medium-difficulty problems.
+
+5. Compute-Optimal Scaling
+   DeepMind’s concept of compute-optimal scaling means picking the best method + hyperparameters for each problem difficulty level 
+   and test-time compute budget 𝑁
+
+   -1. In practice, one can pre-compute which method works best at each difficulty level and allocate test-time compute accordingly.
+   -2. The final performance curve (“compute-optimal curve”) is a combination of the best methods at each difficulty tier.
+
+   Scaling Up to Larger Models
+   -1. The same methodology was tested on a 3B parameter Llama model.
+   -2. Surprisingly, with enough test-time compute, a 3B model can exceed the performance of a 70B model on the MATH-500 tasks.
+   -3. This underscores how iterative search plus a good PRM can boost capabilities even for much smaller models.
+
+6. Where Next?
+   -1. Stronger Verifiers
+       - Verifiers’ quality is critical (e.g., process reward models).
+       - Open reward models (especially for process-level scoring) are still scarce.
+   -2. Self-Verification
+       - A possible “holy grail” where the model verifies its own steps without an external, separately trained verifier.
+       - Research (such as DeepMind’s paper on self-verification and Score) is ongoing.
+   -3. Integrating “Thoughts”
+       - More structured “chain-of-thought” or step-by-step generation may help further.
+   -4. Search as a Data Generator
+       - Using these search methods to generate high-quality solution traces for finetuning the same (or a new) model.
+       - Could resemble approaches like ReST or V-StaR but augmented by search.
+   -5. Extending Beyond Math/Code
+       - How to apply test-time search-based strategies to less “verifiable” or more subjective domains remains an open problem.
+
+7. Conclusion
+   By scaling test-time compute, one can dramatically enhance smaller LLMs’ capabilities, often matching or surpassing much larger models. 
+   Key techniques include Best-of-N, beam search, and DVTS, all guided by a process reward model. The results show that:
+
+   -1. Beam search consistently offers more efficient paths to correct answers on harder problems.
+   -2. DVTS preserves diversity, yielding better accuracy in the simpler or medium cases when 𝑁 is large.
+   -3. Compute-optimal scaling outperforms a one-size-fits-all approach by tailoring the search strategy to the difficulty level.
+
+   In short, test-time search—especially when combined with strong reward models—unlocks a new frontier for model performance 
+   without the prohibitive cost of training ever-larger LLMs.
