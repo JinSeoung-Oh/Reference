@@ -1,0 +1,112 @@
+### https://pub.towardsai.net/pca-and-neural-networks-bridging-linear-autoencoders-non-linear-extensions-and-attention-3876073a54fa
+
+1. Introduction
+   The article bridges concepts from Principal Component Analysis (PCA) with neural networks, particularly autoencoders and attention mechanisms, 
+   to propose innovative methods for enhancing AI models. 
+   It establishes PCA as a foundation for dimensionality reduction and representation learning, 
+   explores its relationship with linear and non-linear autoencoders, 
+   and investigates how PCA-inspired techniques can improve attention mechanisms for tasks like handling sparse data and temporal dependencies.
+
+   - Key motivation:
+     -a. PCA and linear autoencoders achieve the same goal: extracting principal components.
+     -b. By connecting PCA to neural network architectures, we can refine attention models, simplify computations, 
+         and address machine learning challenges such as sparse data and time-based patterns.
+
+2. PCA as a Linear Autoencoder
+   The article demonstrates that PCA can be represented as a linear autoencoder with identity activation functions.
+
+   -a. Setup:
+       -1. Encoder: 𝑍 = 𝑋𝑊_𝑒, where 𝑊_𝑒 ∈ 𝑅^(𝐾×𝑄)
+       -2. Decoder: 𝑋 = 𝑍𝑊_𝑑, where 𝑊_𝑑 ∈ 𝑅^(𝑄×𝐾)
+       -3. Loss function: Minimize reconstruction error using mean squared error (MSE).
+
+   -b. Key Steps:
+       -1. By solving 𝑊_𝑑 = (𝑊_𝑒^⊤ 𝑊_𝑒)^(−1)𝑊_𝑒^⊤, simplify the total mapping from input to output.
+       -2. Optimize 𝑊_𝑒 under orthonormal constraints to derive the principal components of the covariance matrix 
+           𝑆_𝑋 = 𝑋^⊤𝑋
+
+   -c. Conclusion: The encoder weights 𝑊_𝑒 correspond to the eigenvectors of 𝑆_𝑋, demonstrating that linear autoencoders 
+                   with identity activations are equivalent to PCA.
+
+3. Connecting PCA to Non-Linear Autoencoders
+   Non-linear autoencoders extend PCA by using activation functions like softmax or sigmoid, 
+   enabling them to capture complex data structures (e.g., spirals).
+
+   -a. Key Insights:
+       -1. Non-linear encoders map input data onto curved manifolds in latent space.
+       -2. Locally, they resemble PCA by approximating dominant components of the local covariance structure.
+
+   -b. Mathematical Framework:
+       -1. The encoder’s non-linearity can be locally approximated using a Taylor expansion, 
+           linking the encoder weights to local PCA directions.
+       -2. Weight updates during training align the encoder with a PCA-like subspace modulated by activation function derivatives.
+
+4. Attention Mechanisms and Kernel PCA
+   Attention mechanisms in transformers share conceptual similarities with kernel PCA, 
+   as both implicitly map data into high-dimensional spaces to extract key features.
+
+   -a. Kernel PCA:
+       -1. Maps data using a feature function 𝜙(𝑥) and computes principal components from the transformed covariance matrix.
+
+   -b. Connection to Attention:
+       -1. Attention outputs are projections of query vectors onto the principal component axes of key vectors.
+       -2. The kernel in attention is implicitly defined by activation functions and optimization steps, 
+           analogous to the feature function in kernel PCA.
+
+5. Enhancing Attention Mechanisms with PCA
+   The article proposes using PCA to improve attention mechanisms for specific challenges:
+
+   -a. Motivation 1: Temporal Dependencies
+       PCA is adapted to handle time-series data with sequential dependencies:
+
+       -1. Pre Method:
+           - Modify the covariance matrix using temporal weighting to prioritize sequential order.
+           - Perform PCA on this weighted matrix to obtain temporally aware principal components.
+
+       -2. Post Method:
+           - Adjust PCA outputs with a temporal regulation term, ensuring smoothness across sequential indices.
+
+   -b. Dynamic PCA-Attention Hybrid:
+       -1. Incorporates PCA principles into attention mechanisms by redefining keys, 
+           queries, and values based on temporally weighted principal components.
+       -2. Temporal relationships are embedded in attention scores using PCA-derived transformations or temporal penalties.
+
+    -c. Motivation 2: Sparse Data
+        PCA-inspired methods are proposed for handling sparsity in self-attention:
+
+        -1. Sparse PCA:
+            - Use a weighted covariance matrix to compute principal components directly on sparse data.
+            - Replace traditional 𝑄,𝐾,𝑉 matrices in attention with reduced representations from Sparse PCA.
+ 
+        -2. Advantages:
+            - Reduces computational overhead.
+            - Retains critical information despite sparsity.
+
+    -d. Motivation 3: Supervised PCA
+        Supervised PCA introduces target-awareness into dimensionality reduction, aligning features with predictive tasks.
+
+        -1. Method 1: Weighted Covariance Matrix:
+            - Adjust the covariance matrix with weights reflecting feature-target relationships.
+            - Perform PCA on this supervised covariance matrix.
+
+        -2. Method 2: Conditional Expectations:
+            - Replace features with their conditional expectations 𝐸(𝑌∣𝑋), creating a target-aware feature space.
+
+        -3. Integration into Attention:
+            - Redefine 𝑄,𝐾,𝑉 in attention mechanisms using supervised principal components or conditional expectations.
+            - Directly incorporate target dependencies into attention scores, improving model alignment with supervised tasks.
+
+6. Applications and Future Directions
+   The article envisions applying PCA-attention hybrids in diverse scenarios, such as:
+
+   -a. Time Series Forecasting: Enhance temporal fusion transformers with PCA-based preprocessing.
+   -b. Sparse Data Processing: Combine PCA with sparse attention for efficient computation.
+   -c. Supervised Learning: Extend attention models to integrate predictive relationships using supervised PCA.
+
+7. Conclusion
+   The article connects PCA, autoencoders, and attention mechanisms, 
+   offering theoretical insights and practical suggestions for enhancing AI models. 
+   By combining the simplicity of PCA with the sophistication of attention models, 
+   it opens new avenues for addressing challenges like temporal dependencies, sparse data, and supervised learning.
+
+The ideas presented are primarily theoretical, aiming to spark curiosity and inspire further exploration into PCA’s role in modern AI.
