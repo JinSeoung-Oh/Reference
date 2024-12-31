@@ -1,0 +1,97 @@
+### From https://generativeai.pub/coconut-redefining-reasoning-in-large-language-models-43a554411c6b
+
+1. Large Language Models (LLMs) have made significant strides in artificial intelligence, 
+   particularly through Chain-of-Thought (CoT) reasoning, which enables step-by-step problem-solving. 
+   However, the reliance on language as the medium for reasoning introduces inefficiencies and constraints. 
+   The COCONUT (Chain of Continuous Thought) paradigm represents a breakthrough by enabling LLMs to reason in continuous 
+   latent space rather than words, promising improved efficiency, flexibility, and accuracy.
+
+2. Limitations of Chain-of-Thought (CoT) Reasoning
+   -a. Computational Waste: Every token, regardless of its importance, consumes equal computational resources.
+   -b. Lack of Flexibility: Once a reasoning step is articulated, it is difficult to backtrack or explore alternatives.
+   -c. Language Constraints: Reasoning through language ties models to natural language rules, which are not always optimal for problem-solving.
+
+3. Introducing COCONUT
+   COCONUT revolutionizes reasoning by shifting from discrete word tokens to continuous latent vectors, representing abstract,
+   high-dimensional reasoning states. This approach avoids the pitfalls of CoT and unlocks new capabilities for LLMs.
+
+   -a. Core Innovations:
+       -1. Continuous Thoughts: Reasoning states are represented as compact latent vectors rather than words.
+       -2. Bypassing Language: Removes the dependency on language tokens, enabling efficient reasoning.
+       -3. Parallel Exploration: Encodes multiple potential reasoning paths simultaneously, similar to a breadth-first search (BFS).
+       -4. Efficiency Gains: Fully differentiable latent states reduce computational overhead and inference time.
+
+4. How COCONUT Works
+   -a. Reasoning in Latent Space:
+       -1. Each step generates a latent vector representing the reasoning state.
+       -2. These latent vectors flow seamlessly into the next reasoning step without being verbalized.
+
+   -b. Parallel Exploration of Paths:
+       -1. Multiple possible paths are encoded simultaneously.
+       -2. The model refines and prunes paths dynamically, converging on the most promising solutions.
+
+   -c. Gradient-Based Optimization:
+       -1. Latent reasoning states allow direct optimization via gradient descent, 
+           avoiding inefficiencies associated with token generation.
+
+5. Advantages of COCONUT
+   -a. Flexibility:
+       -1. Keeps multiple options open, enabling smarter, more adaptive decisions.
+       -2. Can backtrack and revise reasoning as new information emerges.
+
+   -b. Efficiency:
+       -1. Reduces the computational overhead associated with language tokens.
+       -2. Requires fewer “thinking tokens,” leading to faster inference.
+
+   -c. Enhanced Planning:
+       -1. Supports dynamic and non-linear reasoning, such as adjusting plans mid-execution.
+
+6. Case Studies and Results
+    -a. Datasets:
+        -1. GSM8k: Arithmetic reasoning tasks.
+        -2. ProntoQA: Logical reasoning on tree-structured data.
+        -3. ProsQA: Advanced planning tasks requiring navigation of directed acyclic graphs (DAGs).
+
+    -b. Findings: 
+        -1. Accuracy: Comparable or superior to CoT, particularly in tasks requiring planning or multi-step reasoning.
+        -2. Efficiency: Fewer reasoning tokens needed, with up to 14x speedup in inference.
+        -3. Flexibility: Demonstrated the ability to explore and refine multiple reasoning paths simultaneously.
+
+    -c. Example: Logical Navigation:
+        In a ProsQA task, COCONUT successfully navigated a logical sequence involving multiple steps and relationships 
+        (e.g., “grimpus → rorpus → bompus”), avoiding hallucinated paths that derailed CoT.
+
+7. Challenges and Future Directions
+   -a. Scalability:
+       -1. Latent reasoning requires multiple forward passes during training, increasing computational demands.
+
+   -b. Generalization:
+       -1. While effective for structured tasks, its adaptability to open-ended reasoning remains uncertain.
+
+   -c. Interpretability:
+       -1. Latent states lack the transparency of language-based reasoning, making intermediate steps harder to interpret.
+
+   -d. Training Complexity:
+       -1. Sequential training with latent states requires careful optimization and curriculum design.
+
+8. Potential Applications
+   -a. Automated Theorem Proving:
+       -1. Complex, multi-step problems requiring backtracking and verification.
+   -b. Decision-Making and Planning:
+       -1. Domains like robotics, logistics, and strategy, which rely on exploring multiple paths.
+   -c. Complex Question Answering:
+       -1. Handling ambiguous or graph-structured queries with dynamic reasoning.
+
+9. Conclusion
+   COCONUT represents a paradigm shift in LLM reasoning, breaking free from the constraints of language. 
+   By reasoning in latent space, it enables:
+
+   -a. Smarter, more flexible problem-solving.
+   -b. Significant efficiency gains.
+   -c. Enhanced performance in complex planning and reasoning tasks.
+
+   While challenges remain, COCONUT lays the foundation for more human-like, adaptable AI systems capable of 
+   tackling intricate real-world problems. With further refinement, 
+   latent reasoning could redefine the boundaries of what LLMs can achieve.
+
+
