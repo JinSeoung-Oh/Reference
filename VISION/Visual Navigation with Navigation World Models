@@ -1,0 +1,82 @@
+### From https://medium.com/syncedreview/yann-lecun-teams-new-research-revolutionizing-visual-navigation-with-navigation-world-models-262543b977a2
+
+1. Introduction
+   Navigation is essential for survival, enabling organisms to locate resources, find shelter, and avoid threats. 
+   While humans excel at flexible navigation by mentally simulating paths and adjusting for constraints, 
+   modern robotic systems lack such adaptability. Current robotic navigation models face key challenges:
+
+   -a. Limited Flexibility: Hard-coded navigation policies struggle to adapt to new constraints post-training.
+   -b. Computational Inefficiency: Supervised navigation models cannot allocate additional computational resources 
+                                   efficiently for more complex tasks.
+
+   To overcome these issues, researchers from Meta, NYU, and Berkeley AI Research proposed the Navigation World Model (NWM). 
+   This novel framework introduces a controllable video generation model to predict future visual states based on past observations 
+   and navigation actions. It enables robotic agents to simulate potential navigation plans and assess their feasibility.
+
+2. Key Features of NWM
+   -a. Model Description:
+       -1. NWM is trained on a large dataset of video footage and navigation actions from various robotic agents.
+       -2. The model predicts future video frame representations based on past frames and navigation actions, 
+           enabling trajectory planning in new environments.
+
+   -b. Generalization:
+       -1. Trained across diverse environments and agent embodiments, NWM generalizes well, unlike earlier models constrained
+           to specific environments or tasks.
+       -2. This wide applicability represents a major step forward in model flexibility and autonomy.
+
+    -c. Inspiration from Existing Models:
+        -1. Diffusion-Based World Models:
+            - Inspired by DIAMOND and GameNGen, NWM incorporates ideas from offline model-based reinforcement learning.
+            - Unlike these models, NWM supports diverse environments and agent embodiments.
+        -2. Novel View Synthesis (NVS):
+            - Shares conceptual similarities with methods like NeRF and GDC.
+            - Unlike NVS, which reconstructs 3D scenes, NWM models temporal dynamics directly from natural video data without 
+              relying on 3D priors.
+
+    -d. Core Component: Conditional Diffusion Transformer (CDiT):
+        -1. Efficiency:
+            - CDiT predicts future visual states using past image states and actions.
+            - Compared to standard Diffusion Transformers (DiT), CDiT scales linearly with context frames, 
+              reducing computational overhead.
+            - Requires four times fewer FLOPs than DiT, handling models with up to 1 billion parameters across diverse environments.
+
+       -2. Performance:
+           Delivers superior future prediction results, enabling accurate simulations of potential navigation paths.
+
+3. Experiments and Results
+   -a. Unfamiliar Environment Testing:
+       -1. NWM was tested in new environments using the Ego4D dataset, which consists of unlabeled, action-free, and reward-free video data.
+       -2. Results:
+           - Qualitative: Improved video prediction and generation for individual images.
+           - Quantitative: Achieved higher accuracy in future predictions on the Stanford Go dataset with additional 
+                           unlabeled video training.
+       -3. Highlight: NWM’s ability to generalize to unseen environments demonstrates its suitability for real-world navigation.
+
+   -b. Computational Efficiency:
+       -1. CDiT’s design allowed NWM to handle larger models efficiently, enabling scalability across diverse environments and 
+           tasks without a significant increase in computational cost.
+
+4. Advantages of NWM
+   -a. Simulation and Planning:
+       - NWM allows agents to simulate potential paths before taking actions, enabling better decision-making.
+
+   -b. Generalization:
+       - Trained across diverse datasets, NWM generalizes well to new environments and tasks, unlike traditional navigation models.
+
+   -c. Efficiency:
+       - CDiT provides computationally efficient future prediction, making it feasible for large-scale real-world deployment.
+
+   -d. Flexibility:
+       - Can adapt to new constraints and environments without retraining.
+
+   -e. Scalability:
+       - Supports diverse agent embodiments and environments, paving the way for more universal navigation systems.
+
+5. Conclusion
+   The Navigation World Model (NWM) is a groundbreaking framework that combines controllable video generation, 
+   diffusion-based modeling, and efficient transformers to redefine robotic navigation. 
+   By enabling agents to simulate, plan, and adapt to new constraints, NWM addresses critical limitations in current robotic systems. 
+   It opens new possibilities for developing autonomous systems capable of navigating diverse and unpredictable environments 
+   with flexibility and efficiency.
+
+
