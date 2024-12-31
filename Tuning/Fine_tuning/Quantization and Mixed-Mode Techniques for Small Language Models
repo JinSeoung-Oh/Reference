@@ -1,0 +1,83 @@
+### From https://medium.com/@EsperantoTech/quantization-and-mixed-mode-techniques-for-small-language-models-b3366dbad554
+
+1. Introduction
+   Large Language Models (LLMs) are transforming industries, but their immense size (hundreds of billions to trillions of parameters)
+   limits cost-effective deployment for most companies. Small Language Models (SLMs) offer an alternative, 
+   focusing on domain-specific knowledge to reduce computational and environmental costs while maintaining business value.
+
+   Quantization is a key technique to optimize SLMs by reducing precision in parameters and calculations, 
+   enabling significant reductions in memory, inference time, and storage requirements while preserving accuracy.
+
+2. Understanding Quantization
+   Quantization maps floating-point numbers to lower-precision integers, 
+   reducing memory usage while retaining sufficient accuracy for useful results. 
+   For instance, a 16-bit floating point can be quantized to an 8-bit, 6-bit, or even 4-bit integer representation, 
+   reducing model size by 2x to 8x. Quantization is particularly useful during inference since training requires higher precision.
+
+   -a. How It Works:
+       -1. Quantization: Maps high-precision weights to lower-precision integers.
+       -2. Dequantization-Requantization: Converts weights back to higher precision for computation and re-quantizes afterward. 
+                                          Although this introduces overhead, it is negligible compared to gains in bandwidth and memory efficiency.
+
+   -b. Challenges:
+       -1. Quantization error accumulates, potentially degrading model outputs.
+       -2. Techniques like optimization-based quantization mitigate these errors.
+
+3. Quantization Methods
+   Several quantization frameworks balance accuracy and computational efficiency:
+
+   -a. BitsAndBytes (QLoRA)
+       -1. Uses NormalFloat4, a 4-bit data type with 16 values mapped to 1/16-quantiles of a normal distribution.
+       -2. Fast to implement with no calibration or training required.
+       -3. Fully integrated with Hugging Face, enabling straightforward quantization via code:
+                                            device='cuda',)
+   -b. GPTQ
+       -1. Optimization-based method minimizing quantization error:
+           arg min_𝑊^~ ∥𝑊𝑋−𝑊^~𝑋∥ where 𝑊^~ are quantized weights.
+       -2. Processes weights in blocks to speed up computation, employing techniques like Cholesky decomposition for robustness.
+       -3. Requires minimal calibration data and can quantize a 7B model to INT4 in under 30 minutes on an A100 GPU.
+
+    -c. AWQ (Activation-aware Weight Quantization)
+        -1. Identifies and scales "salient" weights (responsible for outlier activations) before quantization to minimize 
+            quantization error.
+        -2. Uses a small calibration dataset and optimally selects scaling factors for quantization blocks.
+        -3. Can combine with other methods like GPTQ for even lower bit precision (e.g., INT2).
+        -4. Relatively fast, taking less than 30 minutes for a 7B model.
+
+    -d. GGUF (llama.cpp)
+        -1. Developed within the llama.cpp framework for efficient local SLM deployment.
+        -2. Supports various quantization levels (e.g., 8, 6, 4, 2 bits) and strategic layer retention in higher precision 
+            to maintain accuracy.
+        -3. Lacks clear documentation but offers excellent raw performance, making it popular among developers using powerful CPUs.
+
+4. Evaluation
+   An evaluation of quantization methods on the Mistral-7B-Instruct-v0.2 model, using the Wikitext-2 dataset,
+   compared perplexity (lower is better).
+
+   -a. Findings:
+       -1. AWQ: Selected as the best balance of accuracy and usability, integrated into frameworks like Hugging Face.
+       -2. GGUF: Offered the best raw performance but lacked integration and documentation.
+
+5. Integration into ONNX
+   Esperanto optimized the AWQ method for ET-SoC-1, its specialized chip for efficient inference:
+
+   -a. Conversion Process:
+       -1. Quantize models to INT4 using AWQ or AutoAWQ (part of AutoGPTQ).
+       -2. Convert models to ONNX using tools like QLLM, optimizing further for token generation and memory efficiency.
+       -3. Implement key features (e.g., Key-Value-Cache, Rotary Embeddings) for seamless token generation.
+
+   -b. Advantages:
+       -1. Memory footprint reduced by up to 4x for INT4 compared to FP16.
+       -2. Faster inference due to reduced data movement and memory-bound nature of LLMs.
+
+6. Conclusion
+   Quantization is a powerful tool to make LLMs efficient and practical for real-world deployment:
+
+   -1. Key Techniques: GPTQ, AWQ, GGUF, and QLoRA provide different trade-offs in speed, accuracy, and usability.
+   -2. Esperanto’s Focus: AWQ for its balance of flexibility, accuracy, and integration with popular frameworks like Hugging Face.
+   -3. Future Outlook: Quantization continues to evolve, with methods like AWQ pushing boundaries in reducing memory use
+                       while preserving high performance.
+
+   Esperanto has successfully deployed ONNX-quantized SLMs using INT4 precision, ensuring efficient and sustainable AI solutions
+   for diverse applications.
+
