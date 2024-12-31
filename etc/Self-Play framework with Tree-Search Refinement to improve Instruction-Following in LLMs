@@ -1,0 +1,117 @@
+### From https://medium.com/@techsachin/spar-self-play-with-tree-search-refinement-to-improve-instruction-following-in-llms-3047c5ac7735
+
+1. Introduction
+   The paper introduces SPAR (Self-Play with Refinement), a novel framework to enhance the instruction-following 
+   capabilities of large language models (LLMs). 
+   Unlike traditional preference learning methods that sample independent responses,
+   SPAR focuses on generating refinement pairs using a self-play tree-search mechanism to minimize irrelevant variations. 
+   This approach allows LLMs to better recognize and refine their instruction-following responses.
+
+2. Key Contributions
+   -a. Challenges in Existing Preference Learning:
+       - Independent response sampling introduces irrelevant content variations (e.g., different expressions with the same semantics),
+         reducing the effectiveness of preference learning.
+
+   -b. Proposed Solution - SPAR:
+       - A self-play framework employing tree-search refinement to generate high-quality, comparable preference pairs.
+       - Enables continuous self-improvement in instruction-following tasks.
+
+   -c. Datasets:
+       - 43K complex instruction-following prompts derived using taxonomy-based mechanisms.
+       - A supervised fine-tuning (SFT) dataset improves LLM instruction-following capabilities.
+
+3. Methodology
+   -a. Overall Framework
+       -1. Iterative Training:
+           - For a given instruction 𝑥, the actor generates a response 𝑦
+           - The refiner identifies negative responses (i.e., responses that do not follow instructions) and refines them.
+           - These refinement pairs are used to:
+             Train the actor using Direct Preference Optimization (DPO).
+             Fine-tune the refiner using Rejection-sampling Fine-Tuning (RFT).
+
+   -b. Data Construction
+       -1. Prompt Creation:
+           - Seed Prompts:
+             Filter 50K high-quality prompts from the Infinity-Instruct dataset.
+
+           - Taxonomy-based Construction:
+             Build balanced, constraint-specific prompts, resulting in 43K complex instruction-following tasks.
+
+       -2. Model Initialization:
+           - Actor Initialization:
+             Use strong LLM responses to construct SFT data (𝑥,𝑦), where 𝑥 is the instruction and 𝑦
+             is the response. Fine-tune the base model to initialize the actor.
+
+           - Refiner Initialization: 
+             Use the actor’s negative responses and refine them with minimal variations using strong LLMs. 
+             Construct a judgment dataset (𝑥,𝑦,𝑗), where 𝑗 is the judgment.
+
+       -3. Training Loss Function:
+           - Actor:
+             𝐿_actor = 1/𝑁 (∑ 𝑖=1 to 𝑁) ∥𝜋_𝜃(𝑞_𝑖)−𝑟_𝑖∥^2
+
+           - Refiner:
+             𝐿_refiner = 1/𝑁 (∑𝑖=1 to 𝑁) ∥𝜋_𝜃((𝑞_𝑖,𝑦_𝑖))−𝑗_𝑖∥^2
+
+4. Tree-Search Integrated Self-Play Training
+   -a. Negative Data Collection:
+       -1. Sample 𝐾 responses for each prompt 𝑥 from the actor.
+       -2. Use the refiner to label and explain the correctness of responses, applying self-consistency voting for accurate judgments.
+       -3. Collect tuples (𝑥,𝑦_negative,𝑗), where 𝑗 is the judgment for incorrect responses.
+
+   -b. Tree-Search Refinement:
+       -1. Employ breadth-first search (BFS) or depth-first search (DFS) strategies to refine incorrect responses:
+           - Start with the root node (𝑥,𝑦_negative,𝑗)
+           - Expand the tree by generating refinements and evaluating their correctness using the refiner.
+           - Continue until a correct response is found, yielding tuples (𝑥,𝑦_negative,𝑦_refined)
+
+   -c. Actor Training:
+       -1. Train the actor using DPO with refinement pairs:
+           - Negative response (𝑦_negative): rejected response (𝑦_𝑙)
+           - Refined response (𝑦_refined): chosen response (𝑦_𝑤)
+           - DPO Loss:
+             𝐿_DPO = −log⁡(𝜋_𝜃(𝑦_𝑤∣𝑥) / 𝜋_𝜃(𝑦_𝑤∣𝑥)+𝜋_𝜃(𝑦_𝑙∣𝑥))
+
+   -d. Refiner Training:
+       -1. Train the refiner using RFT:
+           - Refinement Training Data: Collect tuples (𝑥,𝑦_𝑝,𝑗_𝑝,𝑦_refined) from the refinement process.
+           - Judgment Training Data: Collect tuples (𝑥,𝑦_𝑖,𝑗_𝑖) from negative data and tree-search nodes.
+
+5. Experiments
+   -a. Actor Evaluation
+       -1. Instruction-Following Benchmarks:
+           - SPAR significantly improves instruction-following abilities:
+             After three iterations, SPAR-8B-DPO-iter3 surpasses GPT-4-Turbo (81.3% accuracy on IFEval).
+             Tree-search refinement during inference boosts performance further.
+
+       -2. General Abilities:
+           - SPAR maintains or enhances general performance (e.g., GSM8k, HumanEval), 
+             showing that improved instruction-following supports overall LLM alignment.
+
+       -3. Comparison to Baselines:
+           - SPAR outperforms other methods in every training iteration.
+
+   -b. Refiner Evaluation
+       -1. Judgment Capability:
+           - SPAR progressively improves judgment capabilities:
+             By iteration 3, SPAR-8B-RFT-iter3 surpasses GPT-4o-Mini, the model used for constructing the SFT dataset.
+
+       -2. Refinement Capability:
+           - Continuous improvement in refinement accuracy:
+             SPAR-8B-Instruct matches GPT-4o-Mini in refinement success after three iterations.
+
+6. Conclusion
+   -a. SPAR Framework:
+       - Integrates tree-search self-play for high-quality refinement pairs, eliminating distractions in preference learning.
+       - Demonstrates superior instruction-following capabilities compared to GPT-4-Turbo.
+
+   -b. Key Insights:
+       - Traditional sampling-based methods hinder instruction-following by introducing irrelevant variations.
+       - Refinement-based training with SPAR addresses these issues, 
+         leading to significant improvements in both instruction-following and general alignment tasks.
+
+   -c. Impact:
+       SPAR-trained models, like LLaMA3-8B-Instruct, achieve state-of-the-art performance, 
+       with potential for further gains through inference-time scaling.
+
+
