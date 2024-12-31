@@ -1,0 +1,72 @@
+### From https://towardsdatascience.com/introducing-layer-enhanced-classification-lec-4972f4f1c79f
+
+1. Introduction
+   The growing use of Language Models (LMs) raises the necessity of detecting inappropriate content in user inputs and generated outputs. 
+   Key challenges include:
+
+   -a. Jailbreaking Models: Users manipulate models to respond in unintended ways despite alignment tuning.
+   -b. Prompt Injection Attacks: Chatbots released for public tasks like customer service are often exploited to perform inappropriate or out-of-scope tasks.
+
+   To address these issues, the team introduced Layer Enhanced Classification (LEC), a novel lightweight classification method. 
+   By leveraging hidden states from intermediate transformer layers, LEC uses a penalized logistic regression classifier 
+   with minimal parameters and training examples, achieving superior performance over special-purpose and state-of-the-art models like GPT-4o.
+
+2. Goals and Approach
+   -a. Primary Objective:
+       To evaluate the utility of hidden states from intermediate transformer layers for classification tasks such as content safety and 
+       prompt injection detection.
+
+   -b. Datasets:
+       -1. Content Safety: Used SALAD Data and LMSYS-Chat-1M datasets.
+       -2. Prompt Injection: Used SPML dataset, which includes system and user prompt pairs.
+
+   -c. Model Selection:
+       -1. Baseline Models: GPT-4o for general-purpose tasks and Llama Guard 3 / DeBERTa for specific tasks.
+       -2. LEC Models: Applied to both general-purpose (e.g., Qwen 2.5 Instruct models in 0.5B, 1.5B, and 3B sizes) and special-purpose models 
+                       (e.g., Llama Guard, DeBERTa).
+
+   -d. Implementation:
+       -1. Method: Captured hidden states from intermediate layers, pruning layers as needed, 
+                   to train a Penalized Logistic Regression (PLR) classifier with L2 regularization.
+       -2. Parameters: The PLR classifier’s trainable parameters equate to the hidden state size + 1 for binary classification. 
+                       This ranged from 769 to 4097 parameters.
+
+3. Key Results
+   -a. General Observations:
+        -1. Efficiency: LEC models outperform baseline models (GPT-4o, Llama Guard, DeBERTa) with as few as 20–100 training examples.
+        -2. Intermediate Layers: Most critical for capturing task-relevant features, especially for small datasets.
+        -3. Cross-Domain Success: LEC generalizes effectively across model architectures and tasks.
+
+   -b. Content Safety Classification:
+       -1. Binary Classification:
+           - LEC models outperform GPT-4o and Llama Guard baselines within fewer training examples:
+             Maximum F1 scores: 0.95–0.96 for Qwen 2.5 Instruct and Llama Guard models.
+             GPT-4o’s baseline: 0.82, while Llama Guard 3 1B and 8B scored 0.65 and 0.71 respectively.
+           - Qwen 2.5 Instruct 0.5B surpasses GPT-4o’s performance within 15 training examples.
+      
+       -2. Multi-Class Classification:
+           - Qwen 2.5 Instruct 0.5B using intermediate layers outperforms GPT-4o for all difficulty levels within 35 training examples.
+
+4. Prompt Injection Classification:
+   -a. LEC improves performance for both general-purpose (Qwen 2.5 Instruct) and task-specific (DeBERTa) models.
+
+   -b. Intermediate Layers:
+       -1. Qwen 2.5 Instruct models surpass DeBERTa’s F1 score (0.73) within 5 examples.
+       -2. Maximum F1 score for DeBERTa with LEC: 0.98.
+
+   -c. Generalization: LEC is effective across all Qwen 2.5 Instruct sizes, demonstrating scalability.
+
+5. Conclusion
+   The research demonstrates the effectiveness of LEC for responsible AI-related classification tasks, including:
+
+   -a. Performance: LEC achieves higher F1 scores with fewer training examples compared to baseline models.
+
+   -b. Integration Options:
+       -1. Use a pruned lightweight model’s intermediate layer as a feature extractor for classification tasks before processing user input 
+           with larger models (e.g., GPT-4o).
+       -2. Apply LEC directly to an open-source model (e.g., Llama) to simultaneously detect violations and generate responses in one pass.
+
+   -c. Broader Applications: Beyond content safety and prompt injection, LEC could address other tasks leveraging intermediate transformer layers.
+
+   Key Implication: LEC offers a scalable, efficient, and practical solution for safeguarding Generative AI systems, 
+   ensuring responsible operation and protecting businesses from system misuse.
