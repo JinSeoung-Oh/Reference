@@ -1,0 +1,79 @@
+### From https://medium.com/binome/ai-agent-workflow-design-patterns-an-overview-cf9e1f609696
+
+This article provides an in-depth exploration of workflow design patterns for large language model (LLM) agents, 
+categorizing them into two primary groups: Reflection-focused and Planning-focused. 
+These patterns enable agents to reason, adapt, and perform tasks efficiently, simulating human problem-solving and planning processes.
+
+1. Reflection-Focused Patterns
+   Reflection-focused patterns emphasize learning and adaptation by analyzing past actions and outcomes. 
+   This approach allows agents to refine their strategies over time.
+
+   -1. Basic Reflection:
+       - A simple feedback loop where the agent generates output, receives feedback, and revises iteratively.
+       - Analogy: A student (Generator) and a teacher (Reflector).
+
+   -2. Reflexion:
+       - Builds on Basic Reflection with reinforcement learning principles.
+       - Evaluates responses using external data and enforces improvements to address redundancies or omissions.
+
+   -3. Tree Search:
+       - Combines Tree of Thought (TOT) reasoning with reinforcement learning.
+       - Enables evaluation of multiple potential outcomes for optimal decision-making.
+
+   -4. Self-Discovery:
+       - Encourages granular task reflection, breaking down tasks into components and evaluating each step.
+
+   -5. Language Agent Tree Search (LATS):
+       - Combines reflection, planning, and tree search with reinforcement learning.
+       - Formula: LATS = Tree Search + ReAct + Plan & Solve + Reflection + Reinforcement Learning.
+       - Involves iterative reflection and collaboration among multiple Generators and Reflectors.
+
+2. Planning-Focused Patterns
+   Planning-focused patterns prioritize structured approaches to tasks, breaking them into manageable steps and organizing 
+   them to achieve specific goals.
+
+   -1. Plan & Solve:
+       - Generates a multi-step plan before execution.
+       - Includes a Planner for initial steps and a Replanner for adjustments based on progress.
+       - Ideal for complex, dynamic tasks (e.g., making coffee or multi-step problem-solving).
+
+   -2. ReAct Pattern:
+       - Integrates reasoning and action, allowing agents to adapt dynamically.
+       - Example: Searching for a pen step-by-step, stopping once the pen is found.
+       - Workflow:
+         -a. Thought → Action → Observation.
+         -b. Uses external tools for actions, iterating until the task is complete.
+
+   -3. Reason without Observation (REWOO):
+       - Simplifies the ReAct process by embedding observations implicitly into execution.
+
+   -4. LLM Compiler:
+       - Optimizes efficiency by enabling parallel function calls.
+       - Example: Comparing AWS Glue and MWAA by retrieving and combining results simultaneously.
+
+   -5. Storm:
+       - Designed for generating structured content, like Wikipedia articles.
+       - Workflow:
+         -a. Outline generation → Information search → Content creation for each section.
+
+3. Agent Workflow Design
+   Agents function as task orchestrators, with workflows composed of nodes that represent tasks like LLM operations, 
+   function calls, or Retrieval-Augmented Generation (RAG). These workflows allow developers to:
+
+    -a. Plan and execute tasks iteratively.
+    -b. Adapt workflows to various use cases, enhancing problem-solving flexibility.
+
+    Key Components for Implementation:
+    -a. Prompt Templates:
+        - Structured examples to simulate human reasoning and task management.
+        - Customized to fit specific workflows and tasks.
+    -b. External Tool Definitions:
+        - Function calls integrated into workflows for task-specific operations.
+
+4. Conclusion
+   This article categorizes workflow patterns into Reflection-focused and Planning-focused, 
+   highlighting their relevance for real-world applications. By leveraging these patterns, developers can design flexible,
+   human-like agents capable of planning, reasoning, and adapting to dynamic environments. 
+   Each workflow acts as an orchestrator, enabling efficient task execution and iteration. 
+
+These insights form the foundation for building more sophisticated and capable LLM agents.
