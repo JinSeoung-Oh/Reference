@@ -1,0 +1,113 @@
+### From https://arijoury.medium.com/understanding-the-why-10-techniques-for-causal-inference-7a4fd78100b3
+
+1. Granger Causality
+   -a. Purpose: Identifies whether one time series predicts another.
+   -b. Method:
+       -1. Compare two models:
+           One where the dependent variable is explained by its own lagged values.
+           Another where it is also influenced by the lagged values of another variable.
+       -2. Use an F-statistic to test if adding the second variable improves predictive accuracy.
+   -c. Strengths:
+       -1. Ideal for time-series data with consistent intervals.
+       -2. Accounts for autocorrelation and evaluates statistical significance.
+   -d. Limitations:
+       -1. Assumes stationarity and lagged relationships.
+       -2. Cannot account for unobserved confounders.
+   -e. Application: Predictive causation in time-series data (e.g., “Does hiring women in management lead to higher profits?”).
+
+2. Difference-in-Differences (DiD)
+   -a. Purpose: Estimates treatment effects by comparing outcome changes in treated and control groups.
+   -b. Method:
+       -1. Compare pre- and post-treatment differences in outcomes between treated and control groups.
+       -2. Formula:Δ𝑌=((𝑌_(treated, post)−𝑌_(treated, pre))−(𝑌_(control, post) - 𝑌_(control, pre)))
+   -c. Strengths:
+       -1. Works when treatment is non-randomized.
+       -2. Adjusts for unobserved time-invariant differences.
+   -d. Limitations:
+       -1. Assumes parallel trends between groups.
+       -2. Cannot handle spillover effects or changes in group composition.
+
+3. Directed Acyclic Graphs (DAGs)
+   -a. Purpose: Visualizes causal relationships and identifies confounders.
+   -b. Structure:
+       -1. Nodes represent variables.
+       -2. Arrows indicate causal direction.
+   -c. Strengths:
+       -1. Clarifies assumptions and causal pathways.
+       -2. Guides variable selection for statistical models.
+   -d. Limitations:
+       -1. Requires domain knowledge and can become overly complex.
+   -e. Application: Identifying confounders, mediators, and causal pathways.
+
+4. Bayesian Networks
+   -a. Purpose: Probabilistically models causal relationships.
+   -b. Structure:
+       -1. Nodes and directed edges, similar to DAGs.
+       -2. Each node has a conditional probability distribution updated using Bayes’ theorem.
+   -c. Strengths:
+       -1. Handles uncertainty and incomplete data.
+       -2. Simulates counterfactual scenarios.
+   -d. Limitations:
+       -1. Computationally intensive and data-dependent.
+       -2. Subject to subjective assumptions in structure.
+
+5. Propensity Score Matching (PSM)
+   -a. Purpose: Mimics randomized experiments by matching treated and untreated units with similar characteristics.
+   -b. Method:
+       -1. Calculate propensity scores using logistic regression or machine learning.
+       -2. Match units with similar scores and estimate treatment effects by comparing outcomes.
+   -c. Strengths:
+       -1. Isolates treatment effects by controlling for observed confounders.
+   -d. Limitations:
+       -1. Cannot adjust for unobserved confounders.
+       -2. Results depend on matching criteria.
+
+6. Synthetic Control Methods (SCM)
+   -a. Purpose: Constructs a synthetic control group to evaluate treatment effects when a real control group is unavailable.
+   -b. Method:
+       -1. Combine data from untreated units to create a weighted synthetic control resembling the treated unit pre-treatment.
+       -2. Compare outcomes post-treatment.
+   -c. Strengths:
+       -1. Ideal for one-time events or small treated groups.
+   -d. Limitations:
+       -1. Requires rich datasets and subjective selection of variables.
+
+7. Instrumental Variables (IV)
+   -a. Purpose: Addresses confounding and reverse causality using an external instrument.
+   -b. Method:
+       -1. Identify an instrument correlated with the treatment but not directly with the outcome.
+       -2. Use a two-stage process to isolate and estimate the causal effect.
+   -c. Strengths:
+       -1. Handles confounding and reverse causality.
+   -d. Limitations:
+       -1. Finding valid instruments is challenging.
+       -2. Estimates are local (LATE).
+
+8. Structural Equation Modeling (SEM)
+   -a. Purpose: Models complex causal relationships with interconnected variables.
+   -b. Method:
+       -1. Specify direct and indirect effects.
+       -2. Estimate parameters and assess model fit.
+   -c. Strengths:
+       -1. Models interdependent relationships and latent variables.
+   -d. Limitations:
+       -1. Requires substantial data and domain expertise.
+       -2. Depends on correct model specification.
+
+9. Causal Forests
+   -a. Purpose: Estimates heterogeneous treatment effects.
+   -b. Method:
+       -1. Builds on random forests, splitting data to estimate treatment effects within subgroups.
+   -c. Strengths:
+       -1. Captures variability in treatment effects across subpopulations.
+   -d. Limitations:
+       -1. Data-intensive and provides no mechanistic insights.
+
+10. Counterfactual Analysis
+    -a. Purpose: Estimates hypothetical outcomes under alternate scenarios.
+    -b. Method:
+        -1. Model the counterfactual outcome and compare it to the observed outcome.
+    -c. Strengths:
+        -1. Simulates policy impacts and optimizes decisions.
+    -d. Limitations:
+        -1. Dependent on model quality and assumptions.
