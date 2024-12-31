@@ -1,0 +1,30 @@
+### From https://medium.com/syncedreview/nvidias-ngpt-revolutionizing-transformers-with-hypersphere-representation-1be9086f216e
+
+In a new paper nGPT: Normalized Transformer with Representation Learning on the Hypersphere, 
+an NVIDIA research team proposes the normalized Transformer (nGPT), 
+which consolidates key findings in Transformer research under a unified framework, 
+offering faster learning and reduced training steps — by factors ranging from 4 to 20 depending on sequence length.
+
+1. Hypersphere-Based Normalization
+   The core advancement of nGPT lies in normalizing all embedding dimensions to reside on a unit hypersphere. 
+   This approach ensures consistent dimensionality across matrices and interprets matrix-vector 
+   multiplications as cosine similarities within the bounded range of [-1,1]. Notably, this normalization eliminates 
+   the need for weight decay by maintaining intrinsic stability.
+
+2. Mitigating Non-Linear Constraints
+   While normalization standardizes embeddings, it also constrains the inputs to non-linear units. 
+   To address this, scaling factors are introduced, balancing these constraints and enhancing the model’s flexibility.
+
+3. Variable-Metric Optimization
+   Inspired by recent studies that position Transformers as meta-optimizers, 
+   the research team demonstrates that nGPT functions as a variable-metric optimizer. Specifically
+
+4. Gradient Information
+   Each transformation block computes gradients.
+
+5. Eigen Learning Rates
+   These gradients are scaled using learnable eigen learning rates derived from a variable-metric matrix.
+
+6. Riemannian Retraction
+   Normalization acts as a retraction step in Riemannian optimization, projecting outputs back onto the hypersphere. 
+   This process transforms nGPT into a data-driven optimizer, fine-tuning its outputs with precision.
