@@ -1,0 +1,84 @@
+### From https://artgor.medium.com/paper-review-training-large-language-models-to-reason-in-a-continuous-latent-space-46f36b198e46
+
+1. Introduction to Coconut
+   Coconut (Chain of Continuous Thought) is a novel reasoning paradigm for Large Language Models (LLMs) that operates in a latent space. 
+   Instead of relying solely on text-based reasoning like traditional Chain-of-Thought (CoT) methods, 
+   Coconut uses continuous thought states—derived from the model’s hidden layers—to reason. 
+   These latent states are fed back into the model as input embeddings, enabling simultaneous exploration of multiple reasoning paths 
+   via breadth-first search. 
+   This approach reduces token usage during inference and improves performance on logical tasks that require backtracking and complex planning.
+
+2. The Approach: Language Mode vs. Latent Mode
+   -a. Modes of Operation:
+       -1. Language Mode: 
+           The model generates tokens autoregressively, functioning like a standard language model.
+       -2. Latent Mode:
+           - The model performs reasoning in an unconstrained latent space, using the last hidden state as the next input embedding.
+           - Special tokens <bot> and <eot> mark the beginning and end of latent mode, signaling transitions between reasoning in text and latent spaces.
+   -b. Training Process:
+       -1. Multi-Stage Curriculum Training:
+           - Stage 1: Train the model on standard CoT (Chain-of-Thought) data, where reasoning is text-based.
+           - Subsequent Stages: Incrementally replace language reasoning steps with latent thoughts.
+                                A hyperparameter controls the ratio of latent to language reasoning steps.
+       -2. Loss Optimization:
+           - The model optimizes normal negative log-likelihood (NLL) loss but masks the loss on questions and latent thought steps.
+           - This encourages the model to predict future reasoning steps more efficiently rather than compressing language steps, 
+             leading to better latent representations.
+   -c. Inference Mechanism:
+       -1. Inference follows standard LLM decoding but switches to latent mode when applicable:
+           - During latent mode, the model takes the last hidden state as the next input embedding without converting it to text.
+           - The termination of latent mode is determined either by a binary classifier or by using a constant padding length (the simpler approach was chosen).
+
+3. Experiments and Evaluation
+   -a. Base Model and Baselines:
+       -1. The base model for evaluation is pre-trained GPT-2.
+       -2. Several baselines are compared against Coconut:
+           - CoT (Chain-of-Thought): Full reasoning chains produced before answering.
+           - No-CoT: Direct answer generation without reasoning steps.
+           - iCoT: Trains to predict only the final answer after gradually removing reasoning tokens.
+          - Pause Token Baseline: Inserts <pause> tokens between questions and answers to simulate extra computation, 
+                                  matching Coconut's continuous thought steps.
+   -b. Coconut Variants:
+       -1. w/o curriculum: Direct training on final-stage data without gradual curriculum.
+       -2. w/o thought: Maintains multi-stage training but excludes continuous thoughts, similar to iCoT.
+       -3. Pause as thought: Replaces continuous thoughts with <pause> tokens, following Coconut’s training schedule.
+   -c. Results:
+       -1. Performance Improvements:
+           - Coconut significantly outperforms CoT, No-CoT, and iCoT in complex planning and contextual understanding tasks.
+           - The multi-stage training curriculum, gradually introducing latent reasoning, is crucial. 
+             Models trained without this curriculum did not perform better than No-CoT.
+           - Continuous thoughts enable deeper reasoning and more efficient token usage, particularly benefiting tasks like GSM8k and ProsQA.
+       -2. Key Observations:
+           - Coconut reduces hallucinations and errors by refining reasoning in latent space.
+           - The use of continuous thoughts (latent reasoning) captures intermediate variables and multiple reasoning traces, 
+             aiding in tasks requiring advanced planning.
+
+4. Understanding Latent Reasoning in Coconut
+   -a. Advantages over Traditional CoT:
+       -1. Superior Reasoning and Planning: 
+           - As more continuous thoughts are used, answer accuracy improves, reasoning processes become more correct, 
+             and errors like hallucinations decrease.
+       -2. Avoiding Premature Commitments:
+           - Coconut refines reasoning progressively, preventing early, incorrect decisions common in standard CoT.
+           - A case study highlighted that Coconut with 𝑘=2 
+            (exploring two simultaneous reasoning paths) solved a problem that both CoT and Coconut with 𝑘=1 could not.
+   -b. Latent Reasoning as a Search Tree:
+       -1. Simultaneous Path Exploration:
+           - Instead of a single linear reasoning chain, Coconut operates like a search tree, exploring multiple potential reasoning paths in parallel.
+       -2. Balancing Exploration and Exploitation:
+           - Initially, Coconut's early latent thoughts explore broadly (diverse paths with varying probabilities).
+           - Over time, as the model gains confidence, it narrows focus on the most promising reasoning paths, reducing diversity and converging on a solution.
+       -3. Implicit Value Function:
+           - At each reasoning step, the model assigns probabilities to potential next steps, implicitly valuing more promising paths 
+             while pruning less relevant ones.
+   -c. Training and Inference Benefits:
+       -1. Training with a mix of language and latent reasoning steps encourages the model to focus on future reasoning, enhancing planning ability.
+       -2. During inference, direct use of hidden states as inputs saves tokens and computation, leading to more efficient and accurate reasoning.
+
+5. Conclusion
+   Coconut introduces a transformative approach to LLM reasoning by shifting from text-based to latent space reasoning. 
+   Through a multi-stage training curriculum and latent mode inference, it improves planning, reduces errors, 
+   and efficiently explores multiple reasoning paths. 
+   This method demonstrates how evolving reasoning paradigms can enhance LLM performance on complex tasks, 
+   offering a promising direction for future AI research and applications.
+
