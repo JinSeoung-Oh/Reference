@@ -1,0 +1,71 @@
+### From https://levelup.gitconnected.com/metas-large-concept-models-lcms-are-here-to-challenge-and-redefine-llms-7f9778f88a87
+
+Summary: Large Concept Models (LCMs) – A New Paradigm in Language Modeling
+
+The article introduces Large Concept Models (LCMs) as an alternative to traditional Large Language Models (LLMs). 
+While LLMs, based on decoder-only Transformers, predict the next token in a sequence, 
+LCMs operate at a higher abstraction level—processing and generating “Concepts” rather than individual words or tokens. 
+This approach aims to mirror human cognitive processes, where reasoning happens with high-level ideas before being translated 
+into detailed language or other modalities.
+
+1. Key Insights & Motivations
+   -a. Human-Like Abstraction:
+       - Humans think in high-level concepts and ideas, not in individual words. 
+         A teacher, for instance, plans a lecture around key ideas rather than scripting every word.
+       - LCMs seek to emulate this by reasoning in an abstract, language-agnostic embedding space, moving beyond the token-by-token prediction
+         of traditional LLMs.
+   -b. Limitations of LLMs:
+       - LLMs work at the token level, often English-centric, lacking explicit hierarchical abstraction.
+       - They predict next tokens based on preceding tokens, not capturing multi-modal or high-level reasoning efficiently.
+
+2. How LCMs Work
+   -a. Segmentation into Concepts:
+       - Texts are segmented into sentences (or larger chunks) called “Concepts” using the Segment any Text (SaT) technique.
+       - Each sentence (Concept) is converted into an embedding using SONAR, a multimodal, language-agnostic representation model.
+   -b. LCM Architecture:
+       -1. Base-LCM: A decoder-only Transformer enhanced by:
+           - PreNet: Normalizes and maps SONAR embeddings to the model’s hidden dimensions.
+           - PostNet: Reverses the process, mapping outputs back to the SONAR space.
+       -2. The model is trained to predict the next Concept embedding given previous ones, using a Mean Squared Error (MSE) loss for next-sentence 
+           (Concept) prediction.
+
+3. Diffusion-Based Enhancements:
+   -a. Motivation: Base-LCM’s MSE training may produce averaged, less meaningful outputs.
+   -b. Diffusion Process: Introduces randomness to generate diverse, meaningful concept embeddings.
+   -c. Forward Noising: Gradually adds Gaussian noise to sentence embeddings.
+   -d. Reverse Denoising: Uses a Transformer to reconstruct clean embeddings from noisy ones.
+   -e. Classifier-Free Guidance: Allows conditioned generation without separate classifiers, balancing quality and diversity.
+
+4. Variants of LCMs:
+   -a. One-Tower Diffusion LCM: Single Transformer handles both context processing and denoising.
+   -b. Two-Tower Diffusion LCM: Separates context encoding (Contextualizer) and denoising (Denoiser) into two specialized Transformers.
+   -c. Quantized LCMs (Quant-LCM-d and Quant-LCM-c): Use Residual Vector Quantization to convert continuous embeddings into discrete forms for prediction.
+
+5. Performance & Comparisons
+   -a. Pre-training & Fine-tuning Evaluations:
+       - Diffusion-based LCMs outperform Base-LCM in metrics like Mutual Information (MI) and Contrastive Accuracy (CA).
+       - In instruction-tuning tasks (e.g., summarization), diffusion-based models show competitive results, 
+         although LLMs like “SmaLlama” still exhibit superior fluency.
+   -b. Efficiency:
+       - LCMs process shorter embeddings (Concepts), leading to lower computational costs than token-level LLMs for longer contexts.
+       - Particularly advantageous for long-context tasks, where attention complexity grows quadratically with sequence length.
+   -c. Task Performance:
+       - Short-Context Summarization: Two-Tower LCMs yield competitive ROUGE-L scores with less repetitive, more abstractive summaries.
+       - Long-Context Summarization: Outperform some 7B-parameter LLMs on compressed summaries.
+       - Summary Expansion: LLMs show higher ROUGE-L due to higher fluency, though LCMs offer more paraphrasing.
+       - Zero-Shot Multilingualism: LCMs generalize well across many languages without fine-tuning, leveraging SONAR’s broad language support.
+
+6. Current Limitations & Outlook
+   -a. Challenges:
+       - Next-sentence (Concept) prediction is more complex than next-token prediction due to virtually limitless valid continuations.
+       - LCMs, especially diffusion-based variants, are promising but still trail behind state-of-the-art LLMs in fluency and some tasks.
+   -b. Future Potential:
+       - Scaling LCMs and refining their probabilistic generation methods may close the performance gap with LLMs.
+       - LCMs offer a compelling direction for research, especially where hierarchical abstraction, efficiency, and multilingual capabilities are critical.
+
+   In summary, while LLMs currently lead in fluency and certain language tasks, LCMs present a promising new approach by operating
+   at a higher level of abstraction, offering efficiency and robust multilingual performance. 
+   The field is evolving, and LCMs may become strong contenders in the future of language and multimodal AI.
+
+
+
