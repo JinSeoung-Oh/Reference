@@ -1,0 +1,65 @@
+### From https://medium.com/aiguys/byte-latent-transformer-changing-how-we-train-llms-b94924f1cc2e
+
+Summary: From Tokens to Dynamic Patches in Language Models
+
+Traditional language models process text by converting it into tokens—basic units such as characters, subwords, 
+or words—using predefined tokenization algorithms (e.g., Byte Pair Encoding, WordPiece, SentencePiece). 
+These tokens are then mapped to embeddings for model processing and output generation. However, recent research from Meta’s FAIR introduces 
+a new approach that challenges this fixed-token paradigm by using dynamic "patches" with the Byte Latent Transformer (BLT).
+
+1. Limitations of Traditional Tokenization
+   -a. Tokenization Process:
+       -1. Text is split into tokens using algorithms like BPE, WordPiece, and SentencePiece.
+       -2. Tokens represent text units (subwords, characters) which the model processes and generates.
+   -b. Challenges:
+       -1. Ambiguities in tokenization can arise (e.g., multiple ways to encode the same word).
+       -2. Fixed vocabulary and static token boundaries may not optimally represent all input texts, especially at scale.
+       -3. Directly training on bytes is too costly due to long sequences.
+
+2. Dynamic Tokenization and Patches
+   -a. Dynamic Tokenization:
+       -1. Instead of relying on a fixed vocabulary of tokens, dynamic tokenization creates variable-sized “patches” of bytes on the fly.
+       -2. This process uses a subword-merging strategy inspired by BPE but adapts boundaries based on input complexity and context dynamically.
+   -b. Patches vs. Tokens:
+       -1. Tokens: Predefined byte-groups from a fixed vocabulary.
+       -2. Patches: Dynamically grouped sequences of bytes without a fixed vocabulary, determined during processing.
+       -3. The size of patches can vary depending on the complexity of the data, enabling more efficient allocation of computational resources.
+
+3. Byte Latent Transformer (BLT) Architecture
+   BLT processes raw text as a continuous stream of bytes, dynamically grouping them into patches. The architecture consists of three main stages:
+   -a. Local Encoder
+       -1. Function: Converts raw byte sequences into initial patch representations.
+       -2. Operations:
+           - Transforms individual bytes into embeddings.
+           - Uses cross-attention to group bytes into patches based on local complexity.
+       -3. Purpose: Captures local patterns and dependencies, creating manageable patches.
+   -b. Latent Transformer
+       -1. Function: Models global context and dependencies across patches.
+       -2. Operations:
+           - Processes patch representations through multiple transformer layers.
+           - Integrates information from all patches to refine their representations.
+       -3. Purpose: Understands broader contextual relationships across the entire sequence.
+   -c. Local Decoder
+       -1. Function: Translates refined patch representations back into byte sequences for text generation.
+       -2. Operations:
+           - Applies residual connections to incorporate original byte-level info.
+           - Uses cross-attention and a lightweight byte-level transformer to predict subsequent bytes.
+       -3. Purpose: Ensures generated text accurately reflects input context and maintains coherence.
+
+4. Benefits of Dynamic Patching with BLT
+   -a. Efficiency:
+       - Reduces the number of processing steps by working with variable-sized patches.
+       - Allocates more computational focus on complex parts of the text while simplifying processing of easier segments.
+   -b. Scalability:
+       - Eliminates the need for a fixed token vocabulary, allowing the model to adapt to diverse languages, scripts, and rare symbols seamlessly.
+       - Handles long sequences more effectively by dynamically adjusting patch sizes.
+   -c. Improved Representation:
+       - By grouping bytes based on context and complexity rather than fixed rules, BLT can potentially capture more meaningful linguistic structures.
+       - Supports multilingual and cross-language models without relying on language-specific tokenization.
+
+5. Conclusion
+   Traditional tokenization methods segment text into fixed units, which can limit flexibility and efficiency at scale. 
+   Meta’s Byte Latent Transformer introduces a paradigm shift by dynamically grouping byte sequences into patches based on contextual complexity. 
+   This dynamic patching approach, integrated into the BLT architecture, offers improved processing efficiency, scalability,
+   and potentially richer text representations, paving the way for next-generation language models that move beyond conventional token boundaries.
+
