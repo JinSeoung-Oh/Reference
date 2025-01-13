@@ -1,4 +1,5 @@
 ### From https://medium.com/data-science-in-your-pocket/kag-enhanced-rag-and-graphrag-for-llm-based-retrieval-e84a66d6088c
+### From https://medium.com/@sarayavalasaravikiran/kag-a-better-alternative-to-rag-for-domain-specific-knowledge-applications-046054bedde1
 
 The article introduces Knowledge-Augmented Generation (KAG) as an advanced variant of Retrieval-Augmented Generation (RAG) and GraphRAG. 
 KAG integrates Large Language Models (LLMs) with domain-specific knowledge graphs to enhance logical reasoning, accuracy, and handling of complex, 
