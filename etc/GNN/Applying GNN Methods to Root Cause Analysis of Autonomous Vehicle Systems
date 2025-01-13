@@ -1,0 +1,89 @@
+### From https://medium.com/stanford-cs224w/applying-gnn-methods-to-root-cause-analysis-of-autonomous-vehicle-systems-07b407ec54a0
+
+1. Background and Motivation
+   -a. Dynamic Graphs & GNN Tasks:
+       -1. GNNs are capable of performing node-, edge-, and graph-level tasks by learning embeddings.
+       -2. In dynamic systems, graphs evolve over time due to changes in node/edge features or structure, often resulting in cascading 
+           effects from a single failure.
+
+   -b. Real-world Example: Software Modules:
+       -1. Large-scale systems (like Apache Airflow or ROS) consist of interconnected software modules forming directed cyclic graphs.
+       -2. A fault in one module (node) can cause cascading failures across downstream nodes, making it challenging to isolate root 
+           causes using traditional methods due to vast amounts of log data and complexity.
+
+   -c. Challenge:
+       -1. Identifying the root cause of failures in such dynamic, complex networks is critical for maintaining reliability and minimizing downtime.
+       -2. Real-world data capturing these scenarios is often proprietary, hence a simulator is needed to generate systematic 
+           and controllable fault data.
+
+2. Development of a Graph Executor Simulator
+   -a. Purpose:
+       To simulate dynamic graph behaviors and fault injections systematically, generating training data for GNN models.
+   -b. Simulator Features:
+       -1. Graph Configuration: Users define nodes, edges, and node behaviors (publishing, subscribing, periodic work) using YAML configurations.
+       -2. Fault Injection: Users specify fault injection configurations (e.g., node crash, message drop/delay) to simulate anomalies.
+       -3. Execution: Given the configurations, the executor:
+           - Generates node features at each time step based on user-defined rules.
+           - Injects faults at specified time points.
+           - Produces a time series of graph snapshots, each representing the system state at a discrete time with node features, edges, 
+             and fault labels.
+       -4. Output Visualization: Graphs can be visualized with blue nodes for healthy and red nodes for faulty states, 
+                                 aiding in understanding fault propagation.
+   -c. Use Case Example:
+       -1. In an autonomous vehicle software architecture graph, crashing a camera node leads to cascading failures in mapping, 
+           perception, motion planning, and control subsystems.
+       -2. Similarly, stalling a GPS node causes localized or cascading issues based on where the fault is injected.
+
+3. Dataset Construction
+   -a. Data Generation:
+       -1. The simulator generates a time series of graphs (“snapshots”) with node features and labels (healthy=0, root cause=1).
+       -2. Each snapshot is structured as a torch_geometric.data object, containing:
+           - Graph structure (nodes and edges).
+           - Node features (9 features per node such as subscription/publication counts, event timestamps, callback types, loop counts, message counts).
+           - Node labels indicating if a node is part of the root cause post-fault injection.
+   -b. Time-Series Aspect:
+       Snapshots are fed to the model in chronological order to capture temporal patterns and dynamic changes in the system.
+
+4. GNN Modeling and Analysis
+   -a. Task Definition:
+       Classify each node in a dynamic graph snapshot as healthy or root cause based on temporal and spatial patterns.
+   -b. Dataset Traits:
+       -1. Contains both local (node-level) and temporal (time-series) patterns.
+       -2. Graphs are directed, and often heterogeneous.
+       -3. Highly imbalanced: anomaly (fault) events are rare.
+   -c. Model Variations Explored:
+       -1. Three types of convolutional layers: GCN, GraphSAGE, and GAT.
+       -2. Consideration of directed vs. undirected message passing, and spatial vs. spatiotemporal architectures 
+           (with GRU layers for temporal modeling).
+
+5. Directed Graph Learning
+   -a. Directed Convolutions:
+       -1. Custom directed versions of GCNConv, SAGEConv, and GATConv were created to handle directed edges by learning separate weight matrices 
+           for source-to-destination and destination-to-source flows.
+   -b. Example implementations:
+       DirectedGCNConv(
+          (src_to_dst_conv): GCNConv(9, 18, aggr=mean),
+          (dst_to_src_conv): GCNConv(9, 18, aggr=mean)
+       )
+   -c. Directed convolutions generally outperformed undirected ones, highlighting the importance of respecting information flow direction 
+       in the network.
+
+6. Handling Imbalanced Data and Rare Event Detection
+   -a. Challenges:
+       -1. Anomalous (fault) nodes are rare, making class imbalance significant.
+       -2. The system remains healthy until a fault occurs, leading to many normal examples before the anomaly.
+   -b. Training Strategy:
+       -1. Weighted Loss: Compute class weights to penalize misclassification of rare anomaly events more heavily.
+           - Example calculation:
+             class0_weight = total_graphs / graphs_with_class0
+             class1_weight = (graphs_with_class1 / graphs_with_class0) * total_graphs / graphs_with_class1
+       -2. Focal Loss Backpropagation: Updates model parameters only when predictions are imperfect, focusing learning on challenging examples.
+       -3. Macro Recall Supervised Early Stopping: Monitors macro recall (averaged recall for each class) to stop training 
+           when improvements plateau, prioritizing anomaly detection performance over global accuracy.
+
+7. Model Architectures and Experimental Setup
+   -a. Model Structures:
+       -1. Spatial Models: Two convolutional layers followed by a linear layer for node classification. Use sigmoid activations 
+                           and dropout between layers.
+       -2. Spatiotemporal Models: Extend spatial models by adding a GRU layer after convolutions to capture temporal dynamics.
+       -3. All models experimented with different convolutions (GCN, SAGE, GAT), directed vs. undirected, and with/without GRU.
