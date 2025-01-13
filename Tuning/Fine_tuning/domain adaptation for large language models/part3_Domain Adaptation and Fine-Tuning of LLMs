@@ -1,0 +1,83 @@
+### From https://towardsdatascience.com/stepping-out-of-the-comfort-zone-through-domain-adaptation-a-deep-dive-into-dynamic-prompting-4860c6d16224
+
+1. Introduction
+   This text is the third part of a three-part blog series on domain adaptation for large language models (LLMs). 
+   It focuses on fine-tuning as a method to adapt LLMs to specific domains or tasks, explaining the motivation, 
+   options, and trade-offs in domain adaptation. Previous parts covered introduction and in-context learning; 
+   this part delves into fine-tuning approaches, offering guidance on selecting methods based on data velocity, task ambiguity, and other factors.
+
+2. Transformers 101
+   -a. Architecture Overview:
+       -1. Most state-of-the-art LLMs use the transformer architecture, introduced by Vaswani et al. in 2017.
+       -2. Key Concept: “Attention” mechanism captures semantic relationships based on context.
+       -3. Transformer Components:
+           - Encoder Block: Converts natural language into contextualized embeddings, used for tasks like classification, 
+                            named entity recognition (NER), semantic search.
+           - Decoder Block: Trained on next-token prediction, generates text autoregressively; commonly used in generative AI.
+       -4. The blog focuses on decoder-only models, as they dominate generative AI.
+
+3. End-to-End Fine-Tuning Pipeline
+   Fine-tuning adapts a pre-trained foundation model (e.g., LLaMA2) to a specific domain efficiently. The process involves several phases:
+
+   -a. Data Collection and Selection:
+       -1. Curate domain-specific data considering quality, confidentiality, licensing, copyright, PII, etc.
+       -2. For domain adaptation, datasets are often curated corpora from organizational or task-specific domains (e.g., research papers).
+   -b. Data Pre-processing:
+       -1. Quality Pre-processing: Formatting, deduplication, PII filtering.
+       -2. Approach-related Pre-processing: Structuring data into prompt templates for supervised fine-tuning.
+       -3. NLP-related Pre-processing: Tokenization, embedding, chunking according to model’s context window.
+   -c. Model Training:
+       -1. Select from various fine-tuning approaches:
+           - Continued Pre-Training (Domain-Adaptation Fine-Tuning): Train on full-text domain-specific data using next-token prediction (Causal Language Modeling).
+           - Supervised Fine-Tuning (SFT): Fine-tune on labeled datasets tailored to the target task, such as Q&A or instruction following.
+           - Preference-Alignment Approaches: Use human preference data (e.g., RLHF/PPO, DPO, KTO, ORPO) to align model behavior with user expectations.
+
+4. Training Methodology
+   -a. Self-Supervised Learning with Transformers:
+       -1. Uses masked tokens to create a supervised signal from unlabeled text (e.g., Masked Language Modeling for encoders, Causal Language Modeling for decoders).
+       -2. The model predicts the next token based on previous context, optimizing loss functions like cross-entropy or perplexity.
+   -b. Continued Pre-Training:
+       -1. Adjusts a pre-trained LLM on domain-specific unlabeled data to infuse niche expertise, such as terminology and patterns.
+       -2. For example, adapting LLaMA2 with research papers on COVID-19 vaccine research to create “BioLLaMA2.”
+   -c. Supervised Fine-Tuning (SFT):
+       -1. Uses labeled data (e.g., instruction-context-response pairs) to align the model for specific tasks like Q&A or following instructions.
+       -2. Example: Using the “dolly-15k” dataset to train BioLLaMA2-instruct for instruction-following behavior.
+
+5. Human Preference Alignment Techniques
+   -a. Reinforcement Learning from Human Feedback (RLHF) with PPO:
+       -1. Involves two steps:
+           - Reward Model Training: Generate multiple responses for prompts, have humans rank them, train a reward model on these rankings.
+           - PPO Fine-Tuning: Use the reward model to optimize the LLM with Proximal Policy Optimization, adjusting model weights to maximize rewards while applying penalties to prevent dramatic behavior shifts.
+       -2. RLHF enhances alignment with user preferences but requires significant resources.
+   -b. Direct Preference Optimization (DPO):
+       -1. Proposed as an alternative to RLHF.
+       -2. Skips separate reward model training and directly fine-tunes the model using preference data by transforming reward signals into a loss function.
+       -3. Reduces computational complexity and resource requirements.
+   -c. Kahneman-Tversky Optimization (KTO):
+       -1. Uses a simpler binary signal indicating whether an output is desirable, based on prospect theory.
+       -2. Defines a reward function with concave (gains) and convex (losses) properties relative to a reference point.
+       -3. More data-efficient when high-quality preference data is scarce.
+   -d. Odds Ratio Preference Optimization (ORPO):
+       -1. Integrates supervised fine-tuning (SFT) with preference alignment in one stage.
+       -2. Adds an odds ratio-based penalty to standard cross-entropy loss to discourage undesirable responses.
+       -3. Streamlines the process by avoiding separate reward models or two-step fine-tuning approaches.
+
+6. Decision Flow Chart for Fine-Tuning
+   -a. Model Selection Considerations (Step 1):
+       -1. Platform, performance, budget, licensing, governance, ethics.
+       -2. Example: Choosing LLaMA-2–7b due to its open-source nature, performance benchmarks, and cost considerations.
+   -b. Fine-Tuning Path Selection (Step 2):
+       -1. Narrow down models and approaches based on:
+           - Task Requirements: Text completion vs. instruction-following vs. chat models.
+           - Desired Model Behavior: Specific alignment goals for tasks.
+           - Data Availability: Amount of unlabelled vs. labeled data influences the chosen method.
+       -2. Flowchart guides starting from a base model through continued pre-training, SFT, and human preference alignment based on the desired outcome.
+
+7. Conclusion
+   The blog underscores that while generative AI holds tremendous potential, enterprise applications require domain-specific adaptation. 
+   Domain adaptation through in-context learning and fine-tuning bridges the gap between generic models and business-specific requirements. 
+   Fine-tuning, in particular, offers various approaches (continued pre-training, SFT, RLHF, DPO, KTO, ORPO) tailored to different needs, 
+   data availability, and desired outcomes. The decision flow chart and examples guide selecting appropriate models and fine-tuning paths, 
+   emphasizing iterative processes, trade-offs, and the importance of aligning AI capabilities with real-world enterprise requirements 
+   for successful adoption.
+
