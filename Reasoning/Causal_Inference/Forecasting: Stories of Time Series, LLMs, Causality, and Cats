@@ -1,0 +1,66 @@
+### from https://pub.towardsai.net/forecasting-stories-of-time-series-llm-causality-and-cats-394bf708a62e
+
+The article explores the relationship between time series forecasting, causal inference, and the emergence of foundation models like TimesFM. 
+It discusses how causality, forecasting, and prediction intersect, 
+highlighting the limitations of current forecasting models in establishing true causality.
+
+1. Causality and Time Series Forecasting
+   -a. Causality Definition:
+       -1. Causality links events in a temporal sequence, where a cause precedes and influences an effect 
+           (e.g., a cat becomes grumpy because it was washed with shampoo earlier).
+       -2. In time series, forecasting relies on similar principles: predicting future values based on past states implies an underlying 
+           causal relationship, though this is more akin to correlation than proven causation.
+   -b. Traditional Approaches to Causality in Neuroimaging:
+       -1. Dynamical Causal Modeling: Complex, Bayesian model comparison-based approach.
+       -2. Granger Causality: Uses autoregressive models to infer causality from temporal correlations,
+           though it may conflate correlation with causation.
+    -c. Deep Learning Trends:
+        -1. Recent models like N-HiTS, TiDE, and TSMixer use multilayer perceptrons for forecasting 1-D time series efficiently, 
+            identifying nonlinear relationships without explicitly modeling causality.
+
+2. Foundation Models and Zero-Shot Learning for Time Series
+   -a. Foundation Models for Time Series:
+       -1. Inspired by large language models, these models aim to handle diverse time series data without task-specific fine-tuning.
+       -2. They leverage the sequential nature of time series data, tokenizing continuous data to feed into transformer-based architectures.
+   -b. TimesFM Overview:
+       -1. Architecture: A decoder-only transformer model designed for forecasting time series data.
+       -2. Key Parameters:
+           - context_len: Number of past time steps used for prediction.
+           - horizon_len: Length of forecast period.
+           - input_patch_len & output_patch_len: Size of input/output segments processed together.
+           - num_layers, model_dims: Define model size and complexity.
+           - backend: Specifies computation device (CPU/GPU).
+       -3. Usage:
+           - Load and preprocess time series data.
+           - Initialize TimesFM with chosen parameters and load pretrained weights.
+           - Forecast using tfm.forecast(...) to obtain predictions for given time series.
+   -c. Practical Example:
+       -1. Forecasting on UCI energy demand dataset by focusing on 'Heating Load' and 'Cooling Load'.
+       -2. Demonstrated how to split data, initialize TimesFM, and visualize forecasts using Matplotlib.
+       -3. Additional use-case: Creating synthetic sine wave time series to test different frequency scenarios.
+
+3. Causality vs. Forecasting with TimesFM
+   -a. Limitations for Causality:
+       -1. TimesFM, like other univariate forecasters, excels at prediction but does not inherently provide causal inference.
+       -2. Predicting a future state implies some form of influence but does not establish the underlying cause-effect relationship.
+   -b. Proposed Approaches to Explore Causality:
+       -1. Multivariate Forecasting with Covariates:
+           - Using forecast_with_covariates(...) to consider multiple time series simultaneously, potentially revealing how one series influences another.
+       -2. Lagged Prediction Analysis:
+           - Forecast each series independently, create lagged versions of predictor series, and perform regression analysis to see 
+             if past values improve predictions of another series (similar to Granger causality).
+   -c. Challenges:
+       These methods suggest potential paths for identifying causal relationships but require further validation and ground truth to confirm 
+       true causality beyond mere correlation.
+
+4. Zero-Shot Learning and Fine-Tuning
+   -a. Zero-Shot Capabilities of Foundation Models:
+       -1. Foundation models like TimesFM are pretrained on vast and diverse time series data, enabling them to make accurate forecasts 
+           on new datasets without retraining.
+       -2. However, for specific tasks or domains, fine-tuning might still be necessary to achieve optimal performance.
+
+   -b. Conclusion:
+       -1. While TimesFM and similar models significantly advance time series forecasting through zero-shot learning and robust prediction
+           capabilities, they do not yet provide definitive causal insights.
+       -2. True causal inference remains challenging: forecasting effectively predicts "what" will happen but does not fully explain 
+           the "why" behind events, akin to predicting a grumpy cat without understanding the shampoo incident that caused it.
