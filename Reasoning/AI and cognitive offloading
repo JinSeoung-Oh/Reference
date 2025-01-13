@@ -1,0 +1,70 @@
+## From https://uxdesign.cc/ai-and-cognitive-offloading-sharing-the-thinking-process-with-machines-2d27e66e0f31
+
+The article explores the concept of "externalized thought" within the framework of distributed cognition, 
+emphasizing how humans offload cognitive tasks onto external tools, environments, and even AI systems. 
+It discusses the implications of this phenomenon for designing AI-driven interfaces and systems that seamlessly integrate with human thought processes,
+thereby reducing cognitive burden and enhancing collaborative problem-solving.
+
+1. Distributed Cognition and Externalized Thought
+   -a. Distributed Cognition Defined:
+       -1. Cognition isn’t confined to an isolated mind but is spread across people, tools, and the environment. 
+           This perspective challenges the traditional view of the mind as a solitary processor.
+       -2. Example: In a car navigation scenario, both the driver and the navigator (using a phone) contribute to thinking, 
+                    forming a distributed cognitive system where technology and human minds collaborate.
+
+   -b. Origins and Theory:
+       -1. Introduced by Edwin Hutchins in "Cognition in the Wild", distributed cognition was observed in complex tasks like naval navigation 
+           where cognitive tasks are shared among individuals, tools, and over time.
+           - Key dimensions:
+             Humans and Environment: Use of tools (compasses, maps, GPS) to extend thinking.
+             Multiple Individuals: Collaboration among team members enhances problem-solving.
+             Time: Building on past knowledge and cultural artifacts to inform present cognition.
+
+    -c. Modern Relevance:
+        With AI becoming integral, design must account for dynamic interaction between humans, AI agents, and context, 
+        shifting focus from isolated cognition to hybrid systems.
+
+2. Cognitive Offloading and Design Principles
+   -a. Cognitive Offloading:
+       -1. The act of transferring cognitive tasks to external resources—tools, devices, collaborators—to reduce mental effort and fatigue.
+       -2. Examples include using calculators, navigation apps, or AI assistants to handle routine or complex tasks, 
+           freeing human minds for higher-order thinking.
+
+3. Principles for Designing AI Systems with Externalized Thought
+   -a. Understanding User Pain Points:
+       -1. Recognize cognitive effort as a form of "pain" that users want to avoid.
+       -2. Identify where users struggle and design features that offload these burdens, reducing decision fatigue.
+       -3. Example: Braintrust simplifies job post creation by transforming simple briefs into polished drafts, reducing effort.
+   -b. Promoting Collaborative Problem-Solving:
+       -1. Design tools that act as cognitive partners, facilitating collaboration between humans and AI.
+       -2. Example: Craft App and Red Sift Radar offer AI assistance to overcome writer’s block or evaluate domain trustworthiness, 
+                    effectively sharing the cognitive load.
+   -c. Using Existing Mental Models and Patterns:
+       -1. Leverage familiar interface patterns to reduce learning curves and cognitive load.
+       -2. Example: Relume uses recognizable visual cues (purple accents, sparkle emojis) to highlight AI features, 
+                    aligning with user expectations and easing interaction.
+
+4. Leveraging Progressive Disclosure:
+   -a. Introduce complexity gradually to avoid overwhelming users.
+   -b. Use wizards or step-by-step guides to manage tasks incrementally.
+   -c. Examples:
+       - Airtable uses a wizard-like flow to guide users through AI-assisted app creation.
+       - Jasper presents functionality through simple tiles and templates, focusing on outcomes rather than technical processes.
+
+5. Ensuring Graceful Failure:
+   -a. Design AI systems to handle errors transparently and helpfully.
+   -b. Provide clear feedback, suggestions, or fallback options when mistakes occur to maintain user trust.
+   -c. Example: Google Search corrects misspellings and suggests alternatives rather than showing irrelevant results.
+
+6. Contextual Guidance:
+   -a. Offer assistance, tooltips, and prompts precisely when and where users need them.
+   -b. Help users build mental models of AI capabilities through integrated guidance.
+   -c. Example: June AI provides starting prompts for user queries post data connection, guiding users on what questions they can ask.
+
+7. Conclusion
+   Designing for externalized thought involves recognizing that cognition extends beyond the individual to include tools, collaborators, 
+   and AI systems. By applying principles like understanding user pain points, promoting collaboration, using familiar patterns, 
+   leveraging progressive disclosure, ensuring graceful failure, and providing contextual guidance, 
+   designers can create AI applications that seamlessly offload cognitive tasks. This approach not only reduces user effort and frustration 
+   but also empowers more effective human-AI collaboration, ultimately amplifying human potential.
+
