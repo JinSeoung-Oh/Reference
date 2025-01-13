@@ -1,0 +1,42 @@
+## From https://towardsdatascience.com/an-agentic-approach-to-reducing-llm-hallucinations-f7ffd6eedcf2
+## From https://github.com/CVxTz/document_ai_agents
+
+The article addresses the common issue of hallucinations in Large Language Models (LLMs)—instances where models generate incorrect, 
+nonsensical, or contradictory text—and provides practical techniques to mitigate these occurrences. 
+It categorizes hallucinations into three types and outlines methods to reduce them using grounding, structured outputs, 
+chain-of-thought prompting, and an agentic approach. Below is a summary of the key points and techniques discussed:
+
+1. Types of Hallucinations
+   -a. Intrinsic Hallucinations: Responses that contradict user-provided context.
+   -b. Extrinsic Hallucinations: Responses that cannot be verified using the provided context.
+   -c. Incoherent Hallucinations: Responses that are off-topic, nonsensical, or fail to answer the question.
+
+2. Techniques to Reduce Hallucinations
+   -a. Tip 1: Use Grounding
+       -1. Concept: Provide the LLM with relevant, in-domain context when posing questions to decrease the chance of generating incorrect answers.
+       -2. Approach: Augment the input with information pertinent to the query (e.g., relevant passages from a textbook when asking a math question).
+       -3. Example: Using Retrieval Augmented Generation (RAG) to supply excerpts from documents helps the model answer questions more accurately by anchoring responses in provided facts.
+
+    -b. Tip 2: Use Structured Outputs
+        -1. Concept: Constrain the LLM to output responses in a predefined structured format like JSON or YAML.
+        -2. Benefits:
+            - Reduces verbose, irrelevant text.
+            - Simplifies parsing and verification of responses.
+    -c. Tip 3: Use Chain-of-Thoughts and Better Prompting
+        -1. Chain-of-Thought (CoT): Encourage the model to think through its reasoning before arriving at a final answer. 
+                                    This can lead to more accurate responses.
+        -2. Enhanced Prompting:
+            - Instruct the model to answer with “N/A” if it doesn’t have enough context, avoiding fabricated responses.
+
+    -d. Tip 4: Use an Agentic Approach
+        -1. Agentic Process Overview: Break down the task into multiple steps handled by different “nodes” or functions, allowing for self-verification:
+        -2. Initial Answer Generation: Use context and question to generate a candidate answer along with a rationale.
+        -3. Reformulation: Convert the question and answer into a declarative statement for clarity.
+        -4. Verification: Ask the LLM to verify whether the provided context entails the reformulated assertion, using a structured verification process.
+
+This multi-step agentic approach uses self-verification to cross-check the model's responses against the provided context, 
+thereby reducing hallucinations.
+
+By employing grounding, structured outputs, chain-of-thought reasoning, and an agentic verification process, 
+developers can significantly reduce the likelihood of hallucinations in LLM-powered applications, leading to more reliable and accurate outputs
+
