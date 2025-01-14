@@ -1,0 +1,111 @@
+### From https://generativeai.pub/practical-guide-of-llm-quantization-gptq-awq-bitsandbytes-and-unsloth-bdeaa2c0bbf6
+
+** Detailed Summary: Quantization Techniques for Running Large Language Models Locally
+As LLMs grow in size, quantization becomes essential to reduce model size and inference costs, 
+enabling these models to run on local PCs with limited resources. 
+This blog introduces primary quantization techniques, explains their theory, and demonstrates how to implement them in a Google Colab environment.
+
+1. Overview of Quantization
+   -a. Quantization Definition:
+       -1. The process of mapping floating-point numbers (e.g., FP32) to lower-bit integers (e.g., FP16, Int8) to reduce model size and computation.
+   -b. Impact on Model Size:
+       -1. Quantizing a 7B-parameter model from FP32 (≈28GB) to Int8 can reduce size to 7GB, cutting inference cost significantly.
+   -c. Basic Rounding Methods:
+       -1. Zero-point Quantization:
+           Maps minimum and maximum data values to the target integer range.
+           - Process: Scale values to fit within an Int8 range (0–255 or -127 to 127), adjusting with a formula that balances accuracy and complexity.
+           - Pros/Cons: More precise but computationally complex.
+       -2. Absolute Maximum Quantization:
+           Scales data based on the maximum absolute value in the dataset.
+           - Process: Rescale all values relative to the maximum absolute value to fit into the target integer range.
+           - Pros/Cons: Simpler but sensitive to outliers, which can affect accuracy.
+   These rounding techniques belong to the "round-to-nearest (RTN)" family.
+
+2. Recent Quantization Techniques: QAT vs. PTQ
+   -a. Quantization Aware Training (QAT):
+       Involves training the model with quantization in mind to mitigate accuracy loss, using expensive resources like A100/H100 GPUs.
+   -b. Post-Training Quantization (PTQ):
+       Quantizes a pre-trained model without further training, saving resources and GPU memory. PTQ is practical and has seen advancements with methods like GPTQ and AWQ, integrated into libraries like Transformers.
+
+3. Group-wise Precision Tuning Quantization (GPTQ)
+   -a. What It Is:
+       A PTQ method introduced in 2022 that quantizes large models (e.g., 175B parameters) to 4-bit precision.
+   -b. How It Works:
+       -1. Quantizes each row of the weight matrix independently.
+       -2. Uses the Hessian matrix to compute optimal weight updates, minimizing quantization error.
+       -3. Maintains FP16 precision for embedding and output layers to preserve accuracy.
+   -c. Performance:
+       -1. Achieves minimal increases in perplexity.
+       -2. Can quantize a 175B model in ~4 hours using an A100 GPU.
+
+   Pseudo-code Overview:
+   GPTQ iteratively adjusts weights row-by-row based on Hessian information to find optimal 4-bit approximations while preserving 
+   overall model performance.
+
+4. Activation-aware Weight Quantization (AWQ)
+   -a. What It Is:
+       A recent PTQ method focusing on “salient” weights that significantly affect model performance.
+   -b. How It Works:
+       -1. Identifies a small fraction of critical weights using activation magnitude.
+       -2. Applies per-channel scaling to these weights to reduce quantization error.
+   -c. Performance:
+       -1. Often achieves better perplexity than general RTN methods and sometimes outperforms GPTQ.
+       -2. Results can vary based on model type (e.g., Mistral models, instruction-tuned models).
+
+5. BitsandBytes
+   -a. What It Is:
+       A widely used library for 8-bit and 4-bit quantization.
+   -b. 8-bit Quantization (LLM.int8()):
+       -1. Separates outlier weights (maintaining them in FP16) from others converted to Int8.
+       -2. Performs matrix multiplications separately and combines results, preserving accuracy.
+   -c. 4-bit Quantization with QLoRA:
+       -1. Combines BitsandBytes 4-bit quantization with Low-Rank Adaptation (LoRA) for fine-tuning.
+       -2. Key Techniques in QLoRA:
+           - 4-bit NormalFloat Quantization:
+             Utilizes normal distribution properties of weights to create a "NormalFloat4" data type, balancing values across quantization bins.
+           - Paged Optimizers:
+             Manages GPU memory efficiently using NVIDIA's unified memory feature.
+           - Double Quantization:
+             Quantizes the quantization constants to further reduce memory footprint.
+   Resource Efficiency:
+   Enables finetuning models up to ~13B parameters on consumer GPUs with 24GB VRAM.
+
+6. Unsloth
+   -a. What It Is:
+       An open-source, super-efficient fine-tuning library for LLMs, supporting parameter-efficient methods like LoRA and QLoRA.
+   -b. Key Features:
+       -1. Optimizes kernels for popular LLMs, reducing VRAM usage by ~70%.
+       -2. Compatible with HuggingFace, vllm, and supports multiple models (Llama, Mistral, etc.).
+       -3. Introduced a "Dynamic 4-bit quantization" method built on BitsandBytes, determining parameter quantization dynamically.
+
+7. Summary of When to Use Each Technique
+   -a. Zero-Shot Usage:
+       -1. Use GPTQ or AWQ to load quantized models efficiently.
+   -b. Finetuned Models with Own Data:
+       -1. Use QLoRA with BitsandBytes or Unsloth for domain-specific fine-tuning while reducing resource requirements.
+
+8. Practical Implementation in Google Colab
+   The latter part of the blog outlines practical steps to implement these quantization techniques in Google Colab, including:
+
+   -a. Environment Setup:
+       Installing necessary libraries such as auto-gptq, autoawq, trl, bitsandbytes, accelerate, transformers, optimum, and unsloth.
+   -b. Loading Pre-Quantized Models:
+       -1. GPTQ Example: Loading a pre-quantized Mistral 7B model with minimal VRAM (~5GB).
+       -2. AWQ Example: Loading a Mistral 7B model quantized with AWQ.
+   -c. Inference with Quantized Models:
+       Using standard inference pipelines (e.g., generating text about black holes) to demonstrate model accuracy is retained post-quantization.
+   -d. Quantizing Your Own Models:
+       -1. GPTQ Implementation:
+           Configuring GPTQConfig, loading a model (e.g., Llama-3.2 3B), performing quantization using a calibration dataset like "wikitext2," and saving the quantized model.
+       -2. AWQ Implementation:
+           Setting up AWQ configuration, quantizing models (e.g., Llama-3.2 3B), saving quantized weights with appropriate transformers-compatible config modifications.
+   -e. BitsandBytes QLoRA Implementation:
+       Configuring BitsandBytes for 4-bit quantization, loading a model (e.g., Llama-3.2 3B), applying LoRA for fine-tuning, setting up training with SFTTrainer, and saving the finetuned model.
+   -f. Unsloth QLoRA Implementation:
+       Loading models and tokenizers using Unsloth wrappers, configuring LoRA parameters with Unsloth-specific settings, running fine-tuning with SFTTrainer, and saving LoRA weights.
+
+   Throughout these sections, code snippets illustrate how to load pre-quantized models, quantize models using GPTQ or AWQ, perform inference with these quantized models, and fine-tune models with QLoRA using BitsandBytes and Unsloth in a Colab environment.
+
+9. Conclusion
+   The blog explains various popular quantization techniques (GPTQ, AWQ, BitsandBytes, Unsloth) and provides practical guidance on their implementation in a Google Colab environment. It emphasizes the importance of quantization for deploying large language models on local PCs, describes key theoretical concepts (zero-point and absolute maximum quantization), reviews mainstream algorithms, and walks through hands-on code examples for loading, quantizing, fine-tuning, and inferring with quantized models. This comprehensive guide aims to help beginners navigate the complexities of quantization, choose suitable methods based on their needs, and effectively implement them for real-world applications.
+
