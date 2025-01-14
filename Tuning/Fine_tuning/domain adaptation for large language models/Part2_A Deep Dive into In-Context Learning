@@ -1,0 +1,68 @@
+### From https://towardsdatascience.com/stepping-out-of-the-comfort-zone-through-domain-adaptation-a-deep-dive-into-dynamic-prompting-9ee1d71d1e35
+
+1. What is In-Context Learning?
+   In-context learning seeks to modify tasks so they fall within an LLM's comfort zone by infusing external context through prompt engineering. This reduces task complexity and leads to improved performance without altering the model’s parameters.
+
+Desired Outcome:
+
+External Tooling for Task Transformation: Modify tasks via prompt engineering to reduce complexity.
+Static vs. Dynamic Context Infusion:
+Static context infusion (e.g., adding a speaker bio) helps by reducing ambiguity for specific queries.
+Dynamic context infusion is needed for scaling to diverse domains where manually inserting relevant context is impractical.
+From Static to Dynamic Context Infusion
+Static context infusion is limited when dealing with vast or dynamic datasets, such as hundreds of speaker bios at a conference. Dynamic approaches automatically retrieve and insert the most relevant context into the model prompt, addressing issues like high token costs, compute requirements, and latency.
+
+Dynamic Context Infusion Process:
+
+Context Retrieval: Use retrieval techniques (deterministic like SQL queries or probabilistic like semantic search) to identify relevant information dynamically from large data sources (databases, vector stores, enterprise systems, APIs).
+Integration with Prompts: The retrieved context is inserted into the prompt template in real-time, tailoring the model's input based on the current query.
+Application Example:
+In a user-facing Q&A chatbot, dynamic context infusion draws on various data sources to provide precise, grounded answers.
+Retrieval-Augmented Generation (RAG)
+RAG is the most popular approach for dynamic prompt engineering. It dynamically incorporates context from large knowledge bases to transform open Q&A tasks into closed ones.
+
+RAG Workflow:
+
+Document Chunking: Break documents into digestible snippets.
+Embedding Creation: Use an encoder LLM to generate embeddings for each chunk, storing them in a vector database.
+Similarity Search:
+Encode the user question to create a query embedding.
+Perform a similarity search in the vector database to find the most relevant snippets.
+Contextualized Generation: Pass top-k relevant snippets to a decoder LLM along with the question to produce a grounded answer.
+Knowledge Graph-Augmented Generation (KGAG)
+KGAG integrates structured knowledge graphs into dynamic prompting to enhance factual accuracy and informativeness.
+
+KGAG Key Components:
+
+Subgraph Retrieval:
+Retrieve a relevant subgraph from a larger knowledge graph based on dialogue history.
+Use Graph Neural Networks (GNNs) to generate embeddings for graph triplets and compute relevance scores.
+Invariant Graph Encoding:
+Encode the retrieved subgraph alongside the text sequence without violating invariance properties (e.g., permutation invariance).
+Sort entities, apply affine transformations, and perturb embeddings to reflect graph structure efficiently.
+Graph-Text Contrastive Learning:
+Use a contrastive objective to maximize similarity between the generated text and the retrieved subgraph, ensuring factual consistency.
+Applications:
+KGAG is useful for dialogue systems and question answering where responses need to be factually accurate and well-grounded in structured knowledge.
+
+Chain-of-Thought (CoT) Prompting
+Concept: CoT prompting, introduced by Wei et al. (2023), guides LLMs to decompose complex, multi-step problems into a sequence of reasoning steps, mimicking human thought processes.
+Benefits:
+Breaks down difficult tasks into manageable parts.
+Provides transparency into the model’s reasoning.
+Applicable across various complex tasks like math problems and commonsense reasoning.
+Figure 5 (from Wei et al. 2023) likely illustrates how CoT prompting breaks down a multi-step reasoning process.
+
+Reasoning and Acting (ReAct) Prompting
+Concept: ReAct, introduced by Yao et al. (2023), integrates reasoning with action-taking, allowing models to reason and interact with environments dynamically.
+Key Features:
+Augments the model's action space with both reasoning steps ("thoughts") and executable actions.
+Enables recursive reasoning and acting, improving performance on tasks like Q&A, fact verification, text games, and web navigation.
+Combines strengths of CoT with dynamic actions to incorporate external context via tools like RAG or KGAG.
+Facilitates intelligent long-term planning, progress tracking, and strategy adjustment.
+Figure 6 likely shows how ReAct prompting operates in a recursive manner, combining reasoning and acting to solve a Q&A problem effectively.
+
+Conclusion of Part 2
+This part of the blog series explored in-context learning as a domain adaptation strategy. It explained how static and dynamic context infusion techniques, such as RAG and KGAG, help move tasks into an LLM's comfort zone. By transforming complex tasks using external context and structured reasoning approaches like CoT and ReAct prompting, organizations can improve the reliability and performance of LLMs on domain-specific tasks.
+
+The next part will focus on fine-tuning approaches, diving deep into techniques for adapting and aligning LLMs through training on domain-specific data, continuing the journey of domain adaptation.
