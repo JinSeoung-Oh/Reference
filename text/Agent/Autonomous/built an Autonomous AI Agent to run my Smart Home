@@ -1,0 +1,98 @@
+### From https://medium.com/@smarthomedan/how-i-built-an-autonomous-ai-agent-to-run-my-smart-home-7bd5984d915b
+
+1. Introduction and Context
+   The author shares their decade-long journey developing a smart home API, mobile app, and chatbot, with the ultimate goal of creating 
+   a real AI-powered home system akin to JARVIS from Iron Man. 
+   While earlier attempts with traditional chatbots (e.g., using Microsoft’s LUIS.ai) had limitations, 
+   the advent of Large Language Models (LLMs) has enabled more sophisticated Autonomous Agents capable of reasoning and acting in complex, 
+   natural language scenarios.
+
+2. Transition from Basic Assistants to Autonomous Agents
+   -a. Old World – Basic Assistants:
+       -1. Traditional chatbots relied on rule-based systems (like decision trees) and specific keywords.
+       -2. These systems were limited by predefined vocabularies and could not handle variations in natural language effectively.
+       -3. Example: A chatbot might fail to recognize synonyms for room names, limiting functionality.
+   -b. Advancement with LLMs:
+       -1. Large Language Models allow agents to reason over complex natural language inputs, overcoming the limitations of rigid decision trees.
+       -2. By using reasoning capabilities of LLMs, agents can understand varied expressions for the same concept 
+           (e.g., different ways to refer to "Living Room").
+
+3. Creating the LangGraph.AI Agent
+   -a. LangGraph Approach:
+       -1. The author transitioned from using LUIS.ai to building an agent with LangGraph, which simplifies the process of integrating
+           an LLM with custom tools.
+       -2. Key Concepts:
+           - An Agent with a system prompt receives task prompts.
+           - The agent is provided with a set of tools—functions tied to specific prompts (e.g., controlling lights).
+           - The LLM reasons about which tools to use to complete the given task, eliminating the need for explicit decision trees.
+   -b. Initial Setup:
+       -1. The basic setup for a runnable agent was simple: passing in a set of tools, creating memory, and setting up a system prompt.
+       -2. Complexity emerged in developing the tools themselves, not the agent framework.
+
+4. Challenges in Providing Tools to Control the Home
+   -a. Tool Development Complexity:
+       -1. While the underlying API for smart home control existed, wrapping it with tool prompts for an LLM agent posed challenges.
+       -2. Ensuring a good Agent Experience is crucial; while the API was great for developers, it wasn't optimized for AI agents.
+   -b. Examples of Tool Implementation:
+       -1. GetLighting Tool:
+           - Queries an integration API to check the status of light groups.
+           - Requires careful prompt design to highlight key information without being overly verbose.
+       -2. Use of Zod Library:
+           - Employed for input validation and documentation of tool specifications.
+           - Simplifies handling of state mutations (e.g., turning lights on/off, adjusting brightness/color).
+           - Shifts responsibility from prompts to schema validation, reducing errors.
+   -c. Agent Experience vs. Developer Experience:
+       -1. The API, though developer-friendly, was not ideal for an agent due to issues like inconsistent data (e.g., temperature units).
+       -2. The author had to consider "Agent Experience": how well the tools and prompts work for the AI agent, not just human developers.
+
+5. Enhancing Agent Experience with Context Tools
+   -a. The author built additional "Context" Tools to fill gaps:
+       -1. Room Mapping Tool:
+           - Provides mappings of room names to IDs, helping the agent make informed decisions without querying full lists frequently.
+       -2. Other context tools included a Date tool and an "About" tool to give the agent a persona and current information.
+   -b. These context tools are integrated without re-engineering the entire API, simply by creating new LangGraph tools to 
+       supply agents with necessary context and data mappings.
+
+6. Adding Memory to the Agent
+   -a. Conversation Memory:
+       -1. LangGraph supports adding short-term memory by using thread IDs, allowing the agent to maintain context over a conversation.
+       -2. The agent can now reference previous messages, improving its ability to handle complex dialogues.
+   -b. Technical Implementation:
+       -1. The agent is wrapped in an Express.js server.
+       -2. Each incoming request generates a UUID if no thread ID is provided, enabling conversation threading.
+   -c. This feature helps the agent manage multi-turn conversations, understand references, and handle follow-up commands intelligently.
+
+7. Exposing the Agent to Users
+   -a. The author built a simple Progressive Web App (PWA) interface using React and Material UI (Joy-UI) to interact with the smart home agent.
+   -b. This chat interface allows daily use by family members, providing valuable feedback for iterative improvement.
+   -c. User Interface Characteristics:
+       -1. Basic but functional UI focused on chat interactions with the agent.
+       -2. Emphasizes rapid deployment and daily use for iterative improvement rather than perfecting the UI upfront.
+
+8. Triggering the AI Agent
+    -a. Autonomous Operation Goals:
+        -1. Beyond user-triggered conversations, the author sought to make the agent autonomous, capable of proactive tasks without explicit user input.
+    -b. Scheduler Integration:
+        -1. The author integrated the AI agent with a Node.js cronjob scheduler.
+        -2. The scheduler triggers API endpoints on a schedule (e.g., weekly jobs, morning updates).
+    -c. Examples of Scheduled Prompts:
+        -1. “Tell me which bin to take out tonight by checking the calendar then send a notification.”
+        -2. “Check if my 7:13am train to Birmingham has been cancelled or delayed.”
+        -3. Daily updates integrating weather, train status, calendar events, and news.
+    -d. NFC and Other Triggers:
+        -1. The author used NFC tags to trigger tasks, e.g., when leaving home, prompting the agent to lower the temperature, turn off lights, and close curtains.
+    -e. Autonomous Decision-Making:
+        -1. The agent checks home presence by logging into the home router and checking Wi-Fi connections.
+        -2. Periodically, the agent wakes up, determines if anyone is home, adjusts lights, heating, etc., accordingly, and manages home conditions based on schedule and context.
+
+9. Observations on Building Autonomous AI Agents
+    -a. Ease of Initial Setup vs. Complexity of Refinement:
+        -1. Setting up an initial autonomous agent was straightforward with LangGraph, but fine-tuning it to meet exact user needs proved challenging.
+    -b. Prompt Engineering as an Art:
+        -1. While the author anticipated prompt engineering would be scientifically precise, it turned out to be more subjective and iterative, requiring trial and error to get desired outcomes.
+    -c. Agent Experience Importance:
+        -1. The success of an AI agent depends on how well it interacts with its environment and adapts to user needs, which involves considering both "developer experience" and "agent experience."
+
+10. Conclusion
+    The text emphasizes that creating a fully autonomous AI agent for smart home control is achievable with modern frameworks like LangGraph and large language models. However, building one that operates exactly as desired involves iterative refinement, prompt engineering, context tool development, memory integration, and proper scheduling. The journey from basic assistant to a personalized, autonomous agent requires attention to both technical APIs and the "agent experience" to ensure the AI functions effectively in real-world scenarios.
+
