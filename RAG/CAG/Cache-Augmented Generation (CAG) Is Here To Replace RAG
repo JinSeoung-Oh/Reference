@@ -1,0 +1,65 @@
+### From https://levelup.gitconnected.com/cache-augmented-generation-cag-is-here-to-replace-rag-3d25c52360b2
+
+1. Introduction
+   Large Language Models (LLMs) generate responses based on their training data, which can become outdated over time. 
+   Traditional approaches to ensure up-to-date answers include:
+
+   -a. Fine-tuning the entire model.
+   -b. Fine-tuning using Low-Rank Adaptation (LoRA).
+   -c. Retrieval-Augmented Generation (RAG).
+
+   Recently, a new technique called Cache-Augmented Generation (CAG) has been introduced. 
+   CAG reduces reliance on RAG by pre-loading relevant knowledge into an LLM's extended context, thus potentially overcoming RAG's limitations.
+
+2. Understanding RAG (Retrieval-Augmented Generation)
+   -a. RAG Process:
+       -1. Retrieval: Relevant documents or snippets are fetched from a knowledge base.
+       -2. Augmentation: Retrieved information is added to the query context.
+       -3. Generation: The LLM generates answers using both the query and the augmented context.
+   -b. Drawbacks of RAG:
+       -1. Retrieval Latency: Time taken to fetch data during inference.
+       -2. Retrieval Errors: Possibility of retrieving irrelevant or incomplete documents.
+       -3. Knowledge Fragmentation: Retrieved pieces may be disjointed, affecting coherence.
+       -4. Increased Complexity: Building and maintaining an RAG pipeline adds infrastructure overhead.
+
+3. Introducing Cache-Augmented Generation (CAG)
+   CAG leverages the long context lengths of modern LLMs to preload relevant knowledge, eliminating the need for dynamic retrieval during each query.
+   -a. How CAG Works:
+       -1. Preloading External Knowledge:
+           -1) Relevant documents are preprocessed and transformed into a precomputed key-value (KV) cache.
+           -2) The KV cache is stored on disk or in memory, allowing the model to have holistic and coherent knowledge available at inference time.
+           -3) Benefits include reduced computational costs, as the documents are processed only once.
+       -2. Inference with CAG:
+           -1) During inference, the LLM loads the precomputed KV cache alongside the user's query.
+           -2) The model uses this combined context to generate responses, eliminating retrieval latency and reducing errors.
+       -3. Cache Reset:
+           -1) As the LLM processes queries, the KV cache grows with new tokens appended.
+           -2) To maintain performance over time, the cache can be reset by truncating newly added tokens, 
+               enabling quick reinitialization without reloading the entire cache.
+
+4. Comparison of Workflows: RAG vs. CAG
+   -a. RAG Workflow: Retrieves knowledge dynamically for each query, integrates it with the query, and then generates an answer.
+   -b. CAG Workflow: Preloads all relevant knowledge into a cache. For each query, the model uses the preloaded information without
+                     additional retrieval steps, enabling faster and more efficient response generation.
+
+5. Performance and Evaluation of CAG
+   -a. Benchmarks Used:
+       -1. SQuAD 1.0: Over 100,000 questions based on Wikipedia articles, requiring text segment answers.
+       -2. HotPotQA: 113,000+ Wikipedia-based questions requiring multi-hop reasoning across documents.
+   -b. Test Conditions:
+       -1. Created three test sets from each dataset with varying reference text lengths, increasing retrieval difficulty.
+   -c. Model and Evaluation:
+       -1. Used the Llama 3.1 8-B Instruction model with a 128k token context length.
+       -2. Compared CAG to RAG using sparse retrieval (BM25) and dense retrieval (OpenAI Indexes).
+       -3. Evaluation Metric: BERT-Score, which measures similarity of generated answers to ground-truth answers.
+   -d. Key Findings:
+       -1. Accuracy: CAG outperformed both sparse and dense RAG systems in BERT-Score on most evaluations.
+       -2. Efficiency: CAG dramatically reduced generation time, especially with long reference texts. 
+                       For instance, on the largest HotPotQA test set, CAG was approximately 40.5 times faster than RAG.
+
+6. Conclusion
+   Cache-Augmented Generation (CAG) presents a promising alternative to Retrieval-Augmented Generation by preloading relevant knowledge 
+   into the LLM's context. This approach addresses common RAG drawbacks such as retrieval latency and errors,
+   while also offering significant speed improvements. As LLMs continue to expand their context lengths, 
+   techniques like CAG will become increasingly valuable for ensuring accurate, efficient, and up-to-date responses in real-time applications.
+
