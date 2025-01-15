@@ -1,0 +1,110 @@
+### From https://pub.towardsai.net/building-large-action-models-insights-from-microsoft-d1a4ba451e74
+
+1. Introduction to LAMs and the Paradigm Shift
+   -a. Context: Traditional Large Language Models (LLMs) excel at understanding and generating text but struggle with executing real-world actions.
+   -b. Limitation: LLMs cannot directly translate language understanding into tangible actions, limiting their real-world applicability.
+   -c. Solution: Large Action Models (LAMs) extend LLM capabilities to include action generation, enabling interaction with both physical 
+                 and digital environments.
+   -d. Paradigm Shift: Transition from passive language understanding (LLMs) to active task completion (LAMs) which combines language reasoning 
+                       with real-world action execution.
+
+2. Key Architectural Components of Microsoft’s LAM Framework
+   Microsoft Research outlines a comprehensive framework for developing LAMs, emphasizing a step-by-step approach:
+
+   -a. Data Collection and Preparation
+       -1. Objective: Gather high-quality, action-oriented data tailored to specific use cases.
+       -2. Two-Phase Approach:
+           -1) Task-Plan Collection:
+               - Collect pairs of tasks (natural language requests) and corresponding plans (step-by-step procedures).
+               - Sources: Application documentation, WikiHow articles, historical search queries.
+           -2) Task-Action Collection:
+               - Convert task-plan data into concrete, executable steps (action sequences).
+               - Example actions: select_text(text="hello"), click(on=Button("20"), how="left", double=False).
+   -b. Model Training
+       A four-phase staged training strategy transforms an LLM into a LAM:
+
+       -1. Phase 1: Task-Plan Pretraining
+           - Train on 76,672 task-plan pairs.
+           - Goal: Teach the model to generate coherent and logical plans for various tasks.
+       -2. Phase 2: Learning from Experts
+           - The model learns to execute actions by imitating expert-labeled task-action trajectories.
+           - Aligns plan generation with actionable steps based on observed UI states and actions.
+       -3. Phase 3: Self-Boosting Exploration
+           - Encourage the model to explore tasks beyond expert demonstrations.
+           - By interacting with the environment and trying alternative strategies, the model generates new successful action sequences, 
+             promoting adaptability and diversity.
+       -4. Phase 4: Learning from a Reward Model
+           - Incorporate reinforcement learning (RL) principles.
+           - Train a reward model on success/failure data to predict action quality.
+           - Fine-tune the LAM offline using RL to improve decision-making based on predicted rewards without further interaction.
+   -c. Integration and Grounding
+       -1. Objective: Integrate the trained LAM into an agent framework for real-world interaction.
+       -2. Process:
+           Embed the LAM into an agent system that interacts with external tools, manages memory, and interfaces with environments.
+           Example: Microsoft’s UFO — a GUI agent for Windows OS interaction.
+
+           AppAgent within UFO:
+           -1) Operates as the platform for the LAM.
+           -2) Components include:
+               - Environment Data Collection: Gathers UI elements and properties.
+               - LAM Inference Engine: Processes environment data to infer necessary actions.
+               - Action Executor: Translates inferred actions into concrete UI interactions (e.g., mouse clicks, keyboard inputs).
+               - Memory: Stores previous actions and plans for context-aware decisions.
+  -d. Evaluation of LAMs
+      -1. Evaluation Types:
+          - Offline Evaluation:
+            Test the LAM using controlled datasets to measure task success rate, precision, recall, etc.
+      -2. Online Evaluation:
+          Assess performance in real-world environments, measuring task completion accuracy, efficiency, and effectiveness.
+  -e. Key Metrics:
+      -1. Task Success Rate (TSR): Percentage of successfully completed tasks.
+      -2. Task Completion Time: Duration from request initiation to task completion.
+      -3. Object Accuracy: Accuracy in selecting the correct UI elements.
+      -4. Step Success Rate (SSR): Percentage of individual steps executed successfully.
+  -f. Performance Example:
+      In tests with Microsoft Word, LAM achieved a TSR of 71.0% and demonstrated superior efficiency with the shortest completion times and lowest latencies compared to baseline models like GPT-4o.
+
+3. Key Building Blocks and Features of LAMs
+   -a. Action Generation:
+       -1. Translating user intentions into executable steps (GUI operations, API calls, physical actions, code generation).
+   -b. Dynamic Planning and Adaptation:
+       -1. Decomposing complex tasks into subtasks and adjusting plans based on environmental changes in real time.
+   -c. Specialization and Efficiency:
+       -1. Tailoring models for specific domains or tasks, optimizing accuracy and computational efficiency.
+   -d. Agent Systems:
+       -1. Provide operational frameworks with tools, memory, and feedback mechanisms.
+       -2. Enable seamless interaction with environments, as demonstrated by UFO’s AppAgent.
+
+4. The UFO Agent: Grounding LAMs in Windows OS
+   -a. Architecture:
+       -1. UFO comprises a HostAgent for decomposing requests and an AppAgent for executing subtasks within specific applications.
+   -b. AppAgent Structure:
+       -1. Environment Data Collection: Gathers information about the UI and application context.
+       -2. LAM Inference Engine: Uses collected data to infer necessary actions.
+       -3. Action Executor: Executes inferred actions on the OS (e.g., clicking buttons, typing).
+       -4. Memory: Remembers past actions and plans to inform future decisions.
+
+5. Evaluation and Performance Metrics
+   -a. Metrics Used:
+       -1. Task Success Rate, Task Completion Time, Object Accuracy, Step Success Rate.
+   -b. Results:
+       -1. LAM demonstrated strong performance with a TSR of 71.0% in real-world tests and excelled in efficiency and latency.
+
+6. Limitations and Future Research Directions
+   -a. Safety Risks:
+       -1. Ensuring safe operation to avoid unintended consequences in real-world interactions.
+   -b. Ethical Considerations:
+       -1. Addressing bias, fairness, and accountability in LAM behavior.
+   -c. Scalability and Adaptability:
+       -1. Expanding LAMs to new domains and tasks requires efficient training methods and possibly transfer learning.
+   -d. Ongoing Research:
+       -1. Improving safety, efficiency, ethical alignment, and scalability of LAMs remains critical for future development.
+
+7. Conclusion
+   Microsoft’s framework for Large Action Models represents a significant evolution from passive language models to active, real-world AI agents.
+   By combining structured data collection, phased training strategies, seamless integration 
+   (e.g., Microsoft’s UFO), and rigorous evaluation, the framework bridges the gap between language understanding and real-world task execution. 
+   Despite current limitations like safety, ethics, and scalability challenges, 
+   LAMs show promise in revolutionizing human-computer interaction and automating complex tasks. 
+   Future research will further refine these systems, making them more reliable, adaptable, and ethically sound.
+
