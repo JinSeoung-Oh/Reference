@@ -1,0 +1,123 @@
+#### https://towardsdatascience.com/an-overview-of-feature-selection-1c50965551dd
+
+1. Introduction
+   The article is part of a series focused on feature selection for tabular data prediction problems. Feature selection aims to:
+
+   -a. Increase Model Accuracy: By removing irrelevant or confusing features.
+   -b. Reduce Computational Costs: By lowering training and inference time.
+   -c. Enhance Robustness: By improving model performance on future, unseen data (to be discussed in a future article).
+
+   This part concentrates on the first two goals (accuracy and computation) and introduces a new feature selection method called 
+   History-Based Feature Selection (HBFS), comparing it to other feature selection techniques.
+
+2. Feature Selection Goals
+   -a. Maximizing Accuracy
+       -1. Removing irrelevant or marginally predictive features can increase model accuracy.
+       -2. Even tree-based models, which typically handle irrelevant features, can be confused by them in practice.
+       -3. Eliminating such features prevents poor splits in decision trees, especially deeper in the tree structure.
+   -b. Minimizing Computational Costs
+       -1. Fewer features reduce training and inference time, as well as costs associated with hyperparameter tuning, model evaluation, and monitoring.
+       -2. Reducing features can lead to faster model development cycles and lower operational expenses.
+       -3. Sometimes small gains in accuracy do not justify the extra computational expense of including more features.
+   -c. Additional Motivations:
+       -1. Data Handling: Fewer features mean reduced effort in data collection, storage, and quality assurance.
+       -2. Cost Savings: For hosted environments (e.g., Google BigQuery), fewer columns/features directly reduce query costs.
+
+3. Techniques for Feature Selection
+   Feature selection methods are broadly categorized into two groups:
+
+   A. Individual Feature Evaluation Methods
+      These methods evaluate each feature one at a time based on its predictive power regarding the target variable.
+
+      -1. Filter Methods (e.g., chi², mutual information, ANOVA f-value): Assess correlation or association between each feature and the target.
+      -2. MRMR (Minimum Redundancy Maximum Relevance): Ranks features high if they correlate well with the target but have low redundancy with other features.
+      -3. Recursive Feature Elimination (RFE):
+          - Trains a model on all features, eliminates the least important feature(s), and repeats.
+          - Provides a ranked order of features based on their removal order.
+      -4. 1D Models:
+          - Trains a simple model (e.g., decision tree) using only one feature at a time.
+          - Ranks features based on individual model performance.
+      -5. Model-based Selection:
+          - Uses feature importances from models like RandomForest or LogisticRegression to select relevant features.
+          - Fast but may not yield the most accurate subset.
+     -6. Permutation Tests:
+         - Measures accuracy drop when a feature’s values are permuted, indicating its importance.
+     -7. Boruta Method:
+         - Creates "shadow" (permuted) versions of each feature.
+         - Trains a model on combined original and shadow features, then compares importances.
+         - Features consistently more important than their shadows are considered predictive.
+
+     Limitations:
+     These methods do not consider feature interactions. They might miss combinations of features that work well together or select redundant 
+     features.
+
+   B. Methods to Identify the Ideal Feature Subset
+      These methods aim to find the best set of features collectively, not just individually.
+
+      -1. Wrapper Methods:
+          - Additive Process: Start with an empty set, add features one by one based on which addition improves the model most.
+          - Subtractive Process: Start with all features, remove the least important ones iteratively.
+          - These methods search for an optimal feature combination but can be slow with many features.
+      -2. Random Search:
+          - Randomly selects feature subsets to evaluate.
+          - Simple and can be effective, but not strategic.
+      -3. Optimization Techniques:
+          - Hill Climbing:
+            -1) Start with a random feature set.
+            -2) Iteratively modify the set slightly (add/remove features) if it improves performance.
+            -3) May use simulated annealing to escape local optima.
+          - Genetic Algorithms:
+            -1) Maintain a population of feature sets.
+            -2) Apply mutation (small changes) and crossover (combining sets) to evolve better sets over generations.
+          - Bayesian Optimization:
+            -1) Uses a Gaussian Process (GP) to model the relationship between feature subsets and model performance.
+            -2) Balances exploration (trying new feature sets) and exploitation (refining promising sets) based on predicted
+                performance and uncertainty.
+            -3) Iteratively selects new subsets to evaluate based on an acquisition function.
+
+4. History-Based Feature Selection (HBFS)
+   HBFS is introduced as a new method that bridges simplicity and performance, akin to Bayesian Optimization but simpler in nature. 
+   It aims to find an optimal set of features by learning from a history of experiments with various feature subsets.
+
+   HBFS Algorithm Overview (Pseudo-code):
+   ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+   Loop a specified number of times (default 20):
+       Generate several random subsets of features (each covering ~half the features)
+       For each subset:
+           Train a model using this subset on training data
+           Evaluate on a validation set
+           Record the feature subset and its evaluation score
+
+   Loop a specified number of times (default 10):
+       Train a RandomForest regressor using the history of feature sets and scores
+       Loop for a specified number of times (default 1000):
+           Generate a random set of features
+           Use the RandomForest to estimate the score for this set
+           Store the estimate
+       Select a specified number (default 20) of top-estimated candidate feature sets
+       For each top candidate:
+           Train and evaluate a model using this subset
+           Record the features and their actual score
+
+   Output all evaluated feature sets and scores, sorted by performance
+   ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+   -a. Key Points:
+       -1. Exploration Phase: The initial loop randomly samples many feature subsets to build an initial history.
+       -2. Exploitation Phase: Subsequent loops use a RandomForest to predict promising feature subsets based on historical performance.
+       -3. This process reduces exploration gradually in favor of exploitation, aiming to identify the best-performing feature sets efficiently.
+   -b. Benefits of HBFS:
+       -1. Simpler than full Bayesian Optimization.
+       -2. Balances exploration and exploitation with fewer iterations.
+       -3. Provides visualization tools to understand the feature selection process.
+       -4. Can be adapted to prioritize accuracy or balance accuracy with computation costs.
+
+5. Conclusions
+   -a. Accuracy and Computation Trade-offs:
+       Feature selection can improve model accuracy and reduce computational costs by eliminating irrelevant or redundant features.
+   -b. Overview of Methods:
+       The article summarized various feature selection methods, their benefits, and limitations, leading to the introduction of HBFS 
+       as a promising new technique.
+   -c. HBFS Value:
+       HBFS learns from past feature subset evaluations to find optimal feature combinations, often performing favorably compared to traditional 
+       methods. It is particularly useful for projects where balancing accuracy with computation is crucial.
+
