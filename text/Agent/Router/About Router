@@ -1,0 +1,79 @@
+### From https://towardsdatascience.com/llm-routing-the-heart-of-any-practical-ai-chatbot-application-892e88d4a80d
+### https://lmsys.org/blog/2024-07-01-routellm/
+
+This article discusses how choosing the right language model for a given application—rather than always opting for the largest, 
+most advanced model—can improve practicality, cost-efficiency, and performance. 
+It introduces the concept of routing as a strategy to select appropriate large language models (LLMs) based on request characteristics and system constraints,
+covering both pre-routing and post-routing techniques, their underlying principles, methods of evaluation, and the challenges involved.
+
+1. Key Insights
+   -a. Model Selection vs. Model Size:
+       -1. While larger models with more capacity and context window often achieve better performance on complex tasks (e.g., advanced mathematics), 
+           real-world applications do not always require the most powerful model.
+       -2. For many tasks, a smaller or more specialized model might yield a more relevant, concise, and resource-efficient response, 
+           particularly when dealing with straightforward queries or casual conversation.
+  -b.Cost and Latency Considerations:
+     -1. Using the largest model for every request can be wasteful, especially for high-volume, simple queries (e.g., greetings) where smaller models suffice.
+     -2. Large models can incur higher costs and longer response times, which can affect scalability and user satisfaction during peak usage.
+     -3. Deploying a mix of models based on request complexity and system load helps manage server capacity, reduce latency, 
+         and handle millions of requests more effectively.
+
+2. Routing: The Core Concept
+   Routing is the process of determining which LLM should handle a particular user request. 
+   This decision is based on various indicators and is implemented through two main approaches: pre-routing and post-routing.
+
+   -a. Pre-Routing
+       -1. Definition: Pre-routing uses information available at the moment a user sends a request to decide which model, parameters, 
+                       or prompt to use before generating a response.
+       -2. Decision Factors:
+           -1) Type of Request: Simple greetings might be routed to smaller, cheaper models, while complex questions or those requiring reasoning might go to larger, 
+                                specialized models.
+           -2) Question Complexity: Diverse questions such as factual queries versus abstract or philosophical ones may be routed differently.
+           -3) Request Length/Context Needs: Longer requests or those needing extended context (e.g., summarizing an article) could be sent to models with
+                                             larger context windows.
+           -4) Technical and User Context: Real-time metrics like recent latency, error rates, user status (e.g., paying customer), origin country, 
+                                           or language of the request can influence routing decisions.
+       -3. Implementation:
+           -1) Extracting routing signals may require additional tools (e.g., classifiers fine-tuned on specific data) to assess query type, complexity, 
+               or other metadata.
+           -2) Decision-making can be rule-based (heuristic) or driven by another fine-tuned model that selects the best LLM based on gathered information.
+
+   -b. Post-Routing
+       -1. Definition: Post-routing involves initially using a cheaper or faster model to generate a response and then evaluating whether the response is adequate. 
+                       If not, a more powerful model is employed to improve the answer.
+       -2. Evaluation of Response Quality:
+           -1) Self-Judgment Challenges: LLMs are typically not reliable judges of their own responses, often overestimating quality.
+           -2) Strategies to Improve Judgment:
+               - Fine-tuning a specialized model dedicated to evaluating responses, though this requires additional data collection and training.
+               - Using statistical methods, such as self-evaluating responses multiple times with high temperature to estimate confidence, 
+                 then adjusting thresholds based on labeled data comparisons between LLM outputs and human evaluations.
+       -3. Workflow:
+           -1) Use a lower-cost model to generate an initial response.
+           -2) Evaluate the response with either the same or a separate evaluator.
+           -3) If the response fails quality checks, escalate to a higher-capability model to regenerate an improved answer.
+
+3. Combining Pre-Routing and Post-Routing
+   -a. Practical Integration: In real-world systems, both pre-routing and post-routing are used together:
+       -1. Pre-routing selects an initial model based on available request information.
+       -2. Post-routing steps in to correct or improve responses that do not meet quality standards.
+   -b. Performance Measurement:
+       -1. Offline Metrics: Latency, call frequency to various models, token length, accuracy, and relevance.
+       -2. Online Evaluation: A/B testing to measure user engagement and satisfaction in response to different routing strategies.
+   -c. Adaptation Over Time:
+       -1. User behavior and request types evolve, which may shift the distribution of query complexity and topics.
+       -2. Pre-routing classifiers and decision logic must be updated regularly to adapt to changing patterns.
+       -3. Updates to underlying models can affect performance, necessitating re-tuning of both pre-routing and post-routing modules.
+       -4. Continuous end-to-end testing and iterations are required whenever models or routing logic are updated to maintain system reliability, scalability, 
+           and robustness.
+
+4. Challenges and Considerations
+   -a. Dynamic Nature of User Requests: As user queries evolve, routing strategies must be flexible and adaptable.
+   -b. System Updates: Changes in models or routing heuristics demand comprehensive testing to ensure new configurations work well across a variety of situations.
+   -c. Resource Management: Balancing cost, latency, and quality across different models while scaling to millions of requests is a complex operational challenge.
+
+In summary, effective routing—both pre- and post-routing—enables practical deployment of LLMs by selecting the most appropriate model for each request based on 
+complexity, context, and system constraints. This approach optimizes resource use, reduces latency, and enhances user experience, 
+but requires continual adaptation and evaluation as models, user behaviors, and requirements change.
+
+
+
