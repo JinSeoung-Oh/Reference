@@ -1,0 +1,90 @@
+### From https://ai.gopubby.com/transformer%C2%B2-the-death-of-lora-c2abc58ca717
+
+The latest research from sakana.ai presents a novel framework for transformer architectures centered on adaptation, 
+aiming to create self-adaptive large language models (LLMs) that dynamically adjust to diverse tasks and domains without constant external fine-tuning. 
+The key motivations, challenges with traditional fine-tuning, proposed solutions, 
+and a new fine-tuning technique called Singular Value Fine-Tuning (SVF) are discussed below.
+
+1. Challenges with Traditional LLM Fine-Tuning
+   -a. Resource Intensity:
+       -1. Fine-tuning large models requires significant computational power and storage, even with mixed precision, quantization, 
+           and Parameter-Efficient Fine-Tuning (PEFT) techniques.
+   -b. Overfitting and Catastrophic Forgetting:
+       -1. Models often generate repetitive outputs and may lose previously learned information (catastrophic forgetting) when fine-tuned extensively on new tasks.
+   -c. Task Interference:
+       -1. Simultaneously training on multiple tasks can lead to conflicting gradients, causing the model to excel in one area while degrading performance in others.
+
+2. Self-Adaptive LLMs: Definition and Benefits
+   Self-adaptive LLMs are models that autonomously regulate their behavior in dynamic environments without external intervention. 
+   They offer several advantages:
+
+   -a. Dynamic Task Adaptation: The ability to modify behavior for different tasks on-the-fly eliminates the need for repeated fine-tuning.
+   -b. Continual Learning: Models can continuously accumulate knowledge over time, adapting to new information and domains.
+   -c. Elimination of Catastrophic Forgetting: New learning is integrated without erasing previous skills, maintaining performance across tasks.
+   -d. Neuroscientific Inspiration: These models mimic the human brain by activating specialized regions for different tasks, ensuring efficient 
+       task-specific processing.
+
+3. Approaches to Achieve Self-Adaptive LLMs
+   -a. Scaling Up Models:
+       -1. Building ever larger models can improve multi-domain performance but is not scalable due to extreme resource demands.
+   -b. Mixture-of-Experts (MoE):
+       -1. Routing inputs to specialized expert modules can tailor responses to specific domains.
+       -2. Traditional MoE requires human-labeled data and training separate experts for each task, which remains resource-intensive.
+       -3. Recent research (e.g., “Self-MoE”) suggests converting monolithic LLMs into compositional systems with self-specialized experts trained on synthetic data, 
+           sharing modules within a base LLM.
+   -c. Benefits of Self-Adaptive Models through MoE-like Systems:
+       -1. They enable dynamic model modification without constant fine-tuning.
+       -2. Support continual learning and avoid catastrophic forgetting.
+       -3. Mimic brain-like specialization for diverse tasks.
+
+4. Singular Value Fine-Tuning (SVF)
+   To overcome the resource demands of training separate expert modules, the paper introduces Singular Value Fine-Tuning (SVF) as an efficient fine-tuning technique:
+   -a. Fundamentals of Singular Value Decomposition (SVD):
+       -1. SVD decomposes a weight matrix 𝑊 into three components: 𝑊=𝑈Σ(𝑉^𝑇)
+       -2. The matrix Σ contains singular values that scale basis vectors aligned with principal axes (directions of maximum variance).
+       -3. Changing these singular values adjusts the model's emphasis on different features without altering the entire parameter space.
+   -b. SVF Technique:
+       -1. Instead of updating all parameters during fine-tuning, only the singular values in Σ are adjusted.
+       -2. This drastically reduces the number of parameters that need to be trained, lowering resource requirements.
+   -c. Trade-offs:
+       -1. While updating only the top-k singular values greatly reduces computational load, it can lead to some information loss if variance is uniformly 
+           distributed among many features.
+
+5. Learning Expert Vectors Using SVF and Reinforcement Learning (RL)
+   -a. SVF for Expert Vectors:
+       -1. The process begins by applying Singular Value Fine-Tuning (SVF) to the base model’s weight matrices. As previously discussed, 
+           SVF focuses on adjusting only the singular values (Σ matrix) of these weights.
+       -2. Mathematically, the tuning can be expressed as updating the model with an SVF expert vector (z), encapsulating the changes applied during fine-tuning:
+           (update equation involving 𝑧)
+   -b. Reinforcement Learning (RL) Integration:
+       -1. The authors train these expert vectors using the REINFORCE algorithm, a policy gradient method in reinforcement learning.
+       -2. They adopt a unitary reward—a simple reward signal—and introduce a Kullback-Leibler (KL) penalty to discourage the adapted model from straying too 
+           far from its original behavior.
+       -3. This approach allows the creation of robust and flexible expert vectors without requiring an excessively large or diverse dataset.
+   -c. Benefits of Expert Vectors:
+       -1. High Compositionality: The expert vectors are not only compact but also interpretable and can be algebraically combined or manipulated.
+       -2. This compositionality means that multiple expert vectors can be effectively combined to address complex or multi-domain tasks.
+
+6. Self-Adaptation Mechanism During Inference
+   The self-adaptation process in Transformer² involves a two-pass strategy, combining multiple sets of expert vectors to adapt to the task at hand:
+
+   -a. First Inference Pass:
+       -1. Given a particular task or input, the model initially processes the request and observes its own test-time behavior.
+       -2. From this observation, the system constructs an adapted vector, 𝑧′, which encapsulates the necessary adjustments to align with the task requirements.
+   -b. Second Inference Pass:
+       -1. In the subsequent pass, the adapted vector 𝑧′is utilized to influence the model’s behavior.
+       -2. The model generates the final output using a linear combination of the base expert vectors informed by 𝑧′, 
+           effectively tailoring its response to the observed demands.
+   -c. Key Idea:
+       -1. By iteratively observing its performance and adjusting via expert vectors, the model can seamlessly integrate long-term learned behaviors and 
+           immediate adaptations.
+       -2. This two-pass mechanism enables the LLM to dynamically adjust without external fine-tuning for each new task, making it truly self-adaptive.
+
+7. Conclusion
+   While Transformer² presents an innovative method for building self-adaptive LLMs through the creation and utilization of SVF-based expert vectors, 
+   it comes with complexity:
+
+   -a. Complexity vs. Simplicity: Creating expert vectors using SVF and training them with RL is more intricate than using established methods 
+       like LoRA (Low-Rank Adaptation), which benefit from extensive library support and ease of use.
+   -b. When to Use Transformer²: SVF-based approaches are particularly valuable if you have a deep understanding of the model’s weight matrices and 
+       desire fine-grained control over their adaptation.
