@@ -1,0 +1,77 @@
+### From https://medium.com/@nikhilanandnj/where-are-facts-stored-in-large-language-models-0869914cfcbf
+
+This article explores where facts are stored within large language models (LLMs) and discusses how to edit these facts without retraining the entire model.
+The central concept is Causal Mediation Analysis, which is used to identify specific locations in an LLM responsible for storing facts. 
+The discussion covers the method's principles, its application, findings, limitations, and implications.
+
+1. Problem Statement and Background
+   -a. Situation: For example, although Brian Niccol has become the CEO of Starbucks, pre-trained LLMs might still believe Kevin Johnson is CEO.
+   -b. Key Questions:
+       -1. How can we update facts in an LLM without retraining it each time?
+       -2. Where are facts actually stored in an LLM?
+   -c. Relevant Research: In 2022, Kevin Meng and colleagues published the paper “Locating and Editing Factual Associations in GPT,” which proposed a method to locate where facts are stored in LLMs and to edit these facts without additional training.
+
+2. Overview of LLM Architecture
+   -a. Transformer Architecture:
+       -1. Input tokens are converted into an initial hidden state ℎ^(0) by summing token embeddings and positional encodings.
+       -2. Each Transformer layer processes the hidden state with two main components:
+           -1) Attention Block: Computes self-attention over the current hidden state.
+           -2) MLP Block: Applies a non-linear transformation to the output of the attention block.
+       -3. Outputs from both the Attention and MLP blocks are added back to the hidden state via residual connections, which is then passed to the next layer.
+       -4. The final hidden state is unembedded to produce the predicted token.
+
+3. Locating Facts Using Causal Mediation Analysis
+   This method compares three different runs of the model to analyze the impact of modifications at various points in the network on factual output.
+   -a. Clean Run
+       -1. Example Input: “Space Needle is located in the city of”
+       -2. Expected Output: “Seattle”
+       -3. Process: The input is fed into the LLM without any alterations, and the model predicts the next token.
+       -4. Outcome: The model accurately outputs “Seattle” based on stored factual knowledge.
+   -b. Corrupted Run
+       -1. Modification: Small perturbations (𝜖) are added to the embedding vectors of the input tokens.
+       -2. Effect: Changing the initial embeddings propagates through all subsequent layers, altering hidden states.
+       -3. Outcome: The model’s prediction likelihood for “Seattle” decreases, and it may produce an incorrect or meaningless output (e.g., “cro”).
+   -c. Corrupted-with-Restoration Run
+       -1. Process: Similar to the corrupted run, but with one specific token at a certain layer restored to its original state.
+       -2. Significance: If restoring a specific layer/token improves the prediction (e.g., increases the probability of “Seattle”), 
+                         that location plays a crucial role in determining the answer.
+4. Key Concepts Defined
+   -a. Total Effect (TE)
+       -1. Definition: The difference in the probability of predicting the correct token (e.g., “Seattle”) between the clean and corrupted runs.
+           - TE = 𝑃[correct output in clean run]−𝑃^∗[correct output in corrupted run]
+       -2. Example: If “Seattle” has a 90% probability in a clean run but drops to 30% in a corrupted run, TE = 60%. 
+                    This indicates a significant effect of the corruption on the output.
+   -b. Indirect Effect (IE)
+       -1. Definition: The improvement in the probability of the correct token when a specific layer/token is restored during the corrupted-with-restoration run.
+           - IE =𝑃(∗,clean)[𝑜]−𝑃^∗[𝑜]
+             Here, 𝑃(∗,clean)[𝑜] is the probability of outputting “Seattle” after restoring a specific hidden state.
+       -2. Example: If the corrupted run gives “Seattle” a probability of 30% and restoring a particular layer/token increases it to 50%, IE = 20%. This means that position has a strong influence on the output.
+    -c. Average Total Effect (ATE) and Average Indirect Effect (AIE)
+        -1. Purpose: Determine which model locations are generally responsible for storing facts, rather than focusing on a single fact.
+        -2. ATE: The average effect of corruption on output probability across multiple statements.
+        -3. AIE: The average effect of restoring a specific location on output probability across multiple statements.
+        -4. Interpretation:
+            - A larger ATE indicates that corruption significantly degrades the model’s output.
+            - A larger AIE for a particular position indicates that restoring that position greatly improves output, signifying its importance in factual storage.
+5. Summary of Findings
+   -a. Observed ATE: Corruption led to an average of 18.6% degradation in output accuracy.
+   -b. Significant AIE Example:
+       -1. For the statement involving “Space Needle,” the largest AIE (8.7%) was found at the last token of the subject (“le” from “Needle”) in layer 15.
+       -2. This suggests that this specific hidden state plays a critical role in storing the factual association between “Space Needle” and “Seattle.”
+
+6. Analysis of MLP vs. Attention Contributions
+   -a. Goal: Determine whether MLP or Attention layers are more critical for factual storage.
+   -b. Method: In corrupted-with-restoration runs, selectively restore only the MLP or only the Attention block at specific layers.
+   -c. Results:
+       -1. At the final subject token, the maximum AIE observed was 6.6% for MLP layers and 1.6% for Attention layers.
+       -2. Conclusion: MLP layers, particularly at the position of the last subject token, have a much larger causal effect on factual output than Attention layers, 
+                       implying that MLPs are more involved in storing factual information.
+
+7. Conclusion and Implications
+   -a. Key Insight: Facts in LLMs are predominantly stored in MLP layers—especially at the hidden state corresponding to the last subject token. 
+                    MLP layers may function like a database, mapping queries to factual answers.
+   -b. Applications: This knowledge can be used to target specific parts of the model for editing facts or improving factual accuracy without full retraining.
+   -c. Limitations:
+       -1. While MLP layers appear crucial for factual associations, it cannot be concluded that other parts of the model are unimportant.
+       -2. The exact mechanism for how facts are stored and retrieved in the model remains unclear.
+       -3. Further research is needed to deepen understanding of factual storage and to refine methods for editing or improving models based on these insights.
