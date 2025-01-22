@@ -1,0 +1,99 @@
+### https://medium.com/@aipapers/titans-by-google-the-era-of-ai-after-transformers-e6fa446991d4
+
+-1. Overview
+    The paper introduces a novel architecture, Titans, developed by Google Research. Inspired by how human memory works, 
+    Titans address the challenge of integrating long-term memory into models without overfitting. 
+    This architecture mitigates the quadratic cost issue in Transformers while providing dynamic memory handling for long input sequences.
+
+-2. Core Contributions:
+    -a. Deep Neural Long-Term Memory Module
+        -1) What It Is:
+            A neural network with multiple layers that encodes past abstractions into its parameters, contrasting traditional RNNs 
+            where memory is stored in fixed vectors.
+
+        -2) Challenges of Memorization:
+            Simply memorizing training data limits a model's generalization capabilities. 
+            The Titans architecture circumvents this by incorporating mechanisms inspired by human cognitive processes.
+
+    -b. Core Mechanisms in Titans
+        -1). Memorization Without Overfitting
+             Inspired by human memory, the architecture models "surprise" to selectively remember significant events.
+             Surprising inputs (measured as large gradients) trigger greater updates to memory weights, 
+             ensuring critical information is captured without overfitting to training data.
+        -2). Modeling Surprise
+             -1. Momentary Surprise:
+                 Updates memory based on immediate significant changes detected in the input.
+                 M_t = M_(t−1)−θ_t ∇ℓ(M_(t−1);X_t)
+                 where the term ∇ℓ(M_(t−1);X_t) represents the "Surprise."
+
+             -2. Past Surprise:
+                 Accounts for how humans adapt to surprises over time. The model retains memory of surprising events, even as their impact decays, 
+                 using a combination of previous and current surprise values.
+                 M_t=M_(t−1)+S_t
+                 𝑆_𝑡=𝜂_𝑡𝑆_(𝑡−1)−θ_t ∇ℓ(M_(t−1);X_t)
+                 where 𝜂_𝑡𝑆_(𝑡−1) is Past Surprise
+                 −θ_t ∇ℓ(M_(t−1);X_t) is Momentary Surprise
+        -3). Modeling Forgetting
+             A gating mechanism (adaptive forgetting) manages memory by selectively removing outdated or unnecessary information.
+             This is crucial for processing very large sequences, enabling the model to focus on relevant data.
+             M_t=(1−α_t)M_(t−1)+S_t
+             𝑆_𝑡=𝜂_𝑡𝑆_(𝑡−1)−𝜃_𝑡 ∇ℓ(𝑀_(𝑡−1);𝑥_𝑡)
+        -4).Loss Function
+            -1. The loss function is designed to model associative memory, mapping input keys to values. 
+                Similar to Transformers, linear layers project inputs into keys and values, and the loss measures 
+                how well the model learns these associations.
+            -2. Instead of processing an entire sequence at once, Titans process input incrementally, updating memory weights as new information arrives.
+            
+            𝑘_𝑡=𝑥_𝑡𝑊_𝐾
+            𝑣_𝑡=𝑥_𝑡𝑊_𝑉
+            ℓ(𝑀_(𝑡−1);𝑥_𝑡)=∥𝑀_(𝑡−1)(k_t)−v_t∥np.transpose(2 2)
+​
+
+3. Titans Architecture: Memory as a Context (MAC)
+   -a. Persistent Memory
+       Stores global, data-independent information in the form of learnable tokens. 
+       These tokens are prepended to input sequences to provide a consistent global context and mitigate "attention drain," 
+       where initial tokens dominate attention mechanisms.
+   -b. Contextual Memory
+       Represents dynamic memory that evolves based on the context. Memory tokens are retrieved using the neural long-term memory module, 
+       which is updated during test time. This allows the model to incorporate information from earlier chunks of the same sequence.
+   -c. Core Component
+       -1). Combines persistent memory, contextual memory, and the current input. An attention mechanism determines how the model integrates 
+            these memory types and decides which information should be stored in long-term memory.
+       -2). Attention also ensures that only relevant contextual information is retained, preventing the model from being overloaded with 
+            unnecessary data.
+
+4. Workflow of the MAC Architecture
+   -a. Chunking Long Sequences:
+       Long inputs are divided into smaller, manageable chunks for processing.
+   -b. Adding Persistent Memory:
+       Learnable tokens are prepended to each chunk, storing global information that remains constant across the sequence.
+   -c. Incorporating Contextual Memory:
+       Memory tokens are retrieved from the long-term memory module using the chunked sequence as input. 
+       These tokens are added to the sequence after the persistent memory tokens.
+   -d. Integrating in the Core Component:
+       An attention block processes the combined sequence (persistent memory + contextual memory + input). 
+       This block determines how much the long-term memory is updated and ensures relevant information is retained.
+   -e. Dynamic Memory Updates:
+       The long-term memory is updated incrementally as chunks are processed, enabling efficient handling of long sequences without requiring 
+       the entire sequence to be stored in memory at once.
+
+5. Advantages of Titans
+   -a. Dynamic Memory Handling:
+       Memory is updated during both training and inference, allowing the model to adapt to new information in real time.
+   -b. Efficient Sequence Processing:
+       The chunking mechanism, combined with persistent and contextual memory, enables the model to handle long sequences efficiently.
+   -c. Biologically Inspired Design:
+       Drawing inspiration from human memory processes (e.g., surprise, forgetting), the architecture achieves a balance between retaining 
+       critical information and adapting to new contexts.
+   -d. Overcoming Transformer Limitations:
+       Titans address the quadratic cost issue of traditional Transformers while leveraging attention mechanisms for effective memory management.
+
+6. Conclusion
+   Titans is a pioneering architecture that introduces biologically inspired memory modeling into deep learning. 
+   By combining persistent, contextual, and core memory components, it provides a scalable solution for processing long sequences. 
+   The integration of mechanisms for surprise, forgetting, and associative memory ensures that the model is both efficient and robust, 
+   paving the way for future advancements in memory-augmented neural networks
+
+  
+
