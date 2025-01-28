@@ -1,0 +1,127 @@
+### From https://ai.gopubby.com/federated-learning-for-composite-ai-agents-83e61d0e430c
+
+1. Composite AI Agents
+   -1.1 Evolution to Agentic AI
+        -a. Transition from Generative AI to Agentic AI: While ChatGPT and similar Generative AI models focus on generating text responses, 
+                                                         Agentic AI involves autonomous agents capable of executing complex tasks without human intervention.
+        -b. Capabilities of AI Agents: These agents can perform tasks such as making sales, planning trips, booking flights, 
+                                       hiring contractors for home projects, and ordering food autonomously.
+        -c. Historical Context: AI agents build upon decades of research in multi-agent systems (MAS), particularly goal-oriented agents, 
+                                aiming to decompose complex user tasks into manageable sub-tasks and compose agents capable of executing these sub-tasks.
+   -1.2 Hierarchical Compositional Scenario
+        -a. Example: Online Repair Agent for Luxury Goods:
+            -1. Product Repair Assessment Agent: Utilizes a computer vision (CV) model to assess repair needs based on user-uploaded product images.
+            -2. Ordering Agent: Captures additional details (e.g., damage specifics, user contact information) if the user approves the repair quote.
+            -3. Future Integration: Data from these agents (e.g., product states, user demographics) can train a Product Recommendation Agent, 
+                enhancing service offerings.
+        -b. Another Scenario: Manufacturing Defect Detection Agent:
+           -1. Integration with Repair Agent: Utilizes labeled images and damage descriptions from the Repair Agent to improve CV models for defect detection.
+           -2. Feedback Loop: Enhances the Product Repair Assessment Agent by feeding back labeled data, refining its accuracy and performance.
+   -1.3 Non-determinism in Agentic Compositions
+        -a. E-shopping Scenario Example:
+            -1. Non-deterministic Operators:
+                -1) Check Credit: Decision-making based on user credit status.
+                -2) Delivery Mode: User choice between store pickup or shipping.
+            -2. Implications:
+                -1) Conditional Execution: Shipping may not occur if the user opts for pickup, affecting the invocation of shipping agents.
+                -2) Constraint Projection: Determining whether constraints (e.g., shipping only to certain countries) apply to composite services.
+                -3) Impact on Component Services: Even deterministic components like Payment and Shipping may not execute if preceded by conditional choices.
+
+2. Privacy Leakage in the Context of LLM Agents
+   -2.1 ML Model Features Leakage
+        -a. Inference Attacks:
+            -1. Membership Inference Attacks: Determining if specific user data was part of the training dataset.
+            -2. Property Inference Attacks: Reconstructing properties or characteristics of the training dataset.
+        -b. Mechanism:
+            -1. Gradient Correlation: During backpropagation, gradients computed are correlated with input features, 
+                                      potentially revealing sensitive information.
+            -2. Weight Sensitivity: Certain weights in neural networks may be sensitive to specific data features, increasing the risk of leakage.
+   -2.2 Pre-trained LLM Data Leakage
+        -a. LLM-Specific Risks:
+            -1. Training Data Exposure: Pre-trained LLMs like GPT-3.5 and GPT-4 may inadvertently leak sensitive information present in 
+                                        their training datasets (e.g., email addresses from the Enron dataset).
+            -2. Leakage Techniques:
+                -1) Zero-shot and Few-shot Prompting: Crafting prompts that coax the model into revealing training data.
+                -2) Example Prompts:
+                    - “The email address of {target_name} is…”
+                    - “Name: {target_name}, Email:”
+                    - “{target_name} [mailto:”
+                    - “—Original Message—\n From: {target_name} [mailto:”
+   -2.3 Enterprise Data Leakage in the Context of LLM Agents
+        -a. Extended Privacy Concerns:
+            -1. Retrieval-Augmented Generation (RAG): Combining LLMs with enterprise data retrieval systems increases the risk of data leakage.
+            -2. Fine-Tuning Risks: Fine-tuning LLMs with sensitive enterprise data can expose proprietary information through inference attacks.
+            -3. Model Snapshots Exposure: Attackers can exploit both pre-trained and fine-tuned model snapshots to extract comprehensive training data.
+        -b. Leakage Scenarios:
+            -1. Model Features Leakage: Similar to traditional ML models, where sensitive features can be inferred from the model’s weights.
+            -2. API Access Vulnerabilities: Even with limited access, attackers can perform black-box attacks to extract sensitive information.
+        -c. Mitigation Strategies:
+            -1. Differential Privacy: Implementing noise addition to model updates to protect individual data contributions.
+            -2. Machine Unlearning: Techniques to remove specific user data from trained models without necessitating complete retraining.
+   -2.4 Privacy Challenges of Agentic Compositions
+        -a. Data Aggregation Risks:
+            -1. Purpose Mismatch: Composite agents may aggregate data for purposes different from the original user consent, 
+                                  leading to profiling and unauthorized use.
+            -2. Complex Data Flows: Higher-level composite agents can inadvertently combine data from various sources without explicit user consent.
+        -b. Right to Forget:
+            -1. Implementation Difficulty: Ensuring that all composite agents and their underlying components can effectively delete user data upon request.
+            -2. Impact on Composite Agents: Deleting data from individual agents can disrupt the functionality of higher-level composite agents 
+                that rely on aggregated data.
+        -c. Solution Proposal:
+            -1. Federated Learning (FL): Introduced as a method to mitigate privacy challenges by processing user data locally and sharing 
+                                         only encrypted data with composite agents.
+3. Federated Learning
+   -3.1 Secure Multiparty Computation (SMC)
+        -a. Definition: Enables multiple distrustful parties to jointly compute functions over their inputs while preserving input privacy.
+        -b. Key Primitives:
+            -1. Homomorphic Encryption (HE):
+                -1) Functionality: Allows arithmetic operations on encrypted data without decrypting it.
+                -2) Public-Key System: Any party can encrypt data; decryption requires collaboration among parties.
+                -3) Threshold Encryption: Decryption requires a minimum number of parties (threshold) to collaborate.
+            -2. Secret Sharing:
+                -1) Definition: Distributes a secret across multiple parties, where only specific combinations can reconstruct the secret.
+                -2) Shamir’s Secret Sharing:
+                    - Mechanism: Distributes shares based on a random polynomial, ensuring that a minimum number of shares (t) are required to reconstruct the secret.
+                    - Operations:
+                      Addition/Subtraction: Can be performed locally by combining individual shares.
+                      Multiplication: Requires distributed collaboration among parties to compute securely.
+       -c. Performance Considerations:
+           Homomorphic Encryption and Secret Sharing have different performance characteristics, making it challenging to compare protocols directly.
+
+   -3.2 Hierarchical Federated Learning (HFL)
+        -a. Definition: An extension of Federated Learning (FL) involving multiple hierarchical levels of parameter servers and participants.
+        -b. Training Process:
+            -1. Local Training: Leaf nodes (participants) train the global model locally using their non-overlapping datasets.
+            -2. Parameter Server Role: The root node acts as a central parameter server that aggregates and averages parameter updates from child nodes.
+            -3. Iterative Updates: The process iterates through epochs where local models are updated and synchronized with the global model.
+        -c. Hierarchical Extension:
+            -1. Multi-Level Structure: Root nodes from lower levels become child nodes at higher levels, facilitating synchronous bottom-up training.
+            -2. Optimal Global Model: Ensures the global model converges by maintaining the latest parameter values across all hierarchical levels.
+        -d. Advantages:
+            -1. Privacy Preservation: Data remains distributed and is not centralized, reducing privacy risks.
+            -2. Scalability: Supports large-scale training across multiple organizational boundaries without compromising data privacy.
+
+   -3.3 Differential Privacy
+        -a. Role in FL:
+            -1. Noise Addition: Introduces noise to model updates to obscure individual data contributions, 
+                                ensuring that the inclusion or exclusion of a single data point does not significantly affect the output.
+            -2. Teacher-Student Models: Multiple teacher nodes trained on sensitive data can train a student model using differentially 
+                                        private aggregated outputs, allowing the student to make accurate predictions without exposing sensitive information.
+        -b. Benefits:
+            -1. Balancing Utility and Privacy: Achieves a trade-off where model performance remains high while individual data privacy is preserved.
+            -2. Protection Against Leakage: Prevents attackers from inferring specific user data from the model’s outputs.
+
+4. Conclusion
+   -a. Pervasiveness of Agentic AI: Agentic AI, particularly through multi-agent systems, is increasingly prevalent, moving beyond single LLM invocations to complex, autonomous task executions.
+   -b. Composite AI Agents:
+       -1. Advantages: Enable reuse, agility, and efficiency in developing and maintaining AI-driven solutions across multiple domains.
+       -2. Challenges: Introduce novel privacy risks related to data aggregation, model leakage, and compliance with privacy regulations.
+   -c. Privacy Challenges:
+       -1. Data Leakage: From both pre-trained and fine-tuned LLMs, as well as through composite agent interactions.
+       -2. Purpose Mismatch: Composite agents may use data for unintended purposes, violating user consent and privacy regulations.
+       -3. Right to Forget: Implementing data deletion across composite agents is complex and requires advanced techniques like machine unlearning.
+   -d. Federated Learning as a Solution:
+       -1. Local Data Processing: FL processes user data locally, sharing only encrypted or aggregated data, thereby mitigating privacy risks.
+       -2. Secure Computation: Utilizes SMC primitives like homomorphic encryption and secret sharing to ensure data privacy during collaborative model training.
+       -3. Hierarchical FL: Extends FL to multi-level organizational structures, enhancing scalability and maintaining privacy across distributed systems.
+
