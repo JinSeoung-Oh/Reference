@@ -1,0 +1,130 @@
+### From https://epikprotocol.medium.com/creating-a-mathematical-knowledge-graph-using-lean-4s-mathlib-library-b187d1af663c
+
+1. Introduction
+   1.1 Lean 4 and Mathlib
+       -a. Lean 4: A computer-assisted proof system, also known as an interactive theorem prover, 
+                   utilized for the formal verification of mathematical theorems and the correctness of computer programs.
+       -b. Mathlib: The mathematical library for Lean 4, maintained by a collaborative team of mathematicians and computer scientists.
+       -c. Applications: Lean 4 has been instrumental in verifying significant mathematical research, such as a key theorem 
+                         in condensed mathematics during the liquid tensor experiment led by Fields Medalist Peter Scholze.
+       -d. Knowledge Graph Project: The initiative involves building a knowledge graph based on Lean 4, encompassing four main components:
+           -1. Data Acquisition
+           -2. Graph Design
+           -3. Graph Visualization
+           -4. Model Training and Inference Based on the Graph
+
+2. Construction and Visualization of the Lean Knowledge Graph
+   2.1 Data Acquisition and Organization
+       -a. Source: Mathlib4, accessible via GitHub.
+       -b. Installation and Compilation: After installing Lean 4, Mathlib4 is compiled, and the doc-gen4 tool generates HTML documentation.
+       -c. Mathematical Objects: The documentation includes various types of mathematical objects, categorized as:
+           -1. def: Mathematical definitions
+           -2. abbrev: Abbreviations that can be automatically expanded
+           -3. structure: Similar to data structures in programming languages
+           -4. class: Supports typeclass inference in type theory
+           -5. instance: Instances of classes (e.g., natural numbers as a monoid)
+           -6. inductive: Recursive definitions
+           -7. axiom: Axioms
+           -8. lemma: Lemmas
+           -9. theorem: Theorems
+
+       -d. Data Extraction: Utilizes the Python library BeautifulSoup to parse HTML documents and convert them into JSON format, extracting:
+           -1. Names of mathematical objects
+           -2. Hierarchical relationships
+           -3. Connections between objects
+           -4. Natural language descriptions
+   2.2 Graph Design
+       -a. Tree Structure: The JSON data's hierarchical structure forms the basis for the knowledge graph.
+       -b. Entity Definitions:
+           -1. Entity Name: Derived from the name field in each JSON entry.
+           -2. Attribute: Derived from the kind field in the JSON.
+           -3. Node Types:
+               -1) Node: Represents each mathematical theorem with its name and type.
+               -2) Description: Represents the description associated with each theorem.
+               -3) Attribute: Represents attributes associated with each theorem.
+               -4) Field: Represents names from the Class_fields list.
+               -5) Parent: Represents inheritance relationships from the Classparent list.
+       -c. Relationship Definitions:
+           -1. HAS_LINK_TO: Connects definitions and theorems.
+           -2. HAS_ATTRIBUTE: Indicates that a theorem possesses a specific attribute.
+           -3. HAS_DESCRIPTION: Indicates that a theorem has an associated description.
+           -4. HAS_FIELD: Indicates that a theorem includes specific fields.
+           -5. EXTENDS_TO: Indicates inheritance from a parent theorem.
+       -d. Graph Construction: Python scripts parse JSON entries to build the knowledge graph, which is stored in a Neo4j graph database.
+       -e. Visualization: Due to the graph's extensive content, only a subset is visualized.
+   2.3 Analysis of the Relationship Structure Characteristics of the Graph
+       -a. Initial Relationship: The HAS_LINK_TO relationship connects nodes but lacks direct logical meaning for mathematical theorems.
+       -b. Refinement:
+           -1. Enhanced Relationships: Incorporates the kind of connected nodes to redefine relationships as HAS_[Linked node’s kind].
+           -2. Retention of HAS_LINK_TO: Maintained for nodes with unknown kind values.
+       -c. Reconstructed Graph: Demonstrates refined relationships, enhancing the graph's logical coherence.
+
+
+3. Experiment Analysis Based on the NeuralKG Platform
+   3.1 Introduction to NeuralKG
+       -a. NeuralKG: An open-source Python library designed for diverse learning of knowledge graph representations.
+       -b. Features:
+           -1. Unified Framework: Reproduces link prediction results across various methods without requiring re-implementation.
+           -2. Configurability and Extensibility: Offers modular, decoupled components for custom model implementation and optimal training methods.
+       -c. Benefits: Facilitates rapid development and experimentation for developers and researchers in knowledge graph embedding (KGE) tasks.
+   3.2 Introduction to Experimental Algorithms
+       -a. Categories of KGE Algorithms:
+           -1. Conventional KGE:
+               -1) TransE: Models entities and relationships as vectors in a continuous space, optimizing based on distance metrics. 
+                           Best suited for one-to-one relationships but struggles with more complex relationship types.
+               -2) DistMult: Uses matrix factorization to capture semantic information via dot products of entity and relationship vectors. 
+                             Effective for symmetric relationships but limited for asymmetric ones.
+               -3) ConvE: Employs convolutional neural networks to capture local patterns and correlations between entity and relationship embeddings,
+                          enhancing the understanding of complex relationships.
+           -2. GNN-Based KGE:
+               -1) RGCN (Relational Graph Convolutional Network): Designed for heterogeneous graph data, effectively encoding diverse entity and 
+                                                                  relationship types.
+               -2) CompGCN: Combines graph convolutional networks with compositional operations to learn representations of 
+                            both entities and relationships simultaneously, improving the modeling of complex interactions.
+               -3) Rule-Based KGE:
+                   - ComplEx-NNE+AER: Integrates complex embeddings with neural network embeddings and automatic expression reconstruction, 
+                                      enhancing the model's expressiveness and generalization for tasks like link prediction and entity disambiguation.
+   3.3 Experimental Design
+       -a. Data Splitting: The knowledge graph is divided into training (70%), validation (20%), and test (10%) sets.
+       -b. Parameter Initialization: Utilizes default settings provided by NeuralKG for each algorithm.
+       -c. Training Process:
+           -1) Iterative Training: Algorithms are trained on the training set.
+           -2) Model Selection: Optimal parameters and models are selected based on validation set performance.
+           -3) Final Evaluation: Model performance is assessed on the test set using predefined metrics.
+   3.4 Evaluation Metrics
+       -a. MRR (Mean Reciprocal Rank):
+           -1) Definition: Measures the average of the reciprocal ranks of the correct answers for a set of queries.
+           -2) Purpose: Assesses the effectiveness of ranking tasks like link prediction.
+       -b. Hit@K:
+           -1) Definition: Measures the proportion of correct answers that appear within the top K predictions.
+           -2) Purpose: Evaluates the model's ability to retrieve correct answers among its top K guesses.
+   3.5 Experimental Results
+       -a. Conventional KGE Models:
+           -1) ConvE: Best performance with an MRR of 26.1%, Hit@1 of 17.0%, Hit@3 of 30.1%, and Hit@10 of 40.5%.
+           -2) TransE: Outperforms DistMult across all metrics, particularly excelling in Hit@1 and Hit@10.
+           -3) DistMult: Lower performance compared to TransE and ConvE, especially in handling asymmetric relationships.
+       -b. GNN-Based KGE Models:
+           -1) CompGCN: Achieves the highest overall performance with an MRR of 27.0%, surpassing both RGCN and conventional KGE models in Hit@1, Hit@3, and Hit@10.
+           -2) RGCN: Performs comparably to ConvE, demonstrating strong capabilities in handling complex graph structures.
+       -c. Rule-Based KGE Models:
+           -1) ComplEx-NNE+AER: Shows relatively weak performance with an MRR and Hit metrics lower than other models, particularly struggling with Hit@1.
+   3.6 Experimental Analysis
+       -a. Model Performance:
+           -1) ConvE: Excels among conventional models, indicating the effectiveness of convolutional approaches in capturing complex relationships.
+           -2) CompGCN: Leads among GNN-based models, highlighting the strength of graph convolutional techniques in handling diverse and intricate graph structures.
+           -3) ComplEx-NNE+AER: Underperforms, suggesting limitations in capturing certain types of relationships or dependencies.
+       -b. Graph Features Impact:
+           -1) HAS_LINK_TO Refinement: The increased logical complexity from redefining relationships affects model performance. GNN models like CompGCN benefit from their ability to model diverse entity and relationship types.
+       -c. Generalization Ability:
+            -1) Unknown Node Types: GNN-based models demonstrate better generalization in handling nodes with unknown or sparse types due to their consideration of local graph structures.
+4. Conclusion
+   -a. Lean 4 and Knowledge Graphs:
+       -1. The project successfully constructs a knowledge graph based on Lean 4’s Mathlib4, encompassing data acquisition, graph design, visualization, and model training.
+       -2. The structured approach using JSON data, Python’s BeautifulSoup for parsing, and Neo4j for graph storage ensures a robust and scalable knowledge representation.
+   -b. NeuralKG Experimental Insights:
+       -1. GNN-Based Models (especially CompGCN) outperform conventional and rule-based KGE models, demonstrating the efficacy of graph neural networks in capturing complex relationships within knowledge graphs.
+       -2. Model Selection: Emphasizes the importance of considering graph structural features when selecting appropriate KGE models.
+       -3. Generalization: Highlights the superior generalization capabilities of GNN-based models in handling incomplete or complex graph data.
+
+Overall Summary: The text outlines the methodology for constructing and visualizing a Lean 4-based knowledge graph, leveraging Mathlib4’s comprehensive mathematical definitions and relationships. By employing Python tools for data parsing and Neo4j for graph storage, the project establishes a detailed and structured knowledge representation. The subsequent experimental analysis using the NeuralKG platform evaluates various KGE algorithms, revealing that GNN-based models, particularly CompGCN, exhibit superior performance in handling complex and diverse graph structures. These findings underscore the potential of graph neural networks in advancing knowledge graph representations and their applications in formal verification and mathematical research.
+
