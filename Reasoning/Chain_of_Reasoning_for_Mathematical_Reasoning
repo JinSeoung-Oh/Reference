@@ -1,0 +1,162 @@
+### From https://medium.com/@techsachin/chain-of-reasoning-unified-framework-for-mathematical-reasoning-in-llms-via-a-multi-paradigm-2d2255d4c78e
+
+1. Introduction to Chain-of-Reasoning (CoR) and DeepSeek-R1
+   1.1 Motivation for Multi-Paradigm Reasoning
+       -a. Limitations of Single-Paradigm Reasoning: Traditional Large Language Models (LLMs) often utilize a single reasoning approach, 
+                                                     limiting their effectiveness across diverse and complex tasks.
+       -b. Emerging Property Thesis: A prevalent belief is that robust reasoning capabilities in LLMs emerge naturally as models scale up in size. 
+                                     However, DeepSeek-R1 challenges this thesis by demonstrating strong reasoning performance without the need for excessively large models.
+       -c. Innovation: DeepSeek-R1 achieves reasoning capabilities by employing an innovative post-training process, 
+                       enabling it to match the performance of GPT-o1 with significantly reduced computational costs.
+   1.2 Overview of Chain-of-Reasoning (CoR)
+       -a. Unified Framework: CoR integrates multiple reasoning paradigms—Natural Language Reasoning (NLR), Algorithmic Reasoning (AR), 
+                              and Symbolic Reasoning (SR)—to foster synergistic collaboration among different reasoning methods.
+       -b. Functionality: CoR generates multiple potential answers using different reasoning paradigms and synthesizes them into a coherent 
+                          final solution.
+       -c. Performance: Experimental results show that CoR-Math-7B significantly outperforms current state-of-the-art (SOTA) models, 
+                        achieving up to a 41.0% absolute improvement over GPT-o1 in theorem proving tasks and a 7.9% improvement over RL-based methods in arithmetic tasks.
+
+2. Chain-of-Reasoning (CoR) Framework
+   2.1 Overview
+       -a. Problem Formulation: Given a mathematical problem 𝑥, LLMs (𝑃) infer the result 𝑦 by following multiple reasoning paradigms. 
+                                Each paradigm 𝜏 includes multiple reasoning paths {𝑟𝑝_1,…,𝑟𝑝_𝑛}
+       -b. Training Pipeline: 
+           -1. Collecting a Multi-Paradigm Mathematical (MPM) Dataset: Incorporates deep reasoning paths based on multiple reasoning paradigms.
+           -2. Progressive Paradigm Training (PPT) Strategy: Gradually trains the model to master various reasoning paradigms.
+           -3. Leveraging Trained LLM for Zero-Shot Inference: Enables multi-paradigm reasoning with adaptable depth using Sequential Multi-Paradigm 
+               Sampling (SMPS).
+   2.2 Collecting Dataset
+       2.2.1 Stage 1: Reconstructing and Extending
+             -a. Universal Text Template: Introduced to standardize the positioning of different reasoning paradigms and define their relationships, 
+                                          accommodating various reasoning depths and combinations.
+             -b. Dataset Processing:
+                 -1. Sources: Numina-TIR and Lean-Workbook datasets.
+                 -2. Pre-processing: Removal of samples without solutions and reconstruction using powerful LLMs (e.g., GPT-4o).
+                 -3. Tailored Prompts: Developed for each seed dataset to guide the generation of multi-paradigm reasoning paths.
+                 -4. Manual Review: Ensured quality and correctness of all samples.
+       2.2.2 Stage 2: Revising
+             -a. Verification with Lean Prover:
+                 -1. Interaction: Submits reasoning paths (𝜏_𝑆𝑅) to the Lean prover for validation.
+                 -2. Revising Incorrect Proofs: If the prover returns errors (𝜖), a revising model (DeepSeek-Prover-V1.5) generates revised 
+                                                proofs (𝜏^~_𝑆𝑅) based on the error prompts (𝑝_𝜖).
+                 -3. Iteration: Continues the process up to 64 iterations or until the prover verifies the revised proof as correct.
+             -b. Result: The MPM dataset comprises 82,770 problems and 167,412 multi-paradigm reasoning solutions.
+   2.3 Training
+       2.3.1 Progressive Paradigm Training (PPT) Strategy
+             -a. Objective: Enables LLMs to gradually master an increasing variety of reasoning paradigms by introducing different types of reasoning data in stages.
+             -b. Training Stages:
+                 -1. Stage ➀:
+                     -1) Focus: Natural Language Reasoning (NLR).
+                     -2) Dataset: Numina-CoT* (modified Numina-CoT).
+                     -3) Generated Sequence: 𝑧=[𝑥]𝜏_(𝑁𝐿𝑅)𝑦
+                     -4) Loss Function: Standard language modeling loss.
+                 -2. Stage ➁:
+                     -1) Focus: Incorporates Algorithmic Reasoning (AR) alongside NLR.
+                     -2) Dataset: Numina-TIR* (modified Numina-TIR).
+                     -3) Generated Sequence: 𝑧=[𝑥]𝜏_(𝑁𝐿𝑅)𝜏_(𝐴𝑅)𝑦
+
+                 -3. Stage ➂:
+                     -1) Focus: Adds Symbolic Reasoning (SR) to NLR and AR.
+                     -2) Dataset: MPM dataset.
+                     -3) Generated Sequence: 𝑧=[𝑥]𝜏_(𝑁𝐿𝑅)𝜏_(𝐴𝑅)𝜏_(𝑆𝑅)𝑦
+
+           -c. Outcome: The trained CoR-Math-7B model masters NLR, AR, and rigorous SR.
+   2.4 Inference
+       2.4.1 Variable Reasoning Depth
+             -a. Adaptive Reasoning: The model can adjust its reasoning depth based on the specific requirements of the task.
+             -b. Example: For theorem proving, the model transitions to SR, generating structured proofs in Lean 4 and extracting relevant 
+                          proof segments as final solutions.
+       2.4.2 Sequential Multi-Paradigm Sampling (SMPS)
+             -a. Process:
+                 -1. Multi-Paradigm Reasoning: Generates multiple reasoning paths across different paradigms.
+                 -2. Hierarchical Sampling: For a two-paradigm reasoning scenario, the model instantiates 𝐽 paths for the 
+                                            first paradigm (𝜏_1) and 𝐾 paths for the second paradigm (𝜏_2), resulting in 𝐽×𝐾 potential responses.
+            -b. Benefit: Explores a diverse solution space comprehensively, leveraging the synergistic effects of different reasoning paradigms.
+
+3. Experiments
+   3.1 Metrics
+       -a. Accuracy: The primary metric for evaluating performance across all datasets.
+   3.2 Implementation Details
+       -a. Models Fine-Tuned: DeepSeek-Math-Base 7B and Llama-3.1 8B using the PPT method on the MPM dataset.
+       -b. Training Parameters: Learning rate of 2e-5 and a warm-up ratio of 1%.
+       -c. Optimization Tools: Utilized DeepSpeed ZeRO Stage 3 and Flash-Attention to enhance computational efficiency.
+   3.3 Baselines
+       -a. General-Purpose Mathematical Models:
+           -1. Includes: Mustard, DeepSeek-Math, InternLM-Math, Llama-3.1, Mistral, and Llemma.
+       -b. Task-Specific Mathematical Models:
+           -1. Arithmetic Computation: Qwen2.5-Math, WizardMath, MetaMath, DART-Math, InternLM-Math, DeepSeek-Math-Instruct/RL, Xwin-Math, ToRA, and NuminaMath.
+           -2. Theorem Proving: LLM-Step, GPT-f, Lean-STaR, Hypertree Proof Search, DeepSeek-Prover, and InternLM2.5-StepProver.
+       -c. Foundation and Proprietary Models:
+           -1. Open-Source: Llama-3.1, Mistral, Mixtral.
+           -2. Proprietary: GPT-4, GPT-4o, and o1-mini.
+   3.4 Results
+       3.4.1 Comparisons with General-Purpose Mathematical Models
+             -a. Performance: CoR-Math-7B outperforms all general-purpose models across three challenging benchmarks in a zero-shot setting, 
+                              demonstrating strong comprehensive mathematical reasoning abilities.
+             -b. Key Findings:
+                 -1. Arithmetic Computation: Achieves optimal results, e.g., 13.7% absolute improvement over InternLM2-Math-Plus-7B on the MATH dataset.
+                 -2. Theorem Proving: Best zero-shot results on MiniF2F, surpassing GPT-4o by 41% absolute increase in a few-shot setting.
+                 -3. Zero-Shot Superiority: CoR-Math-7B's zero-shot results outperform all few-shot results from other models.
+       3.4.2 Comparisons with Expert Models on Theorem Proving
+             -a. Benchmark: MiniF2F.
+             -b. Performance: CoR-Math-7B achieves 66.0% accuracy in zero-shot, surpassing other models that require few-shot examples.
+       3.4.3 Comparisons with Expert Models on Arithmetic Computation
+             -a. Benchmarks: MATH and GSM8K.
+             -b. Performance: CoR-Math-7B demonstrates significant competitiveness, outperforming models like ToRA and NuminaMath that utilize code as a tool without full reasoning.
+   3.5 Discussion on Reasoning Hierarchy
+       3.5.1 Reasoning Structure
+             -a. Three Levels:
+                 -1. Reasoning Steps: Fundamental units comprising one or more tokens, representing incomplete solution stages.
+                 -2. Reasoning Paths: Sequences of reasoning steps forming complete lines of reasoning, including final answers and solution processes.
+                 -3. Reasoning Paradigms: Combinations of multiple reasoning paths, often involving different knowledge media (e.g., natural language).
+       3.5.2 Comparison of Reasoning Paradigms
+             -a. Deep Reasoning: Serial concatenation of reasoning paths.
+             -b. Interleaved Reasoning: Integrates secondary methods within a dominant paradigm for guidance.
+             -c. Multi-Paradigm Reasoning (CoR): Harnesses synergistic effects between different reasoning paradigms for enhanced problem-solving.
+
+4. Key Contributions, Discussion, and Future Directions
+   4.1 Key Contributions
+       -a. Unified Multi-Paradigm Framework: CoR integrates NLR, AR, and SR, enabling models to generate and synthesize multiple reasoning paths.
+       -b. Progressive Paradigm Training (PPT): A multi-stage training pipeline that gradually introduces and masters different reasoning paradigms.
+       -c. Sequential Multi-Paradigm Sampling (SMPS): Enhances inference by exploring a diverse solution space through hierarchical sampling across paradigms.
+       -d. Exceptional Performance: Achieves significant improvements over SOTA models in both theorem proving and arithmetic tasks.
+   4.2 Unsuccessful Attempts
+       -a. Process Reward Model (PRM):
+           -1. Limitations: Difficulty in defining fine-grained reasoning steps, challenging evaluation of intermediate steps, 
+                            and vulnerability to reward hacking.
+       -b. Monte Carlo Tree Search (MCTS):
+           -1. Challenges: Exponentially large search space and difficulty in training fine-grained value models for token generation.
+   4.3 Future Research Directions
+       -a. General Capability Enhancement: Expanding abilities in function calling, multi-turn interactions, complex role-playing, and JSON output.
+       -b. Language Mixing Mitigation: Addressing issues when handling queries in multiple languages beyond English and Chinese.
+       -c. Prompt Engineering: Enhancing model robustness to prompt variations, reducing sensitivity to few-shot prompting.
+       -d. Software Engineering Tasks: Extending RL to software engineering tasks through techniques like rejection sampling and asynchronous evaluations to improve efficiency.
+
+5. Conclusion
+   5.1 Significance of CoR and DeepSeek-R1
+       -a. Advancement in Multi-Paradigm Reasoning: CoR introduces a novel framework that synergistically combines NLR, AR, and SR, 
+                                                    significantly enhancing the reasoning capabilities of LLMs.
+       -b. Performance Gains: Achieves substantial performance improvements on challenging mathematical reasoning tasks, 
+                              outperforming existing single-paradigm approaches on benchmarks like MATH and MiniF2F.
+       -c. Efficiency and Scalability: Demonstrates that robust reasoning does not solely depend on scaling model size but can be effectively 
+                                       achieved through innovative training strategies and multi-paradigm integration.
+       -d. Community Impact: By achieving superior performance with reduced compute costs, CoR sets a new benchmark for future AI architectures, 
+                             encouraging the adoption of multi-paradigm reasoning frameworks in developing next-generation models.
+   5.2 Future Outlook
+       -a. Continued Research and Development: Ongoing efforts will focus on expanding CoR’s capabilities, improving language handling,
+                                               enhancing prompt robustness, and extending its application to software engineering tasks.
+       -b. Scaling and Generalization: Addressing challenges related to scaling memory parameters, verifier design, and domain transfer 
+                                       will be crucial for the widespread adoption and effectiveness of multi-paradigm reasoning frameworks in AI architectures.
+
+Overall Summary: The Chain-of-Reasoning (CoR) framework represents a significant advancement in enhancing the reasoning capabilities 
+                 of Large Language Models (LLMs) by integrating multiple reasoning paradigms—Natural Language Reasoning (NLR), 
+                 Algorithmic Reasoning (AR), and Symbolic Reasoning (SR). By generating and synthesizing multiple potential answers through 
+                 these diverse paradigms, CoR-Math-7B achieves remarkable performance gains, outperforming existing state-of-the-art models 
+                 like GPT-o1 in both theorem proving and arithmetic tasks. The Progressive Paradigm Training (PPT) strategy and 
+                 Sequential Multi-Paradigm Sampling (SMPS) method facilitate the gradual mastery and effective utilization of different 
+                 reasoning paradigms, enabling the model to handle complex mathematical challenges efficiently. 
+                 Despite encountering challenges such as process reward model limitations and the complexity of Monte Carlo Tree Search (MCTS), 
+                 CoR successfully demonstrates that robust reasoning can be achieved without solely relying on scaling model size.
+                 Future research aims to further enhance CoR’s capabilities, address language mixing issues,
+                 and expand its application to software engineering tasks, positioning CoR as a pivotal development in the evolution of AI reasoning frameworks.
+
