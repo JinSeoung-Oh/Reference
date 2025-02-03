@@ -1,0 +1,46 @@
+### From https://artgor.medium.com/paper-review-deepseek-r1-incentivizing-reasoning-capability-in-llms-via-reinforcement-learning-edf4343dcf3a
+
+DeepSeek’s work centers on reinforcement learning (RL) for advanced reasoning. They introduce two models:
+
+-1. DeepSeek-R1-Zero: Trained with only large-scale RL (no supervised fine-tuning).
+-2. DeepSeek-R1: Combines a cold-start supervised phase (to improve readability and language consistency) with a large-scale RL phase.
+
+The core insight is that RL alone can significantly improve a model’s ability to reason. 
+Adding a small set of carefully curated “cold-start” data further refines clarity and avoids mixing languages.
+
+1. How It Works
+   -a. Initial Model Setup (Base or Cold-Start)
+       -1. DeepSeek-R1-Zero starts directly from a base model with no supervised data.
+       -2. DeepSeek-R1 first undergoes a cold-start phase: it’s fine-tuned on thousands of high-quality chain-of-thought examples 
+           (human or model-curated) to establish a readable, coherent style.
+   -b. Large-Scale Reinforcement Learning
+       -1. After the initial step (which could be pure base or cold-start), both models are trained via RL to handle tasks involving math, 
+           logic, coding, and more.
+       -2. A rule-based reward system enforces both accuracy (e.g., correct math results, valid code solutions) and formatting 
+           (structured reasoning in specific tags).
+   -c. Structured Reasoning Outputs
+       -1. Models are prompted to produce a detailed reasoning trail followed by a concise final answer.
+       -2. DeepSeek ensures the model’s “chain of thought” is clearly tagged, so training rewards can penalize or reward structural clarity.
+   -d. Supervised Fine-Tuning (DeepSeek-R1)
+       -1. Once RL converges, DeepSeek-R1 is further refined with supervised data from a broad range of tasks (both reasoning-heavy and simpler ones).
+       -2. This stage corrects issues like language mixing, improves readability, and helps the model align with human preferences.
+   -e. Secondary RL Alignment
+       -1. Lastly, the model is trained again with reward signals for helpfulness, harmlessness, and task success.
+       -2. This ensures that the final response is both accurate and in line with user-friendly communication standards.
+
+2. Core Algorithm: Group Relative Policy Optimization (GRPO)
+   -a. Why GRPO? Conventional RL methods (like PPO) need a critic model as large as the policy, which is expensive. 
+       GRPO avoids this by using group score-based baselines.
+   -b. Mechanics:
+       -1. Sampling: Generate model outputs from an older policy version.
+       -2. Relative Advantage Estimation: Compare outputs in a group to calculate each sample’s advantage, skipping a large critic network.
+       -3. Stability and Control: A clipped probability ratio prevents overly large updates, 
+                                  while a KL-divergence penalty restrains the policy from drifting too far from a reference model.
+   -c. Rule-Based Reward: Instead of training a separate neural reward model, they rely on deterministic checks for correctness 
+                          (e.g., running code test cases) and structural formatting. This reduces risk of “reward hacking” and simplifies the RL pipeline.
+
+In summary, DeepSeek’s key contribution is showing that large-scale RL—especially when paired with a small amount of supervised “cold-start” 
+data—produces strong, transparent reasoning capabilities. 
+The GRPO algorithm underpins the RL phase, balancing training efficiency and output quality through group-based advantage estimation 
+and explicit rule-based rewards.
+
