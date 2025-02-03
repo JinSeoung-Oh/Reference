@@ -1,0 +1,110 @@
+### From https://medium.com/towards-data-science/improving-agent-systems-ai-reasoning-c2d91ecfdf77
+
+1. Background and Context
+   -a. Generative AI and AI Agents
+       -1. Over the last year, generative AI has soared in popularity, and so have AI Agents—automated systems built on Large Language Models (LLMs).
+       -2. According to LangChain surveys, 51% of respondents already use AI Agents in production. Deloitte predicts that in 2025,
+           at least a quarter of companies deploying Generative AI will begin testing AI Agents in pilots or proof-of-concept phases.
+   -b. Challenge: Reasoning Limitations in LLMs
+       -1. Traditional LLMs often struggle to deeply reason about complex tasks on their own, 
+           unless prompted with specialized techniques or used in multi-agent frameworks.
+       -2. To address this, new “reasoning-first” LLMs have emerged, aiming to think internally—breaking tasks into smaller steps, 
+           iterating, and verifying partial outputs before responding.
+
+2. Emergence of Reasoning-Focused Models (RLMs)
+   -a. Examples of RLMs
+       -1. DeepSeek’s R1 and OpenAI’s o1/o3 represent a new generation of models that incorporate built-in reasoning behaviors.
+       -2. They differ from older models like “GPT-4o,” which need external guidance (e.g., chain-of-thought prompts, custom loops) 
+           to achieve stepwise reasoning.
+   -b. Key Concept: Built-In Chain-of-Thought
+       -1. Traditional LLMs: Often produce a final answer in one pass, heavily relying on user prompting if deeper reasoning is needed.
+       -2. RLMs: Internally generate multi-step reasoning sequences (chain-of-thought) and can refine themselves before delivering the final result.
+
+3. Train-Time vs. Test-Time Compute
+   3.1 Train-Time Compute Scaling
+       -a. Pre-Training
+           -1. Models (like GPT, Llama, or Claude) are trained on vast text corpora (often from Common Crawl) to learn general language patterns.
+           -2. This step is extremely resource-intensive—sometimes costing millions of dollars—and yields a “base model” capable of broad tasks.
+       -b. Post-Training
+           -1. After pre-training, additional steps such as Supervised Fine-Tuning (SFT) or Reinforcement Learning (RL) refine the model 
+               for specific goals.
+           -2. Commonly, SFT is used to improve instruction following and chat-like behavior; RL can optimize the model for certain tasks 
+               or reward signals (e.g., correctness, clarity).
+           -3. In the context of Reasoning Language Models, post-training might specifically target chain-of-thought generation, 
+               self-verification, or structured multi-step approaches.
+       -c. Outcome of Train-Time Scaling
+           -1. The base model’s weights are changed to integrate new behaviors (like more advanced reasoning). 
+               The result is a new checkpoint—a “better” or specialized LLM.
+           -2. Since it alters the model’s parameters, we say the model has effectively “learned” or “internalized” the improved reasoning strategy.
+   3.2 Test-Time (Inference) Compute Scaling
+       -a. Definition
+           -1. Refers to spending extra computational resources during inference—that is, while the model is generating answers—to let the model 
+               “think longer” or explore more solution paths.
+           -2. No model weights are changed; we simply give the model more “computation” or “steps” at run time.
+       -b. Techniques
+           -1. Self-Refinement: The model reviews and iterates on its own output multiple times before finalizing an answer.
+           -2. Verifier Searches: Common strategies include:
+               -1) Best-of-N: Generate multiple candidate answers, score them, and select the best.
+               -2) Beam Search or Tree Search: Expand multiple reasoning paths step by step, pruning weaker paths along the way.
+           -3. Goal: Potentially let smaller or mid-sized models match or outperform larger models on reasoning tasks by investing more time and compute during inference.
+       -c. Combined Use
+           -1. One could pair a model that’s already specialized for reasoning (via post-training) with extended test-time compute
+               (multiple iterative steps) to boost performance further.
+           -2. This synergy emphasizes that “thinking before responding” can come from both specialized training and from allowing 
+               more exploration at inference.
+
+4. How DeepSeek-R1 Illustrates Reasoning Model Training
+   DeepSeek’s R1 is a prime example of how advanced reasoning models are created through a multistage post-training process:
+
+   -a. DeepSeek-R1-Zero
+       -1. The team took their base model, DeepSeek-V3, and applied large-scale Reinforcement Learning alone.
+       -2. Results: The model began generating chain-of-thought sequences, practicing self-verification, 
+                    and learning advanced reasoning solely from RL’s reward structure.
+       -3. Problem: Outputs were often unreadable, contained mixed languages, and had other instabilities.
+   -b. DeepSeek-R1
+       -1. The researchers then applied a more complex training pipeline to improve stability and usability:
+           -1) SFT Phase with “cold start” data: thousands of carefully curated chain-of-thought (CoT) examples. This gave the model a more reliable base.
+           -2) RL Phase: Additional reinforcement learning, with new reward signals emphasizing language consistency, clarity, and correctness (especially in math, science, coding).
+           -3) Another SFT Round: Introduced non-reasoning tasks to maintain the model’s general-purpose performance.
+           -4) Final RL Alignment: Fine-tuned alignment with human preferences.
+       -2. Outcome: A robust, 671B-parameter model that retains advanced reasoning while overcoming the language issues from R1-Zero.
+   -c. Distilled Versions
+       -1. The DeepSeek team also compressed R1’s logic into smaller models (1.5B–70B parameters) using SFT without RL.
+       -2. Significance: Developers can access strong reasoning capabilities without the monstrous compute requirements of a 671B model.
+       -3. These smaller models are built on top of Qwen and Llama, making them more accessible to researchers and integrators.
+
+5. Impact of RLMs on AI Agent Development
+   -a. Fewer Multi-Agent Systems
+       -1. Because RLMs can internally break down tasks and verify their steps, developers may no longer need to orchestrate multiple specialized 
+           “planner” and “checker” agents.
+       -2. A single, well-trained RLM might manage the entire workflow with fewer external engineering heuristics.
+   -b. Shifted User Interaction
+       -1. RLMs often take longer to respond, since they do more “internal thinking.” Users may adapt by submitting tasks that can run 
+           in the background, rather than expecting instant chat responses.
+       -2. Complex tasks might run for minutes or hours, yielding more thorough (and traceable) solutions.
+   -c. Tool-Calling
+       -1. Many reasoning models still lack built-in tool-calling capabilities.
+       -2. OpenAI’s o3-mini is among the first to combine deep reasoning with direct tool usage.
+       -3. As the field progresses, more RLMs will likely offer integrated ways to gather external information or execute tasks autonomously, 
+           broadening AI Agents’ real-world utility.
+
+6. Conclusion
+   -a. Reasoning-First Models
+       -1. RLMs like DeepSeek-R1, OpenAI o1/o3, and others represent a shift in LLM development—focusing on internal, 
+           iterative thinking rather than relying on user-supplied step-by-step prompts.
+       -2. These models are beneficial for developers who want more robust out-of-the-box capabilities for complex or multi-step tasks.
+   -b. Train-Time vs. Test-Time
+       -1. Train-Time modifications (pre-training and post-training) embed reasoning skills into the model weights.
+       -2. Test-Time scaling invests additional compute to let the model explore, refine, and verify multiple solution paths on the fly.
+       -3. Both can be combined for maximum effect.
+   -c. Future Outlook
+       -1. AI Agent systems will likely become more streamlined, powerful, and specialized as RLMs improve.
+       -2. User experiences will evolve, balancing immediate chat-like interactions with more in-depth, time-consuming background processes.
+       -3. Widespread adoption of tool-calling within RLMs could further expand the practical tasks AI agents can handle,
+           reducing the need for complex multi-agent setups.
+
+Overall, the ongoing advances in both reasoning-focused training and test-time compute scaling suggest that 
+next-generation AI agents will be dramatically more capable, flexible, and autonomous than today’s systems—pointing to a future where “thinking”
+is increasingly built into the model itself rather than engineered around it.
+
+
