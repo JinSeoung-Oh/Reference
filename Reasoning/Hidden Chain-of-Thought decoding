@@ -1,0 +1,125 @@
+### From https://medium.com/@techsachin/hidden-chain-of-thought-decoding-faster-and-efficient-cot-decoding-to-improve-reasoning-of-llms-d95584bc9346
+
+1. Motivation: Why Compress the Chain of Thought?
+   -a. Long Outputs & High Latency: Traditional Chain-of-Thought (CoT) prompting can produce very lengthy intermediate reasoning sequences. 
+       This leads to increased computational costs and longer inference times, which is a bottleneck for large language models (LLMs).
+   -b. HCoT Goal: The proposed solution—Hidden Chain-of-Thought (HCoT)—aims to compress the multi-step reasoning process into a specialized token 
+                  representation. By doing so, the model preserves reasoning benefits while significantly reducing the time it takes to decode 
+                  or generate outputs.
+
+2. Key Contributions
+   -a. Hidden Chain-of-Thought (HCoT) Framework
+       -1. Introduces a method to accelerate inference by encoding the model’s multi-step CoT reasoning into a compact representation.
+       -2. Reduces the overhead of generating verbose intermediate reasoning tokens during inference.
+   -b. Disentangled Training Paradigm
+       -1. Splits the CoT reasoning workflow into two components (an “auxiliary CoT model” and a “content generation model”), 
+           isolating errors and optimizing each component separately.
+   -c. Compression Model
+       -1. The entire CoT process is condensed into a single special token, allowing the reasoning content to be generated in parallel with 
+           the final answer—yet still maintaining some degree of interpretability.
+   -d. Contrastive Learning Objective
+       -1. Incorporates a span-level loss during supervised fine-tuning to enhance the compressed representation’s quality.
+       -2. Improves both CoT prompting and final task accuracy.
+
+3. The HCoT Training Process
+   3.1 Overview of the Training Pipeline
+       -a. The HCoT approach is broken into three main components:
+           -1. HCoT Training Sample Construction
+           -2. Disentangled Training Paradigm
+           -3. Auxiliary CoT Model & HCoT Model
+       Goal: Train the model to produce a hidden (compressed) representation of the chain-of-thought (CoT) and then use that representation 
+             to generate the final content, thereby shortening the step-by-step textual output at inference.
+
+   3.2 Step (i): HCoT Training Sample Construction
+       -a. Data Preparation:
+           -1. Original Dataset with Reasoning: Start from a dataset that contains question-answer pairs plus intermediate CoT steps.
+           -2. Chain-of-Thought (c0, z0, …, zn−1, cn): The model’s reasoning is explicitly broken down into content segments (c0, c1, …)
+                                                       and intermediate thoughts (z0, z1, …).
+           -3. Recursive Formulation: Each step depends on the previous content and thought. The dataset is labeled to reflect 
+                                      how the model transitions between content (ci) and thoughts (zi).
+        Why It Helps:
+            Forces the model to learn how these segments (content, thoughts) connect, instilling a structured reasoning workflow.
+
+   3.3 Step (ii): Disentangled Training Paradigm
+       Rationale: To separate the tasks of (1) generating reasoning tokens and (2) producing the final textual content, 
+                  preventing errors in the reasoning stage from contaminating the final answer.
+       -a. Auxiliary CoT Model
+           -1. Responsible for generating hidden thought representations.
+           -2. Learns from pθ(zi−1 | x, …, ci−1), which captures the reasoning steps.
+       -b. Content Generation Model
+           -1. Relies on the output from the CoT model to produce the next chunk of content, pθ(ci | x, c0, …, zi−1).
+           -2. Focuses on creating a coherent final response rather than re-deriving the entire chain of thought.
+
+       Benefits of Disentanglement:
+       -a. Error Isolation:
+           -1. Mistakes in reasoning (CoT) stay within the auxiliary model, and corrections can be targeted without harming content generation.
+       -b. Specialized Optimization:
+           -1. The CoT model can improve its logical/analytical skills independently, while the content model refines clarity and relevance.
+       -c. Parallel Development & Interpretability:
+           -1. CoT can run in parallel to content generation, speeding up inference and retaining transparency about how the model reasons.
+
+   3.4 Step (iii): Auxiliary CoT Model
+       -a. Purpose: Compress the multi-step chain-of-thought into a compact token or representation while capturing all key logical steps.
+           -1. Training Data Configuration
+               -1) The original chain-of-thought segments are extracted from the HCoT training samples.
+               -2) A special token, [CoT], is inserted between each content (ci) and thought (zi) to cue the model about where reasoning 
+                   steps should appear.
+       -b. Thought Compression
+           -1. The model, pCOTθ, learns pCOTθ(zi | x, …, ci, ri) to predict the next thought chunk.
+           -2. A contrastive loss is used to align the thought representation with the special [CoT] token, 
+               encouraging the model to compress the entire reasoning trace into a minimal, high-quality vector.
+           -3. The final loss involves comparing normalized vector representations of the target thought with the [CoT] embedding, 
+               ensuring semantic alignment and robust compression.
+
+   3.5 Step (iv): HCoT Model
+       -a. Training Data Configuration
+           -1. In the final data, all original thought processes (z0, z1, …) are replaced with the single [CoT] token.
+           -2. This aligns seamlessly with how the auxiliary CoT model was trained (they share the same input format).
+       -b. Supervised Fine-Tuning
+           -1. The HCoT model pHCoTθ is then fine-tuned to produce content segments ci given the compressed thoughts [z0 … zi−1].
+           -2. The parameters of the auxiliary CoT model are frozen at this stage, so HCoT training does not overwrite the compressed reasoning skills.
+           -3. The standard cross-entropy loss is used to guide the final content generation, ensuring the model can correctly leverage the compressed 
+               thought token(s) to deliver accurate and coherent responses.
+
+4. Experimental Setup and Results
+   4.1 Baseline Approaches
+       -a. Five different training/usage setups:
+            -1. Zero-/Few-Shot CoT: Standard prompting on MATH/GSM8K and a few-shot approach on others—tests the model’s 
+                                    inherent out-of-the-box chain-of-thought ability.
+            -2. Train without CoT: Eliminates the reasoning steps entirely, focusing only on the final content.
+            -3. Train with CoT: Classic single-stage training using explicit chain-of-thought in the data.
+            -4. Train with HCoT Base: A two-stage training (as in Figure 2 of the referenced work) with cross-entropy for the auxiliary CoT model, 
+                                      but no contrastive loss.
+            -5. Train with HCoT Contrast: Full HCoT approach, including the contrastive objective, representing the paper’s proposed final method.
+
+4.2 Performance Observations
+    -a. Models: LLaMa2–7B and LLaMa2–13B tested across tasks like GSM8K, MATH, ScienceQA, and HotpotQA.
+    -b. Key Findings:
+        -1. LLaMa2–7B:
+            -1) HCoT significantly boosts natural science (+3.25%) and language science (+1.72%) in ScienceQA, plus +1.21% in HotpotQA.
+            -2) Minor drops in GSM8K (−0.38%) and social science (−3.03%).
+        -2. LLaMa2–13B:
+            -1) Shows strong improvements in HotpotQA agent invocation (+1.96%), GSM8K (+0.46%), MATH (+1.00%), and language science (+0.55%).
+            -2) Modest decline in social science (−1.24%).
+
+    In summary: HCoT usually matches or outperforms standard full CoT on key benchmarks, while reducing inference latency by at least 1.5x, 
+    a substantial speedup.
+
+5. Conclusion and Discussion
+   -a. HCoT’s Core Innovation
+       -1. Introduces hidden CoT tokens that serve as a compressed reasoning channel, allowing LLMs to maintain multi-step reasoning quality 
+           without generating lengthy intermediate text during inference.
+       -2. Achieves at least a 1.5x speedup in decoding time compared to traditional chain-of-thought.
+   -b. Trade-Offs
+       -1. Training Complexity: Requires a two-stage training process, plus an auxiliary CoT model.
+       -2. Resource Overhead: The compression step and additional model parameters demand more memory/compute, which can be challenging at scale.
+   -c. Future Directions
+       -1. Scalability: How to keep pushing HCoT or similar methods while avoiding large parameter overhead.   
+       -2. Generalization: Potential improvements to handle more diverse domains, or incorporate additional tasks beyond the benchmarks tested.
+       -3. Interpretability: Maintaining enough transparency to understand the “hidden” reasoning while still compressing the chain-of-thought 
+                             into a token representation.
+
+   Overall, HCoT stands as a significant approach to accelerate CoT-empowered language models. 
+   It retains many of the benefits of robust multi-step reasoning while addressing the practical bottlenecks of lengthy,
+   computationally intensive inference.
+
