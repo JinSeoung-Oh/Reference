@@ -1,0 +1,85 @@
+### From https://medium.com/data-science-in-your-pocket/what-is-grpo-the-rl-algorithm-used-to-train-deepseek-12acc19798d3
+
+1. Overview and Intuition
+   Group Relative Policy Optimization (GRPO) is a reinforcement learning method designed to update an agent’s policy in a stable and efficient way. 
+   Instead of looking at actions one by one, GRPO takes a “mini-batch” or group approach: it samples multiple actions from the current policy, 
+   compares how they perform, and then adjusts the policy parameters to encourage actions that outperformed the group average 
+   while discouraging worse actions.
+
+   -a. Motivation:
+       -1. Traditional policy gradient methods can have high variance if each action is considered in isolation.
+       -2. GRPO groups actions and controls policy updates with a KL divergence constraint, ensuring stable incremental changes.
+   -b. High-Level Steps:
+       -1. Sample multiple actions from the policy for a given state.
+       -2. Evaluate each action’s reward.
+       -3. Compare each action’s performance to the group average (the advantage).
+       -4. Adjust policy parameters to favor actions with higher advantage, but limit drastic shifts using a KL divergence penalty.
+
+2. Illustrative Example
+   Imagine a robot in a maze choosing among three paths (A, B, C). It tries each path several times 
+   (e.g., path success rates: A = 66.7%, B = 33.3%, C = 100%). Based on these outcomes:
+
+   -a. Compare: The robot sees path C yields the best success rate.
+   -b. Small Adjustments: It increases the probability of choosing path C but doesn’t completely drop paths A or B; it still explores them.
+   -c. Batch/Group Updates: The robot accumulates performance data (e.g., over multiple trials) before updating, avoiding overreaction 
+                            from a single data point.
+   This approach is similar to “mini-batch gradient” updates in supervised learning, reducing variance by pooling data from multiple action samples.
+
+3. Mathematical Formulation
+   3.1 Policy and Objective
+       -a. Policy 𝜋_𝜃(𝑎∣𝑠): Given state 𝑠, the policy outputs a distribution over actions 𝑎, controlled by parameters 𝜃.
+       -b. Goal: Maximize expected cumulative reward 𝐽(𝜃). Typically, we define:
+           𝐽(𝜃) = 𝐸_(𝜏∼𝜋_𝜃)[∑_𝑡 𝑟(𝑠_𝑡,𝑎_𝑡)]
+           where 𝜏 is a trajectory of states and actions.
+   3.2 Group Sampling
+       -a. Action Group {𝑎_1, …,𝑎_𝑁}: From a single state 𝑠, sample 𝑁 actions from 𝜋_𝜃
+       -b. For each sampled action 𝑎_𝑖, we observe a reward 𝑅(𝑎_𝑖)
+   3.3 Advantage Computation
+       -a. Advantage 𝐴(𝑎_𝑖): Measures whether action 𝑎_𝑖 performed better or worse than the group average.
+       -b. In practice, advantage might be computed as:
+           𝐴(𝑎_𝑖) = 𝑅(𝑎_𝑖) − 𝑅_group‾, where 𝑅_group‾ is some baseline such as the mean reward in the group.
+   3.4 Policy Update
+       -a. Update Rule: Increase probability of actions with positive advantage and decrease probability of those with negative advantage.
+       -b. The KL Divergence constraint ensures that the new policy 𝜋_(𝜃_new) does not drastically diverge from the old one 𝜋_(𝜃_old). 
+           This fosters stable learning.
+   3.5 Overall GRPO Objective
+       max_𝜃 𝐸[Advantage × Probability Ratio],
+       subject to a limit on KL divergence between old and new policies. The method thus balances improvement with caution against large leaps.
+
+4. Why GRPO Works
+   -a. Group Comparison: By evaluating actions within a group, the algorithm reduces the variance of policy gradient estimates,
+                         making updates more reliable.
+   -b. Controlled Policy Shifts: The KL divergence constraint ensures that updates aren’t too large, preventing instability or 
+                                 “catastrophic forgetting.”
+   -c. Efficiency: GRPO avoids enumerating all actions; it samples a small set, which is computationally more tractable in environments 
+                   with large action spaces.
+
+5. Applying GRPO to Train Large Language Models (LLMs)
+   Though often described in a context like robotics or games, GRPO can be used for fine-tuning LLMs via reinforcement learning:
+
+   -a. Group Sampling: For a given prompt (state), the LLM samples multiple candidate responses (actions).
+   -b. Reward Scoring: A reward model or human feedback is used to assign each response a numeric score, measuring “quality” or “alignment.”
+   -c. Advantage Calculation: Compare each response’s reward to the group’s average, identifying which responses are better.
+   -d. Policy Update: Update the LLM’s parameters (policy) to favor higher-reward responses. Use KL divergence constraints 
+                      to avoid diverging too far from the original model distribution.
+   -e. Iterative Training: Repeat this procedure over many prompts and sets of responses, continually improving the LLM’s ability to produce helpful,
+                           coherent answers.
+
+   Result: An LLM that is incrementally refined to produce more aligned or high-quality outputs, while maintaining stability of style and knowledge.
+
+6. Summary
+   Group Relative Policy Optimization (GRPO) is a reinforcement learning technique that:
+
+   -a. Collects a group of action samples from the current policy,
+   -b. Evaluates each action’s reward,
+   -c. Computes advantages by comparing actions within that group,
+   -d. Updates the policy’s parameters with small, stable steps enforced by a KL divergence constraint.
+
+   In practical terms, it stabilizes policy gradient learning and reduces variance by focusing on relative performance within a group.
+   When applied to Large Language Models, GRPO can fine-tune the model’s outputs (responses) in a stable way, 
+   improving quality while limiting extreme, abrupt changes.
+
+   By balancing exploration (still sampling less-favored actions occasionally) with exploitation (boosting probabilities of higher-reward actions),
+   GRPO offers a robust path to gradually refine both robots in a maze and LLMs producing text, 
+   all under the same reinforcement learning framework.
+
