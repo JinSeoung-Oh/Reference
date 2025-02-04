@@ -1,0 +1,122 @@
+### From https://www.interconnects.ai/p/deepseek-r1-recipe-for-o1
+
+1. “Cold-start” of supervised finetuning on synthetic reasoning data from the R1-Zero model.2
+2. Large-scale reinforcement learning training on reasoning problems “until convergence.”
+3. Rejection sampling on 3/4 reasoning problems and 1/4 general queries to start the transition to a general-purpose model.
+4. Reinforcement learning training mixing reasoning problems (verifiable rewards) with general preference tuning reward models 
+   to polish the model.
+
+
+1. Overview
+   DeepSeek R1 is developed through a multi-stage training process that combines supervised fine-tuning (SFT) and 
+   large-scale reinforcement learning (RL) to enhance the model’s reasoning capabilities. 
+   The goal is to build a reasoning model that not only performs well on verifiable reasoning tasks but also maintains 
+   general-purpose abilities. The process is broken into four stages, starting with a “cold-start” using synthetic reasoning data 
+   and culminating in a final RL stage that fine-tunes both reasoning and general behavior.
+
+2. Stage 0: Training R1-Zero to Initialize R1 with Synthetic Data
+   -a. Purpose and Approach:
+       R1-Zero is the initial model trained using large-scale RL without any preliminary SFT. 
+       Its role is to provide synthetic reasoning data that will later be refined.
+   -b. Key Observations:
+       -1. R1-Zero displays emerging reasoning behaviors (e.g., verifying answers or reflecting on its work),
+           although it may sometimes change languages mid-generation or show reliability issues.
+       -2. The “cold start” helps avoid problems common with base models, such as rambling or failing to generate proper stop tokens, 
+           by employing system prompts (e.g., instructing the model to output <answer> HTML tags).
+   -c. Insights and Open Questions:
+       -1. The effectiveness of R1-Zero shows that RL is essential to unlock emergent reasoning behaviors.
+       -2. Researchers are interested in how generation length and RL training time correlate, suggesting that further training might yield even more robust reasoning capabilities.
+       -3. There is curiosity about which traits of a base model (especially those with long-context capabilities) make it best suited for this type of RL training.
+
+3. Stage 1: Reasoning SFT “Cold Start”
+   -a. Objective:
+       To improve the final model’s performance and formatting consistency by lightly fine-tuning the base model with high-quality 
+       synthetic reasoning outputs.
+   -b. Process:
+       -1. A small amount of supervised fine-tuning is performed using a few thousand filtered completions from R1-Zero.
+       -2. Techniques include using few-shot prompting with detailed chain-of-thought (CoT) examples, explicitly instructing 
+           the model to generate answers with reflection and verification, and post-processing by human annotators to ensure readability 
+           and proper formatting.
+   -c. Rationale:
+       This step is intended to shape the loss landscape of the model, making emergent reasoning behaviors 
+       (e.g., “checking its work” or self-correcting errors) more accessible during subsequent RL stages.
+
+4. Stage 2: Large-Scale RL for Reasoning
+   -a. Core Idea:
+       The training here rewards the model for providing correct answers to verifiable reasoning problems.
+   -b. Reward Components:
+       -1. Accuracy Rewards:
+           -1) The primary incentive. If the model’s answer is correct, it receives a positive score; 
+               if not, a penalty (or lower reward) is applied.
+       -2. Format Rewards:
+           -1) These ensure that the output adheres to a prescribed structure (e.g., proper use of <think> and <answer> tags), 
+               which is crucial for reliable inference.
+       -3. Language Consistency Rewards:
+           -1) Additional rewards are given if the model’s answer matches the language of the prompt 100% of the time. 
+               This improves user experience even though it might slightly degrade raw performance metrics.
+   -c. RL Algorithm:
+       -1. DeepSeek employs a variant of the PPO algorithm called Group Relative Policy Optimization (GRPO).
+       -2. GRPO uses Monte Carlo advantage estimates instead of a separate value model, 
+           likely due to its maturity and efficiency in existing infrastructure.
+   -d. Technical Scale:
+       -1. The training involves thousands of RL steps (each step following multiple generations and verifications). 
+           For context, this is significantly more RL updates than what some earlier models (like Tülu 3) underwent.
+   -e. Key Takeaway:
+       -1. The RL phase is the linchpin that transforms the raw base model into one that demonstrates strong, 
+           emergent reasoning behaviors, with detailed metrics (such as increasing generation length over training) 
+           serving as evidence of progress.
+
+5. Stage 3: Rejection Sampling to Introduce General Abilities
+   -a. Purpose:
+       To expand the model’s capabilities beyond pure reasoning by integrating more general conversational and task-specific behaviors.
+   -b. Methodology:
+       -1. Rejection Sampling:
+           -1) The model generates multiple completions. These outputs are ranked via a reward model, 
+               and the highest-quality responses are selected.
+       -2. Data Mix:
+           -1) The training data for this stage consists of roughly 800K completions, split into 600K reasoning completions and 
+               200K general chat or non-verifiable prompts.
+       -3. Additional Techniques:
+           -1) Generative reward models (i.e., using another LLM as a judge) are employed to assess responses 
+               that cannot be explicitly verified.
+           -2) Data from previous post-training pipelines (e.g., DeepSeek-V3) and augmented chain-of-thought prompts help 
+               the model transition from strict reasoning to broader conversational domains.
+   -c. Insights and Open Questions:
+       -1. This stage is crucial for ensuring the model does not become overly specialized in reasoning at the expense of general utility.
+       -2. Details around the data generation, filtering processes, and precise balance of reasoning versus general queries remain 
+           areas for further exploration and open research.
+
+6. Stage 4: Final RL Training for General Use
+   -a. Final Refinement:
+       -1) The last stage of training revisits reinforcement learning to fine-tune the model’s general performance, 
+           including both helpfulness and harmlessness, while retaining refined reasoning skills.
+   -b. Training Mix:
+       -1) This RL phase blends prompts from verifiable reasoning domains with standard RLHF 
+           (Reinforcement Learning from Human Feedback) prompts.
+       -2) Multiple reward models are used to balance these dual objectives, building on the methodologies developed in previous versions
+          like DeepSeek V3.
+   -c. Challenges and Considerations:
+        -1) Determining the correct data balance between reasoning and general prompts.
+        -2) Deciding whether to use off-the-shelf reward models or ones that have been exposed to long reasoning traces.
+        -3) Managing potential degradation in performance when switching contexts from strictly verifiable reasoning 
+            to broader conversational tasks.
+   -d. Ongoing Research:
+       Many implementation details remain open questions. Researchers are actively investigating the interplay between different 
+       reward components, data balances, and the overall infrastructure required to support such mixed RL training.
+
+7. Final Thoughts
+   -a. Integration and Progress:
+       The DeepSeek R1 recipe showcases a layered approach that combines synthetic reasoning data, SFT cold starts, 
+       large-scale RL training, rejection sampling for generalization, and final RL tuning. 
+       This sequence is designed to produce a model that not only excels in reasoning tasks but also performs robustly 
+       as a general-purpose AI.
+   -b. Research and Development:
+       Although many details are still evolving, the overall shape of the training process provides a roadmap for future work. 
+       Key areas include refining RL methods, enhancing data quality and diversity, and developing open-source tools (like verifiers) 
+       to further advance research in reasoning models.
+   -c. Broader Implications:
+       The training recipe underscores the importance of mixing various methodologies—supervised fine-tuning, extensive RL, 
+       and rejection sampling—to achieve a balance between emergent reasoning abilities and general usability. 
+       This hybrid approach is emblematic of the latest trends in AI model training, where iterative refinements and 
+       cross-domain capabilities are increasingly critical.
+
