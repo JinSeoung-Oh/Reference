@@ -1,0 +1,61 @@
+### From https://arxiv.org/abs/2501.17161
+
+This paper investigates how supervised fine-tuning (SFT) and reinforcement learning (RL) affect foundation models’ abilities 
+to generalize and avoid mere memorization, particularly in scenarios involving text-based rules and visual tasks. 
+Here are the key points and findings in detail:
+
+1. Study Focus and Experimental Setup:
+   -a. Objective:
+       The research aims to clarify the distinct roles of SFT and RL in enhancing model generalization versus memorization.
+   -b. Domains Investigated:
+       The study focuses on two types of tasks:
+       -1. Text-based rule variants: Evaluated through GeneralPoints, an arithmetic reasoning card game.
+       -2. Visual variants: Examined using V-IRL, a real-world navigation environment.
+   -c. Evaluation Goal:
+       The experiments assess how models trained with SFT and RL generalize to unseen variants in both textual and visual domains.
+
+2. Findings on Reinforcement Learning (RL):
+   -a. Generalization Strengths:
+       -1. RL, particularly when trained with an outcome-based reward signal, is shown to generalize well across both rule-based textual 
+           and visual variants.
+       -2. The approach helps models acquire flexible, generalizable knowledge that goes beyond the specific examples seen during training.
+   -b. Enhanced Visual Recognition:
+       -1. In the visual domain, RL contributes to improved underlying visual recognition capabilities.
+       -2. This enhancement in visual recognition is a key factor in the model's superior performance on unseen visual tasks.
+
+3. Findings on Supervised Fine-Tuning (SFT):
+   -a. Memorization Tendency:
+       -1 SFT tends to lead the model to memorize training data.
+       -2 As a result, models primarily trained with SFT struggle to handle out-of-distribution or unseen scenarios, 
+          limiting their generalization capabilities.
+   -b. Role as a Prerequisite:
+       -1 Despite its limitations in fostering generalization on its own, SFT plays a critical role in the overall training pipeline.
+       -2 SFT stabilizes the model’s output format. This consistent output is essential for the success of subsequent RL training,
+          which relies on structured, predictable responses to optimize further.
+
+4. Combined Insights:
+   -a. Synergistic Training Approach:
+       -1. The study demonstrates that while RL is key to developing generalizable reasoning and visual recognition skills, 
+           its effectiveness is contingent on the prior stabilization achieved via SFT.
+       -2. The hybrid training strategy—starting with SFT to anchor the model's output structure, followed by RL to refine and
+           generalize its abilities—emerges as a powerful method for tackling complex, multi-modal tasks.
+   -b. Implications for Multi-Modal Tasks:
+       -1. The findings underscore RL’s potential to acquire broad, adaptable knowledge, especially in tasks that require integration 
+           of both textual rules and visual cues.
+       -2. This capability is particularly important in real-world applications where models must operate under varied conditions 
+           that extend well beyond the training distribution.
+
+5. Overall Conclusion:
+   -a. Generalization vs. Memorization:
+       -1. RL, especially with outcome-based rewards, is more effective at enabling models to generalize to unseen conditions 
+           in both text-based and visual settings.
+       -2. SFT, though prone to memorization, remains an indispensable component because it sets up a robust and stable foundation 
+           for RL to build upon.
+   -b. Path Forward:
+       -1. The results highlight the importance of combining SFT and RL in post-training pipelines to achieve models that are 
+           both reliable in output and capable of adapting to new, diverse scenarios.
+
+In summary, this work clarifies that while SFT helps ensure consistency and structured outputs, 
+it is the reinforcement learning component—particularly with an outcome-based reward—that drives significant improvements 
+in generalization and multi-modal reasoning.
+
