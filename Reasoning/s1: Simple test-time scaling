@@ -1,0 +1,171 @@
+### From https://arxiv.org/abs/2501.19393
+### https://github.com/simplescaling/s1
+
+1. Dataset Collection for Reasoning Tasks
+   1.1. Initial Collection of 59K Samples
+        -a. Guiding Principles:
+            The collection of questions is driven by three central criteria:
+            -1. Quality: Only high-quality datasets are used (e.g., well-formatted, free of obvious errors).
+            -2. Difficulty: The questions should be challenging and require significant reasoning effort.
+            -3. Diversity: The datasets span various fields, ensuring coverage of different reasoning tasks.
+        -b. Sources and Composition:
+            The initial pool contains 59,029 questions drawn from 16 diverse sources. The datasets fall into two main categories:
+
+            -1. Curated Existing Datasets:
+                -1) NuminaMATH: The largest source with 30,660 mathematical problems from online sources.
+                -2) Historical AIME Problems: Covering years 1983–2021.
+                -3) OlympicArena: Contributes 4,250 problems across subjects like Astronomy, Biology, Chemistry, Computer Science, 
+                                  Geography, Mathematics, and Physics from various Olympiads.
+                -4) OmniMath: Adds 4,238 competition-level mathematics problems.
+                -5) AGIEval: Provides 2,385 standardized test problems (e.g., SAT, LSAT) spanning English, Law, and Logic.
+                -6) Additional sources are referenced in a supplementary table.
+            -2. New Datasets in Quantitative Reasoning:
+                -1) s1-prob: Contains 182 questions from Stanford’s Statistics PhD Qualifying Exams (complete with handwritten solutions),
+                             emphasizing complex proofs and professional-level problem-solving.
+                -2) s1-teasers: Comprises 23 high-difficulty brain teasers from quantitative trading interviews, sourced from PuzzledQuant.
+        -c. Data Generation Process:
+            -1. For each question, a reasoning trace and solution are generated using the Google Gemini Flash Thinking API, 
+                resulting in triplets of (question, reasoning trace, solution). 
+                The dataset is then decontaminated (e.g., by removing overlaps with evaluation questions using 8-gram matching) 
+                and deduplicated.
+
+   1.2. Final Selection of 1K Samples
+        -a. Motivation:
+            -1. While the initial pool contains 59K examples, the goal is to build a minimal, resource-efficient dataset of 1,000 samples
+                that still meets the guiding principles.
+
+        -b. Three-Stage Filtering Process:
+            -1. Quality Filtering:
+                -1) Remove any samples with API errors, reducing the dataset from 59K to 54,116 examples.
+                -2) Further filter out examples with formatting issues (e.g., ASCII art, broken image references, inconsistent numbering),
+                    resulting in 51,581 high-quality samples.
+                -3) Identify 384 high-quality samples from the most reliable sources for the final selection.
+            -2. Difficulty Filtering:
+                -1) Evaluation Using Model Performance and Reasoning Trace Length:
+                    Two models, Qwen2.5-7B-Instruct and Qwen2.5-32B-Instruct, are used to assess each question.
+                    - Correctness Assessment: A model’s answer is compared against a reference solution 
+                                              (using a grading protocol with Claude 3.5 Sonnet).
+                    - Token Length as Difficulty Proxy: Longer reasoning traces (measured via token count) are assumed to indicate 
+                                                        more difficult problems.
+                -2) Filtering Outcome:
+                    - Questions that both models solve correctly (indicating they might be too easy) are removed. 
+                      This filtering reduces the pool to 24,496 examples.
+            -3. Diversity Filtering:
+                -1) Classification by Domain:
+                    Each question is classified into specific domains using the Mathematics Subject Classification (MSC) system—this 
+                    taxonomy covers various mathematical topics and extends to other fields like biology, physics, and economics.
+                -2) Sampling Strategy:
+                    A domain is selected uniformly at random, and then one question is sampled from that domain, 
+                    with a bias toward those with longer reasoning traces. This process is repeated until 1,000 diverse samples are collected.
+                -3) Outcome:
+                    The final dataset spans 50 different domains, ensuring a wide-ranging coverage that leverages the combined criteria 
+                    of quality, difficulty, and diversity.
+        -c. Empirical Observation:
+            The authors note that using all three criteria together produces a superior dataset compared to filtering on quality, 
+            difficulty, or diversity alone.
+
+2. Test-Time Scaling for Enhanced Reasoning
+   2.1. Methods for Scaling
+        -a. Sequential vs. Parallel Scaling:
+             -1. Sequential Scaling: Later computations depend on earlier ones 
+                 (e.g., a long chain-of-thought where each step builds on the previous).
+             -2. Parallel Scaling: Computations are independent (e.g., majority voting among multiple generated answers).
+                 The focus is on sequential scaling, which intuitively supports deeper reasoning and iterative refinement.
+        -b. Budget Forcing Technique:
+            A simple decoding-time intervention is introduced:
+            -1. Maximum Token Enforcement:
+                Append an end-of-thinking token (along with “Final Answer:”) to force an early exit from the reasoning phase once 
+                a token limit is reached.
+            -2. Minimum Token Enforcement:
+                Suppress the end-of-thinking token generation (and optionally append a prompt like “Wait”) to encourage the model 
+                to continue generating more reasoning tokens.
+            -3. Outcome:
+                This approach can help the model arrive at better answers by controlling the length of the generated reasoning trace.
+        -c. Baselines for Comparison:
+            Two main baselines are used:
+            -1. Conditional Length-Control Methods:
+                -1) Token-Conditional: Upper bound on thinking tokens is specified in the prompt.
+                -2) Step-Conditional: An upper bound is set on the number of thinking steps (with each step approximately 100 tokens).
+                -3) Class-Conditional: Generic prompts instruct the model to either think for a short or long period.
+            -2. Rejection Sampling:
+                Continually samples until a generation meets a predetermined compute budget, capturing the posterior over responses based on length.
+   2.2. Evaluation Metrics
+        The test-time scaling methods are evaluated not only by accuracy but also by controllability and scaling efficiency. 
+        The metrics are defined as follows:
+
+        -a. Control:
+            Measures the percentage of runs where the amount of compute (measured in thinking tokens) stays within pre-specified 
+            minimum and maximum bounds. A perfect control score (100%) indicates full adherence to the set compute budget.
+        -b. Scaling:
+            Represents the average slope of the piece-wise linear function that relates test-time compute (x-axis, in tokens) 
+            to accuracy (y-axis). A positive, larger slope indicates that additional compute leads to improved performance, 
+            up to the point where the method eventually plateaus.
+        -c. Performance:
+            The maximum accuracy achieved by the method on a fixed benchmark (e.g., AIME24). 
+            This value represents the peak performance attainable given the scaling and control mechanisms.
+        -d. Overall Goal:
+            To evaluate methods on how well they allow for controlled scaling (both in terms of compute and output quality) 
+            and to determine which methods best balance accuracy improvements with practical compute limits.
+
+Conclusion
+The text describes a meticulous process for constructing a high-quality, challenging, and diverse dataset for reasoning tasks, 
+starting from an initial pool of over 59K samples and narrowing it down to 1K through a three-step filtering process based on quality, 
+difficulty, and diversity. 
+Additionally, it introduces novel test-time scaling methods—specifically sequential scaling via budget forcing—and outlines robust 
+evaluation metrics (control, scaling, and performance) to measure the effectiveness of these methods. 
+These innovations aim to ensure that the model not only generates accurate and well-reasoned outputs but also does so efficiently, 
+leveraging a controlled amount of compute during inference.
+
+---------------------------------------------------------------------------
+############ 
+The "Budget Forcing Technique" is a decoding-time intervention designed to control the amount of reasoning a model performs during 
+inference by explicitly setting limits on the number of "thinking tokens" it generates. 
+Here are the detailed aspects of the technique based on the provided text:
+
+1. Decoding-Time Intervention:
+   -a. Budget forcing is applied during the model’s inference (or test-time) phase. 
+       Instead of altering the model’s training, it manipulates the generation process to either cap or extend the model's reasoning phase.
+
+2. Enforcing a Maximum Token Count:
+   -a. Mechanism:
+       To force the model to stop reasoning after a certain point, the technique appends a special end-of-thinking token delimiter along 
+       with the string “Final Answer:” to the model's output once the pre-set maximum number of thinking tokens is reached.
+   -b.Outcome:
+      This early termination causes the model to exit the reasoning phase and output its current best answer immediately, 
+      effectively capping the computation time and ensuring that the model does not continue generating unnecessary or redundant reasoning
+      tokens.
+
+3. Enforcing a Minimum Token Count:
+   -a. Mechanism:
+       Conversely, to encourage the model to generate more in-depth reasoning when needed, the technique suppresses the generation 
+       of the end-of-thinking token delimiter. Additionally, it can append a prompt like “Wait” to the current reasoning trace.
+   -b. Outcome:
+       This suppression prevents an early stop and nudges the model to continue generating reasoning tokens, 
+       thereby potentially deepening its analysis and arriving at a more thoroughly reasoned answer.
+
+4. Purpose and Benefits:
+   -a. Control Over Computation Budget:
+       By setting both maximum and minimum boundaries, the budget forcing technique ensures that the model operates within a desired 
+       computational budget during inference. This is crucial for balancing efficiency with performance.
+   -b. Improving Answer Quality:
+       The technique can lead to improved answer quality by preventing premature termination of the reasoning process or avoiding excessive,
+       unproductive generation. An example (referenced as Figure 3 in the original text) demonstrates how carefully controlled 
+       reasoning can yield better final answers.
+   -c. Flexibility:
+       The intervention allows for flexible adjustments based on the requirements of different tasks or benchmarks. 
+       For tasks that benefit from extensive reasoning, a higher minimum may be enforced; for those where speed is critical, 
+       a maximum cap ensures rapid responses.
+
+5. Context of Use:
+   -a. Budget forcing is presented alongside other baseline methods (such as conditional length-control methods and rejection sampling) 
+       as a way to systematically evaluate and benchmark the effects of controlled reasoning length. 
+       The technique is particularly relevant in sequential scaling settings, where later computations build on earlier ones, 
+       enabling deeper reasoning and iterative refinement.
+
+In summary, the Budget Forcing Technique is a straightforward yet powerful method to directly manipulate the reasoning process 
+at inference time. It does so by imposing hard limits—both upper and lower—on the number of thinking tokens generated,
+thereby striking a balance between ensuring sufficient reasoning and preventing inefficient over-computation.
+
+
+
+
