@@ -1,0 +1,99 @@
+### From https://agentissue.medium.com/making-llms-much-smarter-understanding-multi-turn-rag-systems-adcb5f9061ae
+### From https://github.com/ibm/mt-rag-benchmark
+
+The text presents an in-depth discussion and evaluation of Retrieval-Augmented Generation (RAG) systems, 
+particularly emphasizing the challenges and complexities introduced by multi-turn conversations. 
+It draws parallels with the early days of deep learning—where small changes in data or 
+architecture could lead to dramatic shifts in performance—by showing that while single-turn queries might be 
+well-handled by large language models, extending these interactions to multiple turns exposes significant performance gaps.
+
+1. Challenges in Multi-Turn Conversations
+   Traditional question-answering (QA) and information retrieval (IR) benchmarks typically involve a single question paired 
+   with a static set of documents. 
+   However, real-world conversations are dynamic, with participants frequently shifting topics, following tangents, 
+   and referencing earlier remarks. This dynamic nature means that each conversational turn might build on implicit context 
+   from previous turns, making the task of retrieval and generation significantly more complex. 
+   Standard benchmarks often overlook this complexity by not incorporating the retrieval component into multi-turn settings—an 
+   oversight likened to testing only the dialogue orchestration without validating the “retrieval microservice” 
+   that supplies the necessary contextual knowledge.
+
+2. The MTRAG Benchmark
+   To address these challenges, IBM Research introduced MTRAG, the first end-to-end, human-generated multi-turn RAG benchmark 
+   that mirrors the intricacies of real-world conversations. MTRAG specifically targets two major pain points:
+
+   -a. Passage Diversity: Unlike many IR tasks that rely on one or two documents, real conversations may require pulling in a wide array 
+                          of information. In MTRAG, conversations typically average around 17 unique relevant passages, 
+                          emphasizing the need for a system to constantly retrieve fresh and diverse information as the conversation evolves.
+   -b. Non-Standalone Questions: In natural dialogue, users rarely restate all the context with each question. 
+                                 For instance, a query like “And how about their latest model?” relies on information mentioned several turns 
+                                 earlier. MTRAG forces systems to maintain and integrate context over multiple turns.
+
+   In addition to these features, MTRAG incorporates dimensions such as faithfulness, appropriateness, naturalness, 
+   and completeness (collectively referred to as FANC) to push the boundaries of what multi-turn RAG systems must achieve.
+
+3. Building the Benchmark
+   The benchmark was constructed using a custom chat application where human annotators engaged in live conversations with a RAG agent. 
+   The system was built with:
+
+   -a. Retriever: ELSERv1 (ElasticSearch 8.10) was employed to fetch relevant passages.
+   -b. Language Model: Mixtral 8X7B Instruct served as the generative model.
+
+   Human annotators were responsible for “repairing” the responses when the agent’s output was unclear or incorrect. 
+   Notably, more than 90% of the agent’s responses required some form of human intervention, highlighting the current limitations of 
+   large language models in managing nuanced or evolving queries.
+
+4. Document Domains and Structure
+   MTRAG’s design features a domain-driven approach with four distinct document sets:
+
+   -a. CLAPNQ: A subset of Wikipedia.
+   -b. FiQA: Finance advice extracted from StackExchange.
+   -c. Govt: Documents sourced from .gov and .mil websites.
+   -d. Cloud: Technical documentation from a major cloud provider.
+   
+   Each corpus is segmented into 512-token passages, mirroring the modular structure of search indices and reflecting real-world engineering 
+   practices for content microservices.
+
+5. Retrieval and Generation Strategies
+   The evaluation involved comparing different retrieval strategies:
+
+   -a. Lexical Retrieval: BM25.
+   -b. Dense Retrieval: BGE-base 1.5.
+   -c. Sparse Retrieval: Elser.
+
+   Across various metrics (Recall, nDCG), Elser outperformed both BM25 and BGE-base 1.5. An important finding was that query 
+   rewriting—transforming ambiguous queries (e.g., “What about their latest model?”) into more explicit ones 
+   (e.g., “What is the most recent model introduced by Company X?”)—significantly improved retrieval precision. 
+   However, challenges remain, as later turns in conversations showed markedly lower performance compared to the initial turn, 
+   and non-standalone questions still posed difficulties.
+
+6. Model Evaluation and Metrics
+   Multiple large language models were tested, each with its own trade-offs in terms of context length, parameter size, and specialization. 
+   The models included:
+
+    -a. Llama 3.1 (ranging from 8B to 405B parameters)
+    -b. Mixtral Mixture-of-Expert Models (e.g., Mixtral 8×22B)
+    -c. GPT-4o and GPT-4o-mini (supporting up to 128K tokens)
+    -d. Command R+5 (104B-parameter multilingual model)
+    -e. Qwen 2.5 (7B and 72B versions)
+
+    Evaluation was based on three main metrics:
+    
+    -a. RBalg: Combining algorithmic measures like Bert-based recall/precision and Rouge-L.
+    -b. RBllm: An LLM judge metric comparing generated responses against reference answers.
+    -c. RLF: A metric targeting the faithfulness of responses.
+
+    An “I Don’t Know” (IDK) detector was also included to assess whether models appropriately acknowledged unanswerable or partially 
+    answerable queries rather than hallucinating responses. Results indicated that while larger models (like GPT-4o and Llama 3.1 405B) 
+    performed best, all models showed a significant performance drop in later conversation turns. 
+    Additionally, models varied in their willingness to admit uncertainty, with some (like Llama 70B/8B) more frequently saying 
+    “I don’t know” at the expense of overall accuracy.
+
+7. Key Findings and Future Directions
+   -a. Performance Degradation in Later Turns: A notable drop in metrics (e.g., Recall@5 falling from around 0.89 in the first turn to 0.47 in later turns) was observed, underscoring the difficulties posed by compounded context in multi-turn dialogues.
+   -b. Effectiveness of Query Rewriting: While query rewriting improved performance, it was not a complete solution, highlighting the need for better integration between retrieval components and generation models.
+   -c. Synthetic vs. Human Conversations: Synthetic dialogues generated automatically tended to be shorter and less diverse compared to human conversations, indicating that human creativity remains challenging to replicate.
+   -d. Future Opportunities: The text suggests that integrating advanced context-aware retrieval and query understanding directly into model architectures—by leveraging domain knowledge, user history, and conversational style—could significantly enhance the robustness, faithfulness, and contextual grounding of RAG systems.
+
+   In summary, the article meticulously outlines the evolution of RAG applications in handling multi-turn conversations, the development and significance of the MTRAG benchmark, the experimental evaluation of various retrieval and generation strategies, and the ongoing challenges and future directions for research in this area.
+
+
