@@ -1,0 +1,105 @@
+### From https://huggingface.co/blog/open-deep-research#building-an-open-deep-research
+### From https://github.com/huggingface/smolagents/tree/gaia-submission-r1/examples/open_deep_research
+
+1. Deep Research and Its Performance
+   -a. Impressive Benchmark Results:
+       Deep Research significantly outperforms standalone large language models (LLMs) on the GAIA benchmark. 
+       In one-shot settings, it averages about 67% correct answers, and even on very challenging “level 3” questions 
+       (which require multiple reasoning steps and tool usage), it achieves 47.6% correct responses. 
+       This performance represents an order-of-magnitude improvement over traditional approaches; 
+       for instance, GPT-4 without an agentic framework scores below 7% on the validation set of GAIA.
+
+   -b. Core Architecture:
+       The system consists of two main components:
+        -1. An LLM: OpenAI provides a selection of models (e.g., 4o, o1, o3, etc.) that can be used.
+        -2. An Internal “Agentic Framework”: This framework guides the LLM to execute actions like performing web searches,
+            reading PDFs, and organizing its operations into sequential steps. Although OpenAI did not reveal many details about this framework, 
+            its effectiveness is clear from the performance improvements observed.
+
+2. Agent Frameworks: What They Are and Why They Matter
+   -a. Definition and Role:
+       An agent framework sits on top of an LLM and empowers it to take real-world actions—beyond generating text. 
+       For example, it enables the model to browse the web or process files by breaking tasks into a series of manageable steps.
+
+   -b. Advantages of Agentic Systems:
+       -1. Enhanced Capabilities: They transform powerful yet isolated LLMs into systems capable of real “superpowers,” such as solving complex, 
+                                  multi-step problems.
+       -2. Performance Gains: Experiments show that even simple agentic frameworks (like the smolagents library) can boost performance 
+                              dramatically (up to 60 points improvement on certain benchmarks).
+       -3. Real-World Applications: With agents, LLMs can perform tasks like multimodal reasoning, chaining multiple operations, 
+                                    and handling state (e.g., remembering and reusing data across steps).
+
+3. The GAIA Benchmark
+   -a. Challenge Characteristics:
+       GAIA is described as one of the most comprehensive benchmarks for evaluating agent systems. 
+       Its questions are designed to be extremely challenging by requiring:
+
+       -1. Constrained answer formats.
+       -2. Multimodal capabilities (e.g., extracting information from images).
+       -3. Multiple reasoning steps that involve gathering and synthesizing interdependent pieces of information.
+
+   -b. Example Challenge:
+       A question might ask:
+         “Which of the fruits shown in the 2008 painting ‘Embroidery from Uzbekistan’ were served as part of the October 1949 breakfast menu for the ocean liner that was later used as a floating prop for the film ‘The Last Voyage’? Provide the answer as a comma-separated list, ordered in clockwise sequence starting from the 12 o’clock position, and use the plural form of each fruit.”
+
+      This question demands that the system:
+      -1. Identify fruits in an image.
+      -2. Connect historical data about an ocean liner and a film.
+      -3. Retrieve and sequence details from a breakfast menu.
+
+   -c. Performance Gap:
+       Without an agentic setup, even advanced models like GPT-4 struggle on GAIA. Deep Research, by contrast, shows dramatic improvements, 
+       underlining the importance of the agentic approach.
+
+4. Building an Open-Source “Deep Research” System
+   -a. Project Motivation:
+       Inspired by OpenAI’s achievements, the authors embarked on a 24-hour mission to reproduce Deep Research using open-source tools 
+       and frameworks. Their goal is to eventually open-source the agentic framework that powers Deep Research.
+
+   -b. Code Agent Concept:
+       -1. What It Is: A “code agent” expresses its actions in executable code rather than in structured JSON.
+       -2. Advantages Over JSON:
+           -1) Conciseness: Code can describe complex sequences (including parallel actions) in fewer steps, reducing token usage by approximately 30%.
+           -2) Clarity and Reusability: Code is more natural for expressing operations and leverages extensive training exposure of LLMs to coding.
+           -3) Better State Management: It simplifies handling and reusing stateful information across multiple steps, 
+                                        which is particularly useful for multimodal tasks.
+
+   -c. Tooling Enhancements:
+       The system is equipped with:
+       -1. A Web Browser Tool: Initially a simple text-based browser for proof-of-concept purposes. Full performance, however, 
+                               will likely require a more advanced browser like OpenAI’s Operator.
+        -2. A Text Inspector: Capable of reading various text file formats.
+ 
+   These tools are adapted from Microsoft Research’s Magnetic-One agent, with plans to further extend their capabilities 
+   (e.g., supporting more file formats and transitioning to a vision-based browser).
+
+5. Experimental Results and Community Engagement
+   -a. Performance Improvements:
+       During their 24+ hour sprint, the team increased performance on the GAIA benchmark from around 46% (using the Magnetic-One setup) 
+       to 54% on the validation set. A key finding was that using code to express agent actions was critical; 
+       switching to a JSON-based approach resulted in a drop to 33% accuracy.
+
+   -b. Live Demo and Open Collaboration:
+       The authors have set up a live demo of their agentic system and are encouraging community contributions. 
+       They emphasize that while these are promising initial results, much work remains in tuning the agentic framework, 
+       improving tool integration, and benchmarking with various open LLMs (like DeepSeek R1) and vision models.
+
+   -c. Community Reproductions:
+       Several community members (e.g., dzhng, assafelovic, nickscamara, jina-ai, mshumer) have independently built implementations 
+       that align with these ideas, using different libraries and approaches for indexing data, web browsing, and querying LLMs.
+
+6. Next Steps and Future Vision
+   -a. Improving Browser Capabilities:
+       The team plans to develop GUI agents—systems that can “see” the screen and interact via mouse and keyboard—to further enhance performance. This would bring open-source systems closer to the capabilities demonstrated by OpenAI’s Operator.
+
+   -b. Call for Contributions:
+       The project is open to community involvement, and the team is actively seeking contributions and hiring engineers to accelerate development.
+
+   -c. Getting Started:
+       Interested parties are encouraged to explore the smolagents repository, read accompanying documentation and blog posts, and try out examples of the open Deep Research implementation.
+
+7. Conclusion
+   The article lays out a detailed roadmap for replicating and extending the capabilities of OpenAI’s Deep Research with open-source tools.
+   By leveraging an agentic framework—especially one that utilizes code for action specification—the project has already achieved significant 
+   improvements on the GAIA benchmark. Although there is still a long way to go, these early results, community involvement, 
+   and planned enhancements point toward a future where powerful, locally-run, and customizable agent systems become widely accessible.
