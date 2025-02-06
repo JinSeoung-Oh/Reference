@@ -1,0 +1,117 @@
+### From https://levelup.gitconnected.com/huatuogpt-o1-a-medical-reasoning-llm-with-openai-o1-like-capabilities-is-here-76ec7cc838df
+
+
+1. Overview
+   Recent developments in AI have focused on enhancing reasoning with large language models (LLMs). OpenAI’s o-series LLMs have demonstrated impressive reasoning abilities 
+   (for example, o-3 achieved 88% on the ARC-AGI benchmark). 
+   However, while open‑source research on these techniques has largely centered on mathematical reasoning tasks (as seen with DeepSeek‑R1), 
+   a new model—HuatuoGPT‑o1—has been released in the medical domain. This domain is particularly challenging because reasoning and reliability are critical.
+
+   HuatuoGPT‑o1 is trained with advanced Chain-of‑Thought (CoT) reasoning and further enhanced through Reinforcement Learning (RL). 
+   This dual approach has enabled the model to outperform all other open‑source general and medical‑specific LLMs on several medical benchmarks.
+
+2. Step 1: Preparing The Training Data
+   -a. Objective:
+       Most existing medical LLMs rely on close‑ended multiple-choice questions (MCQs). Such questions often allow the model to guess rather than truly reason, 
+       so the training data needed to require more complex reasoning.
+
+   -b. Data Collection:
+       -1. Initially, 192,000 MCQs are selected from the MedQA‑USMLE and MedMCQA datasets.
+       -2. These MCQs are filtered out if any of three small LLMs (Gemma 29B, LLaMA‑3.1–8B, Qwen2.5–7B) can solve them correctly—indicating that they are not challenging enough.
+       -3. In addition, questions asking for “incorrect options” or those with multiple correct or ambiguous answers are removed.
+           (This filtering is done using GPT‑4o with a prompt that takes {Question}, {Options}, and {Answer} into account.)
+
+   -c. Reformatting:
+       -1. After filtering, GPT‑4o is used to reformat the remaining close‑ended MCQs into open‑ended verifiable problems.
+           (A prompt is used for reformatting MCQs to open‑ended verifiable problems.)
+
+   -d. Result:
+       -1. The final training dataset consists of 40,000 verifiable medical problems (denoted by x) with their corresponding ground truth answers (y*).
+       -2. This dataset is designed to engage the model’s reasoning rather than allow it to simply guess.
+
+3. Step 2: Developing A Medical Verifier
+   -a. Purpose:
+       To ensure that the model’s reasoning and answers are correct, GPT‑4o is used as a verifier.
+
+   -b. Process:
+       -1. For each verifiable medical problem (x), the model generates a Chain‑of‑Thought reasoning (e) and an answer (y).
+       -2. The GPT‑4o–based verifier then compares the model’s answer (y) with the ground truth answer (y*), providing binary feedback (True if correct, False otherwise).
+
+   -c. Significance:
+       This feedback is critical for training, as it helps the model refine its reasoning process and learn to generate correct answers.
+
+4. Step 3: Finding The Best Reasoning Trajectory
+   -a. Initial Generation:
+       -1. The model begins with a verifiable medical problem (x) and produces an initial Chain‑of‑Thought reasoning (e(0)) and answer (y(0)) using a specific prompt 
+           for generating initial CoT reasoning.
+
+   -b. Verification and Iterative Refinement:
+       -1. The verifier checks the initial answer (y(0)) against y*.
+       -2. If the answer is wrong, the model refines its answer by applying one of four randomly selected search strategies to its previous reasoning:
+           -1) Exploring New Paths:
+               The model generates a new CoT reasoning approach (e(i)) that differs from its previous attempts.
+               (A prompt is used for this strategy.)
+           -2) Backtracking:
+               The model goes back to a previous reasoning approach (e(j) for j < i − 1) and resumes from that point.
+               (A prompt for backtracking is provided; note that this strategy is allowed only in early iterations, i ≤ 2.)
+           -3) Verification:
+               The model re-evaluates its current reasoning (e(i–1)) and answer (y(i–1)).
+               (A corresponding prompt is used for this strategy.)
+           -4) Corrections:
+               The model critiques and corrects its current reasoning approach (e(i–1)).
+               (A prompt is used for the corrections strategy.)
+
+   -c. After applying a strategy, a new CoT reasoning (e(i)) and answer (y(i)) are generated.
+
+   -d. This iterative process continues until the verifier confirms that the answer is correct or until the maximum number of iterations (three per trajectory) is reached.
+
+   -e. In addition, if the model fails to produce a correct answer after three complete attempts for a given problem, that problem is discarded.
+
+5. Step 4: Supervised Fine-Tuning Using The Best Reasoning Trajectory
+   -a. Refinement:
+       -1. Once the model finds a correct reasoning trajectory (a sequence [e(0), y(0), …, e(i), y(i)]), this trajectory is reformatted into a coherent, 
+           natural language reasoning process, denoted as Complex CoT (represented as ê).
+
+   -b. Characteristics of Complex CoT:
+       -1. It includes smooth transitions (using words like “hmm,” “also,” “wait,” etc.) and is optimized for reduced token usage.
+
+   -c. Process:
+       -1. A prompt is used to reformat the correct reasoning trajectory into Complex CoT.
+       -2. Based on this reformatted reasoning, the model then generates a formal response (ŷ) for the given medical problem (x).
+       -3. This produces a refined dataset, D(SFT) = {(x, ê, ŷ)}, consisting of 20,000 data points.
+       -4. Supervised Fine‑Tuning (SFT) is then performed using this refined dataset, teaching the model to “think before answering” in a way similar to OpenAI’s o1.
+
+   -d. Inspiration:
+       This step is inspired by the approach in the “Stream of Search (SoS)” paper.
+
+6. Step 5: Enhancing Reasoning With Reinforcement Learning
+   -a. Rationale:
+       -1. While SFT teaches the model to mimic pre‑defined reasoning trajectories, these may not always be optimal. 
+           Reinforcement Learning (RL) encourages the model to explore alternative reasoning pathways that might yield better results.
+
+   -b. Process:
+       -1. Starting with the fine‑tuned model (base policy π(ref)), for each medical problem (x), the model generates a reasoning trajectory (ê) and answer (ŷ) 
+           according to its current policy.
+       -2. The model’s answer is evaluated by the verifier:
+           -1) A correct answer receives a reward of 1.
+           -2) An incorrect answer receives a reward of 0.1 (to encourage learning from mistakes).
+           -3) If the answer is null or incomplete, a reward of 0 is given.
+           -4) Reward Adjustment:
+               - The total reward also incorporates a penalty for divergence from the initial policy using the Kullback-Leibler (KL) divergence between 
+                 the current RL policy (π(θ)) and the initial policy (π(ref)), scaled by a coefficient β.
+           -5) Policy Update:
+               - The model’s policy parameters (θ) are then updated using the Proximal Policy Optimization (PPO) algorithm with a clipped objective to ensure stable 
+                 training and to prevent the model from deviating too far from its base behavior.
+7. Conclusion
+   The described process for training HuatuoGPT‑o1 leverages a multi-step approach:
+   -a. Data Preparation: Filtering and converting MCQs into challenging, verifiable medical problems.
+   -b. Medical Verification: Using GPT‑4o as a verifier to ensure that the model’s reasoning and answers are correct.
+   -c. Iterative Reasoning Improvement: Applying search strategies (exploring new paths, backtracking, verification, and corrections) to refine the model’s  
+       Chain‑of‑Thought until a correct answer is produced.
+   -d. Supervised Fine‑Tuning: Reformulating the best reasoning trajectory into a coherent Complex CoT for fine‑tuning the model.
+   -e. Reinforcement Learning Enhancement: Further refining the model’s reasoning through RL, encouraging exploration of superior reasoning pathways while ensuring 
+                                           stability with KL divergence penalties and PPO updates.
+
+This comprehensive training strategy has enabled HuatuoGPT‑o1 to achieve o‑1–like reasoning capabilities in the critical medical domain, 
+significantly outperforming other open‑source general and medical‑specific LLMs on multiple benchmarks.
+
