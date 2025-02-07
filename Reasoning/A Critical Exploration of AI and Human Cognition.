@@ -1,0 +1,76 @@
+### From https://arshithasashok.medium.com/can-ai-truly-think-a-critical-exploration-of-ai-and-human-cognition-093d0f93832a
+
+1. Subjectivity and the Nature of Human Thought
+   -a. Perception and Self-Reference:
+       The text opens with Jiddu Krishnamurti’s assertion—“We do not see things as they are, but as we are”—to emphasize that human thought is inherently 
+       subjective and self-referential. 
+       Humans do not simply observe the world; they interpret it through a lens shaped by personal experiences, emotions, and social contexts.
+
+   -b. Embodied and Contextual Thinking:
+       Human cognition is not an abstract process; it is embodied and deeply intertwined with sensory-motor experiences. 
+       For instance, a child learns what “hot” means through direct tactile and emotional experiences rather than by memorizing definitions. 
+       This highlights that thinking is rooted in physical interaction and that concepts are built upon lived experiences.
+
+   -c. Emotion and Survival:
+       Emotions play a central role in our reasoning and problem-solving. Beyond logical deduction, human thought is influenced by feelings,
+       which in turn shape our decisions, priorities, and responses to the environment. 
+       Our cognitive processes have evolved to solve survival problems—from recognizing patterns in nature to navigating complex social hierarchies.
+
+2. Self-Reference, Recursion, and Symbolic Manipulation
+   -a. Hofstadter’s Perspective:
+       Drawing on ideas from Hofstadter’s Gödel, Escher, Bach, the text explains that self-reference and recursion are foundational to human thought. 
+       Just as Gödel’s incompleteness theorems reveal that formal systems can generate unprovable truths, 
+       human cognition emerges from recursive loops of self-reflection. For example, when we ask ourselves why we feel a certain way, 
+       each layer of inquiry builds upon the previous one, creating a deep and complex internal dialogue.
+
+   -b. Symbol Manipulation and Creativity:
+       Human thinking involves the manipulation of symbols—ideas, words, and images—that refer to other symbols. 
+       Unlike static systems that merely follow predefined rules, the human mind can combine these symbols in novel, creative ways, 
+       leading to unexpected insights and leaps in understanding. This dynamic process of generating and reinterpreting meanings is at the heart of creativity.
+
+3. The Limitations of Large Language Models (LLMs)
+   -a. Statistical Pattern Recognition vs. True Understanding:
+       The text contrasts human cognition with the operational mode of LLMs. While LLMs (as discussed by Agüera y Arcas) are capable of producing coherent 
+       and contextually appropriate language by recognizing statistical patterns in vast text corpora, they do so without any embodied experience. 
+       They lack direct sensory, emotional, or physical interactions with the world.
+
+   -b. Absence of Sensory and Emotional Context:
+       For example, when an LLM discusses “cold,” its understanding is limited to associations found in text (like “winter” or “snow”) rather than 
+       the multisensory experience of feeling cold. 
+       Human understanding, by contrast, is enriched by direct experience—such as the sensation of shivering or the emotional impact of discomfort—which LLMs 
+       cannot replicate.
+
+   -c. Simulation of Theory of Mind:
+       Although some researchers argue that LLMs exhibit a rudimentary theory of mind (simulating emotional responses or conversational consistency), 
+       these are imitations based solely on data patterns. Genuine human cognition involves an intricate awareness of one’s own mental states and 
+       the capacity to understand the emotions and intentions of others—a depth that LLMs do not possess.
+
+4. The Essence of Human Thought
+   -a. Beyond Mere Computation:
+       Human thinking is not just about processing symbols or following algorithms; it is a holistic, embodied process. 
+       It arises from a complex interplay of sensory experiences, emotional responses, and social interactions. 
+       This multifaceted nature allows humans to perceive nuances (such as sarcasm, subtext, or empathy) that machines cannot truly grasp.
+
+   -b. Creativity and Spontaneity:
+       The text highlights that human creativity often emerges spontaneously—through random ideas, sudden epiphanies, or impulsive acts of invention. 
+       These moments of “leap” in understanding are driven by our subjective experiences and emotional states, setting human thought apart from the deterministic, 
+       data-driven outputs of LLMs.
+
+   -c. Imitation Versus Genuine Cognition:
+       Referencing Turing’s classic work, the discussion points out that while machines can imitate human behavior (as in the Imitation Game), 
+       they do not genuinely think. LLMs, no matter how sophisticated, operate solely on pre-existing data and patterns; they cannot innovate or feel as humans do.
+
+5. The Broader Implications
+   -a. Dependence on Human Input:
+       Despite their impressive capabilities, AI systems remain fundamentally tools—mirrors reflecting the data and patterns provided by humans. 
+       Without the richness of human experiences and the capacity for introspection, AI cannot achieve true sentience or independent thought.
+
+   -b. The Risk of Cognitive Complacency:
+       The text concludes with a cautionary note: the real danger lies not in AI overtaking human intelligence but in humans becoming overly reliant on machines. 
+       If we stop thinking for ourselves and delegate our cognitive processes to algorithms, we risk losing the very essence of what makes us human—our creativity, 
+       curiosity, and ability to question the world.
+
+   -c. Final Reflection:
+       Ultimately, while LLMs can simulate aspects of human conversation and even mimic emotional responses, they remain constrained by their lack of physicality,
+       embodied experience, and self-aware introspection. True thinking, as argued in the text, is a uniquely human attribute—deeply rooted in our sensory experiences,
+       emotional lives, and the rich, complex interplay of our inner thoughts.
