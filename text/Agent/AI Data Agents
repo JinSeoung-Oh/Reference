@@ -1,0 +1,95 @@
+### From https://medium.com/basejump-ai/ai-data-agents-unlocking-a-new-era-of-data-intelligence-and-analytics-f0b4437d89b5
+
+1. Evolving Value Proposition in Data and AI
+   -a. Shift in Narrative:
+       -1. Data was once called “the new oil,” but with AI’s rise, compute power has become the critical resource for innovation 
+           and success.
+   -b. Sequoia’s Bold Claim:
+       -1. Generative AI can make billions of workers at least 10% more efficient or creative, potentially generating trillions 
+           of dollars in economic value.
+   -c. Market Perspective:
+       -1. The impact of generative AI is compared to transformative technologies like the internet and mobile phones.
+
+2. Influence on Knowledge Work and Data Analytics
+   -a. Acceleration of Value Delivery:
+       -1. AI is expected to accelerate business value through data analytics.
+   -b. Demand for Better Standards:
+       -1. As data analytics grows rapidly (with a projected CAGR of 27.3% through 2030), there is an increased need 
+           for improved tooling, software engineering practices, and data governance.
+   -c. Educational Shift:
+       -1. Data science and analytics programs have surged, evidenced by a nearly 968% increase in data science bachelor’s
+           degrees from 2020 to 2022.
+
+3. Evolution of Data Tools and Processes
+   -a. From ETL to ELT (and ELTL):
+       -1. Traditional ETL processes have been replaced by ELT, where tools like dbt empower data analysts to perform transformations.
+       -2. The concept of “ELTL” is introduced to emphasize the final load step—presenting modeled data to end users—which 
+           previously lacked sufficient focus.
+   -b. Data Governance and Semantic Layers:
+       -1. Inconsistent dashboards and lack of testing led to governance challenges.
+       -2. Tools like dbt and SQLMesh now incorporate testing, semantic layers, and data catalogs to ensure consistent, 
+           governed data delivery.
+
+4. Role of AI in Data Analytics
+   -a. Integration of AI:
+       -1. AI is being integrated into every aspect of the final load step, especially on top of modeled data in the warehouse.
+       -2. Success hinges on a robust semantic layer built on accurate metadata and data models.
+   -b. Agentic AI Systems:
+       -1. Effective AI systems rely on retrieval-augmented generation (RAG) and need guardrails such as primary key checks, 
+           join definitions, and auditing capabilities to improve accuracy.
+   -c. Precision Analytics:
+       -1. AI will enable “precision analytics,” where data querying shifts from weeks to seconds, delivering tailored insights
+           similar to “precision medicine” in healthcare.
+
+5. Data Objects and Their Role
+   -a. Definition and Types:
+       -1. A data object is treated as an individual SQL query answer and can be categorized as:
+           -1) A metric (1 row, 1 column)
+           -2) A record (1 row, many columns)
+           -3) A dataset (many rows, many columns)
+  -b. Benefits:
+      -1. Data objects are more accessible, comparable, and help organize information better than traditional dashboards.
+
+6. AI Data Analytics Solutions and Approaches
+   -a. Two Functional Groups:
+       -1. Retrieval from Existing Reports:
+           -1) These solutions query data from pre-transformed reports, though they face challenges with inconsistencies.
+       -2. Text-to-SQL and Querying Source Data:
+           -1) Solutions that query original data sources have made significant progress, as evidenced by high scores on benchmarks like Spider.
+   -b. Benchmark Progress:
+       -1. The Spider benchmark shows strong performance (over 91% on execution accuracy), while Spider 2.0 presents
+           a more challenging scenario for RAG workflows.
+
+7. Trust, Control, and Human-in-the-Loop
+   -a. Building Trust in AI:
+       -1. Reliable text-to-SQL systems depend on strong metadata, well-defined schemas, and data governance.
+   -b. Control Mechanisms:
+       -1. Data teams should be alerted when AI confidence is low and be able to audit both SQL queries and the AI’s reasoning.
+       -2. Business users benefit from real-time transparency, the ability to compare source tables, 
+           and human-in-the-loop feedback.
+   -c. Agentic Architecture:
+       -1. An effective AI data agent acts as an assistant, not a fully autonomous entity, relying on human oversight to ensure accuracy.
+
+8. Data Intelligence Platforms Versus Traditional BI
+   -a. Beyond Visualization:
+       -1. Successful AI data applications require integrated governance and control, leading to the term “data intelligence 
+           platform” or “AI Data Analytics Platform.”
+   -b. Key Features:
+       -1. Natural language access (a cognitive layer)
+       -2. Semantic cataloguing and discovery
+       -3. Automated management and optimization
+       -4. Enhanced governance and privacy
+   -c. Approach:
+       -1. A data source–agnostic approach that supports various SQL interfaces and provides both API and ready-to-use user interfaces.
+
+9. Beneficiaries and the Data Agent Vision
+   -a. Who Benefits:
+       -1. Both the data team and business users stand to gain from improved data governance and access.
+   -b. The Data Agent Moment:
+       -1. The future vision is an integrated “data agent” that covers the entire data maturity lifecycle:
+           -1) Ad hoc and reactive analysis
+           -2) Descriptive and diagnostic reporting
+           -3) Predictive and prescriptive analytics
+   -c. Long-Term Goal:
+       -1. While current solutions cover specific aspects, the aim is to eventually create a comprehensive AI-enabled data 
+           analytics solution that fully delivers business value.
