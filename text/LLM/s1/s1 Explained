@@ -1,0 +1,60 @@
+### From https://medium.com/@florian_algo/s1-explained-can-a-50-llm-rival-deepseek-r1-dc4b30c87837
+
+1. Overview of s1:
+   -a. A new reasoning LLM called s1 has emerged.
+   -b. It is claimed to be sample-efficient—using only a 1K dataset—and cost-efficient, with the final fine-tuning step costing approximately $50 (based solely on GPU time).
+
+2. Performance Comparisons:
+   -a. Against OpenAI’s o1 and o1-mini:
+       -1. s1 does not surpass OpenAI o1 or even o1-mini.
+   -b. Against DeepSeek-R1:
+       -1. s1 falls short compared to DeepSeek-R1’s 32B model, which is distilled from 800K data; the performance gap is significant.
+   -c. Other Comparisons:
+       -1. s1 performs better than o1-preview and Sky-T1.
+       -2. It surpasses QWQ-32B on AIME and MATH.
+       -3. It outperforms Bespoke-32B on GPQA.
+   -d. Budget Forcing Impact:
+       -1. The budget forcing method boosts s1’s performance on AIME by 6.7%.
+
+3. Dataset Construction:
+   -a. 1K Dataset (s1K):
+       -1. The 1K dataset is a carefully selected subset from a larger 59K dataset.
+       -2. Training on the full 59K examples does not provide significant improvements over using the selected 1K.
+   -b. Building the 59K Dataset:
+       -1. Quality: High-quality data is ensured by removing formatting errors and irrelevant content.
+       -2. Difficulty: Focus is placed on challenging problems to strengthen reasoning ability.
+       -3. Diversity: The dataset includes questions from various fields (e.g., math, physics, biology).
+       -4. Process:
+           -1) 59,029 reasoning problems were collected from 16 different sources.
+           -2) Two new datasets, s1-prob (PhD-level probability exam questions) and s1-teasers (challenging logic puzzles), were introduced.
+           -3) After cleaning (removing errors and failed API generations), 51,581 high-quality samples remained.
+           -4) Problems that both Qwen2.5–7B and Qwen2.5–32B could solve easily were discarded, reducing the set to 24,496 harder questions.
+           -5) Claude 3.5 Sonnet categorized the questions to ensure coverage across 50 subjects.
+           -6) Finally, 1,000 representative questions were randomly selected from each subject category to form the final s1K dataset.
+
+4. Training Process:
+   -a. Base Model:
+       -1. The training starts with the Qwen2.5–32B-Instruct model, which already has solid reasoning capabilities.
+   -b. Supervised Fine-Tuning (SFT):
+       -1. The s1K dataset is used to fine-tune the base model along structured, step-by-step reasoning paths.
+   -c. Training Setup:
+       -1. The training is performed using PyTorch FSDP on 16 NVIDIA H100 GPUs.
+       -2. The fine-tuning process completes in 26 minutes (using 7 H100 GPU hours), leading to the $50 cost estimate (this cost covers only the fine-tuning GPU time, not data collection, evaluation, or pre-training).
+
+5. Budget Forcing Technique:
+   -a. Purpose:
+       -1. Budget forcing controls reasoning time and computation by managing the number of thinking tokens during decoding.
+   -b. Mechanism:
+      -1. Enforcing a Maximum:
+          The model appends an end-of-thinking token and “Final Answer:” to signal an early stop.
+      -2. Enforcing a Minimum:
+          The stop signal is suppressed and “Wait” is appended, encouraging additional reflection.
+   -c. Example:
+       -1. For the question “How many ‘r’s are in ‘raspberry’?”:
+           -1) The model initially counts and stops, giving the incorrect answer “2”.
+           -2) With budget forcing, the stop signal is blocked, and “Wait” is added, causing the model to re-examine the word and correct the answer to “3”.
+Summary:
+s1 is a new reasoning model that uses a carefully curated 1K dataset selected from a larger pool of 59K examples.
+It is fine-tuned using a base model (Qwen2.5–32B-Instruct) with a training setup that is both efficient and low-cost in terms of GPU usage.
+While s1 does not fully match the performance of top-tier models like OpenAI’s o1 or DeepSeek-R1, it performs competitively against certain mid-tier models and shows notable gains with techniques such as budget forcing.
+The overall approach emphasizes data quality, difficulty, and diversity to create a high-quality, sample-efficient dataset for fine-tuning.
