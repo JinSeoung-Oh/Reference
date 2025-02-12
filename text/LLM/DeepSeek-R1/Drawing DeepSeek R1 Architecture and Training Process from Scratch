@@ -1,0 +1,72 @@
+### From https://levelup.gitconnected.com/drawing-deepseek-r1-architecture-and-training-process-from-scratch-72043da33955
+### Have to Check given link for more detail
+
+1. Starting Point:
+   DeepSeek-R1 isn’t built from scratch. It starts with an already strong base model, DeepSeek-V3, 
+   which already has robust language capabilities. The goal is to transform this model into a "reasoning superstar."
+
+2. Initial Reinforcement Learning (RL) – DeepSeek-R1 Zero:
+   -a. Pure RL Experiment:
+       The initial experiment, dubbed DeepSeek-R1 Zero, uses RL to see if improved reasoning emerges naturally.
+   -b. RL Pipeline:
+       The training isn’t a single pass; it’s a multi-stage pipeline. 
+       The model alternates between receiving new data and undergoing RL updates, 
+       effectively “leveling up” its reasoning abilities step by step.
+
+3. DeepSeek-V3 Architecture and Role in RL:
+   -a. Mixture-of-Experts (MOE):
+       DeepSeek-V3 uses a memory system to recall context and a smart router that directs simple queries to a fast processor 
+       and complex ones to an expert system.
+   -b. As an RL Actor:
+       In the RL setup, DeepSeek-V3 acts as the policy model (the "actor"). It generates answers and reasoning for a given problem,
+       receives rewards from the environment (the reasoning task), and adjusts its strategy accordingly.
+
+4. GRPO Algorithm for RL:
+   -a. Key Innovation:
+       GRPO avoids using a heavy critic model by directly calculating a baseline reference from a group of generated outputs.
+   -b. Advantage Calculation:
+       For each prompt, the model generates a set of outputs. Each answer’s “advantage” is computed by comparing its
+       reward (based on correctness, formatting, etc.) to the group’s average.
+   -c. Stability Mechanism:
+       A clipping mechanism and a “StayStable” term ensure the model’s updates are gradual and don’t deviate too far from
+       the base model.
+
+5. Reward System in DeepSeek-R1 Zero:
+   -a. Accuracy and Format Rewards:
+       For example, in a simple math problem like “What is 2 + 3 * 4?”, the system checks if the answer is correct (14) 
+       and whether the reasoning is properly enclosed in <think> and <answer> tags.
+   -b. Language Consistency Reward:
+       Added later to prevent the model from mixing languages, ensuring that if a question is asked in English, 
+       the entire response stays in English.
+
+6. Data Collection and Supervised Fine-Tuning (SFT):
+   -a. Cold Start Data:
+       Before intense RL training, the model is given high-quality reasoning examples using Chain-of-Thought (CoT) prompts.
+       These examples clearly show step-by-step reasoning.
+   -b. Direct Prompting and Human Refinement:
+       The model is also directly prompted to think aloud and verify its answers. Human annotators refine the initial, 
+       sometimes messy, outputs from R1 Zero to create cleaner, well-structured training data.
+   -c. SFT Process:
+       The refined examples are used to fine-tune the model via next-token prediction, helping it learn to produce ideal, 
+       structured reasoning outputs.
+
+7. Advanced RL Stage (Reasoning-Oriented RL):
+   After SFT, the model undergoes another round of RL:
+
+   -a. Enhanced Rewards:
+       Besides accuracy and formatting, rewards now also include factors like helpfulness and harmlessness.
+   -b. Iterative Improvement:
+       The model continuously generates outputs, gets rewarded based on combined criteria, and updates its policy to favor 
+       high-quality, consistent, and safe responses.
+
+8. Final Steps – Distillation:
+   -a. Model Distillation:
+       Once the final DeepSeek-R1 model is achieved, its reasoning capability is distilled into smaller, 
+       more efficient models by training student models (e.g., Qwen-1.5B, Llama-14B) on outputs from DeepSeek-R1.
+   -b. Outcome:
+       This process produces smaller, faster models that retain much of the advanced reasoning ability of the larger model,
+       making them ready for broader deployment.
+
+In short, DeepSeek-R1 builds on a strong base model (DeepSeek-V3) and evolves it through a multi-stage RL pipeline
+enhanced by structured, supervised training and refined reward systems.
+This transformation enables the model to excel in complex reasoning tasks while ensuring clarity, consistency, and safe outputs.
