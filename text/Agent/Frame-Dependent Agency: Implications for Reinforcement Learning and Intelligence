@@ -1,0 +1,90 @@
+### From https://www.marktechpost.com/2025/02/11/frame-dependent-agency-implications-for-reinforcement-learning-and-intelligence/
+
+The study delves into the concept of agency—defined as a system’s ability to direct outcomes toward a goal—and argues 
+that this ability cannot be judged in an absolute sense. 
+Instead, whether a system exhibits agency depends critically on the reference frame chosen for evaluation. 
+Below is a detailed breakdown of the key points:
+
+1. Definition and Fundamental Claim
+   -a. Agency Defined: Agency is characterized as the capacity of a system to steer or direct outcomes in pursuit of a goal.
+   -b. Frame Dependence: The core argument is that determining if a system is agentic is not an inherent property 
+                         of the system but rather relies on the perspective or reference frame from which it is analyzed. 
+                         This means that the same system might be considered to have agency under one set of evaluative criteria, 
+                         but not under another.
+
+2. Research Context and Background
+   -a. Collaborative Effort: Researchers from Google DeepMind and the University of Alberta are involved, highlighting the study’s
+                             relevance to artificial intelligence and reinforcement learning.
+   -b. Reinforcement Learning (RL) Lens: The investigation is particularly focused on RL, where agents are designed to
+                                         make decisions to achieve specific goals. 
+                                         Understanding agency from a frame-dependent perspective is crucial because it influences 
+                                         how we design and evaluate these agents.
+
+3. Essential Properties of Agency
+   The study builds on prior work by dissecting four core properties of agency, each of which is shown to be contingent on 
+   the chosen reference frame:
+
+   -a. Individuality:
+       -1. Concept: This property concerns defining the boundaries of a system—what counts as the agent versus its environment.
+       -2. Frame Dependence: The decision of where to draw this boundary is inherently subjective and varies with the reference frame.
+   -b. Source of Action:
+       -1. Concept: This addresses the origin of the system’s actions—whether they stem from internal mechanisms or 
+                    external influences.
+       -2. Frame Dependence: Evaluating whether actions are self-initiated requires a specific contextual frame, 
+                             as different frames might attribute the action to different causes.
+   -c. Normativity:
+       -1. Concept: Normativity involves determining if the system's actions are directed toward achieving a goal in 
+                    a “meaningful” way, often measured against a set of norms or criteria.
+       -2. Frame Dependence: What is considered goal-directed behavior can vary greatly depending on the interpretative 
+                             framework used.
+   -d. Adaptivity:
+       -1. Concept: Adaptivity refers to the system’s ability to change its behavior in response to environmental feedback.
+       -2. Frame Dependence: Assessing adaptivity also relies on the context and the criteria established by the chosen 
+                             reference frame.
+
+4. Implications for Reinforcement Learning (RL)
+   -a. Design and Evaluation: In RL, agents are constructed to perform tasks and achieve goals. 
+                              Recognizing that agency is frame-dependent suggests that the design, performance, and evaluation 
+                              of these agents could differ dramatically based on how their reference frames are defined.
+   -b. Need for a Foundational Science: For RL and other fields that rely on understanding intelligent behavior,
+                                        there is a call to develop a foundational science of agency. 
+      -1. Establishing precise definitions for what constitutes a valid reference frame.
+      -2. Formalizing the criteria or principles that guide the selection of these frames.
+      -3. Investigating and comparing different frame-selection principles to see how they affect the interpretation
+          of agent behavior.
+
+5. Broader Context and Everyday Examples
+   -a. Interdisciplinary Relevance: The concept of agency is not limited to AI. It spans biology, philosophy, and cognitive science,
+                                    where similar questions about goal-directed behavior and decision-making arise.
+   -b. Illustrative Examples:
+       -1. A thermostat is often cited as a system that appears to act with agency because it maintains a set temperature. 
+           However, whether it is truly agentic depends on how we define its boundaries and goals.
+       -2. Similarly, a rock rolling down a hill might be interpreted as pursuing the goal of reaching the bottom, 
+           but this is clearly a matter of perspective—attributing goal-directedness to an inanimate object depends entirely 
+           on the reference frame used.
+
+6. Agency and Intelligence: Unresolved Interconnections
+   -a. Close but Unclear Relationship: While agency is closely linked to intelligence, the precise nature of their 
+                                       relationship remains an open question.
+   -b. New Research Frontier: Exploring this relationship through the lens of frame dependence could provide fresh insights.
+       -1. Future work should aim to develop a formal proof or rigorous definition supporting the frame-dependent nature of agency. 
+       -2. Researchers need to determine defensible principles for selecting reference frames and explore the implications 
+           these choices have on our understanding of both agency and intelligence.
+
+7. Future Directions and Research Challenges
+   -a. Formal Definitions and Proofs: A key next step is to establish formal definitions of agent reference frames 
+                                      and to provide rigorous proofs for the frame-dependent nature of agency.
+   -b. Comparative Analysis: It is important to investigate and compare different principles for reference frame selection. 
+                             This comparison will help in understanding how varying definitions impact the assessment 
+                             of agency across different systems.
+   -c. Broader Implications: Understanding frame dependence in agency could reshape foundational theories in reinforcement
+                             learning and other fields that study intelligent behavior, leading to more robust models and evaluation criteria.
+
+In summary:
+The study argues that agency—the capacity of a system to direct outcomes toward a goal—is not an absolute, intrinsic property. 
+Instead, it is highly dependent on the evaluative reference frame. 
+This frame-dependent view influences how we understand the four essential properties of agency
+(individuality, source of action, normativity, and adaptivity) and has profound implications for fields like reinforcement learning.
+Moving forward, the challenge lies in developing precise, formalized criteria for selecting reference frames 
+and understanding how these choices affect our broader understanding of agency and intelligence.
+
