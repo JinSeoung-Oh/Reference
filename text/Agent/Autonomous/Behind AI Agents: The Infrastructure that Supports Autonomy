@@ -1,0 +1,94 @@
+### From https://medium.com/building-the-open-data-stack/behind-ai-agents-the-infrastructure-that-supports-autonomy-4c4657d7d720
+
+1. Autonomy and Supporting Capabilities in AI Agents
+   -a. Autonomy as the Core Feature:
+       Most descriptions of AI agents emphasize their ability to act autonomously without user intervention. 
+       Some agents may include a human-in-the-loop only when uncertainty arises.
+
+   -b. Four Key Requirements for Agentic AI Architectures:
+       -1. Ability and Access:
+           -1) The agent must have the capability to act on behalf of the user, which includes having proper
+               permissions and authenticated access to relevant systems.
+      -2. Reasoning and Planning:
+          -1) Agents need to use structured reasoning—often represented as a chain, tree, graph, 
+              or algorithm—to make decisions and plan actions.
+      -3. Component Orchestration:
+          -1) This involves coordinating various parts of the system, such as prompts, LLMs, data sources, context, 
+              memory, and the status of actions.
+     -4. Guardrails:
+         -1) These are safeguards designed to keep the agent focused, avoid errors, and provide diagnostic information 
+             in case of failures.
+
+2. Component Orchestration and Context Management
+   -a. Challenge of Orchestration:
+       Once the basic capabilities (ability, access, reasoning, planning) are in place, the primary challenge becomes 
+       managing context effectively. Agents must be aware of:
+
+       -1. Their core tasks and goals.
+       -2. The state of connected systems.
+       -3. The history of interactions with users and external systems.
+
+  -b. Limitations of LLM Context Windows:
+      -1. Traditional LLMs have a one-dimensional context window that holds recent history, but this is insufficient 
+          for agents that need to manage long-term and diverse context.
+
+  -c. Multi-Level Context for AI Agents:
+      The text conceptually divides context into three levels:
+
+      -1. Primary Context:
+          -1) Contains the agent’s core task list and goals.
+          -2) Must be stored persistently and structured for quick retrieval.
+      -2. Direct Context:
+          -1) Encompasses the state of connected, relevant systems (e.g., calendars, APIs, messaging systems).
+          -2) This context is dynamic and requires real-time storage solutions.
+      -3. External Context:
+          -1) Includes general knowledge or external data (e.g., web searches, news, or Wikipedia) 
+              that is not part of the core system.
+          -2) This context is vast, unstructured, and fetched on demand.
+
+3. Storage Infrastructure for Context Management
+   -a. Need for Hybrid Storage Architectures:
+       Instead of a single monolithic context, AI agents benefit from a hybrid storage system that:
+       -1. Balances low-latency access (like cache or RAM) with long-term persistence (like databases or hard drives).
+       -2. Combines structured data models (for primary and direct context) with unstructured 
+           or semi-structured models (for external context).
+   -b. Storage Strategies for Each Context Level:
+       -1. Primary Context:
+           -1) Typically stored in transactional databases or document stores.
+           -2) Requires low-latency indexing and event-driven updates.
+           -3) Example: A scheduling assistant tracks tasks, status, priorities, and dependencies reliably.
+       -2. Direct Context:
+           -1) Managed using time-series databases, caching layers, and possibly vector-based retrieval 
+               for recent interactions.
+           -2) Example: A customer support agent tracks live conversation histories and session states.
+       -3. External Context:
+           -1) Handled with document stores, vector search systems, and retrieval-augmented generation (RAG) techniques.
+           -2) Example: A personal assistant retrieves scientific articles or real-time news updates to assemble reports.
+   -c. Hybrid Storage Considerations:
+       -1. Latency vs. Persistence: Frequently accessed context is kept in low-latency storage; less frequent 
+                                    but essential context is stored long-term.
+       -2. Structured vs. Unstructured Data: Structured storage is used for tasks and system states, while unstructured 
+                                             data (with semantic embeddings) supports broader knowledge retrieval. 
+       -3. Real-Time vs. Historical Awareness: Continuous monitoring is balanced with on-demand retrieval of historical data.
+    -d. Example Technologies and Databases:
+        -1. Transactional and Distributed Databases: Apache Cassandra, DataStax Astra DB, PostgreSQL.
+        -2. Time-Series and Event-Driven Storage: InfluxDB, TimescaleDB, Apache Kafka (or Pulsar), Redis Streams.
+        -3. Vector Search Solutions: DataStax Astra DB (vector capabilities), Weaviate, FAISS.
+        -4. Caching and In-Memory Storage: Redis, Memcached.
+
+4. The Future: Hybrid Storage for Scalable AI Agents
+   -a. Role of Hybrid Storage:
+       As AI systems grow more complex, a hybrid storage architecture that integrates various data models is essential
+       for:
+       -1. Managing both short-term and long-term context.
+       -2. Ensuring efficient retrieval and updating of information.
+       -3. Supporting autonomous, context-aware, and scalable agentic systems.
+   -b. Building Scalable AI Data Infrastructure:
+       -1. Integration:
+           -1) Combining transactional processing, vector search, and real-time updates.
+       -2. Benefits:
+           -1) Provides fast, scalable, and context-rich memory for AI agents.
+           -2) Enables autonomous decision-making by maintaining a balance between immediate context and historical knowledge.
+   -c. Overall Goal:
+       To create AI agents that can operate reliably in dynamic, data-intensive environments while maintaining 
+       continuity and responsiveness.
