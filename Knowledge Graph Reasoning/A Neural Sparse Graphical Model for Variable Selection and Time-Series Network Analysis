@@ -1,0 +1,238 @@
+### From https://pub.towardsai.net/a-neural-sparse-graphical-model-for-variable-selection-and-time-series-network-analysis-d8dccebb07d7
+
+1. Introduction
+   -a. Problem Setting:
+       A typical time-series dataset is visualized as a spreadsheet with rows of timestamps and columns labeled 
+       𝑥_1,𝑥_2,…,𝑥_𝑘 (e.g., product sales, stock prices, gene expression levels). 
+       In such data, variables rarely evolve independently—they interact, often with time lags. For example, a dip in 
+       𝑥_1 last month might trigger a spike in 𝑥_2 this month.
+   -b. Main Objectives:
+       The goal is to select the most influential variables and build a reliable time-series network model 
+       that explains how each 𝑥_𝑚 depends on the others over time. 
+       The challenge lies in determining whether a variable is driven by only a few others (and which ones) or 
+       by a broader set of variables over longer lags.
+   -c. Existing Approaches and Limitations:
+       Methods like Graph Neural Networks (GNNs), structural modeling with domain-specific equations, 
+       or exotic approaches such as Mamba with attention-based state spaces have been explored.
+       However, these can be complex to set up, especially when it’s unclear which columns are truly important or 
+       how to represent lagged dependencies.
+   -d. Proposed Solution – NSGM:
+       The paper introduces a novel Neural Sparse Graphical Model (NSGM) that:
+       -1. Learns a “sparse adjacency” matrix 𝐴∈𝑅^(𝑘×𝑘) to identify the critical influencing variables.
+       -2. Uses a neural network to capture nonlinear effects.
+       This integrated method addresses both variable selection and time-series modeling simultaneously, 
+       making the model interpretable and efficient for applications like forecasting product demand, 
+       modeling gene interactions, or real-time stock selection.
+
+2. Mechanism of the Neural Sparse Graphical Model (NSGM)
+   -a. Core Objectives
+       -1. Variable Selection:
+           Identify which variables 𝑥_𝑛​ truly influence a target variable 𝑥_𝑚
+       -2. Network Modeling:
+           Build a time-series network that specifies how 𝑥_𝑚(𝑡+1) depends on selected variables and their lags.
+   -b. Model Components
+       -1. Adjacency Matrix 𝐴
+           -1) 𝐴=[𝐴_(𝑚,𝑛)] is a learnable matrix where a near-zero value of 𝐴_(𝑚,𝑛) indicates that 𝑥_𝑛 is
+               irrelevant for predicting 𝑥_𝑚
+           -2) An ℓ_1-norm penalty on 𝐴 drives many entries to zero, effectively performing variable selection.
+       -2. Temporal Aggregation:
+           -1) With a maximum lag 𝐿, inputs from previous 𝐿 steps for each variable are considered.
+           -2) An attention mechanism or simpler gating function is used to weight the contributions of different lags.
+       -3. Nonlinear Mapping 𝐹_𝑚
+           -1) For each target 𝑥_𝑚, a small neural network 𝐹_𝑚 maps the aggregated signals from the relevant 
+               lagged inputs to the prediction 𝑥_𝑚(𝑡+1)
+   -c. Loss Function
+       The training objective is to minimize the prediction error across all variables and time steps, 
+       with an additional ℓ_1 penalty on 𝐴 to enforce sparsity:
+
+       Loss=∑_(𝑚,𝑡)∥𝑥_𝑚(𝑡+1)−𝐹_𝑚(aggregated inputs)∥^2+𝜆∥𝐴∥_1
+       where 𝜆>0 controls the strength of the sparsity penalty.
+
+3. Detailed Step-by-Step Procedure
+   -a. Prepare Time-Lagged Data:
+       -1. Windowing: For each timestamp 𝑡 in the dataset 𝐷𝐹, extract lagged features up to 𝐿 steps.
+       -2. Alignment: Ensure that the target 𝑥_𝑚(𝑡+1) is paired with the correct window of past values.
+   -b. Initialize Parameters:
+       -1. Adjacency Matrix 𝐴: Initialize each 𝐴_(𝑚,𝑛) with small random values.
+       -2. Neural Network Weights for 𝐹_𝑚: Initialize weights using standard practices (e.g., Xavier initialization).
+   -c. Construct the Network Computation:
+       -1. Selection: For each target 𝑥_𝑚(𝑡+1), use 𝐴 to weight contributions from other variables.
+       -2. Aggregation: Apply a function Φ(⋅) (e.g., attention or RNN) over the lagged inputs of each variable.
+       -3. Mapping: Pass the aggregated, weighted inputs through the neural network 𝐹_𝑚 to produce the prediction.
+   -d. Training Loop:
+       -1. Forward Pass: Compute predictions for each training example using the current 𝐴 and network parameters.
+       -2. Loss Calculation: Compute the combined loss (prediction error + ℓ_1 penalty on 𝐴)
+       -3. Backward Pass: Update 𝐴 and network parameters using optimization algorithms (e.g., SGD or Adam). 
+                          The ℓ_1 penalty drives many 𝐴_(𝑚,𝑛) values toward zero, enabling variable selection.
+
+4. Evaluation and Pruning:
+   -a. Threshold 𝐴: After training, threshold the adjacency matrix to identify significant edges.
+   -b. Interpretation: The remaining non-zero entries in 𝐴 indicate the important variables for each 𝑥_𝑚
+   -c. Forecasting: Use the final model to predict 𝑥_𝑚(𝑡+1) given the most recent 𝐿 lagged inputs.
+   -d. Iterative Updates: In real time, update aggregator states as new data arrives and make predictions accordingly.
+
+5. Extensions / Alternate Ideas
+   -a. Graph Neural Network (GNN) with Edge Weights:
+      Dynamically learn edges using attention instead of a fixed dense matrix 𝐴, then prune irrelevant connections.
+   -b. Nonlinear Penalties:
+       Use techniques like Group LASSO to drop entire lag sequences at once.
+   -c. Adaptive Lags:
+       Allow the model to determine the number of lags for each variable rather than using a fixed 𝐿
+
+6. Implementation and Experiments
+   -a. NSGM Implementation:
+       -1. The code defines a NSGM that learns a sparse adjacency matrix 𝐴 via ℓ_1 regularization.
+       -2. A feedforward network 𝐹_𝑚 is used to predict 𝑥_𝑚(𝑡+1) from the aggregated lagged inputs.
+   -b. Variable Selection:
+       -1. By learning 𝐴, the model pinpoints which variables 𝑥_𝑛 are most influential for each 𝑥_𝑚 Variables 
+           with near-zero weights are effectively excluded.
+   -c. Network Modeling:
+       -1. The model builds a time-series network that predicts 𝑥_𝑚(𝑡+1) based on the selected, lagged inputs.
+   -d. Outputs:
+       -1. The code outputs dataset details (shape, columns), the learned adjacency matrix, training/validation losses,
+           and sample predictions versus true values to illustrate model performance.
+   -e. Validation on Partial Data:
+       -1. The dataset is split into training (80%) and validation (20%) sets. Validation loss is reported per 
+           epoch to confirm model effectiveness on held-out data.
+   -f. Self-Contained Code:
+       The implementation includes synthetic data generation (a DataFrame with 10,000 rows, “time”, and columns 𝑥_1
+       to 𝑥_8), the NSGM model, a training loop with ℓ_1 regularization, and evaluation steps, making it ready for immediate testing and refinement.
+
+--------------------------------------------------------------------------------------------------------
+import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+
+csv_file_path = "NSGM.csv"
+DF = pd.read_csv(csv_file_path)
+
+print("DF shape:", DF.shape)
+print("DF columns:", DF.columns.tolist())
+print("DF time range:", DF['time'].min(), "to", DF['time'].max())
+
+# ----------------------------------------------------------------
+# Create Time-Series Dataset with Lag Window
+# ----------------------------------------------------------------
+
+L = 5  # Lag window length
+num_vars = 8  # Number of variables (e.g., x1 to x8)
+
+class TimeSeriesDataset(Dataset):
+    def __init__(self, df, lag=L):
+        # Ensure data is sorted by 'time' in ascending order
+        self.df = df.sort_values("time").reset_index(drop=True)
+        self.lag = lag
+        self.num_rows = len(self.df)
+        self.vars = [f"x{i}" for i in range(1, num_vars+1)]
+        
+    def __len__(self):
+        # Only use rows that can provide a full lag window plus a target row
+        return self.num_rows - self.lag
+    
+    def __getitem__(self, idx):
+        # X: rows idx to idx+lag-1, shape: (lag, num_vars)
+        X = self.df.loc[idx:idx+self.lag-1, self.vars].values.astype(np.float32)
+        # y: row at idx+lag, shape: (num_vars,)
+        y = self.df.loc[idx+self.lag, self.vars].values.astype(np.float32)
+        return X, y
+
+dataset = TimeSeriesDataset(DF, lag=L)
+
+train_size = int(0.8 * len(dataset))
+val_size = len(dataset) - train_size
+
+train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
+
+# ----------------------------------------------------------------
+# Define the Neural Sparse Graphical Model (NSGM)
+# ----------------------------------------------------------------
+
+class NSGM(nn.Module):
+    def __init__(self, num_vars, hidden_dim=32):
+        super(NSGM, self).__init__()
+        self.num_vars = num_vars
+        # Learnable adjacency matrix A (for variable selection), shape: (num_vars, num_vars)
+        self.A = nn.Parameter(torch.randn(num_vars, num_vars) * 0.01)
+        # Simple feedforward network for nonlinear mapping (F_m)
+        self.fc1 = nn.Linear(num_vars, hidden_dim)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_dim, num_vars)
+        
+    def forward(self, X):
+        # X: shape (batch_size, L, num_vars)
+        # Aggregate the lag window by taking the mean for each variable -> (batch_size, num_vars)
+        z = X.mean(dim=1)
+        # Weighted inputs via adjacency matrix A: u = z @ A^T
+        u = torch.matmul(z, self.A.t())
+        # Pass u through a feedforward network
+        out = self.fc2(self.relu(self.fc1(u)))
+        # Output shape: (batch_size, num_vars) => predictions for next time step
+        return out
+
+model = NSGM(num_vars=num_vars)
+
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=0.0005)
+lambda_l1 = 0.0007  # L1 penalty weight on the adjacency matrix
+
+# ----------------------------------------------------------------
+# Training
+# ----------------------------------------------------------------
+
+num_epochs = 10
+for epoch in range(num_epochs):
+    model.train()
+    running_loss = 0.0
+    
+    for X_batch, y_batch in train_loader:
+        optimizer.zero_grad()
+        pred = model(X_batch)
+        loss = criterion(pred, y_batch)
+        # Add L1 penalty on the adjacency matrix (for sparsity)
+        loss += lambda_l1 * torch.norm(model.A, 1)
+        
+        loss.backward()
+        optimizer.step()
+        running_loss += loss.item()
+    
+    avg_loss = running_loss / len(train_loader)
+    print(f"Epoch {epoch+1}/{num_epochs}, Training Loss: {avg_loss:.4f}")
+    
+    # Validation
+    model.eval()
+    val_loss = 0.0
+    with torch.no_grad():
+        for X_batch, y_batch in val_loader:
+            pred = model(X_batch)
+            v_loss = criterion(pred, y_batch)
+            v_loss += lambda_l1 * torch.norm(model.A, 1)
+            val_loss += v_loss.item()
+    
+    avg_val_loss = val_loss / len(val_loader)
+    print(f"Epoch {epoch+1}/{num_epochs}, Validation Loss: {avg_val_loss:.4f}")
+
+# ----------------------------------------------------------------
+# Evaluation and Output of Key Information
+# ----------------------------------------------------------------
+
+model.eval()
+print("Learned Adjacency Matrix (A):")
+print(model.A.data.cpu().numpy())
+
+# Show predictions vs true values for a few samples from the validation set
+for X_batch, y_batch in val_loader:
+    pred = model(X_batch)
+    print("Sample Predictions:")
+    print(pred[:5].cpu().detach().numpy())
+    print("Sample True Values:")
+    print(y_batch[:5].cpu().numpy())
+    break
+
+print("Training complete. This NSGM model demonstrates effective variable selection and time-series network modeling.")
