@@ -1,0 +1,131 @@
+### From https://medium.com/@techsachin/strategic-guided-optimization-prompt-optimization-using-in-context-learning-based-strategy-for-056fb38d11a1
+### From https://arxiv.org/abs/2410.08601
+
+1. Introduction
+   -a. Motivation:
+       STRAGO (Strategic-Guided Optimization) is introduced as a novel approach to mitigate prompt drifting 
+       in LLM prompt optimization. The method leverages insights from both successful and failed cases to identify 
+       the critical factors needed to achieve optimization objectives.
+   -b. Key Contributions:
+       -1. Unbiased Reflective Optimization:
+           -1) STRAGO incorporates both successful and failed cases in its optimization process, 
+               leading to more stable and reliable prompt refinement.
+       -2. Actionable Strategy Development:
+           -1) It uses in-context learning to generate detailed, step-by-step, actionable strategies that 
+               guide the optimization of prompts, thereby unlocking the LLM’s potential in tasks 
+               where it might initially lack expertise.
+       -3. Broad Validation:
+           -1) The approach is extensively validated across diverse tasks—reasoning, language understanding, 
+               domain-specific knowledge, and industrial applications—demonstrating state-of-the-art performance 
+               in prompt optimization.
+
+2. Preliminaries
+   -a. Task Formulation:
+       -1. Given a dataset 𝐷 consisting of input-output pairs (𝑥,𝑦), the goal is to find the optimal prompt 
+           𝑝∗ that minimizes the loss between the LLM’s generated responses and the desired outputs across the dataset.
+   -b. Assessment Metrics:
+       -1. Accuracy: Primary metric measuring prompt effectiveness.
+       -2. Adverse Correction Rate (ACR):
+           -1) Measures the negative impact by capturing the proportion of correct predictions that become 
+               incorrect after applying the new prompt.
+       -3. Beneficial Correction Rate (BCR):
+           -1) Measures the positive impact by capturing the proportion of previously incorrect predictions 
+               that are corrected with the optimized prompt.
+
+3. STRAGO Methodology
+   STRAGO consists of three main modules:
+   -a. Analyzer:
+       -1. Data Partitioning:
+           -1) The dataset 𝐷 is split into 𝐷_𝑐𝑜𝑟𝑟𝑒𝑐𝑡(correctly predicted samples) and 𝐷_𝑖𝑛𝑐𝑜𝑟𝑟𝑒𝑐𝑡(incorrectly predicted samples) after an initial evaluation.
+       -2. Example Selection:
+           -1) From each subset, 𝐾 examples are selected for deep analysis.
+       -3. Insight Extraction:
+           -1) For each selected example, the Analyzer generates 𝑀 experiences (positive for 𝐷_𝑐𝑜𝑟𝑟𝑒𝑐𝑡 
+               and negative for 𝐷_𝑖𝑛𝑐𝑜𝑟𝑟𝑒𝑐𝑡) that capture the factors driving success or failure.
+           -2) These positive and negative experiences serve as guidance, highlighting key actions to replicate
+               and common errors to avoid.
+   -b. Refiner:
+       -1. Two-Step Process:
+           -1) Strategy Formulation:
+               - For each identified error type or success factor, representative examples are chosen.
+               - The LLM generates an experience for each example and then proposes one or more actionable 
+                 strategies to address the issue.
+               - These proposed strategies are refined through manual revision.
+               - The refined examples, experiences, and strategies serve as in-context learning demos, 
+                 guiding the generation of detailed, step-by-step execution plans.
+               - In implementation, 𝑁 strategies are generated for each example based on its experience.
+          -2) Strategy Selection:
+              - The 𝑁 strategies generated per example are evaluated and scored by an LLM 
+                (using a different model, Claude, to mitigate self-enhancement bias).
+              - Evaluation criteria include:
+                * Match with Experience: How well the strategy addresses the identified issue.
+                * Clarity: The detail and understandability of the strategy.
+                * Effectiveness: The likelihood that the strategy will resolve the problem.
+              - The strategy with the highest score is selected to address the corresponding experience.
+  -c. Optimizer:
+      -1. Three-Step Process:
+          -1) Optimize:
+              - For each example (successful or failed), the Analyzer produces 𝑀 experiences.
+              - The Refiner generates a strategy for each experience.
+              - The Optimizer uses these strategies to create a revised prompt.
+              - Revised prompts are grouped into two sets: one from positive experiences and one from negative experiences.
+          -2) Crossover:
+              - Two prompts (one from each set) are selected and combined via a crossover operation to produce
+                a hybrid prompt.
+          -3) Paraphrase:
+              - A cache is maintained to store the top 𝑛 prompts and their evaluation scores from previous iterations on a validation set.
+              - Each hybrid prompt is paraphrased using the cached prompts.
+              - Both the paraphrased and hybrid prompts are evaluated as candidate prompts.
+              - The best-performing prompt is selected for the next iteration or as the final optimized prompt, 
+                and the cache is updated with new evaluation results.
+
+4. Evaluation Results
+   -a. Performance Across Tasks:
+      -1) STRAGO is evaluated on six tasks using GPT-4 as the evaluator.
+      -2) BBH and NLU Tasks:
+          - Achieves 79.77% accuracy on BBH, 56.34% on SST-5, and 87.21% on TREC—exceeding previous 
+            state-of-the-art methods by 2.37%, 0.82%, and 2.31%, respectively.
+      -3) Domain-Specific Tasks:
+          - On MedQA, it gains 1.22%, and on MedMCQA, it gains 1.33% over baselines.
+      -4) Industrial Scenario Task:
+          - In the Personalized Intent Query task, STRAGO achieves a 2.16% improvement over the compared baseline (APO).
+  -b. Data Analysis:
+      - STRAGO exhibits the lowest ACR and the highest BCR for four of the six tasks, 
+        meaning that its optimized prompts correct more errors while affecting fewer correct predictions 
+        adversely than baseline methods.
+  -c. Convergence Analysis:
+      - For the TREC task, STRAGO converges significantly faster. For instance, achieving a test score above 80% 
+        requires exploring only 10 prompts, compared to over 90 prompts for methods like APO.
+  -d. Cost Analysis:
+      - Although STRAGO uses more tokens due to longer optimized prompts, its substantial performance gains 
+        (e.g., an improvement from 84.90% to 87.21% on TREC) justify the additional resource expenditure.
+  -e. Performance with Different Models:
+      - Evaluations using GPT-3.5-turbo and GPT-4 show that STRAGO improves performance by 5.45% on GPT-3.5-turbo 
+        and 10.34% on GPT-4.
+      - Compared to the best baseline, STRAGO outperforms by 1.86% on GPT-3.5-turbo and 2.37% on GPT-4, 
+        indicating better performance with more advanced models.
+  -f. Case Study:
+      - Two detailed cases illustrate how STRAGO refines strategies and optimizes prompts, 
+        though the displayed refined prompts are not the final best-optimized versions.
+
+5. Limitations
+   -a. Comparative Parameters:
+       - To ensure fair comparisons, parameters in baseline methods were adjusted so that all methods performed 
+         approximately 300–315 prompt searches.
+   -b. Dependency on Proprietary Models:
+       - Evaluations used GPT-3.5-turbo and GPT-4. Changes or discontinuation of these models could impact 
+         reproducibility.
+   -c. Generalization Considerations:
+       - While STRAGO outperforms baselines, its performance is closely tied to the evaluation models and 
+         may need further testing across a wider array of tasks and domains.
+
+6. Conclusion
+   -a. Summary of STRAGO:
+       - STRAGO is a strategy-guided, reflective-based prompt optimization method that uses balanced 
+         iterations to analyze both successful and failed cases.
+       - By leveraging in-context learning, it delivers step-by-step, actionable strategies for prompt refinement.
+   -b. Impact:
+       - Extensive experiments across diverse tasks—from reasoning to domain-specific and industrial 
+         applications—demonstrate that STRAGO significantly outperforms existing prompt optimization methods.
+       - STRAGO establishes a new state-of-the-art in prompt optimization by producing more stable, reliable, 
+         and effective prompts.
