@@ -1,0 +1,220 @@
+### From https://medium.com/data-science-collective/how-to-distill-a-llm-step-by-step-58f06fcf4bfa
+
+1. The Challenge with Large Language Models (LLMs) and the Need for Distillation
+   -a. LLM Explosion:
+       Large Language Models have made a tremendous impact by generating coherent text, translating languages, 
+       and even writing code. However, their massive size demands huge computational resources, specialized hardware,
+       and high energy consumption, which limits accessibility for many researchers and smaller companies.
+   -b. Motivation for Distillation:
+       The idea is analogous to a master chef teaching an apprentice: rather than expecting an apprentice to 
+       replicate a Michelin-star dish immediately, the chef distills core techniques and flavors. 
+       Similarly, distillation aims to compress the knowledge and capabilities of a huge model (the teacher) 
+       into a smaller, more efficient model (the student). Traditional distillation, however, 
+       sometimes loses the “magic” or nuanced reasoning of the larger models.
+   -c. Introducing “Distilling Step-by-Step”:
+       A research paper by Google and academics proposes a method where not only the answers are distilled but 
+       also the step-by-step reasoning (rationales). 
+       The method leverages Chain-of-Thought (CoT) prompting to extract a teacher model’s detailed thought process.
+       These rationales serve as a powerful supervisory signal when training the smaller student model.
+
+2. The Two-Phase Approach of “Distilling Step-by-Step”
+   -a. Phase 1 – Rationale Extraction:
+       -1. Objective: Instead of just getting the final answer, extract the entire reasoning process.
+       -2. Method:
+           -1) Use Chain-of-Thought prompting with few-shot examples to get input-rationale-label triplets.
+           -2) For instance, when asked, “If a train travels at 60 mph for 2 hours, how far does it go?”, 
+               the model is prompted to output not just “120 miles” but also the intermediate steps like 
+               “Speed = 60 mph, Time = 2 hours, so Distance = 60 x 2 = 120 miles.”
+   -b. Phase 2 – Multi-Task Training:
+       -1. Objective: Train the student model to both predict the correct answer and generate the corresponding rationale.
+       -2. Method:
+           -1) Frame the problem as a multi-task learning task with two loss functions:
+               - Label Prediction Loss: Standard cross-entropy loss to compare the student’s predicted answer 
+                                        with the correct label.
+               - Rationale Generation Loss: Another cross-entropy loss computed over the sequence of tokens 
+                                            in the rationale.
+           -2) Combined Loss Function:
+               - The overall loss is a weighted sum of the two:𝐿=𝜆⋅𝐿_(label)+(1−𝜆)⋅𝐿_(rationale)
+               - Typically, λ is set to 1 (equal weighting), but it can be adjusted based on priorities.
+
+3. Mathematical Details
+   -a. Chain-of-Thought (CoT) Prompting:
+       -1. Although not captured by one single equation, CoT prompting conditions the output distribution 
+           to generate an intermediate rationale along with the final answer.
+       -2. The idea is to shift the model’s output to include not only the final label 𝑦 but also an 
+           intermediate reasoning 𝑟
+   -b. Loss Functions:
+       -1. Label Prediction Loss:
+           -1) For each example (𝑥_𝑖,𝑦_𝑖), the loss is:
+               𝐿_(label)=ℓ(𝑓(𝑥_𝑖),𝑦^𝑖) 
+               where ℓ denotes the cross-entropy loss.
+       -2. Rationale Generation Loss:
+           -1) Similarly, for the generated rationale 𝑟^𝑖:
+               𝐿_(rationale)=ℓ(𝑓(𝑥_𝑖),𝑟^𝑖)
+           -2) This loss measures the difference between the predicted rationale sequence and the teacher’s rationale.
+    -c. Combined Multi-Task Loss:
+        -1) The total loss is:
+            𝐿=𝜆⋅𝐿_(label)+(1−𝜆)⋅𝐿_(rationale)
+        -2) This combined objective encourages the student to learn both tasks simultaneously.
+
+4. Python Implementation: Code Walkthrough
+   The implementation is organized into several modules. Here’s a breakdown including code snippets:
+
+   4.1 Data Loading and Preprocessing (data_utils.py)
+       -a. DatasetLoader Class:
+           Loads datasets (via Hugging Face’s load_dataset or from JSON) and prepares inputs/targets. For example:
+       """
+       class DatasetLoader(object):
+           def __init__(self, dataset_name, source_dataset_name, dataset_version, has_valid, split_map,
+                        batch_size, train_batch_idxs, test_batch_idxs, valid_batch_idxs=None):
+               self.data_root = DATASET_ROOT
+               self.dataset_name = dataset_name
+               self.source_dataset_name = source_dataset_name
+               self.dataset_version = dataset_version
+               self.has_valid = has_valid
+               self.split_map = split_map
+               # (Additional setup omitted for brevity…)
+
+           def load_from_source(self):
+               if self.dataset_version is None:
+                   datasets = load_dataset(self.source_dataset_name)
+               else:
+                   datasets = load_dataset(self.source_dataset_name, self.dataset_version)
+               return datasets
+
+           def to_json(self, datasets):
+               for k, v in self.split_map.items():
+                   datasets[v].to_json(f'{self.data_root}/{self.dataset_name}/{self.dataset_name}_{k}.json')
+       """
+       -b. Example: Preparing Input for CQA Dataset:
+           The method prepare_input constructs an input string that includes the question and answer choices:
+       """
+       def prepare_input(example):
+           question = example['question']
+           c_0 = example['choices'][0]
+           # …other choices...
+           input = f'{question}\nAnswer Choices:\n(a) {c_0}\n(b) {example["choices"][1]}\n(c) {example["choices"][2]}\n(d) {example["choices"][3]}\n(e) {example["choices"][4]}'
+           example['input'] = input
+           example['label'] = example['answer']
+           return example
+
+   4.2 Evaluation Metrics (metrics.py)
+       -a. Text and Equation Accuracy:
+           -1. Text Accuracy: Compares decoded predictions with labels.
+           -2. Equation Accuracy: Uses eval safely to compute and compare expressions.
+       """
+       def compute_equation_acc(preds, labels):
+           preds = [eval_equation(pred) for pred in preds]
+           labels = [eval_equation(label) for label in labels]
+           return np.mean(np.array(preds) == np.array(labels))
+
+       def eval_equation(equation):
+           try:
+               answer = eval(equation)
+           except:
+               answer = np.nan
+           return answer
+       """
+
+4.3 Multi-Task Model and Trainer Setup (model_utils.py)
+    -a. Custom Data Collator:
+        -1. The TaskPrefixDataCollator splits each batch into two parts—one for prediction and one for explanation:
+       """
+       class TaskPrefixDataCollator(DataCollatorForSeq2Seq):
+           def __call__(self, features, return_tensors=None):
+               features_df = pd.DataFrame(features)
+               pred_features = features_df.loc[:, ~features_df.columns.isin(['aux_labels', 'expl_input_ids', 'expl_attention_mask'])].to_dict('records')
+               expl_features = features_df.loc[:, ~features_df.columns.isin(['labels', 'input_ids', 'attention_mask'])].rename(
+                   columns={'aux_labels': 'labels', 'expl_input_ids': 'input_ids', 'expl_attention_mask': 'attention_mask'}).to_dict('records')
+               pred_features = super().__call__(pred_features, return_tensors)
+               expl_features = super().__call__(expl_features, return_tensors)
+               return {
+                   'pred': pred_features,
+                   'expl': expl_features,
+               }
+       """
+       -b. Custom Trainer:
+           -1. The TaskPrefixTrainer extends Hugging Face’s Seq2SeqTrainer and overrides compute_loss to 
+               combine losses from both tasks:
+       """
+       class TaskPrefixTrainer(Seq2SeqTrainer):
+           def __init__(self, alpha, output_rationale, **kwargs):
+               super().__init__(**kwargs)
+               self.alpha = alpha
+               self.output_rationale = output_rationale
+
+           def compute_loss(self, model, inputs, return_outputs=False):
+               pred_outputs = model(**inputs['pred'])
+               expl_outputs = model(**inputs['expl'])
+               loss = self.alpha * pred_outputs.loss + (1. - self.alpha) * expl_outputs.loss
+               return (loss, {'pred': pred_outputs, 'expl': expl_outputs}) if return_outputs else loss
+       """
+
+4.4 Running the Distillation Pipeline (rain.py)
+    -a. Main Orchestration:
+        -1. rain.py serves as the entry point:
+            -1) Step 1: Dataset Preparation – instantiate the appropriate dataset loader based on command-line 
+                        arguments.
+            """
+            if args.dataset == 'cqa':
+                dataset_loader = CQADatasetLoader()
+            elif args.dataset == 'svamp':
+                dataset_loader = SVAMPDatasetLoader()
+            # …and so on.
+       -2. Step 2: Integrate LLM Predictions – load external rationales and labels:
+            """
+            datasets['train'] = datasets['train'].add_column('llm_label', train_llm_labels)
+            datasets['train'] = datasets['train'].add_column('llm_rationale', train_llm_rationales)
+            """ 
+       -3.  Step 3: Tokenization with Task Prefixing – prepend “predict:” and “explain:”:
+            """
+            def tokenize_function(examples):
+                model_inputs = tokenizer(['predict: ' + text for text in examples['input']], max_length=args.max_input_length, truncation=True)
+                expl_model_inputs = tokenizer(['explain: ' + text for text in examples['input']], max_length=args.max_input_length, truncation=True)
+                model_inputs['expl_input_ids'] = expl_model_inputs['input_ids']
+                model_inputs['expl_attention_mask'] = expl_model_inputs['attention_mask']
+                # (Encode labels and rationales as targets)
+                return model_inputs
+            """
+       -4. Step 4: Training and Evaluation – call a helper function (in train_utils.py) to set up training and run:
+           """
+           trainer.train()
+           """
+
+4.5 The Training Loop (train_utils.py)
+    -a. Training Setup:
+        -1. Constructs configuration directories based on hyperparameters.
+        -2. Loads the T5 model via T5ForConditionalGeneration.from_pretrained.
+        -3. Sets training arguments (e.g., learning rate, batch size) using Seq2SeqTrainingArguments.
+        -4. Depending on the model, either the custom TaskPrefixTrainer or standard Seq2SeqTrainer is instantiated.
+        -5. Finally, the training loop is executed by calling trainer.train().
+
+5. Empirical Results and Advantages
+   -a. Data Efficiency:
+       -1. The “Distilling Step-by-Step” method shows that student models can achieve comparable or 
+           better performance with much less training data compared to standard fine-tuning or task distillation.
+       -2. Experiments on datasets such as e-SNLI and ANLI indicate that using only a fraction (e.g., 12.5%) 
+           of the data can outperform methods trained on 100% of the data.
+   -b. Model Size Reduction:
+       -1. Smaller models (e.g., a 220M parameter T5-Base) trained with this method can sometimes 
+           outperform massive models (e.g., a 540B parameter PaLM) on certain benchmarks.
+       -2. This indicates that the distilled student, by learning the reasoning process, 
+           becomes more specialized and efficient.
+   -c. Resource Efficiency:
+       -1. The approach shows potential to achieve high performance with both smaller model sizes and 
+           significantly less training data, making it more accessible and sustainable.
+
+6. Conclusion
+   -a. Significance of “Distilling Step-by-Step”:
+       -1. The method represents a paradigm shift from simply mimicking outputs to distilling the teacher’s
+           underlying reasoning.
+       -2. It democratizes access to powerful language models by enabling the deployment of much smaller, 
+           efficient models that still retain robust performance.
+       -3. The combined benefits of data efficiency, reduced model size, and lower computational costs 
+           have far-reaching implications—from enabling AI on edge devices to reducing environmental impact.
+   -b. Future Outlook:
+       -1. While promising, the approach has its limitations and is not a universal solution.
+           Further research is needed to explore its robustness across diverse tasks and the quality of the extracted rationales.
+       -2. Nonetheless, “Distilling Step-by-Step” charts an exciting roadmap toward building “genius in a shoebox”
+           models—small, smart, and efficient.
+
