@@ -1,0 +1,279 @@
+### From https://kargarisaac.medium.com/exploring-the-smolagents-library-a-deep-dive-into-multistepagent-codeagent-and-toolcallingagent-03482a6ea18c
+
+1. Introduction & Overview
+   The smolagents library (v1.8.0) from HuggingFace is a robust framework for building AI agents—entities 
+   that interact with environments to achieve goals. It provides three main agent types:
+
+   -a. MultiStepAgent: The foundational agent implementing the ReAct framework (cycles of thinking and observing).
+   -b. ToolCallingAgent: A specialized agent that makes JSON-like tool calls to interact with external tools 
+                         or managed agents.
+   -c. CodeAgent: An agent designed to generate and execute Python code for tasks requiring computational reasoning.
+
+   This blog post explains each agent’s functionality, implementation, and use cases by delving into the code 
+   and detailing how they work.
+
+2. MultiStepAgent
+   -a. Core Idea:
+       The MultiStepAgent forms the backbone of the library. It uses the ReAct framework to iteratively plan, 
+       act, and observe until a task is solved or a maximum step limit is reached. It supports:
+       -1) Customizable Tools: Developers can integrate custom tools.
+       -2) Planning Capability: It periodically updates its plan using a planning interval.
+       -3) Memory Management & Logging: It stores each action/observation and logs details for debugging.
+
+   -b. Key Method: run()
+       This method orchestrates the task execution. It:
+       -1. Accepts Input Parameters:
+           -1) task (str): The task to solve.
+           -2) stream (bool): Whether to stream intermediate results.
+           -3) reset (bool): Whether to clear previous memory.
+           -4) images (list[str]) and additional_args (dict) for external inputs.
+       -2. Initializes the Task & Updates State:
+           -1) If additional_args is provided, it updates the agent’s state and task description:
+               """
+               if additional_args is not None:
+                   self.state.update(additional_args)
+                   self.task += f"""
+               You have been provided with these additional arguments, that you can access using the keys as variables in your python code:
+               {str(additional_args)}."""
+               """
+      -3. System Prompt Initialization:
+          -1) The agent generates a system prompt and stores it in memory:
+              """
+              self.system_prompt = self.initialize_system_prompt()
+              self.memory.system_prompt = SystemPromptStep(system_prompt=self.system_prompt)
+              """
+      -4. Memory & Monitor Reset:
+          -1) If reset is True, it clears previous memory and monitoring data:
+              """
+              if reset:
+                  self.memory.reset()
+                  self.monitor.reset()
+              """
+     -5. Logging & Task Addition:
+         -1) The task is logged and added to the agent’s memory:
+              """
+              self.logger.log_task(
+                  content=self.task.strip(),
+                  subtitle=f"{type(self.model).__name__} - {(self.model.model_id if hasattr(self.model, 'model_id') else '')}",
+                  level=LogLevel.INFO,
+                  title=self.name if hasattr(self, "name") else None,
+              )
+              self.memory.steps.append(TaskStep(task=self.task, task_images=images))
+              """
+    -6. Execution Modes:
+        -1) Streaming Mode: Uses the _run generator to yield intermediate results.
+            """            
+            if stream:
+                return self._run(task=self.task, images=images)
+            """
+        -2) Non-Streaming Mode: Returns only the final output.
+            """
+            return deque(self._run(task=self.task, images=images), maxlen=1)[0]
+            """
+
+   -c. The _run Method
+       This is the core generator handling step-by-step execution:
+
+       -1. Initialization:
+           -1) Sets final_answer = None and self.step_number = 1. For each step, it creates a new memory step:
+               """
+              final_answer = None
+              self.step_number = 1
+              while final_answer is None and self.step_number <= self.max_steps:
+                  step_start_time = time.time()
+                  memory_step = ActionStep(
+                      step_number=self.step_number,
+                      start_time=step_start_time,
+                      observations_images=images,
+                  )
+              """
+     -2. Periodic Planning:
+         -1) If the current step is at a planning interval, it calls self.planning_step(...) to generate or update the plan.
+     -3. Logging and Execution:
+         -1) It logs the current step, then executes a step via:
+              """
+              final_answer = self.step(memory_step)
+              """
+     -4. Final Answer Validation & Error Handling:
+         -1) It checks if the final answer meets certain criteria using predefined checks and logs any errors 
+             in memory_step.
+     -5. Finalizing the Step:
+         -1) After execution, it records the duration, appends the memory step, triggers callbacks, increments 
+             the step number, and yields the memory step.
+     -6. Handling Max Steps:
+         -1) If the maximum number of steps is reached without a solution, it calls provide_final_answer to generate
+             a final output.
+
+   -d. Other Key Methods:
+       -1. initialize_system_prompt – Creates the system prompt for the LLM.
+       -2. write_memory_to_messages – Converts stored memory to messages for input to the LLM.
+       -3. visualize – Generates a visual tree of the agent’s state.
+       -4. extract_action – Parses the LLM output to extract actions and rationales.
+       -5. provide_final_answer – Summarizes the agent’s interactions when max steps are reached.
+       -6. execute_tool_call – Replaces placeholders in arguments and calls external tools.
+       -7. replay – Replays step-by-step actions for debugging.
+       -8. __call__ – Allows the agent to be managed by another agent.
+
+2. ToolCallingAgent
+   -a. Purpose & Features:
+       The ToolCallingAgent extends MultiStepAgent to interact with external systems by generating JSON-like tool 
+       calls. Its structured approach allows:
+       -1. JSON-Like Tool Calls: Generating calls with a tool name, arguments, and an identifier.
+       -2. Dynamic Tool Execution: Calling the appropriate tool and processing the result.
+       -3. State Management & Logging: Storing observations and logging each tool call.
+
+   -b. Key Methods & Code Examples:
+       -1. initialize_system_prompt Method:
+           """
+           def initialize_system_prompt(self) -> str:
+               system_prompt = populate_template(
+                   self.prompt_templates["system_prompt"],
+                   variables={"tools": self.tools, "managed_agents": self.managed_agents},
+               )
+               return system_prompt
+           """
+       -2. step Method (Core Execution):
+           -1) It generates an action using the LLM and parses the tool call:
+               """
+               model_message: ChatMessage = self.model(
+                   memory_messages,
+                   tools_to_call_from=list(self.tools.values()),
+                   stop_sequences=["Observation:"],
+               )
+               tool_call = model_message.tool_calls[0]
+               tool_name, tool_call_id = tool_call.function.name, tool_call.id
+               tool_arguments = tool_call.function.arguments
+               """
+           -2) It logs the call:
+               """
+               self.logger.log(
+                   Panel(Text(f"Calling tool: '{tool_name}' with arguments: {tool_arguments}")),
+                   level=LogLevel.INFO,
+               )
+               """
+           -3) For a final answer:
+               """
+               if tool_name == "final_answer":
+                   if isinstance(tool_arguments, dict):
+                       if "answer" in tool_arguments:
+                           answer = tool_arguments["answer"]
+                       else:
+                           answer = tool_arguments
+                   else:
+                       answer = tool_arguments
+                   if (
+                       isinstance(answer, str) and answer in self.state.keys()
+                   ):
+                       final_answer = self.state[answer]
+                       self.logger.log(
+                           f"[bold {YELLOW_HEX}]Final answer:[/bold {YELLOW_HEX}] Extracting key '{answer}' from state to return value '{final_answer}'.",
+                           level=LogLevel.INFO,
+                       )
+                   else:
+                       final_answer = answer
+                       self.logger.log(
+                           Text(f"Final answer: {final_answer}", style=f"bold {YELLOW_HEX}"),
+                           level=LogLevel.INFO,
+                       )
+                   memory_step.action_output = final_answer
+                   return final_answer
+               """
+           -4) For non-final calls, it executes the tool:
+               """
+               observation = self.execute_tool_call(tool_name, tool_arguments)
+               # ... logging and state update code follows ...
+               return None
+               """
+
+Use Cases:
+Ideal for API interactions, task automation, and scenarios requiring structured tool invocations.
+
+3. CodeAgent
+   -a. Purpose & Features:
+       The CodeAgent is tailored for tasks that require computational reasoning, such as mathematical calculations, 
+       data analysis, or simulations. It generates and executes Python code:
+       -1. Code Generation & Execution: Uses the LLM to output Python snippets which are then parsed and run.
+       -2. Authorized Imports: Manages a whitelist of allowed modules.
+       -3. Remote Execution: Optionally uses a remote executor (E2BExecutor) for isolated code execution.
+       -4. State Management & Logging: Stores intermediate results and logs code execution details.
+
+   -b. Key Methods & Code Examples:
+       -1. Initialization (__init__):
+           -1) It sets up authorized imports:
+               """
+               self.authorized_imports = list(set(BASE_BUILTIN_MODULES) | set(self.additional_authorized_imports))
+               """
+               And loads prompt templates from a YAML file.
+
+      -2. initialize_system_prompt Method:
+          """          
+          system_prompt = populate_template(
+              self.prompt_templates["system_prompt"],
+              variables={
+                  "tools": self.tools,
+                  "managed_agents": self.managed_agents,
+                  "authorized_imports": (
+                      "You can import from any package you want."
+                      if "*" in self.authorized_imports
+                      else str(self.authorized_imports)
+                  ),
+              },
+          )
+          """
+   
+     -3. step Method:
+         -1) This method handles one iteration of code generation and execution:
+             - Generating Model Output:
+               """
+               chat_message: ChatMessage = self.model(
+                   self.input_messages,
+                   stop_sequences=["<end_code>", "Observation:"],
+                   **additional_args,
+               )
+               model_output = chat_message.content
+               """
+             - Parsing Code:
+               """
+               code_action = fix_final_answer_code(parse_code_blobs(model_output))
+               """
+             - Logging Code:
+               """
+               self.logger.log_code(title="Executing parsed code:", content=code_action, level=LogLevel.INFO)
+               """
+             - Executing Code:
+               """
+               output, execution_logs, is_final_answer = self.python_executor(
+                   code_action,
+                   self.state,
+               )
+               """
+             - Error Handling & Logging Observations:
+               It logs any errors (e.g., unauthorized imports) and displays execution logs:
+               """
+               if "Import of " in error_msg and " is not allowed" in error_msg:
+                   self.logger.log(
+                       "[bold red]Warning to user: Code execution failed due to an unauthorized import - Consider passing said import under `additional_authorized_imports` when initializing your CodeAgent.",
+                       level=LogLevel.INFO,
+                   )
+                   raise AgentExecutionError(error_msg, self.logger)
+               """
+             - Returning the Result:
+               """
+               return output if is_final_answer else None
+               """
+Use Cases:
+Especially suited for mathematical computations, data analysis, and automation scripts where executing dynamic code is key.
+
+4. Conclusion
+   -a. The smolagents library empowers developers to build agents that solve complex tasks through:
+       -1. MultiStepAgent: Providing iterative, ReAct-based task solving with planning, action execution, 
+                           and detailed logging.
+       -2. ToolCallingAgent: Facilitating precise interactions with external tools and APIs via structured
+                             JSON-like tool calls.
+       -3. CodeAgent: Enabling dynamic Python code generation and execution for computational tasks.
+       Each agent type is tailored to specific use cases while sharing core principles such as memory management, 
+       logging, and the use of language models to guide actions. 
+       Together, they illustrate how modular design and thoughtful implementation can democratize sophisticated
+       AI capabilities—whether for automating workflows, performing data analysis, or interacting with external systems.
+
+
