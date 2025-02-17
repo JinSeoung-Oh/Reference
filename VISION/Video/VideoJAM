@@ -1,0 +1,88 @@
+### From https://generativeai.pub/meta-introduces-videojam-an-ai-video-generator-with-sota-temporal-coherence-232fbf5b86cb
+
+1. The Challenge of Realistic Motion in AI Video Generation
+   -a. Current Limitations:
+       Despite impressive visual quality, popular text-to-video models (like OpenAI’s Sora, Runway’s Gen-3, 
+       and Kling AI) struggle with maintaining motion coherence.
+
+       -1. Common issues include inconsistent movement—e.g., liquids defying gravity, objects merging, 
+           limbs twisting unnaturally.
+       -2. In a demonstration video, a boy biting a burger shows the burger floating and unchanged, 
+           highlighting these temporal inconsistencies.
+
+   -b. Root Cause:
+       These imperfections largely arise because current models emphasize pixel-level reconstruction over
+       accurately capturing temporal (motion) relationships. This leads to videos that often appear 
+       as a sequence of disjointed, static frames rather than a smooth, realistic flow of movement.
+
+2. Introducing VideoJAM: Meta’s Approach to Improved Motion Coherence
+   -a. What is VideoJAM?
+       VideoJAM is a new framework from Meta designed to enhance the realism of motion in text-to-video generation. 
+       Its main goal is to improve temporal coherence so that generated videos reflect natural movement even in 
+       complex scenarios.
+
+    -b. Key Innovations of VideoJAM:
+        -1. Joint Appearance-Motion Representation:
+            -1) During training, VideoJAM simultaneously learns both how things look (appearance) and how they move
+                (motion) from a single, unified representation.
+            -2) The training objective is modified to predict not only the visual details (pixels) but also
+                their corresponding motion, effectively fusing these two signals.
+        -2. Inner Guidance:
+            -1) At inference time, VideoJAM employs an “Inner Guidance” mechanism.
+            -2) This technique uses the model’s own evolving motion predictions to guide the video generation process,
+                ensuring that the output adheres to a coherent joint appearance-motion distribution instead of
+                relying on appearance alone.
+
+3. Technical Details of VideoJAM
+   -a. Architecture Modifications:
+       VideoJAM adapts the network architecture by adding two additional linear layers:
+
+       -1. Input Projection Layer:
+           -1) The standard input projection (Win) is extended to accept both video and motion latents.
+           -2) This is achieved by appending zero rows (CTAE·p2) to create a dual-projection matrix 
+               𝑊^+ of dimensions 2⋅𝐶𝑇 𝐴𝐸⋅𝑝2×𝐶𝐷𝑖𝑇
+               Initially, the network behaves like the pre-trained DiT, ignoring the motion signal. 
+       -2. Output Projection Layer:
+           -1) Similarly, the output projection (Wout) is extended with an additional output matrix, forming 
+               𝑊^+_𝑜𝑢𝑡 to extract the motion prediction from the joint representation.
+
+   -b. Training Phase:
+       -1. Videos are paired with corresponding motion representations.
+       -2. The network is trained to predict both appearance and motion jointly, thereby learning a richer representation.
+
+   -c. Inference Phase (Inner Guidance):
+       -1. The model uses its own motion prediction as a dynamic guidance signal.
+       -2. This guidance alters the sampling distribution during generation, steering the output towards 
+           a more coherent video sequence.
+
+4. Evaluations and Comparisons
+   -a. Performance Improvements:
+       -1. VideoJAM shows marked improvements in reducing artifacts such as frame distortions and unnatural 
+           deformations compared to models like Sora and Kling AI.
+       -2. It achieves higher motion coherence scores in both automated metrics and human evaluations.
+       -3. Importantly, VideoJAM can be added on top of existing video models without changing training data or
+           significantly increasing model size.
+
+   -b. Demonstrative Examples:
+       -1. A Woman Hula Hooping:
+          -1) Sora’s version fails to synchronize the hula hoop with the woman, while VideoJAM maintains proper motion alignment.
+       -2. A Giraffe Running in a Field:
+           -1) Where other models show awkward or jerky motions, VideoJAM produces smoother, natural movement.
+       -3. A Hand Spinning a Fidget Spinner:
+           -1) In fast-motion scenarios, VideoJAM handles high-speed motion more reliably, keeping the spinner rotating cohesively.
+
+   -c. Variants and Training Details:
+       -1. Two variants, VideoJAM-4B and VideoJAM-30B (based on the DiT text-to-video models), were fine-tuned under different conditions (varying GPU counts, batch sizes, iterations, latent dimensions, and attention blocks).
+       -2. Both models were trained using a fixed learning rate and the Flow Matching paradigm.
+       -3. Human evaluations show a clear preference for VideoJAM over competitors.
+
+5. Limitations and Final Thoughts
+   -a. Limitations:
+       -1. Zoomed-Out Scenarios: Motion fidelity might suffer when objects occupy a small part of the frame.
+       -2. Complex Physics: The current motion representation lacks explicit physics encoding, limiting performance on interactions with intricate physics.
+       -3. Dynamic vs. Smooth Trade-off: There is an inherent trade-off between the amount of motion and smoothness.
+       -4. Computational Constraints: The approach relies on limited training resolution and RGB-based motion representation.
+
+   -b. Concluding Remarks:
+       VideoJAM represents a promising advancement in text-to-video generation by tackling one of the field’s most challenging problems: achieving realistic, coherent motion. While research results and example videos are impressive, real-world performance remains to be seen. The framework could potentially pave the way for integration into consumer applications (e.g., Meta’s own platforms) but will require further engineering and testing before public release.
+
