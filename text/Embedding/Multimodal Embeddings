@@ -1,0 +1,66 @@
+### From https://medium.com/towards-data-science/multimodal-embeddings-an-introduction-5dc36975966f
+### Check given link
+
+1. Context & Series Overview:
+   -a. This is the second article in a series on multimodal AI. In the previous post, 
+       the focus was on augmenting LLMs to understand new data modalities (images, audio, video) using encoders 
+       that generate embeddings from non-text data.
+   -b. In this article, the discussion shifts to multimodal embeddings and practical use cases.
+
+2. Embeddings: The Building Blocks of AI Representations
+   -a. What Are Embeddings?
+       -1. Embeddings are learned numerical representations of data that capture meaningful information.
+       -2. Traditional models like BERT and Vision Transformers (ViT) learn representations for text  
+           and images respectively by training on specific tasks (e.g., text prediction, image classification).
+   -b. Key Insight:
+       -1. These learned embedding spaces exhibit structure—similar concepts are positioned close together 
+           in the vector space.
+
+3. From Single-Modality to Multimodal Embeddings
+   -a. Single-Modality Limitation:
+       -1. Historically, models were limited to one modality (e.g., only text or only images), 
+           which restricted cross-modal applications such as image captioning or image search.
+   -b. Multimodal Embeddings Concept:
+       -1. Since both text and images (or any other data type) are represented as vectors, 
+           it is possible to merge them into a single embedding space.
+       -2. The goal is to align different modalities so that similar concepts are co-located regardless 
+           of their source.
+   -c. Example – CLIP:
+       -1. CLIP is a notable model that encodes both text and images into a shared embedding space.
+       -2. A major outcome of this alignment is 0-shot image classification, where any text input can serve as a class label.
+   -d. Beyond Text & Images:
+       -1. The idea can extend to various modality pairings (e.g., text-audio, image-tabular, text-video), 
+           opening up numerous applications like video captioning, advanced OCR, and audio transcription.
+
+4. Contrastive Learning for Multimodal Alignment
+   -a. Intuition Behind Contrastive Learning (CL):
+       -1. CL aims to bring different views (modalities) of the same information closer together while pushing 
+           apart dissimilar pairs.
+       -2. For instance, a correct image-caption pair forms a positive pair, while an image with an irrelevant
+           caption forms a negative pair.
+   -b. Advantages of CL:
+       -1. Scalability: Leverages the inherent structure of data (e.g., web image metadata) to curate positive 
+                        and negative pairs without manual labeling.
+       -2. Loss Function: Models like CLIP use a specialized loss that maximizes similarity for positive pairs 
+                          and minimizes it for negative pairs, aligning the embedding spaces effectively.
+
+5. Practical Use Cases Demonstrated with CLIP
+   -a. The article presents two concrete examples using the open-source CLIP model:
+       -1. 0-shot Image Classification:
+           -1) Utilizing CLIP’s aligned embedding space, the model can classify images into arbitrary categories using only text labels.
+       -2. Image Search:
+           -1) Given a text query, the model can retrieve images whose embeddings are close in the shared space.
+   -b. Code Availability:
+       -1. The example code for these tasks is available in a GitHub repository, enabling readers to experiment with multimodal embeddings themselves.
+
+6. Visual Aids:
+   -a. The article includes toy examples and illustrations:
+       -1. Representations of text and image embeddings in separate spaces.
+       -2. A merged, multimodal embedding space showing co-located similar concepts.
+       -3. Diagrams illustrating positive and negative pairs for contrastive learning.
+
+In summary, the article explains how multimodal embeddings merge different data modalities into a single, 
+coherent vector space using contrastive learning. By aligning these representations—as demonstrated 
+by CLIP—the approach enables practical applications such as 0-shot image classification and image search, 
+paving the way for integrated, cross-modal AI systems.
+  
