@@ -1,0 +1,96 @@
+### From https://pretty-radio-b75.notion.site/DeepScaleR-Surpassing-O1-Preview-with-a-1-5B-Model-by-Scaling-RL-19681902c1468005bed8ca303013a4e2
+
+1. Overview and Achievements of DeepScaleR-1.5B-Preview
+   -a. Model Description:
+       -1. DeepScaleR-1.5B-Preview is a language model that builds on the distilled Deepseek-R1-Distilled-Qwen-1.5B 
+           by fine-tuning it with a simple reinforcement learning (RL) approach.
+   -b. Performance:
+       -1. It achieves a 43.1% Pass@1 accuracy on the AIME2024 benchmark, marking a 14.3% absolute improvement 
+           over the base model and even surpassing OpenAI’s o1-preview performance, all with only 1.5B parameters.
+   -c. Open-Sourcing:
+       -1. The dataset, code, and training logs are publicly available, encouraging further progress in scaling
+           intelligence with RL.
+
+2. Dataset Curation and Preprocessing
+   -a. Data Sources:
+       The training set is constructed from high-quality math problems, including:
+       -1. AIME problems (1984-2023)
+       -2. AMC problems (prior to 2023)
+       -3. Problems from Omni-MATH and Still datasets (covering various national and international math competitions)
+   -b. Preprocessing Pipeline:
+       -1. Answer Extraction:
+           -1) Uses gemini-1.5-pro-002 to extract answers from official AoPS solutions for datasets like AMC and AIME.
+       -2. Duplicate Removal:
+           -1) Employs RAG with embeddings from sentence-transformers/all-MiniLM-L6-v2 to eliminate redundant 
+               questions while ensuring no contamination between training and test sets.
+       -3. Filtering Ungradable Questions:
+           -1) Removes problems that cannot be evaluated using sympy (and would require an LLM judge), 
+               preventing noisy reward signals during training.
+   -c. Final Dataset:
+       -1. Approximately 40,000 unique problem-answer pairs are used, with plans for further expansion.
+
+3. Reinforcement Learning Setup and Reward Function
+   -a. Outcome Reward Model (ORM):
+       -1. Instead of using a Process Reward Model (PRM), the reward function is designed to return:
+           -1) 1: If the model’s answer passes basic LaTeX/Sympy checks.
+           -2) 0: If the answer is incorrect or improperly formatted (e.g., missing required delimiters).
+       -2. This approach is intended to prevent reward hacking and ensure the model focuses on producing correct, 
+           well-formatted reasoning.
+
+4. Iterative Context Lengthening and Training Strategy
+   -a. Challenge of Context Length:
+       -1. Reasoning tasks require longer outputs, which increases computational cost dramatically since doubling 
+           the context length at least doubles the compute time.
+       -2. There’s a trade-off: longer contexts offer more space for reasoning but slow down training; 
+           shorter contexts are efficient but may not support solving harder problems.
+   -b. Training Phases:
+       -1. Bootstrapping with 8K Context:
+           -1) The initial RL training uses an 8K context window.
+           -2) Analysis of the base model (Deepseek-R1-Distilled-Qwen-1.5B) on AIME2024 revealed 
+               that incorrect responses were on average three times longer than correct ones.
+           -3) By training with an 8K context, the model learns to generate more concise and effective responses.
+           -4) Results in this phase show an increase in AIME accuracy from 28.9% to 33.9% along with a significant 
+               reduction in token usage for both correct and incorrect responses.
+       -2. Transition to 16K Context:
+           -1) Around 1,000 steps, the model starts generating longer responses within the 8K limit, 
+               leading to response clipping and plateauing accuracy.
+           -2) At step 1,040 (when the response length starts to increase), training is restarted with a 16K context. 
+           -3) Over an additional 500 steps, average response length increases moderately while AIME accuracy 
+               improves further to around 38%.
+       -3. Final Push with 24K Context ("24K Magic"):
+           -1) After the 16K phase shows diminishing returns, the context is extended to 24K by relaunching 
+               training from a checkpoint at step 480 of the 16K run.
+           -2) Within about 50 steps, the model surpasses 40% accuracy on AIME2024 and eventually reaches 43.1% 
+               at step 200.
+   -c. Efficiency Gains:
+       -1. The entire training run comprises roughly 1,750 steps.
+       -2. The 8K phase was trained on 8 A100 GPUs, while the later 16K and 24K phases used 32 A100 GPUs.
+       -3. The total compute cost is 3,800 A100 GPU hours (about 5 days on 32 A100s, costing around $4500), 
+           which is an 18.42× reduction compared to the 70,000 A100 GPU hours needed if training directly at 16K.
+
+5. Evaluation and Comparative Performance
+   -a. Benchmarks:
+       -1. The model was evaluated on several competition-level mathematics benchmarks, including AIME2024, 
+           AMC2023, MATH 500, Minerva Math, and OlympiadBench.
+   -b. Performance Metrics:
+       -1. DeepScaleR-1.5B-Preview consistently outperforms the base Deepseek-R1-Distilled-Qwen-1.5B model across 
+           all benchmarks.
+       -2. It achieves a 14.4% absolute gain on AIME2024 and an overall improvement of 8.1% compared to the base model. 
+       -3. In comparison with other recent RL-based reasoning models (often based on larger 7B parameter models), 
+           DeepScaleR demonstrates superior efficiency by reaching o1-preview-level performance with only 1.5B parameters.
+
+6. Key Takeaways and Conclusions
+   -a. Scalability of RL on Small Models:
+       -1. The results demonstrate that combining high-quality SFT distillation with RL scaling is effective even
+           for smaller models.
+       -2. While previous work suggested RL scaling mainly benefits large models, DeepScaleR shows that a 
+           small model (1.5B parameters) can see significant reasoning improvements (AIME accuracy from 28.9% to 43.1%).
+   -b. Benefits of Iterative Lengthening:
+       -1. The staged approach—starting with a shorter context (8K) and gradually increasing to 16K and 24K—allows 
+           the model to learn effective reasoning patterns without the overhead of long-context training from the start.
+       -2. This strategy prevents the inefficiencies of overly long, repetitive responses that do not contribute 
+           meaningfully to chain-of-thought reasoning.
+   -c. Open-Source Contribution:
+       -1. The release of datasets, code, and logs is aimed at democratizing the RL training recipe for LLMs, 
+            inviting community contributions to push the boundaries of RL-based reasoning further.
+
