@@ -1,0 +1,97 @@
+### From https://artgor.medium.com/paper-review-goku-flow-based-video-generative-foundation-models-b84efc9ae8ae
+
+1. Overview
+   Goku is a family of joint image-and-video generation models built on rectified flow Transformers. 
+   It achieves new state-of-the-art results on both text-to-image and text-to-video tasks 
+   (e.g., 0.76 on GenEval, 83.65 on DPG-Bench, and 84.85 on VBench) by unifying image and video generation under
+   a single framework.
+
+2. Approach and Methodology
+   -a. Unified Latent Space with 3D Joint VAE
+       -1. During training, both images and videos are encoded into a shared latent space using a 3D image-video joint VAE.
+       -2. Mini-batches are formed with a mix of image and video data, enabling a unified cross-modal representation.
+   -b. Rectified Flow & Transformer Processing
+       -1. The model applies a rectified flow algorithm to transform latent samples from a prior (Gaussian noise) 
+           to the target distribution using linear interpolation. This flow-based training converges faster than 
+           traditional denoising diffusion methods.
+       -2. The latents are then processed through Transformer blocks that capture both spatial and temporal dependencies.
+
+3. Model Architecture
+   -a. Goku Transformer Block
+       -1. Components:
+           -1) Self-Attention: Captures inter-token correlations.
+           -2) Cross-Attention: Integrates textual embeddings.
+           -3) Feed-Forward Network: Projects representations.
+           -4) Layer-wise adaLN-Zero: Guides feature transformation with timestamp information.
+      -2. Innovations:
+          -1) Full Attention: Unlike previous methods that separate spatial and temporal attention, Goku applies
+              full attention for superior motion modeling (leveraging FlashAttention and sequence parallelism).
+          -2) Patch n’ Pack: Images and videos are packed into a single minibatch, avoiding separate data buckets.
+          -3) 3D RoPE Positional Embeddings: Extends RoPE to handle images and videos, improving adaptability 
+              and convergence.
+          -4) Q-K Normalization: Uses RMSNorm on query-key pairs to prevent loss spikes and ensure stable training.
+   -b. Flow-Based Training
+       -1. Utilizes rectified flow (RF) to convert noise into meaningful data distributions, 
+           enabling faster convergence and conceptual clarity during joint image-video generation.
+
+4. Training Strategy
+   Goku is trained in three stages:
+   -a. Text-Semantic Pairing:
+       -1. Pretrain on text-to-image tasks to learn visual semantics and basic concepts.
+   -b. Joint Image-and-Video Learning:
+       -1. Expand training to include both images and videos using a unified token sequence approach.
+       -2. A cascade resolution strategy is applied: starting at 288x512, then increasing to 480x864, 
+           and finally to 720x1280.
+       -3. For video generation, the first frame of each clip is used as an image condition; 
+           its tokens are broadcasted and concatenated with noised video tokens, with a single MLP handling channel alignment.
+   -c. Modality-Specific Fine-Tuning:
+       -1. Optimize for improved visual quality in text-to-image generation and for enhanced temporal smoothness, 
+           motion continuity, and stability in text-to-video generation.
+
+5. Infrastructure and Efficiency Optimizations
+   -a. 3D Parallelism: 
+       -1. Distributes computation across sequences, data, and model parameters.
+       -2. Sequence parallelism slices sequences to reduce memory usage, while Fully Sharded Data Parallelism (FSDP) 
+           partitions parameters and gradients.
+   -b. Activation Checkpointing:
+       -1. Minimizes memory by storing activations only for necessary layers.
+   -c. Cluster Fault Tolerance:
+       -1. Integrates strategies from MegaScale (self-check diagnostics, multi-level monitoring, fast recovery).
+   -d. ByteCheckpoint:
+       -1. Supports efficient parallel saving/loading of training states, enabling rapid checkpointing even 
+           for large models (e.g., an 8B model checkpointed in under four seconds).
+
+6. Data Curation Pipeline
+   -a. Dataset Composition:
+       -1. 160M image-text pairs and 36M video-text pairs.
+   -b. Processing Steps:
+       -1. Video Preprocessing: Standardizes videos (H.264) and segments them using a two-stage clipping method:
+           -1) PySceneDetect: Detects shot boundaries.
+           -2) DINOv2: Refines clips based on cosine similarity.
+           -3) Clips longer than 10 seconds are truncated; duplicates are removed via perceptual hashing.
+       -2. Visual Aesthetic Filtering: Retains highly photorealistic clips based on an aesthetic threshold.
+       -3. OCR Filtering: Removes clips with excessive text.
+       -4. Motion Dynamics: Uses RAFT optical flow to assess and annotate motion scores, discarding clips outside acceptable ranges.
+  -c. Captioning Process:
+      -1. For images: InternVL2.0 generates dense captions.
+      -2. For videos: Keyframe captions are produced with InternVL2.0, then Tarsier2 provides video-wide descriptions,
+                      inherently capturing camera motion types. Qwen2 merges these into a coherent unified caption.
+                      Motion scores are integrated to enhance prompt control.
+
+7. Experimental Results
+   -a. Text-to-Image Generation:
+       -1. Goku-T2I outperforms state-of-the-art models (e.g., PixArt-α, DALL-E 2/3, SDXL) on benchmarks like GenEval,
+           T2I-CompBench, and DPG-Bench.
+   -b. Text-to-Video Generation:
+       -1. Goku-T2V achieves SOTA performance on benchmarks like UCF-101 and VBench, with superior Fréchet Video 
+           Distance scores and better representation of human actions, dynamic motion, 
+           and object fidelity across multiple evaluation dimensions.
+
+8. Conclusion
+Goku sets a new state-of-the-art for both text-to-image and text-to-video generation by unifying the processing 
+of images and videos in a single model using rectified flow Transformers. 
+Its innovative architecture—including full attention, 3D RoPE, and flow-based training—coupled with a robust data 
+curation pipeline and efficient large-scale training optimizations,
+enables it to achieve significant performance gains across multiple benchmarks.
+
+
