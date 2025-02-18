@@ -1,0 +1,85 @@
+### From https://shawhin.medium.com/how-to-train-llms-to-think-like-o1-deepseek-r1-eabc21c8842d
+
+1. Overview and Context
+   -a. OpenAI’s o1 Model:
+       -1. Released in September 2024, OpenAI’s o1 model introduced “thinking” tokens—a mechanism that creates 
+           a scratchpad-like chain of thought (CoT) during inference.
+       -2. A key insight was that increased test-time compute (i.e., generating more tokens) improves model 
+           performance, as evidenced by scaling plots on tasks like AIME math problems.
+   -b. DeepSeek’s Contribution:
+       -1. Although OpenAI never publicly disclosed the technical details behind o1’s advanced reasoning capabilities,
+           DeepSeek (an AI research lab) has now replicated this behavior.
+       -2. In their publication “DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning”
+           (January 2025), they detail how reinforcement learning (RL) was used to induce similar reasoning abilities.
+
+2. Core Innovations and Methodology
+   -a. Thinking Tokens and Chain-of-Thought (CoT):
+       -1. Special tokens (<think> and <answer>) are inserted into the model’s output.
+       -2. They demarcate the reasoning process from the final answer, providing a human-readable internal monologue 
+           and an interpretable chain-of-thought.
+   -b. Test-Time Compute Scaling:
+       -1. The model’s performance improves as it generates longer responses.
+       -2. This scaling law is distinct from traditional neural scaling (which is based on train-time compute) 
+           and emphasizes the value of additional tokens during inference.
+   -c. DeepSeek-R1-Zero (RL Only):
+       -1. Training via Reinforcement Learning:
+           -1) R1-Zero is trained solely using RL, without any supervised fine-tuning (SFT).
+           -2) Despite minimal explicit guidance, it learns emergent reasoning behaviors—including discovering 
+               its own chain-of-thought and benefiting from increased test-time token generation.
+       -2. Key Components of R1-Zero’s RL Process:
+           -1) Prompt Template:
+               - A minimal prompting strategy is used. A sample template instructs the assistant to enclose 
+                 its reasoning in <think> … </think> and its final answer in <answer> … </answer>.
+           -2) Reward Signal:
+               - Two reward components are used:
+                     Accuracy Reward: Evaluates if the answer is correct using rule-based methods.
+                     Format Reward: Ensures that the response includes properly formatted chain-of-thought reasoning.
+               - Notably, a neural reward model is avoided to prevent reward hacking.
+           -3) GRPO (Group Relative Policy Optimization):
+               - An RL algorithm that aggregates responses for stable parameter updates, incorporating techniques 
+                 like clipping and KL-divergence regularization to ensure gradual changes.
+       -3. Emergent Behavior:
+           -1) R1-Zero demonstrates that with RL alone, a model can develop long, detailed chains of thought and 
+               effectively scale performance with additional generated tokens.
+           -2) Example: In a coding/math problem prompt, R1-Zero generates a lengthy CoT that includes verification 
+                        steps before providing a final answer.
+    -d. DeepSeek-R1 (SFT + RL):
+        -1) Motivation:
+            - While R1-Zero exhibits impressive reasoning, it sometimes suffers from readability issues and
+              language mixing.
+        -2) Multi-Step Training Pipeline:
+            - Step 1: SFT with Reasoning Data:
+                      The model is first fine-tuned on thousands of curated long chain-of-thought examples, 
+                      guiding it toward the desired response format.
+            - Step 2: RL in R1-Zero Style with a Language Consistency Reward:
+                      The model is further refined using RL similar to R1-Zero, with an extra reward component
+                      to ensure language consistency.
+            - Step 3: SFT with Mixed Data:
+                      A second SFT round uses a mix of reasoning and non-reasoning examples so that the model learns
+                      when to generate chain-of-thought outputs and when not to.
+            - Step 4: RL + RLHF (Reinforcement Learning from Human Feedback):
+                      An additional RL round is performed to optimize both reasoning quality and model helpfulness/harmlessness.
+    -e. Final Outcome:
+        -1) The resulting DeepSeek-R1 model performs exceptionally well on reasoning tasks and functions as an 
+            AI assistant that can respond normally without always exposing its internal thought process.
+
+3. Access and Impact
+   -a. Model Availability:
+       -1) DeepSeek has publicly released the weights for both DeepSeek-R1-Zero and DeepSeek-R1 
+           (and various distilled versions) through multiple channels (e.g., DeepSeek, Together, Hyperbolic, Ollama,
+           Hugging Face), enabling broader experimentation.
+   -b. Implications for Future AI:
+       -1) The success of these RL-based approaches suggests that models can develop reasoning capabilities 
+           independently, potentially surpassing the limitations of models that merely remix internet-sourced information.
+       -2) This innovation could pave the way for AI systems that, by leveraging increased test-time compute and RL,
+           reach new levels of scientific and technological breakthrough.
+
+4. Conclusions
+   -a. OpenAI’s o1 model introduced the paradigm of “thinking tokens” and test-time compute scaling,
+       significantly enhancing LLM reasoning.
+   -b. DeepSeek’s replication via R1-Zero and the subsequent improved DeepSeek-R1 demonstrate 
+       that reinforcement learning can endow models with emergent reasoning capabilities.
+   -c. Although current models have limitations, this new RL approach shows promise for creating AI systems
+       that can reason more independently and effectively, potentially unlocking breakthroughs 
+       that exceed current human-guided paradigms.
+
