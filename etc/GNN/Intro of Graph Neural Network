@@ -1,0 +1,91 @@
+### From https://medium.com/@henryhengluo/intro-of-graph-neural-network-d77262dff4eb
+
+1. Data Modalities and Neural Network Architectures
+   -a. CNNs vs. RNNs:
+       -1. Convolutional Neural Networks (CNNs) excel at handling Euclidean data with fixed dimensions
+           (e.g., one-dimensional sequences, two-dimensional images, three-dimensional volumes). 
+           They process data arranged in grids or square structures.
+       -2. Recurrent Neural Networks (RNNs) are well-suited for sequential data where the length can vary, 
+           such as temporal or spatial sequences.
+       -3. Both CNNs and RNNs traditionally treat each element (or sample) with equal importance, 
+           often assuming that relationships among elements are combinatorial and uniformly significant.
+   -b. When to Use Graph Neural Networks (GNNs):
+       -1. GNNs are introduced for dataset structures where individual elements (or nodes) hold varying degrees 
+           of importance and their relationships have specific constraints.
+       -2. Unlike traditional methods based solely on graph theory, GNNs aim to generate meaningful node embeddings.
+           Starting from initial feature representations, they propagate and iteratively update node information
+           across the graph through “hops” (neighbor-to-neighbor communication).
+       -3. The typical GNN design pipeline includes:
+           -1) Identifying the graph structure
+           -2) Specifying the graph type and scale
+           -3) Designing the loss function
+           -4) Constructing the model using computational modules
+
+2. Task Challenges in Graph Neural Networks
+   -a. Task Categories in GNNs:
+       -1. Node-Level Tasks: Focus on individual nodes, including:
+           -1) Node classification (assigning nodes to classes)
+           -2) Node regression (predicting continuous values)
+           -3) Node clustering (grouping similar nodes)
+       -2. Edge-Level Tasks: Involve relationships between nodes, such as:
+           -1) Edge classification
+           -2) Link prediction (determining if an edge exists between two nodes)
+       -3. Graph-Level Tasks: Consider the entire graph, including:
+           -1) Graph classification
+           -2) Graph regression
+           -3) Graph matching
+   -b. Application Scenarios:
+       -1. Structural Scenarios: Data with explicit relational structures, such as:
+           -1) Graph mining for extracting insights
+           -2) Modeling physical and chemical systems
+           -3) Industrial applications like knowledge graphs, traffic networks, and recommendation systems.
+      -2. Non-Structural Scenarios: Data where relational structure is implicit, for example:
+          -1) Computer Vision, where relationships between image regions are analyzed.
+          -2) Natural Language Processing tasks, such as question answering or reading comprehension.
+      -3. Other Scenarios: Applications that do not neatly fit into the above categories, including advanced relational reasoning using specialized networks.
+
+3. Typical GNN Architectures and Operators
+   -a. Key Computational Modules in GNNs:
+       -1. Propagation Modules: Responsible for transmitting node feature representations along edges.
+       -2. Sampling Modules: Select a subset of neighbors, especially important in large graphs.
+       -3. Pooling Modules: Aggregate node information to form higher-level representations.
+   -b. Convolution Operator Approaches (Spectral Methods – e.g., GCN):
+       -1. Graph Convolutional Networks (GCN) use spectral methods:
+           -1) Transform the graph signal 𝑥 into the spectral domain using the graph Fourier transform.
+           -2) Perform convolution by multiplying in the spectral domain.
+           -3) Convert the result back to the original domain via the inverse Fourier transform.
+       -2. Graph Laplacian:
+           -1) The normalized graph Laplacian 𝐿 is a positive semi-definite, real symmetric matrix with
+               non-negative eigenvalues and orthogonal eigenvectors.
+       -3. Layer-wise Propagation in GCN:
+           -1) Each node’s embedding is updated based on the aggregation of its local neighborhood (one-hop, two-hop, etc.).
+           -2) The update rule involves applying a filter kernel and a learnable weight matrix 𝑊 on the input signals.
+  -c. Spatial Approaches (e.g., GraphSAGE):
+      -1. GraphSAGE operates under an inductive learning framework:
+          -1) Sampling: Only a subset of neighbors is selected, reducing memory demands.
+          -2) Aggregation: Neighbor embeddings are combined using methods such as Mean, LSTM, or Pooling aggregators.
+      -2. Advantages:
+          -1) Handles large graphs and can generalize to unseen nodes.
+          -2) Parameters (aggregator and weight matrices) are shared across nodes.
+      -3. Drawbacks:
+          -1) The sampling does not account for varying importance among neighbors.
+          -2) Aggregation may not fully capture the differing influence of neighbors versus the target node.
+  -d. Attention-based Spatial Approaches (e.g., GAT):
+      -1. Graph Attention Networks (GAT) use masked self-attention mechanisms:
+          -1) Assign different weights to neighbor nodes based on their features.
+          -2) Incorporate multi-head self-attention, using multiple weight matrices, and then combine the outputs (via concatenation or summation).
+      -2. Benefits:
+          -1) No need for a full predefined graph; only neighboring nodes are required.
+          -2) Efficient parallel computation.
+          -3) Suitable for both transductive and inductive learning scenarios.
+  -e. Other Approaches:
+      -1. Recurrent Operator Approaches:
+          -1) Differ from convolution operators in that they share weights across layers (like RNNs), 
+              providing a different form of iterative update.
+      -2. Skip Connection Approaches:
+          -1) When stacking multiple layers, deeper models may suffer from noisy information propagation 
+              and over-smoothing (nodes converging to similar representations).
+          -2) Skip connections are incorporated to mitigate these issues by allowing information to bypass 
+              intermediate layers, helping to preserve distinct node features.
+
+
