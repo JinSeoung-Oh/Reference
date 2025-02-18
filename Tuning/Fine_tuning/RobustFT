@@ -1,0 +1,106 @@
+### From https://medium.com/@techsachin/robustft-framework-for-robust-supervised-fine-tuning-of-llms-under-noisy-response-f54ea2800057
+
+1. Overview and Motivation
+   -a. Challenge in Supervised Fine-Tuning (SFT):
+       While SFT is widely used to adapt large language models (LLMs) to specific domains or tasks, 
+       the training data often contains noise. This noise degrades downstream model performance, 
+       making it essential to develop robust fine-tuning strategies.
+   -b. Introduction to ROBUSTFT:
+       The paper introduces a novel SFT framework called ROBUSTFT that tackles noise in training data through 
+       systematic noise detection and denoising. 
+       This approach is designed to be self-contained—leveraging interactions between the model and 
+       the data—and does not rely on external resources.
+
+2. Key Contributions
+   -a. Noise-Robust SFT for LLMs:
+       The framework addresses the critical, yet underexplored, challenge of handling noisy training data, 
+       aligning more closely with real-world scenarios where noise is inevitable.
+   -b. Self-Contained Noise Detection and Denoising:
+       ROBUSTFT leverages the intrinsic interactions between models and data to identify and mitigate noise, 
+       using a multi-expert collaborative approach.
+
+3. Methodology
+   -a. Overview:
+       The framework comprises two main mechanisms:
+       -1. Noise Detection: Identify noisy samples using consensus from multiple expert LLMs and a Checker mechanism.
+       -2. Data Denoising: Relabel noisy instances and filter out low-confidence samples.
+   -b. Noise Detection:
+       -1. Base Prediction:
+           Each data sample (query 𝑞_𝑖) is processed by a base LLM 𝑀 to generate a prediction 𝑦^(hat)_𝑖
+       -2. Reasoning-Enhanced Prediction:
+           A specialized reasoning-enhanced LLM iteratively performs step-by-step reasoning (using 𝑀_𝑅𝑒𝑎𝑠) 
+           followed by self-reflection (using 𝑀_𝑅𝑒𝑓𝑙) to produce a refined prediction 𝑦^(hat)_𝑖^𝑟𝑒𝑎𝑠
+       -3. Consistency Checker:
+           A consistency metric compares the original label 𝑦_𝑖, the base prediction 𝑦^(hat)_𝑖, and 
+           the reasoning-enhanced prediction 𝑦^(hat)_𝑖^𝑟𝑒𝑎𝑠
+           -1) A high consistency (denoted by 𝑟_𝑖=1) indicates a reliable (clean) sample, 
+               while inconsistency (𝑟_𝑖=0) flags potential noise.
+       -4. Dataset Partitioning:
+           The dataset is split into:
+           -1) 𝐷_(𝑐𝑙𝑒𝑎𝑛): Clean samples where 𝑟_𝑖=1
+           -2) 𝐷_(𝑛𝑜𝑖𝑠𝑒): Potentially noisy samples where 𝑟_𝑖=0
+   -c. Data Denoising:
+       -1. Context-Enhanced Relabeling:
+           Queries from both 𝐷_(𝑐𝑙𝑒𝑎𝑛) and 𝐷_(𝑛𝑜𝑖𝑠𝑒) are encoded into a shared latent space. For each noisy sample,
+           the 𝑘 most similar samples from 𝐷_(𝑐𝑙𝑒𝑎𝑛) are retrieved as context.
+       -2. Review Agent:
+           The context, combined with the reasoning-enhanced predictions, is fed to a Review Agent which evaluates
+           and relabels the noisy data.
+   -d. Data Selection:
+       -1. Perplexity-Based Filtering:
+           A confidence metric is computed using entropy. Lower entropy indicates higher model confidence.
+           -1) The entropy for each context-enhanced response is computed over token predictions.
+       -2. Selection Ratio:
+           Samples are ranked based on entropy, and only the top 𝛽 (default 50%) are selected.
+       -3. Final Fine-Tuning Dataset:
+           The final dataset 𝐷_(𝑓𝑡) is formed by combining 𝐷_(𝑐𝑙𝑒𝑎𝑛) with the selected denoised samples 
+           𝐷_(𝑠𝑒𝑙𝑒𝑐𝑡)
+
+4. Experiments
+   -a. Backbones and Baselines:
+       -1. Base Models:
+           Experiments were conducted on various architectures (e.g., Gemma2–9B, Llama3.1–8B, Llama3.2–3B).
+       -2. Baselines Compared:
+           -1) Vanilla inference (direct model inference)
+           -2) SFT-enhanced solutions (e.g., Hermes-3, Tulu-3)
+           -3) Standard SFT with noisy data
+           -4) Denoising approaches like NoiseAL, SelfLabel, and SelfSelect
+           -5) Self-enhancement methods like SelfRAG
+  -b. Implementation Details:
+      -1. Datasets were partitioned into training and test sets with varying noise levels.
+      -2. Fine-tuning was performed using Low-Rank Adaptation (LoRA) via Llama-factory for 2 epochs.
+      -3. Parameters like 𝑛=4 and 𝜃=50% were set as defaults.
+  -c. Key Experimental Insights:
+      -1. Noise Management:
+          Direct fine-tuning on noisy data significantly degrades performance. Robust noise detection and
+          denoising are essential.
+      -2. LLM Noise Detection Limitations:
+          LLMs on their own (e.g., SelfSelect) are not sufficiently robust to noise.
+      -3. Enhanced SFT Approaches:
+          Methods like Tulu-3 and Hermes-3 did not consistently improve performance, highlighting the need for
+          task-specific adaptation.
+      -4. Impact on Different Architectures:
+          Larger models can be more vulnerable to noise in domain-specific fine-tuning, while smaller models benefit 
+          more from robust denoising strategies.
+  -d. Analysis:
+      -1. Sensitivity Analysis:
+          Model performance peaked when the selection ratio 𝛽 was around 40–50%. Performance degraded with excessive noise inclusion.
+      -2. Perplexity Analysis:
+          ROBUSTFT maintained lower perplexity levels (indicating higher confidence) compared to vanilla SFT under 
+          increased noise.
+      -3. Category-wise and Stability Analyses:
+          Noise had varied effects across knowledge domains, but ROBUSTFT showed consistent and balanced improvements
+          across categories with minimal performance variance at higher noise levels.
+
+5. Conclusion
+   -a. ROBUSTFT Framework:
+       A novel noise detection and denoising framework specifically designed for LLMs, ROBUSTFT leverages a 
+       multi-expert, reasoning-enhanced approach to detect noise and a two-pronged method for data relabeling 
+       and selection.
+   -b. Key Takeaways:
+       -1. Robust noise management is critical for effective supervised fine-tuning of LLMs.
+       -2. Specialized mechanisms (e.g., consistency checkers, context-enhanced relabeling, and perplexity-based
+           filtering) are necessary to overcome the limitations of inherent LLM noise detection.
+       -3. The framework not only improves fine-tuning performance but also generalizes well across different 
+           domains and model architectures.
+
