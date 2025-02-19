@@ -1,0 +1,30 @@
+Frames, or coordinate frames, are essentially reference systems used to describe the position and orientation of objects 
+(such as robot links, joints, or the end-effector) in space. 
+They are foundational in robotics for several reasons:
+
+1. Defining Positions and Orientations:
+   A frame is defined by an origin (a point in space) and a set of axes (usually orthogonal, such as x, y, and z axes). 
+   Any point in space can be described in terms of its coordinates with respect to a given frame.
+
+2. Attaching Frames to Robot Links and Joints:
+   -1. Link Frames: Each link of a robot typically has its own frame. This helps in describing the link’s position and orientation relative 
+                    to a fixed base frame or to the previous link in the kinematic chain.
+   -2. Joint Frames: At the joints, frames are also defined to capture how one link moves relative to the other
+                     (e.g., rotational or translational movement).
+
+3. Transformations Between Frames:
+   -1. To understand the robot's overall configuration, you need to know how to convert coordinates from one frame to another. 
+       This is where homogeneous transformation matrices come into play.
+   -2. For example, if you have a frame attached to the robot's base and another attached to the end-effector, 
+       the transformation between these frames tells you the end-effector’s position and orientation relative to the base.
+
+4. Usage in Forward and Inverse Kinematics:
+   -1. Forward Kinematics: Involves using a sequence of frame transformations (often defined by Denavit-Hartenberg parameters) 
+                           to determine the position and orientation of the end-effector frame relative to the base frame.
+   -2. Inverse Kinematics: Uses the known desired end-effector frame and works backward through the chain of frames to compute the necessary
+                           joint variables.
+
+5. Visualization and Analysis:
+   -1. Frames help visualize the robot's structure. When you see a robot model, you often see little coordinate axes attached 
+       to each link—these are the frames.
+   -2. They allow us to analyze the robot's motion and behavior in a mathematically rigorous way.
