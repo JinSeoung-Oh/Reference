@@ -1,0 +1,100 @@
+## From https://medium.com/correll-lab/a-deep-dive-into-autoencoders-ae-vae-and-vq-vae-with-code-ba712b9210eb
+## Check given link for code and image
+
+1. Introduction
+   -a. Autoencoders Overview:
+       Autoencoders are unsupervised neural networks that learn to compress data into a lower-dimensional latent space 
+       and then reconstruct the input. They are widely used for tasks such as compression, denoising, 
+       feature extraction, and as building blocks for generative models.
+   -b. Variational Autoencoders (VAEs):
+       VAEs extend autoencoders by learning a probability distribution over the latent space. 
+       This allows for the generation of new data by sampling from the learned distribution. 
+       The trade-off is that VAEs often sacrifice reconstruction fidelity for generative ability.
+   -c. Vector Quantized Variational Autoencoders (VQ-VAEs):
+       VQ-VAEs address the reconstruction vs. generation trade-off by discretizing the latent space into a learned
+       codebook (or alphabet). Instead of using continuous latent vectors, 
+       each encoded representation is forced to choose a code from this discrete set, 
+       improving the quality of generated outputs while keeping the model compact.
+
+2. The Basic Autoencoder
+   -a. Architecture:
+       -1. Encoder: A series of convolutional layers that progressively reduce the spatial dimensions, 
+                    followed by a fully connected layer that maps the resulting feature maps into a lower-dimensional latent space. 
+       -2. Decoder: Mirrors the encoder with a fully connected layer to project the latent vector back to 
+                    a higher-dimensional space, followed by transposed convolutions to reconstruct the original image dimensions.
+   -b. Training Objective:
+       The network is trained to minimize the reconstruction error (typically measured as mean squared error) between
+       the input image and its reconstructed output. 
+       This guides the model to learn efficient representations that capture the essential features of the images.
+   -c. Results and Model Size:
+       The autoencoder compresses a significant amount of information (the CIFAR-10 dataset) into a model of 
+       only about 9 million parameters (~9MB). Testing on both the training dataset and another dataset (e.g., SVHN)
+       demonstrates that the autoencoder generalizes by learning common image features.
+
+3. Variational Autoencoders (VAEs)
+   -a. Concept and Trade-off:
+       VAEs modify the standard autoencoder framework by representing each pixel in the latent space with a mean (μ)
+       and a standard deviation (σ) of a Gaussian distribution. 
+       This probabilistic representation enables the generation of new data by sampling from the latent space.
+       -1. The model employs a reparameterization trick (z = μ + ε * σ) to allow for gradient-based optimization 
+           despite the sampling operation.
+   -b. Additional Loss Component – KL Divergence:
+       Besides the reconstruction loss, VAEs add a Kullback-Leibler (KL) divergence loss that measures the difference
+       between the learned latent distribution and a target Gaussian distribution (typically N(0,1)). 
+       This loss encourages the latent space to be structured and continuous, facilitating generation.
+       -1. A weighting factor is used to balance the reconstruction loss and the KL divergence, 
+           affecting the trade-off between reconstruction quality and generative capability.
+   -c. Outcomes:
+       VAEs tend to produce slightly blurred reconstructions compared to standard autoencoders because they learn 
+       to generate average images that capture the overall data distribution.
+       However, the advantage is the ability to sample and generate new, plausible images.
+
+4. Vector Quantized Variational Autoencoders (VQ-VAEs)
+   -a. Motivation:
+       VQ-VAEs are introduced to overcome the blurriness often seen in VAEs by using a discrete latent space.
+   -b. Mechanism:
+       -1. Codebook: A trainable embedding (or codebook) is learned, where each latent vector is forced to choose 
+                     the nearest code via Euclidean distance.
+       -2. Vector Quantization: The process involves mapping continuous latent representations to the closest 
+                                discrete codebook entry. A trick called the "straight-through estimator" is used to 
+                                ensure that gradients can flow through this non-differentiable lookup.
+       -3. Loss Terms:
+           Two additional loss components are added:
+           -1) Commitment Loss: Encourages the encoder's outputs to be close to their selected codebook entries.
+           -2) Codebook Loss: Encourages the codebook entries to be close to the encoder outputs.
+  -c. Benefits:
+      VQ-VAEs achieve higher-quality reconstructions with significantly fewer parameters (e.g., a model of only 1.9MB)
+      They enable effective image compression by storing only the indices of codebook entries, 
+      making them highly attractive for generative tasks where consistency and high resolution are important.
+  -d. Additional Techniques:
+      The article also discusses methods to encourage greater diversity in codebook usage, such as regularizing 
+      the entropy of the distribution over used code indices.
+
+5. Applications and Demonstrations
+   -a. Reconstruction and Compression:
+       Autoencoders are effective at compressing image data, as shown by reconstructing CIFAR-10 images with
+       a model that reduces the original data size dramatically.
+   -b. Denoising and Anomaly Detection:
+       Since the autoencoder learns the typical features of its training set, it can also be used to detect 
+       anomalies or denoise images. Images that differ significantly from the training distribution yield 
+       higher reconstruction losses.
+   -c. Generative Capabilities:
+       VAEs allow for the generation of new images by sampling from the latent space, while VQ-VAEs provide more 
+       visually sharp outputs, enabling blending and interpolation between images 
+       (e.g., averaging latent vectors from two images to produce a blended result).
+
+6. Conclusion
+   -a. Summary of Techniques:
+       The article iteratively develops implementations for a basic autoencoder, a variational autoencoder, 
+       and a vector-quantized variational autoencoder using the CIFAR-10 dataset.
+   -b. Trade-offs and Benefits:
+       -1. Standard Autoencoders excel at faithful reconstruction but are limited in generative applications.
+       -2. VAEs introduce probabilistic sampling in the latent space, which is crucial for generating 
+           new data but can lead to blurriness.
+       -3. VQ-VAEs address the shortcomings of VAEs by discretizing the latent space with a learned codebook, 
+           striking a balance between quality and model compactness.
+   -c. Applications:
+       These models serve as powerful tools for image compression, denoising, anomaly detection, 
+       and generative modeling, with VQ-VAEs being particularly promising for integration with 
+       transformer-based generative decoders.
+
