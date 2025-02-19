@@ -1,0 +1,112 @@
+1. Manipulator Kinematics (Forward Kinematics)
+   1.1. Fundamental Concepts
+        -a. Objective:
+            To determine the position and orientation of the end-effector given the geometric relationships between the joints and links of the robot.
+        -b. Use of Coordinate Frames:
+            Local coordinate frames are assigned to each link, and the relationships between these frames define the overall geometry of the robot.
+   1.2. Homogeneous Transformation
+        -a. Definition:
+            A homogeneous transformation matrix 𝑇 combines rotation and translation into a single 4×4 matrix, transforming coordinates 
+            from one frame to another.
+
+            𝑇=[𝑅 𝑝
+              0  1]
+
+            -1. 𝑅: A 3×3 rotation matrix
+            -2. 𝑝: A 3×1 translation vector
+       -b. Role:
+           This matrix is used to connect the relative positions and orientations of successive links, and the overall forward kinematics 
+           is built by multiplying these matrices in sequence.
+   1.3. Denavit-Hartenberg (DH) Parameters
+        -a. Purpose:
+            To systematically describe the transformation between adjacent links and joints using a standardized set of parameters.
+        -b. The Four DH Parameters:
+            -1. 𝑎_𝑖 (Link Length): The length of the common normal between the previous and current joint axes.
+            -2. α_i (Link Twist): The angle between the previous 𝑧-axis and the current 𝑧-axis, measured about the common normal.
+            -3. 𝑑_𝑖(Link Offset): The distance along the current joint axis between the previous common normal and the current one.
+            -4. 𝜃_𝑖(Joint Angle): The rotation about the previous 𝑧-axis needed to align the previous common normal with the current one.
+        -c. DH Transformation Matrix:
+           For each joint 𝑖, the transformation is given <-- check Introduction to ROBOTICS Mechanics and Control - Forth edition by John Craig
+        -d. Forward Kinematics Computation: 
+            The overall transformation to the end-effector 𝑇_𝑛^0 is the product of the individual transformation matrices:
+            𝑇_𝑛^0=𝑇_1^0𝑇_2^1⋯𝑇_𝑛^(𝑛−1)
+            This multiplication yields the position 𝑝 and orientation 𝑅 of the end-effector.
+   1.4. Velocity Analysis: The Jacobian Matrix
+        -a. Definition:
+            The Jacobian 𝐽(𝑞) relates the joint velocities 𝑞˙to the linear and angular velocities 𝑥˙ of the end-effector:
+            𝑥˙=𝐽(𝑞)𝑞˙
+        -b. Composition:
+            -1. Linear Velocity Component: How joint motions affect the end-effector's translational movement.
+            -2. Angular Velocity Component: How joint rotations contribute to the end-effector's angular motion.
+        -c. Usage and Importance:
+            -1. Essential in designing control algorithms (e.g., impedance and force control).
+            -2. Critical for singularity analysis, since the Jacobian's determinant approaching zero indicates potential control issues.
+            -3. Used in numerical approaches for inverse kinematics to compute joint updates.
+------------------------------------------------------------------------------------------------------------------------
+
+2. Inverse Manipulator Kinematics (Inverse Kinematics)
+   2.1. Problem Definition and Challenges
+        -a. Definition:
+            The inverse kinematics problem involves finding the joint variables 𝑞 that achieve a desired end-effector position and orientation.
+        -b. Key Challenges:
+            -1. Nonlinearity: The relationship between joint variables and end-effector pose is nonlinear, complicating the derivation of analytical solutions.
+            -2. Multiple Solutions: There can be several joint configurations that yield the same end-effector pose.
+            -3. Singularity Issues: Near singular configurations, the Jacobian may become ill-conditioned, leading to high sensitivity and numerical instability.
+   2.2. Solution Approaches
+        2.2.1. Analytical Methods
+               -a. Characteristics:
+                   -1. Suitable when the robot’s geometry is simple or exhibits certain symmetries, allowing derivation of a closed-form solution.
+                   -2. For example, specific 6-DOF robots (like the PUMA robot) allow geometric decomposition to explicitly solve for joint angles.
+               -b. Advantages:
+                   Fast computations with explicit solutions.
+               -c. Limitations:
+                   Generally not applicable to all robot configurations, particularly with complex geometries.
+       2.2.2. Numerical Methods
+              -a. Characteristics:
+                  -1. Use iterative algorithms to reduce the error between the current and desired end-effector pose until convergence is achieved.
+                  -2. Common methods include Newton-Raphson, Damped Least Squares, and techniques that employ the pseudoinverse of the Jacobian.
+              -b. Basic Procedure:
+                  -1. Initialization: Start with an initial guess 𝑞0
+                  -2. Error Calculation: Compute the error Δ𝑥 between the current end-effector pose and the target pose.
+                  -3. Jacobian Computation: Calculate the Jacobian 𝐽(𝑞) and determine the joint update Δ𝑞 using:
+                      Δ𝑞=𝐽†(𝑞)Δ𝑥
+                  -4. Update: Set 𝑞←𝑞+Δ𝑞 and repeat until the error is minimized.
+              -c. Advantages:
+                  -1. Generally applicable to complex robot structures, providing continuous solutions.
+              -d. Disadvantages:
+                  -1. Sensitive to the initial guess, may converge to local minima, and can be computationally intensive.
+   2.3. Additional Considerations
+        2.3.1. Redundancy
+               -a. Definition:
+                   -1. Occurs when the robot has more degrees of freedom (DoF) than the minimum required to control the end-effector
+                       (e.g., 7-DoF robots controlling a 6-DoF pose).
+               -b. Utilization:
+                   -1. Extra degrees of freedom can be exploited to optimize secondary criteria such as energy efficiency, collision avoidance, 
+                       and adherence to joint limits.
+                   -2. Null-space Projection: After achieving the primary objective (end-effector pose), the remaining DoF can be used to satisfy
+                       additional goals.
+        2.3.2. Singularities
+               -a. Definition:
+                   Specific configurations where the Jacobian loses rank (i.e., its determinant approaches zero), leading to limited motion in certain directions.
+               -b. Issues:
+                   Can result in control instability and require exceedingly large joint velocities.
+               -c. Mitigation:
+                   -1. Techniques such as Damped Least Squares are used to alleviate numerical instability near singularities.
+                   -2. Singularity avoidance strategies may be incorporated into trajectory planning and control.
+        2.3.3. Existence and Uniqueness of Solutions
+               -a. Existence:
+                   Not every desired end-effector pose within the workspace has a corresponding solution due to physical and geometric constraints.
+               -b. Multiple Solutions:
+                   The same end-effector pose may be achieved by various joint configurations. Selection criteria (e.g., minimum energy or 
+                   joint limit avoidance) are often applied to choose the most appropriate solution.
+
+3. Conclusion
+   -a. Forward Kinematics:
+       -1. Uses homogeneous transformations and DH parameters to model the relationships between links and joints.
+       -2. Computes the end-effector’s position and orientation via sequential multiplication of transformation matrices.
+       -3. Employs the Jacobian matrix to relate joint velocities to end-effector velocities, crucial for control and singularity analysis.
+   -b. Inverse Kinematics:
+       -1. Involves determining joint variables 𝑞 that produce a desired end-effector pose.
+       -2. Distinguishes between analytical methods (closed-form solutions for simpler, symmetric structures) and numerical methods 
+           (iterative approaches such as Newton-Raphson and Damped Least Squares).
+       -3. Addresses challenges including redundancy, singularities, sensitivity to initial guesses, and the possibility of multiple solutions.
