@@ -1,0 +1,56 @@
+### From https://medium.com/@albertoromgar/grok-3-another-win-for-the-bitter-lesson-0a63bda5ddcf
+
+I. Scaling Laws Govern AI Progress
+   -a. Grok 3’s Breakthrough:
+       -1. xAI’s Grok 3 is heralded as a massive leap over its predecessor, Grok 2, 
+           and even rivals models from OpenAI, Google DeepMind, and Anthropic.
+       -2. It excels in reasoning tasks (math, coding, science) and tops performance categories in arenas like LMSys.
+       -3. This success reaffirms the “Bitter Lesson” – that scaling (more compute) is still the primary driver of AI
+           progress.
+
+II. DeepSeek: The Exception that Proves the Rule
+    -a. Resource Constraints and Optimization:
+        -1. DeepSeek, despite using a more modest GPU cluster (50K Nvidia Hoppers vs. 100K+ H100s used by US labs), 
+            managed to match the performance of models like OpenAI’s o1 through extensive optimization across the stack.
+        -2. Critics argued this showed that human ingenuity and algorithmic tweaks could overcome compute limitations.
+            However, the lesson is that even these clever optimizations rely on scaling – if DeepSeek had more GPUs, 
+            its performance would be even better.
+        -3. DeepSeek’s CEO acknowledged that external export controls (limiting access to more powerful GPUs) are 
+            the real bottleneck, reinforcing that compute matters.
+
+III. xAI as Proof That Scaling > Optimization
+     -a. Brute-Force Compute Advantage:
+         -1. xAI built Grok 3 using a massive 100K+ H100 cluster, significantly more than DeepSeek’s resources.
+         -2. Unlike DeepSeek, xAI didn’t need to heavily re-engineer its infrastructure—they could rely 
+             on scale to boost performance.
+         -3. The Bitter Lesson implies that if you have access to vast compute, scaling out is far more effective 
+             than relying on intricate, resource-constrained optimizations. 
+         -4. The message is clear: while algorithmic improvements are valuable, throwing more compute 
+             at the problem ultimately leads to better results.
+
+IV. The Paradigm Shift: From Pre-Training to Post-Training Compute
+    -a. Changing Focus: 
+        -1. The early AI era (pre-2024) was dominated by scaling models in size during pre-training. 
+            OpenAI had a head start with models like GPT-2 to GPT-4.
+        -2. More recently, the focus has shifted toward scaling test-time compute—essentially, letting models 
+            “think” more during inference (e.g., through reinforcement learning and chain-of-thought prompting).
+        -3. This paradigm shift, which led to advances like OpenAI’s o1, has leveled the playing field, 
+            allowing latecomers like xAI and DeepSeek to rapidly catch up.
+        -4. Post-training improvements are cheaper and faster, enabling rapid iteration and significant performance
+            leaps in a short time.
+
+V. Contextualizing the Wins
+   -a. Comparing Approaches:
+       -1. Both xAI and DeepSeek demonstrate impressive achievements using different strategies—DeepSeek 
+           through heavy optimization under compute constraints, and xAI through brute-force scaling.
+       -2. Compute is not everything, but scaling compute has repeatedly proven to yield the best marginal gains.
+       -3. xAI’s advantage with a massive GPU cluster and robust team (along with Elon Musk’s backing)
+           puts it in an even stronger position compared to competitors.
+
+VI. Future Competitive Landscape
+    -a. Post-Training Costs and Compute Domination:
+        -1. While post-training approaches are currently cost-effective, as companies scale up their 
+            compute investment (stockpiling GPUs), only those with sufficient resources will remain competitive.
+        -2. xAI is well positioned with its 100K–200K H100 clusters, whereas DeepSeek remains limited 
+            by export controls.
+        -3. Ultimately, the lesson is that scaling compute will continue to drive breakthroughs in AI development.
