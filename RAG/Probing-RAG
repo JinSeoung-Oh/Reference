@@ -1,3 +1,90 @@
 ### From https://medium.com/@techsachin/probing-rag-rag-approach-with-efficient-adaptive-retrieval-pipeline-using-llm-hidden-states-for-a97baa0774c5
 
+1. Overview
+   -a. Problem with Traditional RAG:
+        Traditional Retrieval-Augmented Generation (RAG) systems rely on surface-level semantic similarity and static vector databases. 
+        This leads to:
+        -1) Shallow Retrieval: Documents are retrieved based on keyword overlaps, often missing contextually relevant material.
+        -2) Infrastructure Complexity: The need for chunking, embedding, and maintaining vector indexes introduces errors 
+            (e.g., stale indexes) and slows updates.
+        -3) Static Knowledge: The indexed documents quickly become outdated, especially in dynamic domains like medicine or finance.
+   -b. Probing-RAG Concept:
+       Probing-RAG upgrades the RAG pipeline by integrating a "prober" that leverages the hidden state representations from intermediate layers 
+       of the language model. 
+       Instead of relying solely on external retrieval, the prober assesses—based on internal cues—whether additional retrieval is needed for a given query.
+
+2. Methodology
+   -a. Prober Model:
+       -1. Inputs:
+           -1) Uses the hidden states 𝐻_(𝑙𝑘) from intermediate layers of the language model corresponding to the generated rationale 
+               𝑟 and answer 𝑎^
+           -2) These hidden states are aggregated (mean-pooled across token positions) and normalized to form a compact representation 
+               𝑇′′_(𝑙𝑘)
+       -2. Architecture:
+           -1. A feed-forward network with one hidden layer, outputting a binary classification (retrieval needed vs. not needed).
+       -3. Positioning:
+           -1. Based on prior findings, the prober is positioned after roughly one-third of the model’s layers
+               (e.g., at even-numbered layers starting from the 6th layer in an 18-layer Gemma-2B model).
+   -b. Training the Prober:
+       -1. Dataset Creation:
+           -1) Pairs (𝑇′_(𝑙𝑘),𝑦) are generated via Chain-of-Thought (CoT) prompting. For each query:
+               - Two versions of rationale and answer are generated: one without retrieval and one with retrieval.
+               - Label 𝑦 is set to 1 if the answer is correct (no retrieval needed) and 0 if retrieval improves the answer.
+           -2) The training data spans four types of examples: with/without retrieval and correct/incorrect outcomes.
+           -3) Three open-domain QA datasets (HotpotQA, NaturalQA, TriviaQA) are used, yielding 26,060 training and 500 validation samples.
+       -2. Loss Function:
+           -1) The prober is trained with cross-entropy loss to classify whether further retrieval is necessary.
+   -c. Adaptive Retrieval Process:
+       -1. Initial Generation: 
+           -1) The language model generates a chain-of-thought and an initial answer using CoT prompting.
+       -2. Probing:
+           -1) Hidden states corresponding to the generated rationale and answer are extracted and fed into the prober.
+           -2) The prober outputs logits that indicate the necessity of further retrieval.
+       -3. Decision Mechanism:
+           -1) The system sums the logits across designated layers; if the difference between the “retrieve” and “no retrieval” logits exceeds 
+               a threshold 𝜃, additional documents are retrieved.
+       -4. Iterative Process:
+           -1) Retrieved documents are fed back along with the original query to generate updated 𝑟 and 𝑎^
+           -2) This iterative retrieval continues until no further retrieval is needed or a maximum number of iterations is reached.
+
+3. Experiments and Results
+   -a. Performance Comparison:
+       -1. Probing-RAG outperforms prior adaptive retrieval methods, improving accuracy by approximately 6.59 percentage points 
+           over no-retrieval and 8.35 points over single-step retrieval approaches on several open-domain QA datasets.
+   -b. Retrieval Efficiency:
+       -1. Retrieval Calls:
+           -1) Probing-RAG uses significantly fewer retrieval calls compared to other methods (e.g., performing 1.17× or even as low as 
+               1.54× retrieval calls versus methods that make many more).
+       -2. Consistency:
+           -1) The method shows high answer consistency—meaning that when the model is capable of answering correctly without retrieval, 
+               adding retrieval does not adversely affect the answer.
+   -c. Prober Analysis:
+       -1. Layer-wise Accuracy:
+           -1) Prober performance peaks near the residual post positions (e.g., around the 10th-12th layers), with average accuracies near 0.7.
+       -2. Correlation with QA Performance:
+           -1) A strong correlation (0.93) is observed between the prober’s classification accuracy and the overall QA performance, 
+               indicating that improvements in the prober directly benefit retrieval quality.
+       -3. Logit Distributions:
+           -1) Kernel density estimates of the logits show a clear separation between cases where retrieval is needed versus not, 
+               validating the prober’s decision process.
+   -d. Case Studies:
+       -1. Detailed examples comparing Probing-RAG with methods like DRAGIN show that Probing-RAG produces more factually accurate and
+           contextually relevant answers with reduced retrieval overhead.
+
+4. Limitations
+   -a. Model Compatibility:
+       -1. Probing-RAG currently requires access to internal hidden states and is thus limited to open-source LLMs; certain APIs restrict such access.
+   -b. Generalizability:
+       -1. The prober’s effectiveness on larger hyper-scale models (e.g., 70B parameter models) or domain-specific datasets has not been thoroughly 
+           validated due to resource constraints.
+
+5. Conclusion
+   -a. Probing-RAG introduces a novel, efficient adaptive retrieval pipeline that uses a pretrained prober to determine, 
+       based on the LLM’s internal hidden states, whether additional document retrieval is needed.
+   -b. Key Achievements:
+       -1. It outperforms previous adaptive retrieval approaches on open-domain QA tasks.
+       -2. It reduces unnecessary retrieval calls, thereby lowering computational overhead while maintaining or improving accuracy.
+   -c. Overall Impact:
+       -1. Probing-RAG rethinks the retrieval process by integrating internal model representations with external document retrieval, 
+           enabling more effective and efficient knowledge augmentation in LLMs.
 
