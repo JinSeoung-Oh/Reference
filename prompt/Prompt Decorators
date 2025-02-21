@@ -1,0 +1,91 @@
+### From https://kalami.medium.com/prompt-decorators-a-simple-way-to-improve-ai-responses-c3f3c2579a8c
+### Have to enter given link for checking example
+
+1. Overview 
+   -a. Challenge in AI Prompting:
+       -1. AI models’ responses can be vague, inconsistent, or require excessive trial and error in prompt formulation.
+       -2. Users often struggle with ambiguous or overly detailed prompts, leading to unpredictable outputs.
+   -b. Solution – Prompt Decorators:
+       -1. Prompt Decorators are structured prefixes inspired by Python decorators.
+       -2. They standardize and refine AI responses by instructing the model to follow specific patterns or reasoning styles.
+       -3. This approach improves clarity, logical consistency, and overall output quality.
+
+2. How Prompt Decorators Work
+   -a. Concept:
+       -1. Just as Python decorators modify the behavior of functions, Prompt Decorators modify how an AI generates responses.
+       -2. Instead of using the “@” symbol (which is often reserved for tagging), the system uses “+++” as a distinct prefix.
+   -b. Example – Reasoning Decorator:
+       -1. Without Decorator:
+           -a. A prompt such as “Suggest a name for an AI YouTube channel focused on AI/ML video tutorials” might yield a simple list
+               without explaining the thought process.
+       -2. With +++Reasoning Decorator:
+           -a. Adding “+++Reasoning” before the prompt forces the model to first outline its reasoning—explaining criteria like clarity, 
+               relevance, and audience appeal—before suggesting names.
+           -b. This leads to more transparent, well-structured, and justified responses.
+
+3. Key Prompt Decorators and Their Benefits
+   -a. +++Reasoning:
+       -1. Forces the model to explain its approach before providing an answer.
+       -2. Benefits: Increases transparency and encourages thoughtful responses.
+   -b. +++StepByStep:
+       -1. Directs the model to break down a task into clear, sequential steps.
+       -2. Benefits: Improves clarity in complex processes and ensures completeness.
+   -c. +++Debate:
+       -1. Prompts the model to present multiple perspectives on a topic.
+       -2. Benefits: Encourages balanced, critical evaluation by presenting pros and cons.
+   -d. +++Critique:
+       -1. Instructs the model to analyze strengths and weaknesses of an idea. 
+       -2. Benefits: Provides a well-rounded assessment and identifies areas for improvement.
+   -e. +++Refine(iterations=N):
+       -1. Causes the model to refine its output over multiple iterations.
+       -2. Benefits: Produces more polished, high-quality responses through successive improvements.
+   -f. +++CiteSources:
+       -1. Ensures that the AI includes references or citations for its claims.
+       -2. Benefits: Enhances credibility and reduces the risk of misinformation.
+   -g. +++FactCheck:
+       -1. Prioritizes verifying factual accuracy before generating a response.
+       -2. Benefits: Critical for topics where precision is key.
+   -h. +++OutputFormat(format=FORMAT):
+       -1. Structures the response in a specific format (e.g., JSON, Markdown).
+       -2. Benefits: Saves time and ensures compatibility with technical applications.
+   -i. +++Tone(style=STYLE):
+       -1. Allows users to set the tone of the response (e.g., formal, casual).
+       -2. Benefits: Customizes responses for various audiences and contexts.
+
+4. Why Use Prompt Decorators?
+   -a. Enhancing Clarity and Structure:
+       -1. Standardized prefixes help generate responses that are logical and well-organized.
+       -2. They reduce the need for extensive prompt engineering by providing a reusable framework.
+   -b. Improving Accuracy and Trustworthiness:
+       -1. Decorators like +++CiteSources and +++FactCheck ensure that outputs are verifiable and accurate.
+   -c. Simulating Thought Processes:
+       -1. By enforcing reasoning or step-by-step breakdowns, the AI is encouraged to “think” more deeply before responding.
+   -d. Customizability and Flexibility:
+       -1. Users can mix and match decorators to suit various tasks—whether it’s creative content generation, data extraction, or professional communication.
+
+5. Real-World Applications
+   -a. Marketing & Content Creation:
+       -1. Using +++Refine(iterations=3) to generate and improve taglines or messaging, automating the iterative process of content refinement.
+   -b. Data Extraction for Developers:
+       -1. +++OutputFormat ensures that outputs are structured (e.g., JSON), facilitating seamless integration with APIs and automation workflows.
+   -c. Business & Policy Decision-Making:
+       -1. +++Debate enables balanced viewpoints, helping executives make informed decisions by presenting pros and cons.
+   -d. Research & Academic Writing:
+       -1. +++CiteSources provides verifiable references, crucial for academic and scientific rigor.
+
+6. Future Directions
+   -a. Native Integration into AI APIs:
+       -1. Future AI APIs (from OpenAI, Google, Microsoft, etc.) might support Prompt Decorators as structured parameters,
+           eliminating the need for manual prepending.
+   -b. Open Standard Adoption:
+       -1. Prompt Decorators could become a standardized way to control AI responses across various platforms, much like Markdown for text formatting.
+   -c. Industry-Specific Customizations:
+       -1. Custom decorators could be developed for specialized fields (e.g., legal, medical, financial) to meet domain-specific standards and compliance requirements.
+
+7. Conclusion
+   Prompt Decorators offer a powerful, simple way to unlock the full potential of AI by ensuring responses are clear, logical,
+   and tailored to user needs. By standardizing instructions with decorators like +++Reasoning, +++StepByStep, +++Debate, and others,
+   users can significantly reduce trial-and-error in prompt formulation, improve response quality,
+   and customize outputs for a wide range of applications. The adoption of these structured prompts may eventually become an open standard,
+   transforming how we interact with AI systems across diverse fields.
+
