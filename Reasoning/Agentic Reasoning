@@ -1,0 +1,90 @@
+### From https://levelup.gitconnected.com/the-open-source-agentic-reasoning-beats-google-gemini-deep-research-8ed8d9d07176
+
+1. Overview & Motivation
+   -a. Deep Research Trend:
+       With recent advances from Google, OpenAI, and Perplexity, the focus on multi-step, 
+       deep research tasks has grown. Now, an open-source framework from the University of Oxford—Agentic
+       Reasoning—is emerging as a powerful tool for tackling complex, multi-step logical problems 
+       that require extensive research.
+   -b. Why It Matters:
+       Agentic Reasoning outperforms state-of-the-art retrieval-augmented generation (RAG) systems and 
+       closed-source LLMs on challenging PhD-level scientific reasoning tasks (GPQA) and 
+       domain-specific deep research questions in finance, medicine, and law.
+
+2. The “Brain” Behind Agentic Reasoning
+   -a. Inspiration from Chain-of-Thought (CoT) Models:
+       While earlier models like OpenAI o1 and DeepSeek R1 demonstrated effective chain-of-thought reasoning 
+       on math and coding problems, fields such as ethics or social sciences require more nuanced, 
+       research-intensive approaches.
+   -b. Agentic Reasoning Framework:
+       -1. Instead of directly using external tools for data gathering and computation, 
+           the framework deploys external LLM-based agents to perform these tasks.
+       -2. A central reasoning LLM supervises and orchestrates three specialized agents:
+           -1) Web-Search Agent: Gathers up-to-date information from the internet.
+           -2) Coding Agent: Generates and executes Python code for quantitative analysis.
+           -3) Mind Map (Memory) Agent: Constructs a knowledge graph from the reasoning context to serve as dynamic memory.
+   -c. Iterative Process:
+       The reasoning LLM starts with a query and task instructions and decides, in real time, 
+       whether additional external information is needed. It uses specialized tokens 
+       (e.g., web search, coding, mind-map calling) to request help from the corresponding agent. 
+       The responses are integrated iteratively into a chain-of-thought, culminating in a well-informed final answer.
+
+3. Mathematical Formulation
+   -a. Objective:
+       For a multi-step reasoning query 𝑞, the goal is to generate a reasoning chain 𝑟 and a final answer 𝑎
+   -b. Framework Inputs:
+       -1. Task instructions 𝑜
+       -2. Query 𝑞
+       -3. External outputs 𝑒 (from the agents)
+       -4. Reasoning memory 𝑘 (the knowledge graph from the mind map agent)
+   -c. Generation Process:
+       The probability of generating the complete reasoning chain and final answer is modeled as the product 
+       (or sum of stepwise probabilities) of generating each reasoning step 𝑟(𝑡) and each answer token 𝑎(𝑡)
+       over the sequence lengths 𝑇(𝑟) and 𝑇(𝑎)
+       -1. At each step, if specialized tokens trigger a tool call, the LLM pauses its internal reasoning 
+           to delegate tasks (web search, coding, or mind-map updates) and then resumes the process with enriched context.
+
+4. Components and Workflow
+   -a. Web Search Agent:
+       -1. Retrieves and filters information from online sources.
+       -2. Processes raw web pages to extract the most relevant content, which is then fed back into the reasoning chain.
+   -b. Coding Agent:
+       -1. Generates and executes code based on the current query and reasoning context.
+       -2. Returns natural language summaries of computation results to support quantitative analysis.
+   -c. Mind Map Agent:
+       -1. Constructs and updates a dynamic knowledge graph (a “mind map”) that stores the reasoning context.
+       -2. Facilitates retrieval of relevant past information via a RAG-style query mechanism,
+           thereby reducing redundancy and enhancing coherence.
+   -d. Overall Workflow:
+       -1. The reasoning LLM initiates with task instructions and a query.
+       -2. It dynamically decides whether to request external input by emitting special tokens.
+       -3. External agents process the request, and their outputs are integrated into the evolving chain-of-thought.
+       -4. This iterative process continues until the LLM is confident in its final answer.
+
+5. Performance and Impact
+   -a. Benchmarking on GPQA:
+       -1. On the GPQA Diamond set (198 challenging PhD-level MCQs in STEM), Agentic Reasoning achieves 
+           the highest pass rate compared to other RL-trained open/closed-source LLMs and RAG-enhanced systems.
+       -2. On the extended GPQA set (546 questions), the framework even outperforms human experts in many subjects.
+   -b. Domain-Specific Success:
+       -1. In open-ended Q&A tasks across finance, medicine, and law, Agentic Reasoning outperforms Google Gemini 
+           Deep Research, showcasing its superior capability in deep, knowledge-intensive research.
+   -c. Key Advantages:
+       -1. Reduced Cognitive Load: Delegation to specialized agents allows the central reasoning LLM to focus on 
+                                   synthesizing information.
+       -2. Enhanced Accuracy: By selectively triggering retrieval only when necessary, the system minimizes 
+                              error propagation from irrelevant or redundant information.
+       -3. Scalable and Adaptive: The framework dynamically adapts to each query, leveraging external tools 
+                                  only when beneficial.
+
+6. Conclusion
+   Agentic Reasoning represents a significant leap forward in AI research by combining the strengths of 
+   multiple specialized LLM agents under the guidance of a central reasoning LLM. 
+   By leveraging external tools (for web search, coding, and memory management) and integrating their outputs 
+   into a coherent chain-of-thought, the framework achieves state-of-the-art performance on complex,
+   multi-step research tasks. Its success on challenging datasets like GPQA and domain-specific Q&A in finance, 
+   medicine, and law highlights its potential to transform how deep research and advanced reasoning are performed
+   with AI. This open-source breakthrough paves the way for more robust and adaptable AI systems capable of handling 
+   the intricate demands of real-world knowledge tasks.
+
+
