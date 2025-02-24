@@ -1,0 +1,90 @@
+### From https://medium.com/@techsachin/token-budget-aware-llm-reasoning-framework-5299e17998c0
+
+1. Overview
+   -a. Problem Statement:
+       Traditional Chain-of-Thought (CoT) prompting enhances LLM reasoning by decomposing problems into intermediate 
+       steps. However, this process often incurs significant token redundancy, which increases inference costs.
+   -b. Objective:
+       The paper proposes a token-budget-aware LLM reasoning framework—TALE—that dynamically estimates an optimal 
+       token budget based on the complexity of the reasoning task and guides the model to generate concise 
+       yet correct outputs.
+
+2. Key Concepts
+   -a. Token Budget in CoT Reasoning:
+       -1. LLMs can follow explicit token constraints provided in prompts. 
+       -2. By specifying a token budget (e.g., “50 tokens”), the model adjusts its output length. 
+           However, simply enforcing a strict limit can lead to redundancy or inefficiency.
+   -b. Token Redundancy Phenomenon:
+       -1. Experiments show that while minimal budgets preserve correctness, further reducing the budget 
+           may inadvertently increase the token cost due to the model compensating with longer reasoning outputs.
+       -2. The concept of token elasticity demonstrates that there is an optimal token budget where redundancy is 
+           minimized.
+
+3. Methodology
+   -a. Vanilla Optimal Budget Search:
+       -1. Process:
+           -1) Start with a vanilla CoT prompt to generate an initial answer and measure its token cost,
+               setting the “right” boundary.
+           -2) Use a binary search between 0 and this boundary. The model tests a candidate budget (midpoint) 
+               and evaluates if the answer remains correct.
+           -3) Iteratively update the candidate budget until the minimal token count that still preserves 
+               answer correctness is found.
+       -2. Feasibility Check:
+           -1) A function determines if a given token budget is feasible by verifying both correctness and
+               a reduction in token cost compared to previous budgets.
+   -b. Token Elasticity Based Search:
+       -1. Observation:
+           -1) Beyond ensuring correctness, the optimal budget should result in lower token consumption 
+               than previous iterations.
+       -2. Algorithm:
+           -1) Incorporates a feasibility function that not only checks for answer accuracy but also ensures 
+               that the token cost decreases (using a greedy strategy).
+           -2) The search stops when further reduction in the budget leads to increased token usage or loss 
+               of correctness.
+       -3. Budget Estimation and Internalization:
+           -1. Zero-shot Estimator:
+               -1) Uses the reasoning LLM itself to estimate the required token budget before answering.
+               -2) Mimics a human-like “quick look” to gauge the effort needed.
+           -2. Regression Estimator:
+               -1) A fine-tuned model (e.g., using LLaMA 3–8B) is trained to predict the optimal token budget given
+                   a prompt.
+               -2) The loss function maximizes the probability of producing the correct target output 
+                   (e.g., “The token budget is 14”).
+           -3. Internalization:
+               -1) The LLM is fine-tuned with token-budget-aware Chain-of-Thought prompts, guiding it to generate 
+                   outputs that adhere to the optimal budget.
+
+4. Experimental Evaluation
+   -a. Metrics:
+       -1. Accuracy (Acc):
+           Measures the correctness of the final answer.
+       -2. Output Token Cost:
+           Quantifies the number of tokens generated, reflecting computational and cost efficiency.
+   -b. Results:
+       -1. Efficiency Gains:
+           -1) TALE reduces token usage by approximately 68.64% compared to vanilla CoT.
+           -2) It significantly lowers operational expenses while maintaining competitive accuracy.
+       -2. Dataset-Specific Performance:
+           -1) On GSM8K, TALE improved accuracy to 84.46% while reducing token costs from ~253 to ~23 tokens.
+           -2) On MathBench-Arithmetic, TALE reduced expenses (from 78.58 to 18.62) with only a minimal drop in accuracy.
+       -3. Generalization:
+           -1) TALE was tested across different LLMs (Yi-lightning, GPT-4o-mini, and GPT-4o), consistently reducing
+               token costs by 61–70% compared to Vanilla CoT while preserving accuracy.
+   -c. Budget Estimation Quality:
+       -1. In-range Accuracy:
+           Approximately 60.61% of estimated budgets fall within the ideal range.
+       -2. Out-of-Range Distance:
+           The average deviation of out-of-range estimates is 109.64, highlighting areas for further refinement.
+
+5. Conclusion
+   -a. Key Achievement:
+       TALE presents a novel approach that integrates token budget awareness into LLM reasoning. 
+       It dynamically adapts output length based on task complexity, reducing token redundancy and associated costs.
+   -b. Benefits:
+       -1. Achieves a balanced trade-off between performance and efficiency.
+       -2. Reduces token usage by nearly 69% on average with less than a 5% accuracy loss compared to conventional CoT methods.
+       -3. Generalizes well across multiple LLM architectures.
+   -c. Impact:
+       The framework paves the way for more cost-effective and efficient LLM deployment, particularly in applications
+       where token costs are a critical concern, without sacrificing the quality of reasoning and output accuracy.
+
