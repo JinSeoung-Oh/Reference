@@ -1,0 +1,84 @@
+### From https://pub.towardsai.net/alphageometry2-a-deep-dive-into-a-gold-medalist-ai-geometry-solver-f86f459f976a
+
+1. Overview
+   -a. Milestone Achievement:
+       AlphaGeometry2 (AG2) marks a significant advancement in AI-driven mathematical reasoning by surpassing 
+       average gold medalist performance in International Math Olympiad (IMO) geometry problems—one
+       of the most challenging areas at the competition.
+   -b. Historical Context:
+       DeepMind’s journey began with models like AlphaProof and AlphaGeometry, which nearly clinched gold at the IMO.
+       AG2 builds upon these predecessors and establishes a new standard for mathematical AI.
+
+2. Core Architecture: A Neuro-Symbolic Hybrid
+   AG2 combines neural networks and symbolic reasoning to tackle complex geometry problems:
+   -a. Language Model (LM):
+       -1. Based on the Gemini architecture, the LM interprets problem statements, generates auxiliary constructions,
+           and proposes proof steps.
+   -b. Symbolic Engine (DDAR):
+       -1. The Deductive Database Arithmetic Reasoning (DDAR) engine verifies proposed proof steps using a set of 
+           predefined rules and axioms.
+       -2. Optimizations in DDAR (through the DDAR2 algorithm) include handling duplicate points and leveraging 
+           efficient C++ implementations for a 300x speed improvement.
+   -c. Search Algorithm (SKEST):
+       -1. The Shared Knowledge Ensemble of Search Trees (SKEST) algorithm conducts multiple parallel beam searches, 
+           sharing knowledge among trees to improve the overall search process.
+
+3. Key Improvements and Contributions
+   -a. Expanded Domain Language:
+       -1. AG2 significantly extends the domain language from AlphaGeometry, boosting coverage of IMO geometry 
+           problems from 66% to 88%.
+       -2. New predicates introduced include:
+           -1) Find x predicates: Solve for specific angles or ratios.
+           -2) Linear equations: Express relationships with predicates like distmeq, distseq, and angeq.
+           -3) Locus problems: Use tokens to denote fixed-point placeholders.
+           -4) Diagram checks: Predicates such as sameclock, noverlap, and lessthan enforce valid constructions.
+           -5) Non-constructive problems: Allow the definition of points using multiple predicates.
+   -b. Stronger and Faster Symbolic Engine:
+       -1. The DDAR engine now handles duplicate points (double points) and employs hard-coded searches 
+           and hashing for efficiency.
+       -2. A new implementation in C++ ensures significant speed improvements over previous versions.
+   -c. Enhanced Language Model:
+       -1. AG2’s LM is trained on 300 million synthetic theorems, covering larger and more complex diagrams, 
+           longer proofs, and a balanced distribution of problem types.
+       -2. Top-k sampling with a temperature of 1.0 (k = 32) during inference generates diverse and creative auxiliary 
+           constructions.
+   -d. Novel Search Algorithm:
+       -1. SKEST runs multiple beam searches with varied configurations (e.g., classic, deep narrow, shallow wide trees)
+           to accelerate and improve the search process.
+       -2. This ensemble approach enhances the overall performance of the system by sharing knowledge across different
+           search strategies.
+
+4. Results and Performance
+   -a. IMO Geometry Performance:
+       -1. AG2 achieves an 84% solve rate on IMO geometry problems (2000–2024), outperforming the average gold medalist.
+       -2. It successfully solves 20 of the 30 hardest IMO shortlist problems.
+   -b. Ablation Studies:
+       -1. Increasing model size consistently reduces perplexity loss.
+       -2. A higher temperature with multiple samples is crucial for achieving optimal performance.
+       -3. The best results were obtained with a beam size of 128, depth of 4, and 32 samples.
+   -c. Broader Impact:
+       -1. AG2’s success in solving complex geometry problems demonstrates the potential of neuro-symbolic methods 
+           for mathematical reasoning.
+       -2. The model’s performance paves the way for further research in advanced problem-solving, 
+           potentially influencing AI approaches in other challenging domains.
+
+5. Broader Contributions and Future Directions
+   -a. Advancing Mathematical AI:
+       -1. AG2’s neuro-symbolic architecture represents a breakthrough in combining neural learning with symbolic 
+           reasoning, enabling superhuman creativity in solving intricate geometry problems.
+   -b. Implications for Other Domains:
+       -1. The techniques and optimizations introduced in AG2 could be adapted to other fields requiring deep reasoning,
+           such as coding, scientific research, and even real-world planning.
+   -c. Future Research:
+       -1. Potential avenues include expanding the domain language for even more advanced geometric concepts, 
+           incorporating reinforcement learning for subproblem decomposition, and enhancing the system’s ability 
+           to generate full, self-sufficient proofs.
+
+6. Conclusion
+   AlphaGeometry2 (AG2) sets a new benchmark in AI-driven mathematical reasoning by combining a powerful language model,
+   an optimized symbolic engine, and a novel search algorithm within a neuro-symbolic hybrid framework. 
+   By achieving a high solve rate on IMO geometry problems and demonstrating superhuman reasoning capabilities, 
+   AG2 underscores the potential of such integrated approaches in advancing the frontiers of AI. 
+   This milestone not only marks a major leap forward in mathematical problem-solving but also opens up
+   new possibilities for AI applications across various complex reasoning tasks.
+
