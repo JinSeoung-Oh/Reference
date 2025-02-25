@@ -1,0 +1,59 @@
+### From https://github.com/deepseek-ai/DeepEP
+
+1. High-performance Communication Library for Mixture-of-Experts (MoE) and Expert Parallelism (EP)
+   -1. Provides GPU-based All-to-All kernels to accelerate MoE dispatch and combine operations.
+   -2. Supports low-precision computation such as FP8.
+   -3. Optimizes asymmetric domain bandwidth forwarding by applying the group-limited gating algorithm proposed 
+       in the DeepSeek-V3 paper.
+       -1) Example: Optimization of data transfers from NVLink to RDMA.
+   -4. Delivers high throughput suitable for training and inference prefilling tasks.
+   -5. Includes an RDMA-specific low-latency kernel for latency-sensitive inference decoding.
+   -6. Offers communication-computation overlap techniques (without occupying SM resources).
+
+2. Performance
+   -a. General Kernels (NVLink and RDMA Transfers)
+       -1. DeepEP performance was tested in an environment featuring H800 GPUs and a CX7 InfiniBand 400Gb/s RDMA network.
+       -2. Based on the DeepSeek-V3/R1 configuration, the test applied a structure with 4096 tokens per batch, 
+           7168 hidden nodes, top-4 groups, top-8 experts, utilizing FP8 dispatch and BF16 combine.
+       -3. Test results showed that intra-node (NVLink-based) communication achieved bandwidth of over 150GB/s, 
+           while inter-node (RDMA-based) communication reached bandwidth levels between 40 and 47GB/s, depending on the number of experts.
+       -4. As the number of experts increased, the RDMA bandwidth showed a slight increase 
+           (e.g., 43GB/s for 16 experts and 46GB/s for 64 experts).
+   -b. Low-latency Kernel (Pure RDMA)
+       -1. Measurements of the low-latency kernel’s performance revealed significantly reduced latency compared to 
+           the general kernel.
+       -2. In an environment processing 128 tokens per batch, latency increased with the number of experts, although 
+           RDMA bandwidth remained relatively constant.
+           -1) For example, latency was approximately 163 microseconds with 8 experts and about 194 microseconds with 256 experts.
+       -3. In combine operations, latency was higher than in dispatch, and as the number of experts increased, 
+           RDMA bandwidth gradually decreased to below 40GB/s.
+       -4. In summary, while the low-latency kernel operates very quickly with smaller expert groups, increased expert numbers 
+           lead to higher latency, necessitating an appropriate balance.
+
+3. Network Settings
+   -a. Traffic Isolation
+       -1. Traffic can be isolated by utilizing Virtual Lanes (VL) of InfiniBand.
+       -2. Recommended separation method:
+           -1) General kernel operations
+           -2) Low-latency kernel operations
+           -3) Other operations
+       -3. VL settings can be configured via the NVSHMEM_IB_SL environment variable.
+  -b. Adaptive Routing
+      -1. Supports adaptive routing on InfiniBand switches.
+      -2. For the low-latency kernel, adaptive routing can be enabled; however, it must be disabled in the general kernel 
+          to avoid potential data corruption.
+      -3. Recommended settings:
+          -1) High network load: enable adaptive routing.
+          -2) Low network load: maintain static routing.
+  -c. Congestion Control
+      -1. DeepEP operates with congestion control functionality disabled.
+      -2. Real-world environments have shown that network congestion is not severe.
+
+4. Key Technical Considerations
+   -a. Unofficial PTX Instructions:
+       -1. Uses the instruction ld.global.nc.L1::no_allocate.L2::256B to optimize performance.
+   -b. Platform Considerations:
+       -2. Works normally on the Hopper architecture, but on other platforms, setting DISABLE_AGGRESSIVE_PTX_INSTRS=1 
+           can disable these instructions.
+   -c. Auto-Tuning Recommendation:
+       -3. For optimal performance, conduct performance tests for each cluster and apply the appropriate settings.
