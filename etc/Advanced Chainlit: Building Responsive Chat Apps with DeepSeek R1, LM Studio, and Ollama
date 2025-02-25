@@ -1,0 +1,91 @@
+### From https://ai.gopubby.com/advanced-chainlit-building-responsive-chat-apps-with-deepseek-r1-lm-studio-and-ollama-d80350325524
+
+import chainlit as cl
+import os
+import asyncio
+import requests
+import json  # Import JSON to parse LM Studio responses
+
+# =================
+@cl.on_chat_start
+async def start_chat():
+    # Initialize session-specific state
+    cl.user_session.set("cancel_flag", False)
+    cl.user_session.set("active_request", None)
+# =================
+
+async def chat(message):
+    # =================
+    # Get session-specific state
+    cancel_flag = cl.user_session.get("cancel_flag")
+    active_request = cl.user_session.get("active_request")
+
+    cancel_flag = False  # Reset flag at the start of each chat
+    active_request = requests.Session()  # Start a new HTTP session
+    cl.user_session.set("active_request", active_request)  # Update session state
+    # =================
+
+    # Create an empty message in Chainlit UI
+    msg = cl.Message(content="")
+    await msg.send()
+
+    # Define a function to make the streaming request manually
+    def generate():        
+        return active_request.post(
+            "http://localhost:11434/api/generate",  
+            json={
+                "prompt": message,                  
+                "model": "deepseek-r1:1.5b",        
+                "stream": True,                
+            },
+            stream=True,  # Enable streaming response
+            headers = { "Content-Type": "application/json" }
+        )
+
+    # Run the request in a separate thread
+    response = await asyncio.to_thread(generate)
+
+    # Initialize response content
+    full_response = ""
+    try:
+        for line in response.iter_lines():
+            if cancel_flag:
+                response.close()  # Forcefully close the connection
+                break
+            if line:
+                decoded_line = line.decode("utf-8").strip()
+                print(decoded_line)
+                if decoded_line.startswith("{"):  # Ollama output is JSON, starting with '{'
+                    try:
+                        # Parse JSON chunk
+                        json_data = json.loads(decoded_line)
+                        if "response" in json_data:  # Check for "response" key in Ollama's output
+                            token = json_data["response"]
+                            if token:
+                                full_response += token
+                                await msg.stream_token(token)  # Send token to UI
+                        if json_data.get("done", False):  # Check if the response is complete
+                            break  # Stop streaming if done is True
+                    except json.JSONDecodeError:
+                        continue  # Ignore malformed JSON
+    except Exception as e:
+        print(f"Error: {e}")  # Handle disconnection errors
+
+    # Finalize message
+    await msg.update()
+
+@cl.on_message
+async def main(message: cl.Message):
+    await chat(message.content)
+
+@cl.on_stop
+async def stop():
+    # =================
+    cl.user_session.set("cancel_flag", True)
+    active_request = cl.user_session.get("active_request")
+    # =================
+    if active_request:
+        active_request.close()  # Forcefully close LM Studio request
+        # =================
+        cl.user_session.set("active_request", None)  # Reset session state
+        # =================
