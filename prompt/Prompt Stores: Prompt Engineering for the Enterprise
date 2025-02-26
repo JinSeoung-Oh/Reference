@@ -1,0 +1,159 @@
+### From https://ai.gopubby.com/prompt-stores-prompt-engineering-for-the-enterprise-60a61167f491
+
+1. Introduction
+   -a. Core Idea:
+       Prompts are now the primary way to interact with large language models (LLMs). They must be tuned for user-specific 
+       contexts to maximize the chance of receiving the correct response.
+   -b. Emergence of Prompt Engineering:
+       The practice of systematically experimenting with prompt variations—recording what works—to find the “best” prompt 
+       has given rise to prompt engineering as a professional field. Successful prompts are organized into a “prompt store” for reuse.
+   -c. Challenge: 
+       Maintaining a high-quality prompt store is difficult because prompts often overlap in content, making it hard to decide 
+       which version to store for retrieval later.
+
+2. Problem Statement
+   -a. Example in Content Writing:
+       Two similar prompts are presented:
+       -1. Prompt 1:
+           Generates an engaging abstract for a blog post about an eighties-themed cafe, focusing on ambience and menu, 
+           and uses a friendly tone targeting an elderly audience.
+       -2. Prompt 2:
+           Generates an engaging abstract (maximum 200 words) for a newspaper post about a modern-themed cafe, emphasizing
+           decor and menu, and uses a friendly tone aimed at a young audience.
+  -b. Key Questions:
+      When both prompts are approved by human reviewers, which should be added to the prompt store?
+      Four options are considered:
+      -1. Add both: Might cause retrieval difficulties due to high similarity.
+      -2. Add one or the other: Risks losing unique context (e.g., target audience, word count limit).
+      -3. Add neither: If a similar prompt already exists.
+      -4. Add a template: Create a generalized prompt template with placeholders to capture common elements and list allowed 
+          values for each variable. For instance:
+          Generate an engaging abstract for a post on the following event. Highlight the theme. Use the specified tone of voice and limit the response to word count.
+          Post (type): [newspaper, blog, article, …]
+          Event: [opening of cafe, restaurant, diner, …]
+          Theme: [ambience, decor, menu, …]
+          Tone: [friendly, formal, informative, …]
+  -c. Recommendation:
+      The last option is suggested because it generalizes the prompt while preserving all important details 
+      (such as post type, event, theme, and tone).
+
+3. Prompt Templates in LangChain
+   -a. Predefined Classes:
+       LangChain offers several classes to help structure prompts:
+       -1. PromptTemplate:
+           The default template for simple string prompts with variable placeholders.
+           '''''
+           from langchain_core.prompts import PromptTemplate
+           prompt_template = PromptTemplate.from_template(
+               "Generate an engaging abstract for a {post} on the following {event}."
+           )
+           prompt_template.format(post="blog", event="opening of cafe")
+           '''''
+       -2. ChatPromptTemplate:
+           Designed for multi-turn conversations where roles (e.g., system, human, ai) are specified. 
+           This provides extra context that can improve LLM understanding.
+           '''''
+           from langchain_core.prompts import ChatPromptTemplate
+           chat_template = ChatPromptTemplate.from_messages(
+               [
+                   ("system", "You are a knoweldgeable AI bot. You are called {name}."),
+                   ("human", "Hi, how are you today?"),
+                   ("ai", "I'm doing great, thanks! How can I help you?"),
+                   ("human", "{user_input}"),
+               ]
+           )
+           messages = chat_template.format_messages(name="Emily", user_input="How should I call you?")
+       -3. FewShotPromptTemplate:
+           Supports few-shot learning by providing sample question-answer pairs that train the LLM before asking the final question.
+           '''''
+           from langchain_core.prompts.few_shot import FewShotPromptTemplate
+           from langchain_core.prompts.prompt import PromptTemplate
+           examples = [
+               {"question": "What is the second largest ocean on Earth?", "answer": "Atlantc Ocean"},
+               {"question": "What is the tallest mountain in Asia?", "answer": "Mount Everest"},
+           ]
+           example_prompt = PromptTemplate(
+               input_variables=["question", "answer"], template="Question: {question}\n{answer}"
+           )
+           prompt = FewShotPromptTemplate(
+               examples=examples,
+               example_prompt=example_prompt,
+               suffix="Question: {input}",
+               input_variables=["input"],
+           )
+           print(prompt.format(input="What is the tallest mountain in Africa?"))
+           '''''
+       -4. Note on Prior Technologies:
+           Concepts from earlier chatbots (like intents, utterances, and entities in IBM Watson, AWS Lex, etc.) are similar
+           to how LangChain structures prompts. Here, prompt variations act like utterances, 
+           and entities are akin to the allowed values for placeholders.
+
+4. Reinforcement Learning Based Prompt Store Curation
+   -a. The Curation Challenge:
+       When managing an enterprise prompt store with 100+ templates, manually curating them becomes extremely challenging. 
+       For each new prompt, you must:
+       -1. Extract its template and associated entity values.
+       -2. Check for overlaps with existing templates.
+       -3. Decide if you add a new template, adapt an existing one, or do nothing.
+  -b. Example:
+      Suppose an existing template is:
+      ''''
+      Generate an engaging abstract for a post on the following event. Highlight the theme. Use the specified tone of voice.
+      Post (type): [newspaper, blog, article, …]
+      Event: [opening of cafe, restaurant, diner, …]
+      Theme: [ambience, menu]
+      Tone: [informative, formal]
+      ''''
+      And the new prompt is:
+      '''''
+      Generate an engaging abstract of no more than 200 words for a newspaper post announcing the opening of a modern-themed cafe. Highlight the decor and menu. Use a friendly tone to appeal to a young customer base.
+      '''''      
+      In this case, the existing template must be adapted to include a 200-word limit and expand the entity values to:
+      -1. Theme: [ambience, decor, menu]
+      -2. Tone: [friendly, informative, formal]
+  -c. Automation via Reinforcement Learning (RL):
+      A proposed solution uses reinforcement learning (RL) with user feedback to semi-automate the curation process:
+      -1. A score model is trained to evaluate prompt-response pairs based on user feedback.
+      -2. The predicted scores serve as rewards for an RL agent.
+      -3. A user simulator feeds prompts (instantiated from templates) into the system.
+      -4. The RL agent, implemented using a Deep Q-Network (DQN) with epsilon-greedy exploration, learns a policy for prompt store updates and includes fallback responses for out-of-scope cases.
+
+5. Reinforcement Learning Model Details
+   -a. Architecture Overview:
+       The RL model comprises:
+       -1. NLU Unit:
+           An intent recognition component (using LangChain’s PromptTemplate and open-source NLU like Rasa with TensorFlow) 
+           that provides initial training.
+       -2. User Simulator:
+           Randomly selects candidate prompts from a database to be considered for new scenarios.
+       -3. Score Model:
+           Uses the Universal Sentence Encoder (from TensorFlow Hub) to compute vector representations. 
+           It projects prompts and responses into a transformed space where similarity yields high scores. 
+           Training is done with a squared error loss (plus L2 regularization) comparing model predictions to human feedback.
+       -4. RL Agent:
+           Based on a Deep Q-Network (DQN), it learns policies via Q-learning. The network is trained using an experience replay 
+           buffer containing state-action-reward tuples.
+   -b. Training Process:
+       -1. Warm-up Phase:
+           The DQN is initially trained on data from the NLU unit, using NLU confidence levels. 
+           Data augmentation assigns zero weight to alternative actions when a high-confidence state-action tuple is encountered.
+       -2. Epsilon-Greedy Exploration:
+           The agent explores with a probability ε, which starts at 0.2 and reduces to 0.05 over time.
+       -3. Experience Replay:
+           During each epoch, a batch of conversations (10–30 episodes) is simulated. The replay buffer, containing tuples
+           (sₜ, aₜ, rₜ), is periodically flushed once performance exceeds a set threshold.
+           For state-action pairs earning above 50% reward, other actions for that state are given zero reward to reinforce 
+           the correct choice.
+
+6. Conclusion
+   -a. Main Challenges:
+       The article emphasizes the difficulty of building and maintaining an enterprise prompt store due to overlapping prompt 
+       issues. Key questions include whether to add a new prompt directly (complicating retrieval) or to adapt existing ones.
+   -b. Organizing Prompts:
+       A structured approach using prompt templates (as demonstrated with LangChain’s various classes) is discussed in detail.
+   -c. Semi-Automation with RL:
+       The article shows how reinforcement learning, leveraging user feedback, can semi-automate prompt store curation. 
+       This approach addresses overlapping scopes and guides adaptation when new prompts do not fully align with existing templates.
+   -d. Future Needs:
+       As prompt stores expand, especially across multiple domains with varying stakeholder views, 
+       improved tools and strategies will be essential to resolve prompt scope conflicts effectively.
