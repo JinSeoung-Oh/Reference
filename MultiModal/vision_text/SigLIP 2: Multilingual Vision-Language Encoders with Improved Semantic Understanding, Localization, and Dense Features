@@ -1,0 +1,96 @@
+### From https://medium.com/@artgor/paper-review-siglip-2-multilingual-vision-language-encoders-with-improved-semantic-understanding-b7b578002adc
+### From https://arxiv.org/abs/2502.14786
+
+1. Overview & Key Improvements
+   -a. Family of Models:
+       SigLIP 2 is an enhanced, multilingual vision-language encoder family that builds on the original SigLIP.
+       It incorporates several new training strategies:
+       -1. Caption-based pretraining: Incorporates captions into the pretraining process.
+       -2. Self-supervised learning: Uses self-distillation (local-to-global consistency) and masked prediction techniques.
+       -3. Online data curation: Applies active data curation methods to improve training data quality.
+  -b. Performance Gains:
+      The new models show superior performance in zero-shot classification, image-text retrieval, and visual representation 
+      extraction. They also improve on localization and dense prediction tasks and support multiple resolutions 
+      while preserving aspect ratios.
+  -c. Model Sizes:
+      Released in four sizes:
+      -1. ViT-B (86M parameters)
+      -2. ViT-L (303M parameters)
+      -3. ViT-So400m (400M parameters)
+      -4. ViT-g (1B parameters)
+
+2. Architecture & Training Strategy
+   -a. Architecture:
+       -1. Maintains the ViT (Vision Transformer) architecture with learned positional embeddings.
+       -2. Uses identical image and text encoders (except for the largest vision model that pairs with a So400m-sized text encoder).
+       -3. An attention-based MAP head is used for pooling representations.
+       -4. Text is tokenized with the multilingual Gemma tokenizer (256k vocabulary) and is capped at 64 tokens.
+   -b. Training Data:
+       -1. Trained on the WebLI dataset containing 10 billion images and 12 billion alt-texts in 109 languages.
+       -2. The data mix is predominantly English (90%) with 10% non-English.
+       -3. Training is performed on 2048 TPUv5e chips with a fully-sharded data-parallel strategy.
+   -c. Loss Functions:
+       -1. SigLIP Loss: Uses sigmoid-based loss (treating image-text matching as a binary classification problem) 
+                        rather than contrastive loss like CLIP.
+       -2. LocCa Loss: Adds a transformer decoder with cross-attention to the un-pooled vision features. 
+                       This decoder, which is lighter than the text encoder, is trained on tasks like image captioning, 
+                       referring expression prediction, and grounded captioning (with region-caption pairs generated automatically).
+   -d. Additional Self-supervised Losses:
+       -1. Self-distillation (Local-to-Global Consistency):
+           The vision encoder (student) learns from a teacher network that processes the full image. 
+           The teacher parameters are updated via an exponential moving average of the student’s past parameters.
+           (One teacher supervises eight student instances.)
+       -2. Masked Prediction Loss:
+           Based on TIPS, 50% of embedded image patches are masked in the student model. 
+           The student then learns to predict the teacher’s features for these patches. Unlike the global self-distillation loss, 
+           this loss is applied per patch.
+   -e. Training Schedule:
+       The new losses (self-distillation and masked prediction) are introduced at 80% of training completion.
+       At this point, the teacher is initialized from the student while extra parameters (for heads, mask tokens, optimizer state)
+       start from random initialization. 
+       Global views of the original image are used for SigLIP and LocCa, whereas augmented views are used for the new losses
+       to maintain proper image-text alignment.
+
+3. Adaptation to Multiple Resolutions & Aspect Ratio Preservation
+   -a. Fixed-Resolution Checkpoints:
+       SigLIP 2 resumes training from nearly complete checkpoints (95% of training) to produce fixed-resolution models. 
+       Positional embeddings are resized to the new target sequence lengths, and training continues with all loss functions.
+   -b. NaFlex Approach:
+       -1. Extends concepts from FlexiViT and NaViT to support multiple predefined sequence lengths.
+       -2. Allows processing images at their native aspect ratios to minimize distortion 
+           (especially useful for OCR and document image processing).
+       -3. Images are resized to multiples of the patch size, split into patches, and padding/coordinate data is added if needed.
+       -4. Positional embeddings are bilinearly resized (with anti-aliasing) to fit the non-square grid.
+       -5. NaFlex training begins with the default SigLIP 2 checkpoints (which were originally resized non-aspect-preservingly to 256px)
+           and, at 90% of training, switches to aspect-preserving resizing with uniformly sampled sequence lengths (128, 256, 576, 784, 1024).
+       -6. To simplify complexity, self-distillation and masked prediction losses are not applied during NaFlex training.
+
+4. Knowledge Distillation via Active Data Curation
+   -a. Purpose:
+       Enhances performance particularly for the smallest fixed-resolution models.
+   -b. Method (ACID):
+       -1. A short fine-tuning stage (using 4 billion examples) is run with only the sigmoid image-text loss.
+       -2. Both a teacher model and the learner model score examples based on “learnability” to select the most informative batches.
+       -3. A single strong teacher (fine-tuned on 1B high-quality curated examples) is used to implicitly transfer knowledge, 
+           achieving performance comparable to methods that use explicit softmax distillation.
+
+5. Experimental Results
+   -a. Zero-Shot Classification & Image-Text Retrieval:
+       SigLIP 2 outperforms both its predecessor and other open-weight baselines, even with multilingual training. 
+       Distillation contributes especially to improved recall in smaller models.
+   -b. Visual Representation Extraction:
+       When integrated with Gemma 2 2B LLM and trained on 50M multimodal examples, SigLIP 2 consistently outperforms SigLIP 
+       across various resolutions and model sizes.
+   -c. Dense Prediction & Localization Tasks:
+       -1. Semantic Segmentation, Depth Estimation, Surface Normal Estimation:
+           SigLIP 2, using a simple linear layer or DPT decoder, outperforms previous CLIP-style vision encoders 
+           (including the original SigLIP).
+       -2. Open-Vocabulary Segmentation:
+           It surpasses both SigLIP and the larger OpenCLIP G/14 model.
+       -3. Referring Expression Comprehension:
+           SigLIP 2 shows improvements over SigLIP, CLIP, and image-captioning pretraining models, 
+           though it is slightly outperformed by LocCa—likely due to its use of multilingual data versus LocCa’s English-only data.
+       -4. Open-Vocabulary Detection:
+           Gains are most significant in LVIS rare categories; SigLIP 2 also outperforms OWL-ViT, 
+           likely thanks to using SigLIP’s approach instead of CLIP’s contrastive learning.
+
