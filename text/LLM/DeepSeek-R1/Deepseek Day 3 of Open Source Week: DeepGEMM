@@ -1,0 +1,37 @@
+### From https://news.hada.io/topic?id=19444
+### From https://github.com/deepseek-ai/DeepGEMM
+
+1. Overview
+   -a.  FP8 Matrix Multiplication (GEMM) Library
+        A library that efficiently performs FP8 matrix multiplication (GEMM) and supports the fine-grained scaling method proposed 
+        in DeepSeek-V3.
+   -b. It supports both general GEMM and Mix-of-Experts (MoE) grouped GEMM.
+   -c. Implemented on CUDA, it compiles kernels at runtime using a lightweight Just-In-Time (JIT) module without requiring separate
+       compilation during installation.
+   -d. Currently, it is supported exclusively for NVIDIA Hopper tensor cores.
+   -e. To compensate for the imprecise accumulation operations of FP8 tensor cores, dual accumulation (promotion) based on
+       CUDA cores is used.
+   -f. It utilizes some concepts from CUTLASS and CuTe but reduces complex template dependencies, 
+       resulting in a simple design that includes only about 300 lines of kernel code.
+   -g. It is well-suited for learning Hopper FP8 matrix operations and optimization techniques.
+   -h. Despite its lightweight design, it shows performance that is comparable to or better than that of libraries tuned
+       at an expert level for various matrix sizes.
+
+2. Performance Evaluation
+   -a. General GEMM Performance (Dense Model)
+       -1. Performance evaluation is conducted in the DeepSeek-V3/R1 inference environment for various matrix sizes.
+       -2. Tests are performed on the NVIDIA H800 GPU (NVCC 12.8) environment.
+       -3. The speedup metric is calculated in comparison to an internally optimized version based on CUTLASS 3.6.
+       -4. Key Performance Summary
+           -1) Up to 2.7x speedup for small matrix sizes.
+           -2) Maintains performance at around 1.0–1.2x for some large matrix sizes.
+           -3) Optimizes memory bandwidth and computational performance to deliver performance tailored to the Hopper architecture.
+
+3. Grouped GEMM Performance for MoE Models
+   -a. Grouped GEMM with Contiguous Layout
+       -1. Groups based on the M-axis, keeping N and K unchanged.
+       -2. Achieves up to a 1.2x speedup and maintains around 1.1x speedup under certain settings.
+   -b. Grouped GEMM with Masked Layout
+       -1. Designed for cases when the CPU cannot know the number of tokens for each expert when using CUDA Graphs.
+       -2. By providing a mask tensor as input, only the necessary computations are performed.
+       -3. Performance improvements range from 1.1x to 1.2x.
