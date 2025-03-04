@@ -1,0 +1,74 @@
+### From https://medium.com/data-science-collective/llada-explained-how-diffusion-could-revolutionize-language-models-950bcce4ec09
+
+1. Introduction: Rethinking Language Generation
+   The article introduces LLaDA as a novel approach that aims to mimic human thinking more closely. 
+   Instead of generating text one token at a time as in traditional autoregressive models, 
+   LLaDA “sketches” its thoughts first and then gradually refines them. 
+   This diffusion-based strategy enables the model to generate coherent text by progressively unmasking hidden tokens.
+
+2. The Current Landscape of Large Language Models (LLMs)
+   Modern LLMs typically follow a two-step process:
+   -a. Pre-training: Models learn language patterns by predicting the next token in massive text corpora through 
+                     self-supervised learning.
+   -b. Supervised Fine-Tuning (SFT): Models are then refined on curated datasets to better follow instructions 
+                                     and produce useful outputs.
+   These models, built on the Transformer architecture, utilize masked self-attention (where each token only attends 
+   to previous ones) and generate text sequentially, one token at a time. 
+   This sequential generation, while effective, presents limitations such as computational inefficiency, 
+   restricted bidirectional reasoning, and an enormous data requirement.
+
+3. Limitations of Autoregressive Models (ARMs)
+   The article outlines several critical challenges faced by current autoregressive LLMs:
+   -a. Computational Inefficiency: Generating text token by token requires processing the entire preceding context repeatedly,
+                                   even with optimizations like KV caching.
+   -b. Limited Bidirectional Reasoning: ARMs can only predict future tokens based on past context, which restricts their 
+                                        ability to consider the whole context or “revise” earlier parts of the text.
+   -c. High Data Demands: These models often require vast amounts of training data, which can be resource-intensive and
+                          problematic for niche domains.
+
+4. How LLaDA Works: A Diffusion-Based Approach
+   LLaDA replaces traditional autoregression with a diffusion-like process. Its training and inference procedures include:
+   -a. Pre-training:
+       -1. A maximum sequence length is set (e.g., 4096 tokens).
+       -2. A random masking rate is chosen (for example, 40%), meaning a proportion of tokens in each sequence is replaced 
+           with a special <MASK> token. 
+       -3. The entire masked sequence is fed into a transformer-based model, and the model predicts the original tokens 
+           for the masked positions. The loss is calculated as the average cross-entropy over these predictions.
+  -b. Supervised Fine-Tuning (SFT):
+      -1. The process is analogous to pre-training but uses (prompt, response) pairs.
+      -2. Only tokens in the response are masked, and the model learns to predict these tokens based on the prompt context.
+  -c. Inference: The Diffusion Process in Action
+      During generation, LLaDA adopts a multi-step refinement process:
+      -1. Step 1: The prompt is provided followed by <MASK> tokens for the response.
+      -2. Step 2: The model predicts tokens for each mask. Instead of committing to all predictions, a remasking process 
+                  is applied—only the tokens with the highest confidence are kept while others remain masked.
+      -3. Step 3: This partially unmasked sequence is fed back into the model, and the process repeats until all tokens
+                  are unmasked.
+      The article also discusses a semi-autoregressive variant where text is generated in blocks. 
+      Each block is refined through the diffusion process before moving on to the next, balancing between bidirectional 
+      refinement and guided left-to-right generation.
+
+5. The “Diffusion” Analogy
+   The term “diffusion” is borrowed from image generation models like DALL-E. In image diffusion, noise is gradually removed
+   from a corrupted image to reconstruct a clear picture. 
+   LLaDA applies a similar concept to text by progressively “deactivating” (masking) and then “reactivating” (unmasking) tokens,
+   effectively denoising the initial masked input into coherent language.
+
+6. Empirical Results and Benefits
+   The article highlights several promising results from LLaDA:
+   -a. Training Efficiency: LLaDA achieves performance comparable to traditional ARMs with significantly fewer training tokens. 
+                            For example, an 8B parameter version is trained on about 2.3 trillion tokens compared to 15 trillion
+                            for some autoregressive models.
+   -b. Task-Specific Adaptability: Adjusting parameters like block length can improve performance on specialized tasks 
+                                   (e.g., mathematical reasoning).
+   -c. Improved Bidirectional Reasoning: Tasks such as the reversal poem completion, which require backward generation,
+                                         see better performance with LLaDA’s diffusion-based process.
+
+7. Conclusion: A Promising New Direction
+   LLaDA presents a significant shift in language model design by moving away from sequential token generation towards
+   a parallel, diffusion-based refinement process. This approach addresses key limitations of current LLMs, 
+   including computational inefficiency and limited bidirectional context, 
+   while offering flexibility through tunable parameters such as the number of blocks and refinement steps. 
+   As research into diffusion-based language models progresses, LLaDA could pave the way for more efficient, coherent, 
+   and human-like text generation, influencing future developments in AI and agentic systems.
+
