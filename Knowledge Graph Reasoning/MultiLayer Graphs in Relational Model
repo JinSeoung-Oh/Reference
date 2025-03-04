@@ -1,0 +1,60 @@
+### From https://ai.plainenglish.io/multilayer-graphs-in-relational-model-d3c9bc313709
+
+1. Defining Multilayer Graphs
+   -a. Functional Definition:
+       A multilayer graph is defined as a pair G = (O, γ), where:
+       -1. O is a finite subset of a universe Obj (which could consist of strings, numbers, IRIs, etc.). 
+           This set represents all the objects (or nodes) present in the graph.
+       -2. γ is a partial mapping from O to O × O × O. This mapping represents directed, labeled, and identified edges 
+           in the graph. For example, if γ(e) = (n₁, l, n₂), then edge e is assigned a label l and connects source node n₁ 
+           to target node n₂.
+   -b. Higher-Arity Relations:
+       The model is designed to directly capture higher-arity relations (relations involving more than two entities) through
+       the nested structure of edge identifiers.
+   -c. Pure Object IDs vs. Literal Values:
+       The text discusses the option of using objects purely as IDs (e.g., using a sequence generator or an ID table) 
+       without any inherent properties. However, there is an open question about handling literal values. 
+       One strategy could allow literals to appear as subjects or objects, although that might complicate queries. 
+       Alternatively, objects might be extended with optional fields to carry literal data.
+
+2. Modeling Property Graphs
+   -a. Challenge with Property Graphs:
+       When adapting multilayer graphs to property graphs, one can end up with numerous triples and paths, 
+       which may clutter the graph and complicate query processing.
+   -b. Organizational Options:
+       Two primary approaches are suggested:
+       -1. Structural Approach:
+           Use a separate layer (Layer 2) for edges that link nodes to their property labels. 
+           This layer can also include metadata such as edge types, effectively encoding all properties as structural information.
+       -2. Data Shape Approach:
+           Extend the definition of an Object by including dedicated fields for properties and labels.
+   -c. Real-World Reference:
+       The discussion cites MilleniumDB as an example, which employs a layered approach to managing property graphs
+       and even uses separate storage (like a B+ tree index) for properties. 
+       The author expresses a preference for the structural approach due to its clarity and indexing benefits.
+
+3. The Concept and Power of Layers
+   -a. Defining Layers:
+       Layers are defined based on the nested use of edge IDs:
+       -1. For any object o ∈ O, if o is not an edge ID (i.e., it’s not in the domain of γ), then layer(o) is defined as 0.
+       -2. If o is an edge ID and γ(o) = (n₁, l, n₂), then layer(o) is computed as max{layer(n₁), layer(l), layer(n₂)} + 1.
+       A multilayer graph is described as an n-layer graph if n is the maximum layer of an edge ID within G.
+   -b. Utility of Layers:
+       Layers provide a mechanism to build metadata and metarelations, such as:
+       -1. Contextual information (e.g., temporal context)
+       -2. Types of relations
+       -3. Meta edges connecting metadata
+       -4. Other advanced features like Time Trees or Entity State relational models
+
+   -c. Flexibility:
+       The design does not enforce a rigid relational structure on layers, allowing the use of edge IDs from different layers.
+       This flexibility is key to modeling complex relationships and facilitating advanced querying.
+
+4. Conclusion
+   The multilayer graph model introduced in the text offers a robust framework for representing complex relationships
+   in a relational model. By using a function-based approach (via a partial mapping) and leveraging nested edge IDs 
+   to define layers, the model not only supports traditional graph structures but also scales to capture higher-arity
+   relations, metadata, and property graphs. The discussion on handling literal values and the comparison of structural
+   versus data shape approaches further highlights the model’s versatility and the ongoing research in optimizing graph-based 
+   data representations.
+
