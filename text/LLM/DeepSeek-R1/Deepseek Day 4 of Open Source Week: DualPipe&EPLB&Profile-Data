@@ -1,0 +1,61 @@
+## From https://news.hada.io/topic?id=19466
+
+1. Strategies and Codes Used in DeepSeek V3/R1
+   -a. DualPipe:
+       A bidirectional pipeline parallelization algorithm designed to overlap computation and communication.
+   -b. EPLB:
+       Expert-Parallel Load Balancer.
+   -c. Profile-Data:
+       Data profiling of the DeepSeek infrastructure used to analyze computation-communication overlap.
+
+2. DualPipe
+   - DualPipe is the innovative bidirectional pipeline parallel algorithm introduced in the DeepSeek-V3 Technical Report.
+   - It fully overlaps the forward and backward computation-communication steps, reducing pipeline bubbles.
+   - For more detailed information on the computation-communication overlap, please refer to the profile data.
+
+3. Expert Parallelism Load Balancer (EPLB)
+   - In Expert Parallelism (EP), different experts are assigned to each GPU.
+   - However, because the workload for each expert may vary, it is crucial to balance the load across GPUs.
+   - In DeepSeek-V3, a redundant experts strategy is used—replicating experts with high load and efficiently placing them
+     on GPUs to balance the load.
+   - Additionally, group-limited expert routing is employed to place experts from the same group on the same node as much as
+     possible, minimizing data transfers between nodes.
+   - To facilitate reproduction and deployment, the EP load balancing algorithm is provided as open source in eplb.py.
+   - This algorithm calculates a balanced expert replication and placement plan based on the expected expert load.
+   - Note that the specific method for predicting expert load is beyond the scope of this repository; generally, a moving average using past statistics is commonly used.
+   - The load balancing algorithm offers two policies, each suited for different scenarios:
+   
+   -a. Hierarchical Load Balancing
+       - When the number of server nodes can evenly divide the number of expert groups, the hierarchical load balancing policy 
+         is used to optimize group-limited expert routing.
+       - First, expert groups are evenly distributed across nodes to balance the load among them.
+       - Then, experts are replicated within each node.
+       - Finally, the replicated experts are assigned to individual GPUs to balance the load across GPUs.
+       - This policy is applicable during the prefilling phase when the scale of expert parallelism is small.
+   -b. Global Load Balancing
+       - In other cases, the global load balancing policy is used to replicate experts globally regardless of expert groups,
+         and then assign them to individual GPUs.
+       - This policy is suitable for the decoding phase, where the scale of expert parallelism is large.
+
+4. Profiling Data of DeepSeek Infra
+   - DeepSeek’s training and inference framework has released profiling data to help the community better understand 
+     the strategies for computation-communication overlap and the low-level implementation details.
+   - This profiling data was collected using the PyTorch Profiler and can be visualized after downloading using
+     chrome://tracing in Chrome or edge://tracing in Edge.
+   - In addition, experiments simulated a balanced MoE routing strategy for profiling.
+
+   -a. Training
+       - The training profile data demonstrates the overlap strategy of forward and backward chunks in DualPipe.
+       - Each chunk contains four MoE (Mixture of Experts) layers and the parallel configuration matches the pre-training
+         setup of DeepSeek-V3.
+   -b. Inference
+       -1. Prefilling
+           - In this phase, two micro-batches are used to overlap computation and all-to-all communication.
+           - Additionally, the attention operation workload is evenly distributed between the two micro-batches 
+             so that the same prompt can be split across multiple micro-batches.
+       -2. Decoding
+           - During decoding, similar to prefilling, two micro-batches are used to overlap computation and all-to-all
+             communication.
+           - However, in decoding, all-to-all communication does not occupy the GPU SM; after sending RDMA messages, 
+             the GPU SM is freed, and the process waits for the communication to complete after the computation ends.
+           - More detailed implementation information on all-to-all communication can be found in DeepEP.
