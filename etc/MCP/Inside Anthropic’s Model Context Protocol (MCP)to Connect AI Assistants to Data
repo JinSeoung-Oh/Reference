@@ -1,0 +1,183 @@
+### From https://pub.towardsai.net/inside-anthropics-model-context-protocol-mcp-to-connect-ai-assistants-to-data-529fb322ef5b
+
+1. Overview
+   Anthropic, known as OpenAI’s main rival and creator of the Claude model, has recently expanded its focus into 
+   agentic workflows and developer frameworks. One notable open source release in this area is the Model Context Protocol (MCP).
+   MCP is an open standard designed to connect AI assistants with various data sources—including content repositories, 
+   business tools, and development environments—to overcome the isolation of modern AI models from real-world data.
+
+2. Motivation and Challenges
+   -a. Problem Statement:
+       Modern AI assistants, though impressive in reasoning and quality, typically work in isolation from the vast and 
+       diverse data in external systems. Custom integrations for each new data source have proven inefficient and unscalable.
+   -b. MCP’s Solution:
+       MCP provides a universal protocol to enable seamless data integration. This standardization removes the need for 
+       ad-hoc solutions and facilitates robust, scalable connections between AI applications and external systems.
+
+3. MCP Architecture
+   MCP is built on a client-server model with an intermediary host layer:
+   -a. Clients:
+       AI applications (e.g., Claude Desktop) that connect to MCP servers to request data and functionalities.
+   -b. Servers:
+       They expose data and functionalities via MCP, serving as the data-access layer.
+   -c. Hosts:
+       These act as intermediaries, managing and facilitating connections between clients and servers.
+   This separation ensures that while clients handle user interactions and AI processing, servers focus on data management 
+   and access.
+
+4. Core Concepts of MCP
+   MCP introduces several key elements that shape the interaction between clients and servers:
+   -a. Resources:
+       Mechanisms through which servers expose data and content to large language models (LLMs). 
+       This enables the models to tap into diverse information sources.
+   -b. Prompts:
+       Reusable prompt templates and workflows defined by servers. 
+       These templates streamline interactions by ensuring consistency and efficiency in how LLMs engage with data.
+   -c. Tools:
+       Executable functionalities exposed on the server, which LLMs can call to interact with external systems or manipulate data.
+   -d. Sampling:
+       A feature that allows servers to request LLM completions via the client, 
+       supporting advanced agentic behaviors while maintaining security and privacy.
+
+5. Protocol Structure and Communication
+   MCP relies on a request/response pattern over a transport layer. The transport can be implemented using:
+   -a. Stdio Transport:
+       For local processes and efficient communication on the same machine.
+   -b. HTTP Transport:
+       Suitable for remote interactions, with support for standard features such as authentication.
+   Communication is implemented via JSON-RPC 2.0, ensuring interoperability across different platforms and 
+   programming languages.
+
+   -c. Example Code (Python)
+       The following code snippet illustrates a basic MCP session implementation in Python, 
+       showing how requests and notifications are handled:
+       ''''
+       class Session(BaseSession[RequestT, NotificationT, ResultT]):
+           async def send_request(
+               self,
+               request: RequestT,
+               result_type: type[Result]
+           ) -> Result:
+               """
+               Send request and wait for response. Raises McpError if response contains error.
+               """
+               # Request handling implementation
+
+           async def send_notification(
+               self,
+               notification: NotificationT
+           ) -> None:
+               """Send one-way notification that doesn't expect response."""
+               # Notification handling implementation
+
+           async def _received_request(
+               self,
+               responder: RequestResponder[ReceiveRequestT, ResultT]
+           ) -> None:
+               """Handle incoming request from other side."""
+               # Request handling implementation
+
+           async def _received_notification(
+               self,
+               notification: ReceiveNotificationT
+           ) -> None:
+               """Handle incoming notification from other side."""
+               # Notification handling implementation
+   -d. Message Types
+       Communication in MCP revolves around four primary message types:
+       -1. Requests:
+           Expect a response and include action details and parameters.
+       -2. Notifications:
+           One-way messages for events or status updates that do not require a response.
+       -3. Results:
+           Responses to successful requests, containing either the requested data or confirmation.
+       -4. Errors:
+           Responses that indicate failures, with standard error codes (e.g., MethodNotFound, InvalidRequest, InternalError)
+           to help with debugging and consistency.
+       An example interface for a request is given as:
+      ''''
+      # typescript
+      interface Request {
+        method: string;
+        params?: { ... };
+      }
+      ''''
+
+6. Connection Lifecycle
+   The MCP connection lifecycle comprises:
+   -a. Initialization:
+       The client starts by sending a request that includes protocol version and capabilities. 
+       The server responds with its capabilities, followed by an “initialized” notification from the client.
+   -b. Message Exchange:
+       After initialization, clients and servers exchange messages using the defined request-response or notification patterns.
+   -c. Termination:
+       Either side may end the connection cleanly or in response to errors or transport issues.
+
+7. Error Handling
+   MCP defines a set of standard error codes to ensure consistent error handling. For example:
+   ''''
+   # typescript
+   enum ErrorCode {
+     // Standard MCP error codes
+     MethodNotFound = 32601,
+     InvalidRequest = 32600,
+     // … other standard errors
+     InternalError = 32000,
+     // … other internal errors
+   }
+   ''''
+   SDKs and applications can extend these with their own error codes to cover specific use cases.
+
+8. Example: Basic MCP Server Implementation in TypeScript
+   The following TypeScript code snippet demonstrates a simple MCP server setup using the Stdio transport:
+   ''''
+   # typescript
+   import { StdioServerTransport } from "modelcontextprotocol";
+   const server = new MCPServer({
+     name: "example-server",
+     version: "1.0.0",
+     capabilities: {},
+   });
+
+   // Handle requests
+   server.setRequestHandler(ListResourcesRequestSchema, async () => {
+     return {
+       resources: [
+         {
+           type: "resource",
+           url: "example://resource",
+         },
+       ],
+     };
+   });
+
+   // Connect transport
+   const transport = new StdioServerTransport();
+   await server.connect(transport);
+   ''''
+   This code shows the server’s initialization with basic metadata, the registration of a request handler for listing resources,
+   and how it connects to a transport layer.
+
+9. Best Practices and Security Considerations
+   For efficient and secure MCP implementations, the article recommends:
+   -a. Transport Selection:
+       Use the appropriate transport (Stdio for local, HTTP for remote) based on your needs.
+   -b. Request Handling:
+       Validate inputs, implement timeouts, and manage errors gracefully.
+   -c. Error Management:
+       Use standard error codes and ensure resources are properly cleaned up on errors.
+   -d. Transport Security:
+       Employ TLS and verify connection origins.
+   -e. Message Validation:
+       Sanitize inputs, check message sizes, and ensure JSON-RPC formats are correctly adhered to.
+   -f. Resource Protection:
+       Implement access controls, validate resource paths, monitor resource usage, and enforce rate limiting to prevent abuse 
+       or DoS attacks.
+
+10. Conclusion
+    The Model Context Protocol (MCP) provides a standardized, open, and robust framework for integrating AI assistants with 
+    diverse data sources. Its client-server architecture, comprehensive message types, 
+    and flexible transport options empower developers to build secure and efficient AI-powered applications. 
+    By unifying data access across disparate systems, MCP aims to unlock the full potential of AI systems, 
+    enabling them to deliver richer, more context-aware responses.
+
