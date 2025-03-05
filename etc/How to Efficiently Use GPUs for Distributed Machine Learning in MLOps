@@ -1,0 +1,111 @@
+### From https://medium.com/weles-ai/how-to-efficiently-use-gpus-for-distributed-machine-learning-in-mlops-94add9801a2b
+
+1. Overview and Motivation
+   Efficient GPU orchestration is crucial for modern MLOps platforms to support distributed training and serving 
+   of increasingly complex machine learning models. 
+   GPUs are leveraged to handle massive workloads—processing thousands of operations concurrently—which 
+   can dramatically reduce training time and costs. For example, DeepSeek-V3, a 671-billion-parameter Mixture-of-Experts model,
+   was trained on 14.8 trillion tokens using a 2048-GPU cluster in under two months, 
+   showcasing the impact of efficient multi-GPU utilization.
+
+2. Key Topics Covered
+   -a. System Setup and Orchestration
+       -1. Distributed Training Setup:
+           How GPU-accelerated machines are enabled for distributed training, including the use of frameworks such as 
+           PyTorch Distributed Data Parallel (DDP).
+       -2. Orchestration Strategies:
+           Architecting GPU-optimized clusters using Kubernetes or HPC systems. Kubernetes automates provisioning, 
+           scheduling, and scaling across clusters with features such as vendor-specific GPU drivers and device plugins.
+   -b. Multi-GPU Communication and Collective Operations
+       -1. Challenges with Standard Methods
+           Traditional communication protocols like gRPC involve CPU-mediated data staging 
+           (GPU → PCIe → CPU RAM → PCIe → NIC → Network), which increases latency and reduces throughput.
+      -2. Optimized Communication Libraries:
+          Libraries like NVIDIA's NCCL and AMD's RCCL perform collective operations (e.g., all_reduce) using GPU kernels, 
+          allowing direct GPU-to-network transfers and aggregating small tensors into larger packets. 
+          Benchmarks indicate that these libraries can accelerate communication by up to 5–6× compared to CPU-mediated methods.
+      -3. Example Code for Distributed Setup in PyTorch:
+          '''''
+          # [...] 
+          # 1. Assigning the scheduled GPU device and selecting the `nccl` backend
+          def ddp_setup():
+              torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
+              init_process_group(backend="nccl")
+
+          # [...] 
+          # 2. "Putting" the model onto the assigned GPU
+          model = model.to(int(os.environ["LOCAL_RANK"]))
+  -c. Kubernetes and GPU Operators
+      -1. Resource Management:
+          Kubernetes abstracts underlying infrastructure using declarative configurations and custom device plugins 
+          (e.g., for NVIDIA or AMD) to expose GPUs as schedulable resources.
+      -2. GPU Operators:
+          These operators automate driver installation, node annotation, and resource monitoring. 
+          They simplify the management of complex hardware components (NICs, Infiniband, ROCE adapters) and ensure that 
+          each node’s GPU capabilities are optimally aligned with workload demands.
+      -3. Example Kubernetes Resource Request:
+          '''''
+          yaml
+
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          '''''
+  -d. Performance Tuning and Optimization
+      -1. GPU Sharing Mechanisms:
+          Techniques such as CUDA Multi-Process Service (MPS), time-slicing, and Multi-Instance GPU (MIG) allow a single 
+          physical GPU to be shared across multiple workloads. For NVIDIA GPUs, the configuration may look like:
+          '''''
+          yaml
+
+          --- # Time-Slicing configuration example for NVIDIA GPUs
+          version: v1
+          sharing:
+            timeSlicing:
+              resources:
+              - name: nvidia.com/gpu
+                replicas: 10
+          # MPS configuration example
+          version: v1
+          sharing:
+            mps:
+              resources:
+              - name: nvidia.com/gpu
+               replicas: 10
+          '''''
+     -2. NUMA Awareness and Network Optimization:
+         Optimizing process placement with tools like numactl and NUMA-aware schedulers (e.g., Volcano) minimizes memory access latency.
+         Aligning GPUs with their associated CPUs and memory in the same NUMA node helps to avoid cross-domain traffic 
+         that slows down collective operations.
+     -3. Reducing CPU–GPU Bottlenecks:
+         Techniques such as pre-allocating pinned CPU memory (using pin_memory=True in PyTorch) and leveraging RDMA 
+         (Remote Direct Memory Access) for direct GPU-to-GPU transfers bypass the CPU to further reduce latency.
+  -e. Storage and Data Transfer Considerations
+      -1. Fast Storage Access:
+          Efficient storage systems with RDMA-optimized pathways are essential for high-throughput data retrieval, 
+          especially when thousands of GPUs access shared datasets simultaneously.
+      -2. RDMA Integration:
+          Enabling RDMA on Kubernetes via device plugins (e.g., k8s-rdma-device-plugin) and using compatible hardware 
+          (e.g., Mellanox NICs, RDMA-supported GPUs) significantly boosts data transfer speeds between storage systems and GPUs.
+  -f. Benchmarking and Tuning Collectives
+      -1. Iterative Benchmarking:
+          Testing various configurations (buffer sizes, protocol choices, thread counts) using tools like the OSU benchmark 
+          or dedicated NCCL/RCCL test suites is crucial to identify optimal settings for collective communication operations.
+      -2. Example RCCL Test Command:
+          '''''
+          bash
+
+          mpirun --allow-run-as-root -np 2 -H 10.10.15.200,10.10.12.86 /rccl-tests/build/all_reduce_perf -b 8 -e 128M -f 2 -g 1
+          '''''
+3. Summary
+   Efficient GPU orchestration in distributed training involves a multifaceted approach that includes:
+   -1. Optimized multi-GPU communication using libraries like NCCL and RCCL to bypass CPU bottlenecks.
+   -2. Leveraging Kubernetes for automated scheduling, scaling, and management of heterogeneous GPU clusters.
+   -3. Implementing GPU sharing strategies (MPS, time-slicing, MIG) and ensuring NUMA alignment to maximize resource 
+       utilization.
+   -4. Reducing data transfer bottlenecks by optimizing CPU–GPU communication through pinned memory and RDMA.
+   -5. Continuously benchmarking and tuning collective operations to fully exploit hardware capabilities.
+
+   These strategies collectively enable organizations to handle petabyte-scale data and train massive models faster and 
+   more cost-effectively, driving innovation in large-scale AI deployments while reducing energy usage and operational costs.
+
