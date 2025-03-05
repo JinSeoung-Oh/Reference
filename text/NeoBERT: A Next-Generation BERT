@@ -1,0 +1,59 @@
+### From https://artgor.medium.com/paper-review-neobert-a-next-generation-bert-eff9b219442a
+
+1. Overview
+   NeoBERT is a next-generation bidirectional encoder designed to bridge the gap between traditional encoders (like BERT) 
+   and powerful autoregressive models. 
+   Despite its compact size of 250 million parameters, NeoBERT supports a long context length of 4096 tokens and 
+   achieves state-of-the-art results on benchmarks such as MTEB, outperforming larger models under the same fine-tuning 
+   conditions.
+
+2. Architectural Innovations
+   NeoBERT introduces several key improvements to enhance both efficiency and performance:
+   -a. Model Depth and Width:
+       -1. Retains BERTbase’s width (768 hidden dimensions) while increasing depth, addressing "width inefficiency" found 
+           in smaller models.
+   -b. Positional Embeddings:
+       -1. Replaces traditional absolute positional embeddings with Rotary Position Embeddings (RoPE) and extends them 
+           (Yet Another RoPE Extension) to better handle long sequences and extrapolate beyond the training context.
+   -c. Normalization Technique:
+       -1. Utilizes Pre-Layer Normalization with RMSNorm inside residual connections, stabilizing training and performance.
+   -d. Activation Function:
+       -1. Switches from GELU to SwiGLU, a more efficient activation function that has shown benefits in other modern models like LLaMA.
+
+3. Data and Pre-training Strategy
+   NeoBERT leverages massive and diverse data to achieve superior performance:
+   -a. Dataset:
+       Pre-trained on RefinedWeb, a dataset containing 600 billion tokens—18 times larger than RoBERTa’s corpus. 
+   -b. Two-Stage Pre-training:
+       -1. Stage One:
+           Trained for 1 million steps on sequences of 1024 tokens (covering around 2 trillion tokens).
+       -2. Stage Two:
+           Further training for 50K steps on sequences increased to 4096 tokens (about 100 billion tokens), 
+           supplemented with additional sub-datasets that include longer sequences.
+   -c. Masked Language Modeling (MLM):
+       Follows RoBERTa’s approach with a 20% masking rate across 2.1 trillion tokens.
+   -d. Efficiency Techniques:
+       -1. Implements DeepSpeed ZeRO for memory optimization, FlashAttention for efficient attention computations, 
+           and fused operators via xFormers.
+       -2. Model dimensions are aligned with GPU architecture (multiples of 64) and biases are removed to streamline computation.
+
+4. Ablation Studies and Experimental Results
+   -a. Ablation Insights:
+       Major improvements include the contribution of an enhanced dataset (yielding a +3.6% boost on GLUE) and 
+       an increase in model size (adding +2.0% on GLUE).
+   -b. Benchmark Performance:
+       On the GLUE benchmark, NeoBERT achieves an 89.0% score, matching state-of-the-art performance despite having 
+       100M–150M fewer parameters than some competing models.
+   -c. MTEB Benchmark:
+       -1. Uses a model-agnostic contrastive fine-tuning strategy on 9 million query-document pairs 
+           (with hard negatives and in-batch negatives) to ensure fair embedding evaluations.
+       -2. NeoBERT outperforms all large baselines on MTEB-English, achieving a relative improvement of +4.5% over 
+           the second-best model.
+
+5. Conclusion
+   NeoBERT’s architectural advancements—such as increased depth, innovative positional embeddings, 
+   and efficient normalization and activation functions—combined with its extensive pre-training on a massive dataset, 
+   enable it to deliver state-of-the-art performance on challenging benchmarks like MTEB. 
+   Its success, despite a significantly smaller parameter count, highlights the potential for compact, 
+   efficient models to rival or even outperform larger architectures when optimized with modern training techniques and data.
+
