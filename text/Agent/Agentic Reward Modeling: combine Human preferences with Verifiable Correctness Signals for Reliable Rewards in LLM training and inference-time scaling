@@ -1,0 +1,97 @@
+### From https://medium.com/@techsachin/agentic-reward-modeling-combine-human-preferences-with-verifiable-correctness-signals-for-reliable-76c408b3491c
+### From https://arxiv.org/abs/2502.19328
+### From https://github.com/THU-KEG/Agentic-Reward-Modeling
+
+1. Overview
+   Traditional reward models (RMs) for large language models (LLMs) have mainly focused on capturing human preferences. 
+   However, they often overlook verifiable correctness signals—such as factual accuracy or adherence to strict 
+   instructions—that are critical for robust model behavior. 
+   This paper introduces agentic reward modeling, a system that fuses the strengths of human preference rewards
+   with verifiable correctness signals from multiple aspects, 
+   thereby yielding more reliable reward signals for training and inference.
+
+2. Agentic Reward Modeling
+   -a. Definition:
+       Agentic reward modeling is a reward system that integrates a base reward model (focused on human preferences) 
+       with additional verification agents that supply correctness signals. These signals come from diverse aspects 
+       (e.g., factuality, instruction following) to form a more robust and interpretable reward. 
+       Formally, it can be expressed by combining the base reward model (weighted by λ) with several verification agents 
+       𝑎_𝑖(each weighted by 𝑤_𝑖) over a selected index subset 𝐴_𝑥 determined by the instruction 𝑥
+
+   -b. Key Idea:
+       The system aims to choose the superior response by leveraging multiple correctness dimensions. 
+       For example, when comparing two responses, a verification agent (e.g., a rule-based system) can determine 
+       which one is more factually accurate or adheres better to the instruction.
+
+3. REWARDAGENT: An Empirical Implementation
+   The paper presents REWARDAGENT, a concrete implementation of agentic reward modeling that integrates:
+   -a. Human Preference Rewards (from a base reward model)
+   -b. Factuality Verification: Checks whether the response’s claimed facts are correct.
+   -c. Instruction-Following Verification: Evaluates if the response meets hard constraints specified in the instruction.
+
+4. System Architecture
+   REWARDAGENT is structured into three main modules:
+   -a. Router:
+       -1. Function: Analyzes the instruction using an LLM backbone to decide which verification agents to invoke.
+       -2. Process: It uses concise, manually provided descriptions of each verification agent and, given an instruction, 
+                    selects appropriate agents for further evaluation.
+   -b. Verification Agents:
+       -1. Factuality Agent:
+           -1) Components:
+               - Difference Proposal: Identifies key differences in facts between two responses.
+               - Query Generation: Constructs queries based on those differences.
+               - Evidence Generation: Retrieves supporting evidence using external search engines or internal LLM knowledge.
+               - Verification: Assigns an integer score (0 or 1) based on the evidence.
+           -2) Advantage: Efficiently captures subtle factual differences by verifying only the discrepancies rather 
+                          than every fact.
+       -2. Instruction-Following Agent:
+           -1) Components:
+               - Constraint Parsing: Extracts hard constraints from the instruction.
+               - Code Generation & Refinement: Generates Python scripts to test if a response meets these constraints. 
+                 If errors occur, the scripts are refined iteratively.
+               - Verification: Executes the generated code to obtain a binary score (0 or 1) for each constraint, 
+                               with the final score as the average.
+   -c. Judger:
+       -1) Function: Combines the scores from the verification agents with the human preference score from the base reward model.
+       -2) Implementation: In the experiments, a simple weighted sum (with λ and 𝑤_𝑖 set to 1.0) is used to compute the final
+                           reward score.
+5. Experiments and Results
+   -a. Implementation Variants:
+       -1. REWARDAGENTMINI: Uses GPT-4o mini as the LLM backbone for all modules.
+       -2. REWARDAGENTLLAMA: Uses the open-source Llama3–8B Instruct as the backbone, with Qwen2.5-Coder 7B powering 
+                             the instruction-following verification (due to its stronger coding abilities).
+   -b. Findings:
+       -1. Improved Reliability: REWARDAGENT outperforms the base reward model (ArmoRM) and even advanced proprietary
+                                 LLMs such as GPT-4o mini.
+       -2. Cost Efficiency: Even when using a smaller LLM backbone like Llama3–8B Instruct, REWARDAGENTLLAMA achieves superior
+                            performance without requiring additional reward training data.
+       -3. Trade-offs: Using external knowledge (e.g., Google API for factuality) can introduce noise, slightly reducing 
+                       performance in certain benchmarks.
+       -4. Enhanced Instruction Following: Significant improvements were observed on datasets focusing on instruction
+                                           adherence (IFBench), indicating the promise of integrating verification code into reward modeling.
+
+6. Applications
+   -a. Best-of-N Search:
+       -1. Setup: Experiments on datasets like TriviaQA (factuality) and instruction-following benchmarks (IFEval, CELLO) 
+                  using 32 responses per instruction.
+       -2. Result: REWARDAGENT significantly boosts best-of-n performance compared to using only the base reward model. 
+                   An oracle setting further improves these results.
+   -b. DPO Training:
+       -1. Setup: Constructed training datasets from UltraFeedback2024 and on-policy samples, and used a model
+                  (zephyr-7bsft-full) that had been trained only using supervised fine-tuning.
+       -2. Result: Models trained with datasets constructed via REWARDAGENT consistently outperformed those using ArmoRM,
+                   especially on factuality and instruction-following tasks.
+
+7. Limitations
+   -a. Verification Imperfection: The verification agents achieve an average score of around 72.5% on reward modeling benchmarks,
+                                  indicating room for improvement.
+   -b. Scope of Verification: Currently, only factuality and instruction-following agents are implemented, though the authors 
+                              believe these address key weaknesses in existing reward models.
+
+8. Conclusion
+   The paper introduces agentic reward modeling, a reward system that combines human preferences with verifiable correctness 
+   signals to deliver more reliable rewards for training and scaling LLMs. 
+   The empirical implementation—REWARDAGENT—demonstrates that integrating multiple correctness signals can significantly 
+   enhance performance, leading to more robust model training without incurring extra cost in training data or parameters.
+
+
