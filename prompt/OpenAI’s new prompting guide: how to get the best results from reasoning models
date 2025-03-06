@@ -1,0 +1,79 @@
+### From https://blog.stackademic.com/openais-new-prompting-guide-how-to-get-the-best-results-from-reasoning-models-354a6adf76c2
+
+1. Overview 
+   OpenAI’s latest guide emphasizes that the quality of AI responses largely depends on how users prompt the models. 
+   Whether for application integration, decision-making, or research, the guide offers best practices to optimize interactions 
+   with reasoning models.
+
+2. Key Best Practices for Prompting
+   -a. Keep Prompts Simple and Direct
+       -1. Guidance:
+           Avoid overcomplicating your prompt with excessive instructions.
+       -2. Example:
+           -1) Less Effective: “Can you analyze this dataset step by step, explain your reasoning at every stage, and ensure that the answer aligns with best practices in statistical analysis?”
+           -2) Better: “Analyze the dataset and provide key insights.”
+       -3. Takeaway: Trust the model’s internal reasoning rather than micromanaging its thought process.
+   -b. Avoid Chain-of-Thought (CoT) Prompts
+       -1. Guidance:
+           Instructing the model to “think step by step” may actually hinder performance. 
+       -2. Example:
+           -1) Less Effective: “Think step by step and explain how you would calculate the square root of 144.”
+           -2) Better: “What is the square root of 144?”
+       -3. Tip: If an explanation is needed, ask for the answer first and then request a follow-up explanation.
+
+3. Use Delimiters for Clarity
+   -a. Guidance:
+       When providing complex or structured input, delimiters (like triple quotation marks or XML tags) help 
+       the model understand the structure.
+   -b. Example:
+       -1) Without Delimiters: “Summarize this contract: The first party agrees to deliver goods… The second party agrees to pay…”
+       -2) With Delimiters:
+           '''''
+           yaml
+
+           Summarize the following contract:
+           ---
+           The first party agrees to deliver goods…
+           The second party agrees to pay…
+           ---
+           '''''
+      -3) Benefit: Reduces misinterpretation by clearly marking where the input begins and ends.
+
+4. Limit Additional Context in Retrieval-Augmented Generation (RAG)
+   -a. Guidance:
+       Provide only the most relevant context to avoid diluting the model’s focus.
+   -b. Example:
+       -1. Less Effective: “Here are ten pages of information. Please summarize them.”
+       -2. Better: “Summarize the key points from these three sections: [insert relevant sections].”
+   -c. Result: The AI focuses on the most critical information, leading to more accurate outputs.
+
+5. Provide Specific Guidelines
+   -a. Guidance:
+       Clearly state any constraints or requirements (e.g., budget, timeframe, methodology) in your prompt.
+   -b. Example:
+       -1. Less Effective: “Suggest a marketing strategy.”
+       -2. Better: “Suggest a digital marketing strategy for a startup with a $500 budget focused on social media.”
+   -c. Outcome: Specific constraints yield more targeted and useful responses.
+
+6. Be Specific About Your End Goal and Iterate
+   -a. Guidance:
+       Clearly define success parameters and be prepared to refine your prompt based on initial outputs.
+   -b. Example:
+       -1. First Attempt: “Generate ideas for a new SaaS product.”
+       -2. Refined Prompt: “Generate ideas for a B2B SaaS product in the HR tech space that leverages AI for recruitment 
+                           automation.”
+       -3. Tip: Iteration helps guide the model toward the desired outcome.
+
+7. Conclusion
+   OpenAI’s new prompting guide provides valuable insights to enhance AI model performance. The main recommendations are:
+   -a. Keep prompts simple and direct.
+   -b. Avoid unnecessary chain-of-thought instructions.
+   -c. Use clear delimiters for structured inputs.
+   -d. Limit additional context in retrieval tasks.
+   -e. Provide specific guidelines to refine outputs.
+   -f. Clearly define your end goal and iterate when needed.
+   By adopting these best practices, you can reduce errors, improve response accuracy, and optimize your overall interaction 
+   with AI models. 
+   Whether integrating AI into applications or using it for personal productivity, effective prompt engineering is key 
+   to harnessing the full potential of these advanced reasoning models.
+
