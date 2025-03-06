@@ -1,0 +1,56 @@
+### From https://uselessai.in/what-is-scaling-in-transformers-self-attention-you-ll-not-regret-reading-this-d37121f6644e
+
+1. Overview
+   The article explores a fundamental aspect of the transformer’s self-attention mechanism: scaling the dot-product attention
+   scores. 
+   In the "Attention is All You Need" paper, the dot product of the Query and Key matrices is divided by √(dₖ) before 
+   applying softmax. This summary unpacks why this scaling is necessary and why √(dₖ) is the chosen factor.
+
+2. Why Scale the Dot-Product Attention?
+   -a. High Variance in High Dimensions:
+       When computing the dot product between high-dimensional vectors (e.g., 512-dimensional), 
+       the resulting attention scores exhibit high variance. 
+       This happens because each element in the product is a sum over many terms, and as the number of terms (dₖ) increases,
+       the variance of the dot product scales approximately linearly with dₖ.
+   -b. Impact on Softmax:
+       The softmax function, applied to these attention scores, is sensitive to the scale of its input. 
+       High-variance scores can lead to extremely peaked softmax outputs:
+       -1. Large scores dominate and yield probabilities near 1.
+       -2. Small scores result in probabilities near 0.
+       This imbalance causes two issues:
+       -1. Biased Attention: The model becomes overly focused on certain tokens.
+       -2. Vanishing Gradients: During backpropagation, small values may receive negligible gradient updates, 
+                                hampering effective learning.
+
+3. Why Divide by √(dₖ)?
+   -a. Variance Preservation: 
+       The mathematical property of variance under scaling is key here: if a random variable X is scaled by a constant c 
+       (i.e., Y = cX), then Var(Y) = c² Var(X).
+       -1. In the context of dot-product attention, scaling by 1/√(dₖ) counteracts the increase in variance due to
+           the summation over dₖ elements.
+       -2. For instance, if the variance naturally scales as dₖ, then dividing by √(dₖ) reduces the variance by a factor 
+           of dₖ (since (1/√(dₖ))² = 1/dₖ), keeping the magnitude of the scores in a range that is well-behaved for softmax.
+   -b. Maintaining Effective Softmax Behavior:
+       With controlled variance, the softmax operation produces a smoother, more balanced probability distribution. 
+       This allows gradients to propagate more evenly during training, ensuring that no single token is unfairly prioritized 
+       or ignored.
+
+4. Illustrative Example
+   The article provides a practical illustration:
+   -a. Low-Dimensional Case:
+       When multiplying small vectors (e.g., 1x3 and 3x1), the output matrix has low variance. 
+       The softmax on such scores produces moderately balanced probabilities.
+   -b. High-Dimensional Case:
+       With high-dimensional vectors (e.g., 3x512 and 512x3), the output matrix has much higher variance. 
+       Without scaling, softmax would assign almost all probability mass to a few large values, 
+       making the model’s attention distribution too sharp and potentially causing vanishing gradients for smaller values.
+   The article even includes code snippets that compute the dot-product variance for both small and large dimensions and
+   demonstrates how scaling effectively reduces variance.
+
+5. Conclusion
+   Scaling the dot-product attention by 1/√(dₖ) is essential for controlling the variance in high-dimensional spaces. 
+   This ensures that when softmax is applied, the resulting probability distribution is balanced, 
+   preventing the model from focusing too narrowly and maintaining robust gradient propagation during training. 
+   By dividing by the square root of the key vector dimension, transformers maintain stability and performance,
+   which is a core reason behind this design choice in the "Attention is All You Need" paper.
+
