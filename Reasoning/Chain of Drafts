@@ -1,0 +1,59 @@
+### From https://medium.com/data-science-in-your-pocket/what-is-chain-of-drafts-bye-bye-chain-of-thoughts-76658d913169
+
+1. Overview
+   For several months, Chain of Thought (CoT) has been the de facto prompting method for leveraging LLMs like ChatGPT. 
+   While CoT excels at detailed multi-step reasoning, its verbosity can lead to unnecessarily long responses. 
+   Chain of Drafts (CoD) is introduced as a more concise prompting method that retains the essential reasoning steps 
+   while significantly reducing token usage and speeding up inference.
+
+2. What is Chain of Drafts (CoD)?
+   -a. Concept:
+       CoD is a prompting technique that minimizes verbosity by condensing reasoning into succinct "drafts" of the essential
+       steps needed to solve a problem.
+   -b. Key Characteristics:
+       -1. Less Verbosity: Eliminates overly detailed explanations.
+       -2. Fewer Tokens: Reduces computational costs.
+       -3. Faster Responses: Ideal for real-time applications.
+
+3. Comparison: CoD vs. CoT vs. Standard Prompting
+   -a. Standard Prompting:
+       Directly answers a question without detailing the reasoning process (e.g., "8" for a math problem).
+   -b. Chain of Thought (CoT):
+       Provides a detailed, step-by-step explanation (e.g., breaking down each subtraction step in a math problem).
+   -c. Chain of Drafts (CoD):
+       Offers a concise representation of reasoning (e.g., "20–12 = 8 → Final Answer: 8"), 
+       striking a balance between brevity and clarity.
+
+4. Advantages and Disadvantages
+   -a. Advantages of CoD:
+       -1. Faster Inference: Generates responses quicker due to lower token usage.
+       -2. Lower Computational Cost: Fewer tokens lead to reduced operational expenses.
+       -3. Concise Outputs: Ideal for applications where brevity is essential.
+       -4. Easier Production Integration: Less verbose reasoning is more user-friendly in production systems.
+   -b. Disadvantages of CoD:
+       -1. Less Transparency: Lacks the detailed step-by-step breakdown of CoT, 
+                              which can be useful for debugging and understanding the reasoning.
+       -2. Potential for Error in Complex Tasks: Complex problems that require in-depth intermediate reasoning might suffer 
+                                                 from omitted steps.
+       -3. Not Ideal for Learning: Detailed explanations are often more beneficial for educational purposes.
+
+5. Where CoD Excels
+   CoD is best suited for:
+   -a. Real-Time Applications: Customer support, personal assistants, and chatbots where speed and resource efficiency 
+                               are critical.
+   -b. Resource-Constrained Environments: Ideal for edge devices or systems with limited compute resources.
+   -c. Summarization Tasks: Quickly distilling key points from dense text without excess detail.
+   -d. Cost-Sensitive Deployments: Reducing the token count directly lowers computational costs.
+
+6. Naming: Why "Chain of Drafts"?
+   The term "Chain of Drafts" originates from the idea of producing a rough draft—a minimal outline of reasoning—rather
+   than a fully elaborated essay. 
+   CoD generates brief, essential reasoning steps that maintain logical coherence without the verbosity of
+   a full chain of thought, making it both efficient and token-economical.
+
+7. Conclusion
+   Chain of Drafts (CoD) offers a powerful tweak to traditional prompting methods. By balancing concise reasoning with 
+   accuracy, CoD achieves nearly the same performance as CoT but with fewer tokens, faster inference, 
+   and lower computational costs. This makes it especially attractive for real-time applications and
+   resource-constrained environments, while still providing sufficient insight into the reasoning process when needed.
+
