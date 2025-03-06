@@ -1,0 +1,93 @@
+### From https://aisecuritychronicles.org/a-comparison-of-deep-research-ai-agents-52492ee47ca7
+
+1. Overview
+   Recent weeks have witnessed the emergence of “Deep Research” AI agents that go far beyond simple question-answering. 
+   These systems perform multi-step reasoning to autonomously research topics and produce detailed reports complete 
+   with citations. They have the potential to save humans significant time by automating hours of research into minutes. 
+   Notable examples include OpenAI’s Deep Research, Google’s Gemini Deep Research, OpenDeepResearcher, 
+   LangChain’s Open Deep Research, and Ollama Deep Researcher.
+
+2. Architectural Approaches
+   -a. Fully Autonomous Agents:
+       -1. Operation:
+           Given a topic, these agents autonomously plan, execute web searches, browse, analyze data, and synthesize 
+           a final report without further user intervention.
+       -2. Example:
+           OpenAI’s Deep Research (launched in Feb 2025) uses a specialized version of the upcoming o3 model optimized
+           for long-form reasoning and web browsing. The agent acts like a research analyst by following its internal plan
+           from query formulation to report generation.
+   -b. Human-in-the-Loop (HITL) Agents:
+       -1. Operation:
+           These agents integrate human feedback at key stages—typically pausing after a planning or outlining phase. 
+           The user can review, adjust, or approve the proposed research plan before the agent continues.
+       -2. Advantage:
+           This plan-review stage acts as quality control, ensuring the research direction aligns with user intent and
+           reducing the risk of wasted efforts on irrelevant subtopics.
+
+3. Common Architectures
+   Regardless of the high-level approach, most deep research agents share similar architectural patterns:
+   -a. Manager Agents (Planning/Orchestration):
+       Often the primary LLM instance, these agents interpret the user’s request, decompose the task into subtasks 
+       (such as outlining report sections or individual questions), and orchestrate the overall process. 
+       In some frameworks, this is implemented as a “CodeAgent” that can generate and execute code to perform actions.
+   -b. Tool-Calling Agents (Execution):
+       These specialized modules interact with external resources. They handle tasks such as:
+       -1) Web Search: Formulating search queries via APIs (e.g., SerpAPI, DuckDuckGo, Tavily) to retrieve relevant links.
+       -2) Navigation & Retrieval: Accessing webpages using text-based browsers or HTTP clients to extract and parse content.
+       -3) Iterative Exploration: Operating in loops where the manager agent reviews retrieved data, 
+                                  triggers follow-up searches, or drills down into hyperlinks until sufficient information is gathered.
+   -c. Synthesis Phase:
+       After data collection, the manager agent compiles the information into a coherent, well-structured report 
+       that includes explanations, comparisons, and citations. The output can be formatted in Markdown or other structured forms.
+
+4. Evaluation Metrics and Benchmarks
+   To assess the effectiveness of these deep research agents, researchers use challenging benchmarks that simulate real-world
+   problem solving:
+   -a. GAIA (General AI Assistant):
+       Evaluates multi-hop reasoning and tool use. Recent results show that OpenAI’s Deep Research agent achieves around 
+       72–73% accuracy overall, with approximately 58% on the hardest (Level 3) questions.
+   -b. Humanity’s Last Exam (HLE):
+       Acomprehensive test across 100+ expert subjects. OpenAI’s agent, using its o3 model, reportedly scored 26.6%—a dramatic
+       improvement over earlier systems (~3%), indicating significant advances in expert-level reasoning.
+
+5. Proprietary vs. Open-Source Implementations
+   -a. Proprietary Systems:
+       -1. Examples:
+           OpenAI’s Deep Research and Google’s Gemini Deep Research.
+       -2. Characteristics:
+           -1) Built on cutting-edge models (e.g., OpenAI’s o3 series, Google’s Gemini 1.5 Pro/2.0).
+           -2) Typically fully autonomous (OpenAI) or semi-autonomous with human input (Google).
+           -3) Often come with turnkey solutions, rich UIs, and extra features like chart generation and export options.
+           -4) They leverage internal search and ranking algorithms, prioritizing credible and authoritative sources.
+   -b. Open-Source Alternatives:
+       -1. Examples:
+           OpenDeepResearcher, LangChain’s Open Deep Research, Ollama Deep Researcher.
+       -2. Characteristics:
+           -1) Often use a modular architecture with smaller, optimized models (e.g., weight-optimized Llama derivatives, 
+               Anthropic’s Claude via API).
+           -2) Some implementations use a plan-then-execute approach, allowing human intervention between planning and execution.
+           -3) Search methodologies typically rely on public search APIs (e.g., SerpAPI, DuckDuckGo, Tavily) and 
+               basic content extraction tools.
+           -4) Although current performance may lag behind proprietary agents, recent benchmarks
+               (such as Hugging Face’s reproduction achieving 55–82% of OpenAI’s GAIA score) show rapid improvement,
+               especially when using a CodeAgent approach to reduce reasoning errors.
+           -5) Cost-wise, open-source solutions can be extremely economical, especially when run on custom hardware or 
+               entirely offline for privacy.
+
+6. Cost and Accessibility
+   -a. Proprietary Solutions:
+       OpenAI’s Deep Research is available only through high-tier subscriptions (e.g., ChatGPT Enterprise/Pro at $200/month), 
+       while Google’s is more affordable ($20/month under Google One Premium).
+   -b. Open-Source Solutions:
+       These can be run at a fraction of the cost or even for free (excluding hardware expenses). 
+       They offer flexibility, privacy, and customizability, though they might require additional setup and maintenance.
+
+7. Conclusion
+   Deep research agents represent a significant leap in autonomous multi-step reasoning and web-based research. 
+   Their architectures generally fall into two categories—fully autonomous and human-in-the-loop—with common patterns 
+   such as manager and tool-calling agents to structure the research process. 
+   While proprietary systems currently lead in performance on benchmarks like GAIA and HLE,
+   open-source alternatives are rapidly closing the gap and offer cost-effective, customizable options. 
+   This evolving landscape is enabling AI systems to perform complex research tasks that closely mimic human analytical
+   reasoning, potentially revolutionizing how we approach research and decision-making.
+
