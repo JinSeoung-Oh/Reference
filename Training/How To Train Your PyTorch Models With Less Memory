@@ -1,0 +1,172 @@
+### From https://levelup.gitconnected.com/how-to-optimize-memory-usage-for-training-llms-in-pytorch-b012f3008798
+
+1. Overview
+   Training large deep learning models—including LLMs and vision transformers—can quickly exceed available GPU memory. 
+   This article outlines a range of techniques that, when combined, can reduce memory usage by up to 20× without 
+   impacting model performance or prediction accuracy. 
+   These techniques are designed to work together, offering practitioners multiple levers to optimize training 
+   on resource-constrained hardware.
+
+2. Memory Optimization Techniques
+   -a. Automatic Mixed-Precision Training
+       -1. Concept: Uses a mix of FP16 and FP32 formats to reduce memory usage while retaining critical precision.
+       -2. Key Points:
+           -1) Most computations (activations and gradients) are done in FP16, cutting memory usage nearly in half.
+           -2) Essential operations remain in FP32 to prevent numerical instability.
+           -3) PyTorch’s native AMP makes this straightforward.
+       -3. Example Usage:
+           '''''
+           python
+
+           import torch
+           from torch.cuda.amp import autocast, GradScaler
+
+           model = MyModel().cuda()
+           optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+           scaler = GradScaler()
+
+           for data, target in data_loader:
+               optimizer.zero_grad()
+               with autocast():
+                   output = model(data)
+                   loss = loss_fn(output, target)
+               scaler.scale(loss).backward()
+               scaler.step(optimizer)
+               scaler.update()
+           '''''
+  -b. Lower-Precision Training
+      -1. Concept: Run full training in lower precision formats like FP16 or BF16.
+      -2. Key Points:
+          -1) BF16 offers a larger dynamic range than FP16, reducing the risk of NaN values.
+          -2) Supported on modern GPUs (e.g., Nvidia Ampere).
+      -3. Usage Tip:
+          '''''
+          python
+
+          import torch
+          print(torch.cuda.is_bf16_supported())  # Expected output: True
+          '''''
+  -c. Gradient Checkpointing
+      -1. Concept: Reduces memory by saving only selected intermediate activations during the forward pass and recomputing
+                   the rest during backpropagation.
+      -2. Trade-Off: Extra computation during the backward pass.
+      -3. Example Usage:
+          '''''
+          python
+
+          import torch
+          from torch.utils.checkpoint import checkpoint
+
+          def checkpointed_segment(input_tensor):
+              return model_segment(input_tensor)
+
+          output = checkpoint(checkpointed_segment, input_tensor)
+          '''''
+   -d. Reduce Batch Size with Gradient Accumulation
+       -1. Concept: Accumulate gradients over multiple smaller batches to simulate a larger batch size.
+       -2. Advantage: Maintains predictive performance while reducing per-iteration memory usage.
+       -3. Caveat: Increases overall runtime.
+   -e. Tensor Sharding and Distributed Training
+       -1. Technique: Utilize Fully Sharded Data Parallel (FSDP) to partition model parameters, gradients, 
+                      and optimizer states across GPUs.
+       -2. Advantage: Dramatically lowers per-device memory requirements.
+       -3. Example Usage:
+          '''''
+          python
+
+          import torch
+          from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+
+          model = MyLargeModel().cuda()
+          fsdp_model = FSDP(model)
+          '''''
+   -f. Efficient Data Loading
+       -1. Concept: Optimize the data pipeline to prevent unnecessary memory overhead. 
+       -2. Best Practices:
+           -1) Use pinned memory for faster host-to-device transfers.
+           -2) Employ multiple workers in data loaders.
+       -3. Example Usage:
+          '''''
+          python
+
+          from torch.utils.data import DataLoader
+
+          train_loader = DataLoader(
+              dataset,
+              batch_size=64,
+              shuffle=True,
+              num_workers=4,
+              pin_memory=True
+          )
+          '''''
+   -g. In-Place Operations
+       -1. Concept: Modify tensors directly to avoid creating additional copies, reducing memory fragmentation.
+       -2. Example Usage:
+          '''''
+          python
+
+          import torch
+
+          x = torch.randn(100, 100, device='cuda')
+          y = torch.randn(100, 100, device='cuda')
+          x.add_(y)  # In-place addition modifies x directly.
+          '''''
+  -h. Activation and Parameter Offloading
+      -1. Concept: Temporarily move intermediate activations or parameters to CPU memory to free up GPU space.
+      -2. Approach: Offload non-critical tensors and retrieve them when needed.
+      -3. Example:
+          '''''
+          python
+
+          def offload_activation(tensor):
+              return tensor.cpu()
+
+          def process_batch(data):
+              intermediate = model.layer1(data)
+              intermediate = offload_activation(intermediate)
+              intermediate = intermediate.cuda()  # Bring back when needed.
+              output = model.layer2(intermediate)
+              return output
+   -i. Using a Leaner Optimizer
+       -1. Concept: Replace memory-intensive optimizers like Adam with more lightweight ones such as SGD.
+       -2. Trade-Off: May require additional tuning (e.g., using a cosine decay learning rate scheduler) to achieve similar 
+                      convergence.
+       -3. Example Usage:
+          '''''
+          python
+
+          # Instead of using Adam:
+          # optimizer = torch.optim.Adam(model.parameters(), lr=5e-5)
+
+          # Use SGD with a cosine scheduler:
+          optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+          num_steps = NUM_EPOCHS * len(train_loader)
+          scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_steps)
+          '''''
+  -j. Advanced Strategies (Beyond the Basics)
+      -1. Memory Profiling and Cache Management:
+          Use utilities like torch.cuda.memory_summary() to inspect memory usage and torch.cuda.empty_cache() to free up
+          unused memory.
+      -2. JIT Compilation with TorchScript:
+          Convert your model to TorchScript to optimize both memory and computational efficiency.
+          '''''
+          python
+
+          import torch
+
+          scripted_model = torch.jit.script(model)
+          output = scripted_model(input_tensor)
+          '''''
+     -3. Custom Kernel Fusion:
+         Fuse multiple operations into a single kernel to reduce redundant memory operations.
+     -4. Dynamic Memory Allocation with torch.compile():
+         Leverage JIT and graph-optimization techniques to improve dynamic memory allocation, especially beneficial for
+         larger models and transformers.
+
+3. Conclusion
+   By combining these memory optimization techniques—ranging from mixed-precision training and gradient checkpointing 
+   to efficient data loading, tensor sharding, and advanced JIT compilation—you can reduce GPU memory consumption by up
+   to 20× without compromising model performance or prediction accuracy. 
+   These strategies are complementary and can be integrated to enable training on limited hardware,
+   making large-scale deep learning accessible even on resource-constrained setups.
+
