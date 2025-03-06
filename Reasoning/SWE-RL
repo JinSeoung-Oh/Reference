@@ -1,0 +1,72 @@
+### From https://medium.com/@aipapers/swe-rl-by-meta-reinforcement-learning-for-software-engineering-llms-f1ca46c7fdec
+
+1. Overview
+   DeepSeek-R1 demonstrated the potential of RL to enhance LLM reasoning on competitive programming tasks. 
+   However, real-world software engineering tasks—such as debugging complex backend systems—pose additional challenges. 
+   Unlike self-contained coding problems, these tasks require handling complex codebases and environments 
+   where executing the solution isn’t straightforward. Meta’s SWE-RL paper addresses this gap by training models 
+   on the evolution of open-source software, leveraging GitHub pull requests (PRs) as a rich dataset for reinforcement learning.
+
+2. Building the Dataset: GitHub PRs Curation
+  -a. Data Collection:
+      -1. Source: Researchers use GH Archive to gather comprehensive public GitHub activity, including issues, comments, 
+                  and pull requests.
+      -2. Repository Cloning: By cloning repositories, the model captures the full commit history rather than static 
+                              code snapshots—applied to 4.6 million repositories.
+      -3. Exclusions: Repositories used for the SWE-bench benchmark are excluded from training.
+  -b. Data Aggregation and Filtering:
+      -1. Aggregation: For each merged PR, relevant data are collected:
+          -1) The issue description associated with the PR.
+          -2) All comments.
+          -3) The original content of edited files (pre-change).
+          -4) The final merged changes serving as the oracle patch.
+      -2. Relevant Files Prediction:
+          To avoid biasing the model into altering all input files, an additional step predicts which files are related 
+          (using Llama-3.1–70B-Instruct), even if they weren’t directly changed.
+      -3. Quality Filtering:
+          Low-quality PRs (e.g., bot-generated or trivial changes like version bumps) are filtered out, 
+          resulting in a curated dataset of ~11 million high-quality PRs.
+
+3. SWE-RL Training Process
+   -a. Seed RL Dataset Formation:
+       -1. A subset of the curated PR dataset is selected to serve as the seed dataset.
+       -2. Each sample includes a GitHub issue (focused on bug-fixing) and relevant code changes.
+   -b. Input Prompt Format:
+       -1. A consistent prompt template is used:
+           -1) System Instruction: Directs the model to output its reasoning within <think> tags.
+           -2) Proposed Solution: Wrapped in <solution> tags.
+           -3) The prompt body includes the issue description and extracted code context.
+   -c. Sampling and Reward Calculation:
+       -1. Multiple Outputs:
+           -1) Given an input prompt, the model samples several outputs. Some outputs might be valid; others may have format issues.
+       -2. Reward Rules:
+           -1) Outputs with illegal format receive a reward of -1.
+           -2) For valid outputs, a similarity score (between 0 and 1) is computed by comparing the generated patch 
+               to the oracle patch (final merged changes).
+           -3) Note: This reward function might discourage exploring alternative solutions different from the original PR.
+   -d. RL Algorithm – GRPO:
+       -1. The model weights are updated using Group Relative Policy Optimization (GRPO), which:
+           -1) Compares a group of outputs.
+           -2) Optimizes the model towards the output with the highest reward.
+       -2. The resulting model is named Llama3-SWE-RL.
+
+4. Emergent "Aha" Moments and Transferable Reasoning
+   The RL training process led to several emergent behaviors:
+   -a. Enhanced Reflection:
+       The model learned to allocate more time to reconsider its initial assumptions during reasoning.
+   -b. Transferable Abilities:
+       -1. Function Implementation: The model begins exploring alternative solutions.
+       -2. Math Problem-Solving: Demonstrates divide-and-conquer strategies—breaking problems into smaller subproblems 
+                                 and aggregating the results.
+   These emergent behaviors indicate that the training not only improved performance on software engineering tasks 
+   but also enhanced general reasoning abilities that transfer to out-of-domain tasks.
+
+5. Conclusion
+   Meta’s SWE-RL approach scales reinforcement learning for real-world software engineering by leveraging a massive, 
+   curated dataset of GitHub PRs. 
+   The process involves careful data aggregation, filtering, and transformation into a consistent prompt format. 
+   Using GRPO to optimize based on a rule-based reward—derived from comparing generated code patches to actual merged
+   changes—leads to the development of Llama3-SWE-RL. 
+   Importantly, the training process induces emergent reasoning strategies that generalize beyond software engineering, 
+   pointing toward a future where LLMs can better handle complex, real-world coding challenges.
+
