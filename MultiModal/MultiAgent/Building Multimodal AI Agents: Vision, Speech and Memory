@@ -1,0 +1,158 @@
+### From https://medium.com/data-science-collective/building-multimodal-ai-agents-vision-speech-and-memory-61415511ccb4
+
+1. Overview
+   The article outlines a project to develop a real-time, agentic AI system that not only transcribes and generates speech 
+   but also incorporates multimodal capabilities—such as vision and web search—to enable rich, interactive conversations. 
+   The system leverages the LiveKit framework, which simplifies real-time communication via WebRTC, 
+   and integrates various tools (for capturing video frames, screenshots, web search, and database logging) to build a robust,
+   multimodal personal assistant or customer support agent.
+
+2. Key Components and Architecture
+   -a. LiveKit Framework and Agent Integration:
+       -1. LiveKit Overview:
+           LiveKit is an open-source platform for real-time data communication (audio, video, and text) using WebRTC. 
+           It provides cloud-based services or self-hosted options, making it easier to build web-based teleconferencing and 
+           voice calling applications.
+      -2. Agent Code:
+          The agent code is responsible for connecting to a LiveKit meeting room, processing real-time audio and video streams, 
+          and interacting with external LLM APIs (e.g., OpenAI’s Realtime API).
+      -3. Example Code Snippet:
+          '''''
+          python
+
+          from livekit.agents import AutoSubscribe, JobContext
+
+          async def entrypoint(ctx: JobContext):
+              logger.info(f"connecting to room {ctx.room.name}")
+              await ctx.connect(auto_subscribe=AutoSubscribe.SUBSCRIBE_ALL)
+              participant = await ctx.wait_for_participant()
+              logger.info(f"Started agent for participant {participant.identity}")
+              conversation_id = str(uuid.uuid4())
+              run_multimodal_agent(ctx, participant, conversation_id)
+              logger.info("agent started")
+          '''''
+          This code sets up the agent to connect to the room, wait for a participant, and launch the multimodal agent.
+   -b. Real-Time Model Setup:
+       -1. Realtime Model Initialization:
+           The agent uses a real-time LLM (e.g., gpt-4o-mini-realtime-preview) along with specific parameters like voice 
+           settings, temperature, and turn detection options to manage interactions.
+       -2. Example Code Snippet:
+           '''''
+           python
+
+           from livekit.plugins import openai
+           from agent.prompts import RealTimeModelDriverPrompt
+
+           REALTIME_MODEL = "gpt-4o-mini-realtime-preview"
+           VOICE = "alloy"
+           REALTIME_TEMPERATURE = 1.0
+
+           model = openai.realtime.RealtimeModel(
+               model=REALTIME_MODEL,
+               instructions=RealTimeModelDriverPrompt.system_message,
+               voice=VOICE,
+               temperature=REALTIME_TEMPERATURE,
+               modalities=["audio", "text"],
+               turn_detection=openai.realtime.ServerVadOptions(
+                   threshold=0.75,
+                   prefix_padding_ms=300,
+                   silence_duration_ms=1000,
+                   create_response=True,
+               ),
+           )
+   -c. Integration of Multimodal Tools:
+       -1. Vision Tools:
+           -1) Video Stream Snapshot: Captures a frame from the user’s video stream for tasks like identifying an object.
+               - Process: The tool waits for a video frame, resizes the image, converts it to a base64 string, 
+                          and sends it to an LLM (e.g., GPT-4o-mini) along with a user-specified question.
+               - Example Functionality:
+                 '''''
+                 python
+
+                 @llm.ai_callable()
+                 async def question_camera_image(self, user_question: Annotated[str, llm.TypeInfo(description="The question for the captured frame")]):
+                     logger.info(f"CAPTURE FRAME: Asking: {user_question}")
+                     latest_frame = await capture_image_from_video_stream(self._room)
+                     # further processing and API call to the multimodal LLM
+                 '''''
+           -2) Screenshot Tool:
+               Captures the user’s screen to answer questions about what they see. It uses Pillow’s ImageGrab to take 
+               a screenshot, resizes and encodes the image, then sends it to the LLM.
+       -3. Web Search Tool:
+           Uses Perplexity’s Sonar API to perform web searches. It constructs a query, calls the API, 
+           and integrates the response into the conversation.
+           -1) Example Snippet:
+               '''''
+               python
+
+               import requests, json
+
+               class PerplexityChat:
+                   BASE_URL = "https://api.perplexity.ai/chat/completions"
+
+                   def __init__(self, pplx_api_key=None):
+                       self.api_key = pplx_api_key
+
+                   def invoke(self, system_prompt, query, max_tokens=1000):
+                       payload = { ... }  # Constructed payload with system and user messages
+                       headers = {
+                           "Authorization": f"Bearer {self.api_key}",
+                           "Content-Type": "application/json",
+                       }
+                       response = requests.request("POST", self.BASE_URL, json=payload, headers=headers)
+                       return response
+               '''''
+       -4. Database Logging and RAG:
+           Uses TinyDB to log conversations, including inputs, outputs, and tool interactions. 
+           This supports retrieval-augmented generation (RAG) by allowing the agent to reference past interactions.
+           -1) Example:
+               A tool that converts a user query into a TinyDB query to fetch historical conversation data.
+   -d. Putting It All Together:
+       -1. Agent Tools Setup:
+           A class (AgentTools) encapsulates all tools (vision, web search, database queries) and integrates them into 
+           the agent’s workflow.
+           -1). Example Code Snippet:
+                '''''
+                python
+
+                from agent.tools.AgentTools import AgentTools
+
+                tools = AgentTools(
+                    ctx.room,
+                    images_model,
+                    web_model,
+                    database=conversation_and_tool_use_database,
+                    user_id=participant.identity,
+                    conversation_id=conversation_id,
+                )
+                '''''
+       -2. Agent Object Creation:
+           The agent is constructed with the real-time model, initial chat context, and the tool context, 
+           enabling it to seamlessly call tools as needed.
+           -1) Example:
+               '''''
+               python
+
+               from livekit.agents.multimodal import MultimodalAgent
+
+               initial_context = llm.ChatContext().append(
+                   role="system",
+                   text="Do not hallucinate. If you don't understand, ask for clarification."
+               )
+
+               agent = MultimodalAgent(
+                   model=model,
+                   chat_ctx=initial_context,
+                   fnc_ctx=tools,
+                   max_text_response_retries=5,
+               )
+3. Conclusion
+   This project demonstrates how to build a real-time, multimodal AI agent using LiveKit’s framework. 
+   The agent integrates various specialized tools to capture audio, video, and text inputs, 
+   leveraging APIs for speech-to-text (STT), text-to-speech (TTS), vision processing, and web search. 
+   By combining these modalities, the system can act as a sophisticated personal assistant or customer support agent, 
+   capable of handling complex interactions in real time. The project also illustrates practical considerations, 
+   such as logging conversation data with TinyDB and managing tool responses, that are critical for creating robust, 
+   interactive AI systems.
+
+
