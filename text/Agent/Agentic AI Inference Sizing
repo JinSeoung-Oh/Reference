@@ -1,0 +1,136 @@
+### From https://ai.gopubby.com/agentic-ai-inference-sizing-2fd5f9e9578c
+
+1. Introduction
+   -a. Agentic AI Evolution:
+       The article begins by contrasting basic generative models (like ChatGPT, which primarily respond to text-based queries)
+       with agentic AI systems. Unlike traditional chatbots, agentic AI agents are designed to autonomously execute complex,
+       multi-step tasks (e.g., booking travel, ordering services, or coordinating a sales campaign) 
+       by decomposing tasks into subtasks and executing them in a coordinated manner.
+   -b. Bill Gates’ Vision:
+       Bill Gates’ vision of an AI agent that handles multifaceted tasks—such as planning an entire trip based on 
+       your preferences—is highlighted as a real-world example of agentic AI’s potential.
+   -c. Focus on Pricing & Sizing:
+       The core of the article addresses how to estimate the cost (and resource requirements) for these sophisticated 
+       agentic AI systems. 
+       It discusses how to map traditional LLM inference dimensions to a system that orchestrates multiple agents, 
+       considering factors like latency, throughput, context windows, and non-deterministic task execution.
+
+2. Generative & Agentic AI Architectural Patterns
+   The article categorizes AI systems into several architectural patterns, emphasizing that agentic AI is emerging
+   as the next step beyond standalone LLMs:
+
+   2.1 Black-box LLM APIs:
+       -a. Definition:
+           These are standard interfaces (e.g., ChatGPT) where users interact with a closed, managed LLM.
+       -b. Prompt Engineering:
+           Prompts are critical for eliciting the best responses. Extensive research in prompt engineering has led 
+           to enterprise prompt stores that consolidate best practices.
+   2.2 Embedded LLM Apps:
+       -a. Integration in Enterprise Platforms:
+           LLMs are embedded within SaaS products (like Salesforce or ServiceNow) or delivered as standalone enterprise 
+           applications.
+       -b. Data Ownership & IP Concerns:
+           Enterprises must address data usage rights, training data ownership, and liability issues when integrating 
+           third-party LLM models.
+   2.3 LLM Fine-tuning / Domain-specific SLMs:
+       -a. Contextualization:
+           Generic LLMs are fine-tuned with domain-specific enterprise data (documents, wikis, business processes) to create 
+           smaller, specialized language models.
+       -b. Cost-effective Approaches:
+           Open-source models (e.g., the LLaMA family) enable fine-tuning on enterprise data at a fraction of the cost compared
+           to closed models.
+   2.4 Retrieval-Augmented Generation (RAG):
+       -a. Concept:
+           RAG systems combine retrieval mechanisms with generative models. A set of documents or context is retrieved 
+           (using vector search or similar techniques) and provided as part of the prompt to guide the model's output.
+       -b. Architecture:
+           The RAG pipeline typically involves three phases: Retrieve (query embedding and similarity search), 
+           Augment (combining retrieved documents with the prompt), and Generate (producing a contextualized response).
+   2.5 Agentic AI — LLM Orchestration:
+       -a. Future of AI Agents:
+           Agentic AI systems orchestrate multiple LLM agents to tackle complex tasks. 
+           They are composed of several integrated components:
+           -1. Agent Marketplace: Where different specialized agents are available.
+           -2. Orchestration Layer: Handles task decomposition and agent coordination.
+           -3. Integration Layer: Connects agents to external systems (e.g., CRM systems) via APIs or protocols 
+                                  (like Anthropic’s Model Context Protocol).
+           -4. Shared Memory & Governance Layers: Maintain execution context over long-running tasks and enforce data privacy, 
+                                                  explainability, and security.
+   Long-Running Execution:
+   For tasks such as an email campaign that spans days or weeks, maintaining context and state is crucial. 
+   This is typically handled by saving embeddings in vector stores and using approximate nearest neighbor (ANN) 
+   search for efficient retrieval.
+
+3. LLM Inference Sizing Dimensions
+   Before extending to agentic AI, the article first outlines the key dimensions that affect LLM inference sizing for 
+   typical use cases:
+
+   -a. Context Window:
+       Models process inputs and outputs within a fixed token window (commonly 4K–8K tokens, translating to roughly 
+       3,000–6,000 words in English). This limits the amount of information that can be processed in one pass.
+   -b. Model Size & Precision:
+       Inference speed and memory consumption depend on model parameters, and whether models run in full precision or 
+       are quantized.
+   -c. Latency:
+       -1. First-token latency: Time until the first token is generated (important in streaming scenarios).
+       -2. Inter-token and last-token latency: Overall generation time for completing the response.
+   -d. Throughput:
+       Defined as the number of requests processed per unit time, particularly relevant in batch or offline processing scenarios.
+   -e. Batching and Parallelism:
+       For high throughput, determining if the model fits on one GPU or requires parallelism (pipeline or tensor parallelism)
+       is essential, along with adjusting batch size accordingly.
+
+4. Agentic AI Inference Sizing Considerations
+   Extending from single LLM inference to a system orchestrating multiple agents introduces additional factors:
+   4.1 Agent Observability:
+       -a. Mapping Token Latency:
+           The concept of token latency translates to individual agent execution latency. This includes both the time taken 
+           by the first agent (first-token equivalent) and the total time for the entire orchestration (end-to-end latency).
+       -b. Streaming vs. Batch Execution:
+           In some scenarios, you may want to stream outputs as each agent finishes, while in others, waiting for 
+           full orchestration completion might be acceptable.
+   4.2 Agentic Context Window Size:
+       -a. Chaining Contexts:
+           The output from one agent is fed as input to the next. This, along with the overall execution state 
+           (maintained in a shared memory layer), effectively increases the input context size for downstream agents.
+       -b. Implication:
+           Careful sizing of context windows is needed to ensure that all relevant information is preserved without 
+           overwhelming the model.
+   4.3 Non-determinism in Agentic AI Execution:
+       -a. Uncertainty and Choice:
+           Agentic workflows may include non-deterministic elements. For example, in an e-shopping scenario, 
+           choices like “Check Credit” or “Delivery Mode” might lead to different execution paths.
+       -b. Handling Variability:
+           Strategies such as flattening the execution plan to estimate best- and worst-case scenarios help manage this 
+           uncertainty. This ensures that even when certain tasks are skipped or executed differently, the system remains robust.
+
+5. LLM Inference Sizing and Pricing: Trade-offs
+   -a. Batch vs. Streaming:
+       -1. Increasing batch size can improve throughput (more requests processed simultaneously) but may worsen latency.
+       -2. Streaming mode prioritizes reducing first-token latency, which is critical for interactive applications.
+   -b. Hardware Upgrades:
+       Faster GPUs or more optimized parallel processing (e.g., using pipeline parallelism) can improve both latency and 
+       throughput, impacting overall pricing and system sizing.
+   -c. Cost Considerations:
+       Pricing agentic AI systems must account for the extended inference required by orchestrated workflows. 
+       This includes evaluating token generation costs, extended execution times for multi-agent plans, 
+       and memory/storage requirements for maintaining long-term context.
+
+6. Conclusion
+   The article presents a comprehensive framework for understanding and sizing agentic AI systems:
+   -a. From Single LLM Inference:
+       Starting with conventional dimensions like context window, model size, latency, and throughput.
+   -b. To Multi-Agent Orchestration:
+       Expanding these dimensions to cover agent-specific factors such as chaining context, non-deterministic execution,
+       and long-term observability.
+   -c. Architectural Patterns:
+       Several patterns—ranging from black-box APIs to embedded LLM apps and RAG pipelines—play a role in forming a full 
+       agentic AI system.
+   -d. Integration Layers:
+       Key to connecting disparate agents and enterprise systems, ensuring that data flows seamlessly while managing privacy, 
+       security, and governance.
+
+   By meticulously evaluating these dimensions, organizations can better estimate the resource requirements, 
+   cost implications, and performance trade-offs when deploying agentic AI systems. 
+   This detailed understanding is critical for scaling these complex systems in real-world enterprise environments.
+
