@@ -1,0 +1,75 @@
+## From https://medium.com/data-science-in-your-pocket/tencent-hunyuan-turbo-s-the-fastest-reasoning-llm-d64a02bed5c8
+
+1. Overview
+   Hunyuan Turbo S introduces an innovative approach that mimics human cognitive processes by combining “fast thinking” with 
+   “slow thinking.” 
+   This hybrid strategy is designed to deliver rapid responses for everyday queries while still engaging in deep, 
+   multi-step reasoning for complex tasks.
+
+2. Fast and Slow Thinking
+   -a. Fast Thinking:
+       -1. Inspiration: Analogous to human intuition.
+       -2. Capabilities:
+           -1) Provides almost instantaneous responses to simple or common queries.
+           -2) Achieves higher word generation speed and reduces the latency for the first output token by 44%.
+           -3) Use Case: Ideal for general conversations and quick interactions.
+  -b. Slow Thinking:
+      -1. Inspiration: Reflects deliberate, analytical reasoning.
+      -2. Capabilities:
+          -1) Handles complex tasks in math, logical reasoning, and scientific queries.
+          -2) Draws on the strengths of Hunyuan T1—a slow-thinking model by Tencent trained with long-thinking chain synthesis.
+      -3. Result: Enables the model to solve multi-step problems without sacrificing its speed advantage.
+  -c. Combined Outcome:
+      By integrating both modes, Hunyuan Turbo S can match or even surpass models like GPT-4o and Claude 3.5 on reasoning-heavy
+      tasks while maintaining impressive speed.
+
+3. Hybrid-Mamba-Transformer Fusion
+   Hunyuan Turbo S employs a groundbreaking architectural innovation known as Hybrid-Mamba-Transformer Fusion, 
+   which balances efficiency with deep contextual reasoning by integrating two distinct architectures:
+   -a. Mamba: Efficient for Long Sequences
+       -1. Description:
+           -1) A state-space model (SSM) that processes long sequences with far less memory usage than traditional Transformers.
+           -2) Excels in tasks like reading, summarizing, and generating responses for lengthy documents.
+       -2. Benefit:
+           -1) Reduces the quadratic scaling issue associated with Transformers’ KV-cache, making it ideal for handling extended text 
+               without heavy computational overhead.
+   -b. Transformer: Strong Contextual Understanding
+       -1. Description:
+           -1) Maintains robust contextual and dependency understanding, essential for tasks requiring deep reasoning such as math, 
+               logic, and code generation.
+           -2) Benefit:
+               -1) Offers detailed understanding of complex patterns and multi-step reasoning.
+   -c. Integration in a Super-Large MoE Model:
+       -1. MoE (Mixture of Experts) Integration:
+           -1) Only a subset of the model parameters are activated for each query, enhancing efficiency.
+           -2) Turbo S is the first large-scale MoE model to integrate Mamba, allowing it to harness Mamba’s efficiency without 
+               losing the transformer’s reasoning power.
+       -2. Result:
+           -1) Achieves lower training and inference costs while delivering both speed and intelligence.
+
+4. Key Features and Performance
+   -a. Speed & Efficiency:
+       -1. Fast-thinking component doubles word speed and reduces first-word latency.
+       -2. Non-autoregressive design allows quick token generation, crucial for real-time applications.
+   -b. Robust Reasoning:
+       -1. Slow-thinking component ensures deep, multi-step reasoning, making the model excellent in math, logic, and science-related queries.
+   -c. Hybrid Architecture Benefits:
+       -1. Balances the strengths of Mamba (long-sequence efficiency) with the transformer’s deep contextual understanding.
+       -2. Reduces KV-cache memory usage and computational complexity.
+   -d. Performance Benchmarks:
+       -1. Excels in knowledge, mathematics, and Chinese language understanding (top scores in MMLU, Chinese-SimpleQA, and C-Eval).
+       -2. Highest performance in math benchmarks like MATH and AIME2024.
+       -3. Competitive performance in reasoning benchmarks (BBH, DROP, ZebraLogic) and alignment/ethical response tasks.
+       -4. While it slightly trails in simple QA and live coding challenges compared to GPT-4o and Claude 3.5, overall, it is positioned as one of the best models in key areas.
+   -e. Deployment and Pricing:
+       -1. Available via API on Tencent Cloud.
+       -2. Offers a free one-week trial.
+       -3. Cost-efficient pricing at 0.8 yuan per million input tokens and 2 yuan per million output tokens,
+           which is much cheaper compared to previous Turbo models.
+
+5. Conclusion
+   Hunyuan Turbo S represents a significant advancement in AI models by emulating human fast and slow thinking. 
+   Its hybrid architecture—merging Mamba’s efficiency with the transformer’s deep reasoning—allows 
+   it to deliver rapid responses for straightforward queries while retaining robust, multi-step reasoning for complex tasks. 
+   This balance makes Turbo S particularly effective for knowledge-intensive applications and positions it competitively against
+   top-tier models, all while reducing costs and resource demands.
