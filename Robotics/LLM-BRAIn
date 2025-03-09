@@ -1,0 +1,84 @@
+### From https://arxiv.org/pdf/2305.19352
+
+1. System Overview
+   The system is designed to enable a robot to execute complex tasks by generating executable Behavior Trees (BTs) from
+   natural language commands. Key components include:
+   -a. Hardware Requirements:
+       -1. An onboard microcomputer capable of running the retrained LLM-BRAIn model (7B parameters).
+       -2. Necessary sensors, actuators, and mechanical parts to perform tasks as defined in its node library.
+   -b. Software Components:
+       -1. LLM-BRAIn Application: Runs the fine-tuned language model to generate BTs.
+       -2. BT Interpreter: Converts the model’s output into an executable BT (in XML format) that the robot can process.
+       -3. Node Library: Contains the list of available actions and conditions (and sometimes subtrees) that the robot can execute.
+   -c. Workflow:
+       -1. An operator issues a natural language command.
+       -2. The command, combined with the list of available nodes, is sent to the LLM-BRAIn model.
+       -3. The model processes the query and outputs a BT in XML.
+       -4. The BehaviorTree.CPP library (integrated as a ROS2 node) executes the BT on the robot.
+
+2. Utilizing LLM Generated BTs to Define Robot Behavior
+   -a. Behavior Trees (BTs) in Robotics: 
+       BTs are hierarchical structures that represent tasks using leaf nodes (Actions and Conditions) and branch nodes (Sequences and Fallbacks).
+       -1. Sequence Nodes: Execute child nodes sequentially until a Failure occurs.
+       -2. Fallback Nodes: Execute child nodes until a Success is achieved.
+   -b. Advantages Over State Machines:
+       -1. Modularity: Nodes can be added, removed, or replaced independently.
+       -2. Scalability: BTs can include subtrees for recursive behavior, enabling the generation of complex behaviors in manageable parts.
+   -c. LLM as a BT Generator:
+       -1. Using a transformer-based LLM (fine-tuned on BT examples) allows generating executable BTs from natural language instructions.
+       -2. The modularity of BTs helps overcome token length limitations by letting the model generate high-level structures and fill in details later.
+
+3. Dataset Collection for BT Generation
+   -a. Dataset Representation Format:
+       -1. Each sample consists of an instruction and a corresponding output BT in a valid, executable XML format.
+       -2. The instruction includes:
+           -1) A common directive: “Write a behavior tree for the robot to execute the command using only available nodes.”
+           -2) A task-specific description of the desired robot behavior.
+           -3) A list of available Action, Condition, and (optionally) SubTree nodes.
+   -b. Dataset Generation Using text-davinci-003:
+       -1. Three-step process:
+           -1) BT Generation: Request the model to generate a BT based on a given instruction, with clarifications ensuring 
+                              the BT is executable and appropriate for the robot.
+           -2) Node Library Creation: Ask the model to generate a library of nodes conforming to a specified structure.
+           -3) Behavior Description: Obtain a verbal description of the generated BT.
+       -2. Debug and refine these outputs to minimize structural or logical errors.
+       -3. Final datasets were created with sizes of 1000, 5000, and 8500 samples, with quality judged by diversity, structural correctness,
+           and task correspondence.
+
+4. LLM-BRAIn 7B Model Fine-tuning
+   -a. Obtaining LLM-BRAIn:
+       -1. Based on Stanford Alpaca 7B (a fine-tuned version of LLaMA 7B using 52K instruction-following demos).
+       -2. Further fine-tuned for BT generation using the curated dataset.
+       -3. Parameter-Efficient Fine-Tuning (PEFT):
+           -1) The Low-Rank Adaptation (LoRA) method was used to fine-tune only a small subset of parameters, reducing computational
+               and storage costs.
+   -b. Fine-Tuning Process:
+       -1. Conducted on an NVIDIA Tesla A100 (80GB VRAM).
+       -2. Batch size and micro batch size settings could vary (e.g., batch size 128, micro batch 4; or reduced sizes for lower memory usage).
+       -3. Hyperparameters: Learning rate of 3e-4, 10% of data reserved for validation, and typically 3 epochs for the final dataset.
+       -4. As dataset size increased (from 1000 to 5500 to 8500 samples), the model’s ability to generate complex and logically consistent 
+           BTs improved.
+       -5. The final training on the largest dataset took approximately 8 hours on the A100.
+
+5. Limitations
+   -a. Token Constraints:
+       The model’s ability to generate large BTs is limited by the available memory needed to store attention weights for all tokens. 
+       This restricts the overall size of the BT until recursive subtree generation is incorporated.
+   -b. Device-Specific Adaptation:
+       The fine-tuned model may require additional training on BTs tailored to specific robots or devices, ensuring the control logic 
+       is accurately represented.
+   -c. Node Library Limitations:
+       The node library defines all actions and conditions the robot can perform. A custom library must be composed for each robot, 
+       constraining the robot's possible behaviors. 
+       However, this design also enhances predictability and safety, as all actions are predefined and vetted.
+
+6. Conclusion
+   The system leverages a retrained LLM-BRAIn 7B model fine-tuned on behavior tree (BT) generation data to allow natural language
+   commands to be converted into executable BTs for robot control. 
+   The architecture combines a powerful LLM with a BT interpreter on ROS2, 
+   guided by a carefully curated dataset and efficient PEFT methods like LoRA.
+   While the system shows promise in enabling autonomous robotic behavior from natural language instructions, 
+   it faces limitations in terms of token-based memory constraints, device-specific adaptation, 
+   and the inherent limitations of the predefined node library. 
+   Future improvements, such as recursive subtree generation, aim to mitigate these challenges and extend the system’s capabilities.
+
