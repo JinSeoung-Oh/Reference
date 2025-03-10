@@ -1,0 +1,92 @@
+### From https://medium.com/@infiniflowai/reasoning-for-rag-a-2025-perspective-1f4e63b5537f
+
+1. Introduction & Motivation
+   The blog begins by noting the transformative impact that DeepSeek R1 had in early 2025, which advanced our predictions 
+   about LLM reasoning and decision-making by roughly six months. 
+   As LLMs improve their ability to reason, a pressing question arises: How should RAG systems evolve alongside 
+   these enhanced reasoning capabilities? This question forms the core motivation for the article.
+
+   While reasoning with LLMs wasn’t new—earlier agent systems in 2024 already showcased basic reasoning abilities—the breakthrough
+   with R1 lies in its ability to implement deep reasoning chains. 
+   The author contrasts two main paradigms: conventional Agent frameworks (often built on approaches like ReAct,
+   which tightly couple reasoning and action in an iterative loop) and the emerging trend of integrating more robust reasoning
+   mechanisms into RAG workflows.
+
+2. Technical Approaches to Reasoning
+   The article outlines three main technical avenues for enhancing reasoning in LLM-driven systems:
+   -a. Prompt Engineering for Agent Frameworks (e.g., ReAct):
+       -1. Concept: Even before R1, LLMs had intrinsic reasoning capabilities. Frameworks like ReAct harness these by having
+                    the model alternate between reasoning (generating contextual explanations and analytical steps) 
+                    and acting (making tool or API calls).
+       -2. Limitation: However, because these processes are highly dependent on each previous step, errors can accumulate. 
+                       Moreover, many agent systems underemphasize the retrieval component (RAG), which limits the potential of ReAct.
+   -b. Model Architecture Improvements (R1’s Approach):
+       -1. Concept: R1 leverages reinforcement learning to train models that synthesize Chain of Thought (CoT) reasoning 
+                    trajectories. This means breaking complex tasks into intermediate steps and refining each one gradually.
+       -2. Advantage: Longer CoT chains allow for more careful, step‑by‑step reasoning, ultimately leading to more accurate
+                      final outputs.
+   -c. Architectural Extensions via RAG and Agent Mechanisms:
+       -1. Concept: This approach views reasoning as an integral part of search. By combining heuristic search with 
+                    fine-tuning (and even methods like Monte Carlo Tree Search), models can incrementally refine their reasoning paths.
+       -2. Example: Recent work integrates iterative search with RAG so that each step of reasoning is guided by reward models
+                    that assess the quality of the reasoning path.
+       -3. Challenge: Although promising, these reinforcement learning–based methods can be computationally heavy and are still 
+                      in an experimental phase, with certain aspects (like termination criteria) yet unresolved.
+   The blog then presents emerging industrial frameworks such as RAGFlow, which focus on enhancing RAG systems with reasoning 
+   capabilities. RAGFlow leverages an iterative reasoning chain that decomposes problems into sub-questions, 
+   triggers multi-source retrieval, and then synthesizes complete reasoning chains. 
+   This method, however, does not yet incorporate reinforcement learning elements into its roadmap for Spring 2025.
+
+3. Key Developments in the Field
+   The article reviews several influential works that have sought to integrate reasoning with RAG:
+   -a. O1 Embedder: Trains an embedding model that produces high-quality “thought” content alongside precise retrieval,
+                    though decoupling reasoning from the LLM risks losing the advantages of large-scale models.
+   -b. Search o1: Proposes a two-thread workflow that iteratively refines the reasoning chain while identifying knowledge gaps
+                  and triggering external searches.
+   -c. Microsoft’s PIKE-RAG: Uses a knowledge graph (GraphRAG) to guide task decomposition and multi-hop retrieval, 
+                             ensuring sub-questions align with structured data.
+   -d. Agentic Reasoning: Deploys an agent architecture where different agents (e.g., a MindMap Agent, a Web Search Agent,
+                          and a Coding Agent) work in tandem to build and refine reasoning chains.
+   -e. LevelRAG: Breaks reasoning into high-level strategic search and low-level concrete search, emphasizing a multi-layered 
+                 approach.
+   -f. OmniThink: Focuses on generating long-form content by constructing an information tree and a conceptual pool, 
+                  then iteratively refining content until a termination condition is met.
+   Additionally, frameworks like RAG-Gym and DeepRAG explore modeling the reasoning process as a Markov Decision Process (MDP), 
+   using reinforcement learning or imitation learning to guide decision-making.  
+   However, these are still in the exploratory phase and face challenges like excessive sub-task decomposition and a lack of
+   intelligent retrieval decisions.
+
+4. Practical Observations
+   Based on the implementation of reasoning-enhanced LLMs, the article shares several insights:
+   -a. Performance Parity with Trade-Offs:
+       Systems like RAGFlow can deliver reasoning-powered performance that is comparable to specialized models (like R1) 
+       when connected to standard LLMs (e.g., DeepSeek V3). 
+       However, directly using R1-level reasoning can introduce latency that isn’t acceptable for certain applications.
+   -b. Contextual LLM Selection:
+       Not every application requires the full reasoning capabilities of R1. For simpler tasks like keyword extraction, 
+       a standard LLM may suffice, which helps in keeping system latency low.
+   -c. Enterprise Adoption Barriers:
+       The absence of dedicated reasoning chain APIs in current systems limits enterprise use cases. 
+       Enterprises need mechanisms to generate proprietary reasoning chains using their internal data, 
+       and solutions like RAGFlow are a step in that direction.
+   -d. Strategic API Development:
+       There is a call for providers like DeepSeek to prioritize the release of reasoning chain APIs. 
+       Such interfaces would allow enterprises to merge the deep reasoning abilities of LLMs with proprietary datasets, 
+       unlocking significant commercial potential in sectors like healthcare, business intelligence, and legal compliance.
+
+5. Conclusion
+   The article concludes by emphasizing that while LLM reasoning capabilities are advancing rapidly 
+   (thanks in part to innovations like R1), simply integrating these models with basic RAG systems does not automatically
+   result in enhanced reasoning. 
+   The real breakthrough lies in structured, iterative reasoning processes that decompose complex tasks into manageable 
+   sub-tasks, retrieve relevant data, and then synthesize high-quality reasoning chains.
+
+   Frameworks such as RAGFlow demonstrate that combining reasoning with targeted search—and orchestrating this via intelligent
+   agents—can provide deep research capabilities that are both operationally viable and commercially impactful.
+   However, there remain open challenges in evaluating reasoning quality, defining termination conditions,
+   and balancing computational efficiency.
+
+   Ultimately, the synergy between reasoning and search forms the cornerstone of future enterprise AI services. 
+   The article invites continued collaboration and innovation, urging developers and researchers to refine these approaches 
+   so that robust, efficient, and scalable reasoning-enhanced LLMs can become a reality across diverse industries.
+
