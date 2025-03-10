@@ -1,0 +1,107 @@
+### From https://medium.com/data-science-collective/agentic-mesh-building-highly-reliable-agents-9a0d34277113
+
+1. Introduction
+   The article begins by noting that as Large Language Models (LLMs) become more powerful, both software and user expectations grow.
+   However, increasing demands on these models lead to a paradox: while new LLMs are often more capable, 
+   asking them to perform larger, more complex tasks tends to reveal or even exacerbate their inherent inaccuracies and hallucinations.
+   In essence, when LLMs are given small tasks, they perform reliably, but when asked to generate extensive outputs,
+   the small errors in each step multiply—often catastrophically. 
+   This phenomenon is referred to as the “combinatorial explosion of choice,” where each token’s generation depends on the previous
+   one, so minor mistakes early on can cascade into substantial inaccuracies over long outputs.
+
+   The author suggests that instead of continuously asking more of LLMs, a better strategy would be to break down large requests 
+   into smaller, more manageable parts. 
+   This would involve decomposing a complex task into a series of smaller tasks, each of which is highly reliable. 
+   By doing so, the risk of error multiplication is greatly reduced.
+
+2. Problem Statement
+   Anyone who has used LLMs knows that they tend to produce errors and hallucinations—phenomena that are more pronounced
+   when the tasks are complex. 
+   The article uses software development as an example: while LLMs can reliably generate short code snippets or 
+   single-function scripts, they struggle with larger projects such as multi-file software systems or complex components. 
+   This limitation makes it difficult to deploy LLM-based solutions at scale, especially in regulated industries 
+   (finance, healthcare, insurance) where high accuracy is critical.
+
+   A recent study is cited to highlight that current LLMs face significant challenges in processing long, context-rich inputs.
+   As the context length increases, the likelihood of compounding errors rises dramatically. 
+   This poses a barrier to using LLMs for tasks that require extensive reasoning or detailed outputs.
+
+3. Root Cause
+   The core issue is that LLMs are probabilistic in nature. They generate each token based on the previous one and 
+   on probabilities learned from large training datasets. 
+   This non-deterministic process means that even with high per-token accuracy (for example, 99%), 
+   the probability of an entirely error-free output drops dramatically as the number of tokens increases. 
+   The article illustrates this with a simplified calculation:
+   -a. A 100-token output might only have about 37% accuracy overall, and for 1,000 tokens the probability becomes nearly 
+       negligible. This exponential drop-off is what the author calls the “combinatorial explosion of choice,” 
+       which explains why longer outputs are so error-prone.
+
+4. Potential Solutions
+   Several strategies are discussed to mitigate these issues:
+   -a. Iterative Refinement:
+       Some practitioners address errors by having the LLM produce an initial output, then reviewing and correcting inaccuracies 
+       through further prompts. 
+       This iterative process can work for short outputs but does not fully solve the problem when outputs become lengthy.
+   -b. Chain of Thought (CoT) Reasoning:
+       This technique involves prompting the model to explain its reasoning step by step. By forcing the model to articulate 
+       intermediate steps, it becomes less likely to make unsupported leaps.
+       However, while this may reduce errors in intermediate steps, the dependency between steps means that any mistake can still 
+       propagate throughout the process.
+   -c. Better LLMs and Scaling:
+       Newer, larger LLMs have been designed to handle longer contexts with improved accuracy. 
+       However, even as these models extend the threshold before errors become significant, 
+       the demand for even longer or more detailed outputs continues to push the system back into error-prone territory.
+   The fundamental challenge remains: regardless of model improvements, when tasks exceed a certain complexity, 
+   the inherent probabilistic nature of LLMs leads to cascading errors.
+
+5. The Proposed Approach: Specialized, Orchestrated Execution
+   The article advocates for a new methodology that reduces error propagation by rethinking how tasks are structured and executed. 
+   The key components of this approach are:
+   -a. Prompt Decomposition into Smaller Tasks:
+       Instead of handling a large request as one continuous prompt, the task is divided into a series of smaller, 
+       independent steps. 
+       This “task plan” minimizes the length of each individual prompt, thus keeping the probability of errors low. 
+       Each small prompt is designed to be highly reliable on its own.
+   -b. Deterministic Orchestration:
+       Rather than relying solely on the probabilistic outputs of LLMs, the approach uses deterministic orchestration engines 
+       to manage task flow. 
+       These engines handle branching logic and tool usage with 100% reliability, ensuring that each task is executed 
+       in the correct order and with proper context.
+   -c. Specialist LLMs:
+       As the cost of running LLMs decreases, it becomes feasible to deploy specialized models that excel in specific domains. 
+       These specialist LLMs, trained and tuned for narrower tasks, are less likely to produce errors within their domain 
+       of expertise.
+   -d. Independent Execution:
+       Each task is executed as a self-contained unit. By isolating each step, errors do not cascade from one task to the next. 
+       This independence is critical to prevent the multiplication of mistakes.
+   -e. Agent-Based Orchestration:
+       Agents are introduced as the deployment vehicles that bundle all these capabilities. 
+       An agent serves as an orchestrator that first analyzes the overall request, decomposes it into smaller steps, 
+       and then delegates each step to the appropriate specialist LLM or tool. 
+       Once all the parts are completed, the agent aggregates the results into a coherent final output.
+
+6. Advantages of the Proposed Framework
+   This agent-based, specialized framework addresses the core issue by:
+   -a. Reducing Dependency:
+       Since each task is self-contained and executed independently, errors do not multiply as they might when one long prompt 
+       is used.
+   -b. Improving Accuracy:
+       Specialist LLMs are optimized for specific tasks, which improves the reliability and repeatability of outputs.
+   -c. Enhancing Flexibility:
+       The orchestrator can dynamically select and route tasks to the best available resources. 
+       This modular approach also allows organizations to integrate new specialized models as they become available without 
+       overhauling the entire system.
+   -d. Mitigating Risks:
+       Particularly in regulated industries, this approach minimizes the risk of critical errors, making it more suitable for
+       applications that require high levels of accuracy and compliance.
+
+7. Conclusion
+   The article concludes by emphasizing that while LLMs are becoming increasingly capable, their probabilistic nature and 
+   the exponential risk of errors in long outputs remain significant challenges. 
+   Instead of continually pushing for larger, more comprehensive outputs from a single model, 
+   the proposed approach breaks down tasks into smaller, manageable pieces. 
+   By combining deterministic orchestration, specialist LLMs, independent execution, and an agent-based framework, 
+   it is possible to reduce errors dramatically.
+   This method leverages well-understood, traditional techniques from distributed systems and microservices, 
+   offering a scalable, reliable solution to the “combinatorial explosion of choice” problem inherent in current LLMs.
+
