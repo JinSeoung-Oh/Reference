@@ -1,3 +1,87 @@
 ### From https://artgor.medium.com/paper-review-large-language-diffusion-models-d323f8182784
 
+1. Overview
+   LLaDA represents a shift from the standard autoregressive (AR) paradigm to a diffusion-based approach for generative modeling. 
+   Instead of generating text token by token in a fixed order, LLaDA leverages a forward–reverse process. 
+   During the forward process, tokens in an input sequence are progressively masked until the entire sequence is hidden.
+   In the reverse process, a Transformer is used to recover the masked tokens by predicting them based on the partially 
+   masked input. This formulation—optimized using a likelihood bound—enables principled probabilistic inference and 
+   addresses some of the inductive biases present in AR models.
+
+2. Probabilistic Formulation and Training Objective
+   At the heart of LLaDA’s design is a two-step process:
+   -a. Forward Process:
+       The model gradually masks tokens from an input sequence. Unlike traditional masked language models with fixed masking 
+       ratios, LLaDA employs a random masking strategy. 
+       This randomness not only improves scalability but also facilitates natural in-context learning by exposing the model 
+       to a diverse range of masking patterns.
+   -b. Reverse Process:
+       Using a mask predictor, the model recovers the masked tokens from the partially masked input. 
+       The training objective is defined as minimizing a cross-entropy loss computed solely on the masked tokens. 
+       Importantly, the overall objective is an upper bound on the negative log-likelihood, 
+       which ensures that LLaDA is a principled generative model with strong theoretical foundations (Fisher consistency).
+
+3. Pre-training Details
+   LLaDA adopts a Transformer-based architecture similar to existing LLMs, but with key differences:
+   -a. No Causal Masking:
+       The model is not constrained by a left-to-right causal mask; it can see the entire input sequence when predicting tokens.
+       This full-context view is crucial for its diffusion-based recovery mechanism.
+   -b. Architectural Adjustments:
+       Since LLaDA does not support key-value caching, it utilizes vanilla multi-head attention. 
+       Additionally, the feed-forward network (FFN) dimension is reduced to maintain a balanced parameter count.
+   -c. Data and Compute:
+       The model is pre-trained on 2.3 trillion tokens using a fixed sequence length of 4096 tokens, 
+       consuming 0.13 million GPU hours on H800 GPUs. To improve handling of variable-length sequences, 1% of the training samples are randomly assigned sequence lengths between 1 and 4096 tokens.
+
+4. Supervised Fine-Tuning (SFT)
+   Beyond pre-training, LLaDA undergoes supervised fine-tuning to enhance its instruction-following abilities:
+   -a. Instruction-Focused SFT:
+       A dataset of 4.5 million prompt-response pairs is used. During fine-tuning, prompts remain unmasked while 
+       the corresponding response tokens are masked, and the model is trained to predict these masked tokens given the prompt.
+   -b. Performance Boost:
+       This fine-tuning step greatly improves the model’s capability to follow instructions, making it competitive in tasks 
+       where guidance and detailed outputs are crucial.
+
+5. Inference and Sampling Strategies
+   During inference, LLaDA supports both text generation and likelihood evaluation:
+   -a. Text Generation: 
+       The reverse process is discretized for generation. Starting from a fully masked response, the model iteratively predicts 
+       tokens. The number of sampling steps acts as a control for the trade-off between efficiency and output quality.
+   -b. Remasking Strategies:
+       To further refine output quality, the model employs remasking techniques:
+       -1. Low-Confidence Remasking:
+           After a token is predicted, tokens with the lowest confidence scores are re-masked for subsequent refinement.
+       -2. Semi-Autoregressive Remasking:
+           Alternatively, after fine-tuning, text is generated block by block from left to right.
+   -c. Likelihood Evaluation:
+       For more stable probability estimates, LLaDA uses a lower-variance reformulation of the loss function. 
+       Additionally, unsupervised classifier-free guidance is applied to enhance the evaluation quality.
+
+6. Experimental Results
+   LLaDA’s performance was evaluated on several benchmarks, demonstrating its scalability and effectiveness compared 
+   to traditional autoregressive models:
+   -a. Scalability and In-Context Learning:
+       LLaDA 8B exhibits strong in-context learning capabilities. It rivals LLaMA3 8B in tasks that require contextual 
+       understanding and even outperforms some self-constructed AR baselines.
+   -b. Instruction-Following:
+       After supervised fine-tuning, LLaDA shows impressive abilities in following instructions, making it suitable for 
+       applications that require detailed, guided responses.
+   -c. Reversal Poem Completion:
+       A particularly notable result is in the reversal poem completion task. While other models like GPT-4o and Qwen 2.5 
+       struggle due to the “reversal curse” (the challenge of generating text in reverse order), 
+       LLaDA excels in both forward and reverse tasks. This is attributed to its uniform token treatment and diffusion-based 
+       framework, which mitigates inductive biases present in autoregressive systems.
+   -d. Remasking Impact:
+       Experiments on remasking strategies and sampling steps reveal that proper token remasking can significantly enhance 
+       both generation quality and stability.
+
+7. Conclusion
+   LLaDA introduces a diffusion-based alternative to autoregressive models for LLMs, focusing on a forward data masking process 
+   and a reverse token recovery mechanism. 
+   This approach, underpinned by a principled probabilistic formulation and an upper bound on negative log-likelihood, 
+   provides a scalable, theoretically sound method for text generation. 
+   With strong performance in in-context learning, instruction following, and overcoming challenges like the reversal curse,
+   LLaDA marks a significant departure from traditional ARMs. 
+   Its innovative remasking strategies and flexible inference procedures highlight its potential for a wide range of applications,
+   positioning it as a promising alternative for future large-scale generative models.
 
