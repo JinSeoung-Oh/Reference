@@ -1,0 +1,91 @@
+### From https://medium.com/@techsachin/atlas-approach-to-finetune-llm-agents-by-identifying-critical-steps-in-expert-trajectories-7eb0a2c5df19
+
+1. Overview and Motivation
+   Traditional approaches to fine-tuning LLM agents often rely on supervised fine-tuning (SFT) across entire expert trajectories. 
+   However, this full-trajectory tuning tends to introduce two major issues:
+   -a. Expert Bias: The model becomes too narrowly tuned to the examples provided by experts, 
+                    which may not cover all possible states.
+   -b. Generalization Weakness: When confronted with states or scenarios not represented in the training data, 
+                                the model’s performance degrades.
+   To overcome these challenges, the ATLAS method—Agent Tuning via Learning Critical Steps—was proposed. 
+   Instead of fine-tuning on every step of an expert’s trajectory, ATLAS focuses exclusively on the most impactful 
+   “critical steps.” By selecting and training on just these key moments, the method not only cuts down on training tokens 
+   (reducing them to about 30% of the original) but also lowers the risk of overfitting to the expert data, 
+   thereby enhancing generalization.
+
+2. Key Contributions
+   -a. Efficient Tuning with Reduced Tokens:
+       ATLAS identifies critical steps within expert trajectories and limits the training data to these pivotal moments—reducing 
+       the token count to 30%. 
+       This not only cuts computational costs but also sharpens the learning focus on the steps that truly matter.
+   -b. Improved Performance and Generalization:
+       Experiments show that agents fine-tuned on these critical steps outperform those tuned on the full trajectories. 
+       This performance boost is especially notable in multi-task learning scenarios, 
+       where the reduced training data helps mitigate negative transfer across different tasks and lessens 
+       the influence of expert bias.
+   -c. Enhanced Generalization Capability:
+       Agents trained via ATLAS demonstrate better generalization, performing strongly on both held-in tasks 
+       (those seen during training) and held-out tasks (novel, unseen scenarios).
+
+3. Methodology
+   The ATLAS approach is structured into three main phases:
+   -a. Critical Step Identification:
+       -1. Expert Trajectories Collection: Start with expert trajectories, which are sequences of actions and observations 
+                                           gathered from various environments.
+       -2. Oracle Selector: Utilize an oracle LLM (by default, GPT-4o) as a selector to sift through these trajectories. 
+                            The selector uses a defined prompt (termed promptc) that categorizes steps into four types:
+           -1) Plan Creation: Steps where the agent formulates sub-goals by breaking down a larger objective.
+           -2) Critical Observation: Moments where key environmental information is identified and analyzed.
+           -3) Critical Action: Points where a decisive, impactful action is taken that drives the trajectory forward.
+           -4) Self Correction: Instances where the agent reviews and adjusts its previous decisions to better align with the goal.
+       -3. Dataset Construction: The selector returns indices of the most critical steps—limited to a maximum percentage (m) 
+                                 of the total trajectory (set to 30% in this study). This creates a curated dataset 𝐷_𝑐
+                                 focused solely on the critical portions of each trajectory.
+   -b. Agent Tuning on Critical Steps:
+       -1. Focused Loss Computation: During fine-tuning, the training loss is calculated only on these critical steps rather 
+                                     than on every token in the expert trajectory. 
+                                     The objective is to optimize the model’s parameters by emphasizing the crucial decision points.
+       -2. Benefits: This focused training approach not only reduces computational overhead but also encourages the model 
+                     to better explore and generalize on non-critical parts, since it is not overfitting to the entire trajectory.
+   -c. Training Objective:
+       The loss function is defined over the selected critical steps. By minimizing this loss, the model is steered toward
+       reproducing high-impact decisions rather than merely mimicking the entire expert sequence.
+
+4. Experimental Evaluation
+   The method was evaluated on a dataset derived from AgentTraj-L, which consists of expert trajectories from multiple 
+   held-in tasks. A subset of these trajectories was filtered to create the critical step dataset 𝐷_𝑐 using GPT-4o. 
+   The experiments involved fine-tuning using a backbone model (Llama-3.1–8B-Instruct) and were then extended to other models 
+   like Mistral-7B-Instruct-v0.3 and Qwen2.5–7B-Instruct.
+   -a. Key Findings:
+       -1. Held-In Tasks:
+           Agents trained with ATLAS (i.e., fine-tuned on only 30% of the tokens) consistently outperformed baseline models 
+           that were fine-tuned on the full trajectories. On average, ATLAS resulted in over a 5% improvement.
+       -2. Held-Out Tasks:
+           The generalization performance of ATLAS-trained agents was also superior, indicating that focusing on critical steps 
+           reduces overfitting and enables the model to handle new, unseen scenarios more effectively.
+       -3. Multi-Task Learning: 
+           In multi-task settings, the reduced training set from ATLAS helped mitigate the negative transfer that can occur 
+           when a model is trained on a wide array of tasks simultaneously.
+
+5. Limitations
+   While ATLAS shows significant promise, the paper identifies a few limitations:
+   -a. Dependence on Closed-Source Models:
+       The current selection process relies heavily on powerful, closed-source models (like GPT-4o) for identifying critical 
+       steps. Future work needs to explore more cost-effective and open alternatives.
+   -b. Focus on Semantic Criteria:
+       The current methodology primarily considers semantic aspects for selecting critical steps. 
+       Integrating additional metrics could further refine the selection process and enhance performance.
+
+6. Conclusion
+   ATLAS represents a novel and efficient approach to fine-tuning LLM agents by concentrating on the most impactful steps 
+   within expert trajectories. 
+   By reducing the training tokens to 30% and focusing the loss computation solely on these critical steps,
+   ATLAS not only reduces computational costs but also mitigates expert bias and improves generalization.  
+   Experimental results demonstrate that agents trained with this method outperform those fine-tuned on complete trajectories 
+   across both held-in and held-out tasks.
+
+   Ultimately, ATLAS shifts the paradigm from fine-tuning on entire expert demonstrations to a more strategic, 
+   critical step–focused training regimen. 
+   This approach promises to enhance agent performance in multi-task environments and enable more robust generalization, 
+   paving the way for more effective and efficient LLM agent tuning in real-world applications.
+
