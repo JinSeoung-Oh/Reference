@@ -1,0 +1,26 @@
+### How to build MCP - https://news.hada.io/topic?id=19633
+### emcee - Convert OpenAI API to MCP - https://news.hada.io/topic?id=19615
+### Wanaku - MCP Router - https://news.hada.io/topic?id=19614
+
+MCP is a universal protocol that connects AI systems with various data sources, aiming to enhance the performance and 
+utility of AI models.
+
+1. Key Features of MCP:
+   -a. Open Standard: MCP is an open-source protocol that can be used by all AI systems.
+   -b. Bidirectional Connectivity: It supports secure, two-way connections between AI tools and data sources.
+   -c. Universality: It can connect with a wide range of data systems such as content repositories, business tools,
+                     and development environments.
+   -d. Standardization: It enables integration through a single protocol without the need to develop separate connectors
+                        for each data source.
+2. Structure of MCP:
+   Based on a client-server architecture
+   -a. Host: An LLM application that initiates the connection.
+   -b. Client: Maintains a one-to-one connection with the server within the host application.
+   -c. Server: Provides context, tools, and prompts to the client.
+
+3. Advantages of MCP:
+   -a. Enhanced Data Accessibility: AI models can easily access various data sources.
+   -b. Development Efficiency: Developers can connect to multiple data sources using a standard protocol.
+   -c. Scalability: AI systems can maintain context across multiple tools and datasets, 
+                    enabling the construction of more sustainable architectures.
+   -d. Security: With built-in security in the protocol, there is no need to share API keys with LLM providers.
