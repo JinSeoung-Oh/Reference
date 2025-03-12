@@ -1,0 +1,97 @@
+### From https://medium.com/@techsachin/condense-moe-approach-for-condensing-mixture-of-experts-models-to-get-faster-and-efficient-moe-c84c1dd7e08e
+
+1. Overview and Motivation
+   Mixture-of-Experts (MoE) architectures promise to scale neural networks by distributing computation among many specialized 
+   experts. However, a critical drawback remains: the massive memory requirements of these networks. 
+   This memory burden significantly limits their practicality in real-world applications, particularly as large language models 
+   (LLMs) continue to expand in size and capability. 
+   Although recent studies have explored the possibility of removing entire MoE layers to save memory, 
+   such approaches often suffer from a notable drop in performance.
+
+   To address these challenges, the paper introduces Condense-MoE (CD-MoE). Rather than discarding entire layers, 
+   CD-MoE “condenses” the large, sparse MoE layer into a smaller, dense layer that retains only a few experts—specifically, 
+   a small subset of the routing experts along with a shared expert that is always activated. 
+   This design significantly enhances inference efficiency while maintaining high performance.
+
+   For example, in the DeepSeekMoE-16B model, CD-MoE manages to preserve nearly 90% of the original model’s accuracy 
+   while reducing memory usage by 30% and improving inference speed by 30%. Additionally, 
+   by applying lightweight expert fine-tuning, the pruned model can be further optimized for specific tasks.
+
+2. Preliminaries of MoE
+   In typical MoE layers, a set of experts {𝐸_1,𝐸_2,…,𝐸_𝑁} is employed, along with an extra shared expert 𝐸_𝑠
+   For any given token, the model always activates the shared expert and a subset of routing experts based on 
+   token-to-expert similarity scores. The routing process involves computing gate values for each expert and selecting the top 
+   𝐾 experts based on these scores. This full set-up, however, contributes to high memory usage and computational demands.
+
+3. The CD-MoE Approach
+   -a. Expert Selection and Condensing
+       CD-MoE aims to streamline the MoE layer by eliminating the expensive routing phase and condensing the large pool 
+       of experts into a small, essential subset. Here’s how it works:
+       -1. Expert Calibration:
+           For each expert in the original MoE layer, the authors use a calibration dataset (referred to as C4) to compute 
+           the average gate value when that expert is activated. 
+           This average, acting as a representative gate value, is then used during inference.
+       -2. Retaining Critical Experts:
+           Instead of considering all experts, the method retains only 𝐾 routing experts—matching the number of experts 
+           that would have been activated during training—along with the shared expert. 
+           The result is a condensed layer that approximates the original layer’s behavior while dramatically reducing resource usage.
+       -3. Greedy Expert Selection:
+           Given that fine-grained MoE models can have over 60 experts per layer, testing all combinations is computationally 
+           prohibitive. To overcome this, the paper employs a greedy search algorithm. 
+           This algorithm selects the most critical experts by measuring the similarity between outputs before and after 
+           condensation. The similarity is quantified using a Jensen-Shannon divergence metric, 
+           which is a symmetric variant of the Kullback–Leibler divergence. The experts whose selection minimizes 
+           this divergence are chosen for the condensed layer.
+
+   -b. Layer Selection and Condensing
+       Not all layers in a deep LLM contribute equally to performance, and pruning must be applied selectively:
+       -1. Selecting the Right Layers:
+           A similar greedy search strategy is used to determine which layers are best suited for condensation. 
+           For each candidate layer, the output distributions before and after condensation are compared using divergence metrics.
+           Layers that show minimal change when condensed are preferred, 
+           as this suggests they are less sensitive to the pruning process.
+       -2. Maintaining Expressive Power:
+           Layers that are not condensed continue to use the full token routing mechanism, ensuring that the overall expressive
+           capacity of the model is preserved. 
+           This selective condensation strikes a balance between efficiency and performance.
+
+4. Experimental Evaluation
+   The authors tested CD-MoE on several models and tasks, with key findings summarized as follows:
+   -a. Zero-shot Evaluation:
+       When comparing against baseline methods like Block Trimming and Layer Trimming, 
+       CD-MoE consistently outperforms these approaches. 
+       For instance, configurations such as CD-MoE (E2+6), which retain the shared expert plus six routing experts, 
+       maintain nearly 90% of the original model’s accuracy while achieving a 30% reduction in memory usage and a similar gain 
+       in inference speed.
+   -b. Fine-tuning Results:
+       The experiments also involved a two-stage fine-tuning process. 
+       First, a language modeling (LM) phase helps restore the model’s baseline performance, followed by supervised 
+       fine-tuning (SFT) tailored to specific tasks. 
+       This sequential fine-tuning enhances the activation and contribution of the retained experts, 
+       resulting in improved performance over other variants.
+   -c. Comparison of Selection Methods:
+       The paper compares different methods for selecting which experts to retain. 
+       Baselines using random selection or statistical metrics (such as the sum of L1 norms) were less effective 
+       than the proposed greedy search method based on divergence measurements. 
+       The greedy approach ensures that the condensed layer’s outputs are as close as possible to those of the original layer.
+   -d. Layer Condensation:
+       Experiments also indicate that as more layers are condensed, the advantage of CD-MoE becomes more pronounced. 
+       Greedy search for layer selection minimizes the overall disruption to the model’s output, 
+       thereby preserving performance while reducing resource requirements.
+   -e. Impact of Calibration Data:
+       The authors found that using a diverse and comprehensive calibration dataset (like C4) yields consistently better 
+       results compared to using task-specific downstream data, highlighting the importance of robust calibration in 
+       the condensation process.
+
+5. Conclusion
+   CD-MoE presents a novel approach to condensing Mixture-of-Experts models by focusing on critical experts and 
+   selective layer pruning rather than dropping entire MoE layers. 
+   This method leverages a greedy search algorithm to choose the most impactful experts, 
+   thereby reducing memory usage and speeding up inference by about 30% while maintaining nearly 90% of the original 
+   model’s accuracy. The approach not only improves efficiency but also shows promise in enhancing generalization, 
+   especially when combined with a two-stage fine-tuning process.
+
+In summary, by strategically reducing the number of tokens used for fine-tuning and concentrating on the critical steps 
+in expert trajectories, CD-MoE offers a compelling solution to one of the most pressing challenges in deploying large-scale
+MoE models in practical, real-world applications.
+
