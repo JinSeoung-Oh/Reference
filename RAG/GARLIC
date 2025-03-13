@@ -1,0 +1,110 @@
+### From https://medium.com/gitconnected/ai-innovations-and-insights-18-garlic-bebecac36c8d
+
+1. Vivid Description and Background
+   Imagine you’re in a vast library, holding a 1,000‑page book. 
+   You’re trying to quickly extract the key events, character journeys, and major plot points. 
+   Traditional approaches might enlist a couple of clumsy assistants:
+   -a. Assistant A (Chunk-based Retrieval):
+       He simply cuts the book into page-by-page fragments and hands you isolated paragraphs based on keywords. 
+       However, he offers no insight into how these fragments connect or their overall context.
+   -b. Assistant B (Tree-based Retrieval):
+       He organizes the book into a rigid tree, following one branch at a time. 
+       If you need information from another branch, he must climb back to the top and restart his search, wasting precious time.
+   Now, picture a smart, intuitive librarian named GARLIC. GARLIC doesn’t just pass you random pages;
+   he creates a hierarchical map of the entire book. 
+   Each node in his map summarizes a key event or idea, and he understands the relationships between these events. 
+   When you ask, “What did the protagonist go through?” GARLIC navigates the most relevant paths of his map and provides 
+   you with a concise, clear answer—without you having to sift through endless pages.
+
+   This is the essence of GARLIC: an advanced retrieval system that dynamically finds the most critical information by 
+   constructing a Hierarchical Weighted Directed Acyclic Graph (HWDAG) and using LLM-guided search techniques.
+
+2. The Problem with Traditional Retrieval
+   In long document question answering, Retrieval-Augmented Generation (RAG) methods have been the standard. 
+   These methods typically split documents into smaller chunks and retrieve pieces based on keyword matching. 
+   However, this has several critical limitations:
+   -a. Global Context Loss:
+       Breaking a long text into isolated chunks often loses the broader narrative or context. 
+       For complex queries that require understanding connections across multiple events, these chunks alone are insufficient.
+   -b. Dense Embedding Dependence:
+       Many current RAG methods rely on dense embeddings to compute relevance between chunks. 
+       While effective to some degree, this approach can miss nuanced relationships between different pieces of information.
+   -c. Inefficient Tree-Based Methods:
+       Approaches like RAPTOR or MeMWalker that use tree structures can be rigid. 
+       They typically follow a single path from the top node down, which can lead to inefficiencies when key information 
+       is spread across different branches.
+   -d. Computational Overheads:
+       Directly feeding long texts into advanced LLMs (like Llama 3.1) is computationally expensive, 
+       especially for documents that exceed 100,000 tokens.
+
+3. Enter GARLIC: A Dynamic, Graph-Based Retrieval Method
+   GARLIC proposes a new paradigm. Instead of rigid chunking or single-path tree traversal, 
+   it builds a Hierarchical Weighted Directed Acyclic Graph (HWDAG) that maps out the document in a way similar to a smart 
+   librarian’s mind map. 
+   Each node, called an Information Point (IP), represents a summarized event or concept from a portion of the text.
+   -a. Key Innovations of GARLIC:
+       -1. Hierarchical Graph Construction:
+           GARLIC begins by splitting the input document into smaller chunks (e.g., 300 tokens each). 
+           An LLM then summarizes each chunk into a bullet-point “Information Point.” These summaries are recursively combined, 
+           forming a multi-level graph where:
+           -1) Nodes: Represent concise summaries or key events.
+           -2) Edges: Are weighted using attention scores derived from LLMs, capturing how strongly one event or concept relates 
+                      to another.
+   -b. Dynamic Graph Search:
+       When you pose a query, GARLIC employs Greedy Best-First Search (GBFS) over this graph. 
+       Rather than following one fixed branch, it flexibly explores multiple paths based on LLM attention weights. 
+       The search continues until the system determines that enough critical nodes have been gathered to answer 
+       the question—using key-value caching to avoid redundant computation.
+   -c. Attention-Based Traversal:
+       Instead of relying solely on dense embedding similarity, GARLIC uses the attention weights from LLMs to guide its 
+       traversal of the graph. 
+       This often leads to more accurate identification of relevant information and a better understanding of how different 
+       events connect.
+
+4. How GARLIC Works: Step-by-Step
+   -a. Summary Graph Construction:
+       -1. Chunking: The document is first split into manageable pieces.
+       -2. Summarization: An LLM condenses each chunk into a bullet-point summary (IP).
+       -3. Graph Building: These IPs are organized into a hierarchical graph (HWDAG) where each level represents a higher-level
+                           summary of events. The edges between nodes are weighted according to how much one IP relates to another.
+   -b. Dynamic Graph Search:
+       -1. Initialization: When a query is issued, GARLIC starts from the top of the graph.
+       -2. Greedy Search: It then performs a best-first search, guided by the attention scores, to traverse multiple paths.
+       -3. Stopping Criterion: The search halts once enough high-relevance nodes are gathered, 
+                               and the collected information is then fed to the LLM to generate the final answer.
+
+5. Reflections on GARLIC’s Potential and Challenges
+   -a. Potential Benefits:
+       -1. Enhanced Global Context:
+           By building a hierarchical graph, GARLIC preserves the overall context and the relationships between events, 
+           leading to more coherent answers.
+       -2. Flexibility in Retrieval:
+           The multi-path search allows the system to adapt dynamically, retrieving only the most pertinent information 
+           without following a rigid structure.
+       -3. Reduced Computational Cost:
+           By stopping the search early when sufficient information is collected, the system avoids unnecessary computation, 
+           saving both time and resources.
+  -b. Challenges:
+      -1. Attention Score Normalization:
+          The method for normalizing attention scores is empirical and might vary across different contexts, 
+          potentially affecting consistency.
+      -2. Dynamic Stop Mechanism:
+          Determining the “sufficient information” threshold is challenging and can vary with query complexity, 
+          risking early or delayed termination.
+      -3. Graph Construction Overhead:
+          Building the HWDAG involves intensive preprocessing, which might be computationally expensive for very large documents,
+          and it may not easily support incremental updates when the source document changes.
+      -4. Path Overlap:
+          While the multi-path retrieval is comprehensive, overlapping paths might lead to redundant computations without
+          effective redundancy handling.
+
+6. Conclusion
+   GARLIC reimagines long document retrieval by drawing inspiration from how a human librarian would navigate a complex text.
+   Instead of breaking the document into isolated fragments or following a rigid tree structure, 
+   GARLIC constructs a hierarchical, weighted graph that captures both the granular details and the global context. 
+   Its dynamic, attention-based search method allows for efficient retrieval of the most critical information,
+   promising more accurate and coherent answers. 
+   While challenges remain—particularly in standardizing attention scores and optimizing graph construction—the 
+   GARLIC framework offers a promising direction for next-generation retrieval systems that can handle extensive, 
+   context-rich documents with greater finesse.
+
