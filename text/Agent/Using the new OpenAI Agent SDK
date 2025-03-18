@@ -1,0 +1,168 @@
+### From https://medium.com/data-science-collective/using-the-new-openai-agent-sdk-d41c9c85f425
+
+1. Agent SDK Overview
+   The Agent SDK is designed around two core principles:
+   -a. Simplicity:
+       It offers just enough functionality to be immediately valuable while keeping the core primitives minimal and intuitive 
+       for rapid learning.
+   -b. Flexible Defaults:
+       It comes ready to use out-of-the-box with sensible defaults, yet it is fully customizable so you can tailor it to 
+       your precise requirements.
+
+   Key features of the SDK include:
+   -a. Agent Loop: Automatically manages the interactions between tools and the LLM, handling iterative workflows until completion.
+   -b. Python-First Approach: Leverages native Python features to orchestrate and chain agents, eliminating the need for extra abstractions.
+   -c. Handoffs: Simplifies collaboration and delegation among multiple agents seamlessly.
+   -d. Guardrails: Runs validations and checks concurrently with agent execution, allowing workflows to halt quickly upon detecting issues.
+   -e. Function Tools: Converts Python functions into tools with automatic schema generation and Pydantic-powered data validation.
+   -f. Tracing: Provides built-in capabilities to visualize, debug, and monitor agent workflows, including integration with OpenAI’s evaluation, fine-tuning, and model distillation tools.
+
+2. Setting Up a Development Environment
+   Before you start coding, it’s best practice to set up a separate development environment. 
+   Although you can use any environment you’re comfortable with, here’s an example using Miniconda on Windows (
+   often via WSL2 Ubuntu):
+   -a. Create and Activate a New Environment
+      (base) $ conda create -n agent_demo python=3.12 -y
+      (agent_demo) $ conda activate agent_demo
+   -b. Install Required Libraries
+       (agent_demo) $ pip install jupyter
+       (agent_demo) $ pip install openai-agents
+   -c. Launch Jupyter Notebook with:
+       (agent_demo) $ jupyter notebook
+
+3. Example 1: "Hello World" with the Agent SDK
+   Before running the example, ensure that your OpenAI API key is set. In Linux, do:
+   (agent_demo) $ export OPENAI_API_KEY="your_api_key_here"
+
+   Because Jupyter Notebook may have issues with already running event loops, include the following code to resolve that:
+   '''''
+   python 
+
+   import nest_asyncio
+   nest_asyncio.apply()
+   '''''
+   Then, in your Jupyter Notebook, run this code:
+   '''''
+   python
+
+   from agents import Agent, Runner
+
+   agent = Agent(name="Assistant", instructions="You are a helpful assistant")
+
+   result = Runner.run_sync(agent, "What is the capital of France?")
+   print(result.final_output)
+   '''''
+
+   If you wish to specify a particular model, you can modify the agent initialization as follows:
+   '''''
+   python
+
+   agent = Agent(
+       name="Assistant", 
+       instructions="You are a helpful assistant",
+       model="gpt-4o-mini"
+   )
+
+4. Example 2: A Subject Matter Expert (SME) Triage System
+   In this more complex example, we create a triage system that directs questions to subject-specific expert agents 
+   (for math, physics, chemistry, and geography). This example also demonstrates setting up guardrails to filter out inappropriate
+   language.
+   First, make sure to apply the necessary patch for event loops:
+   '''''
+   python
+
+   import nest_asyncio
+   nest_asyncio.apply()
+
+   from agents import Agent, Runner, input_guardrail, GuardrailFunctionOutput, InputGuardrailTripwireTriggered
+   import asyncio
+   import re
+
+   # Define the inappropriate language guardrail
+   @input_guardrail
+   async def inappropriate_language_guardrail(ctx, agent, input):
+       inappropriate_words = ['Stainless steel']  # Add inappropriate words here
+       pattern = re.compile('|'.join(inappropriate_words), re.IGNORECASE)
+       if pattern.search(input):
+           return GuardrailFunctionOutput(
+               output_info="Inappropriate language detected.",
+               tripwire_triggered=True
+           )
+       return GuardrailFunctionOutput(
+           output_info="No inappropriate language detected.",
+           tripwire_triggered=False
+       )
+
+   # Define specialized agents with customized response prefixes
+   math_agent = Agent(
+       name="Math Expert",
+       instructions=(
+           "You are the Math Subject Matter Expert (SME). "
+           "Preface each response with: 'This is your Math SME. The answer to your question is as follows.' "
+           "Then, provide the detailed answer to the math question."
+       )
+   )
+
+   physics_agent = Agent(
+       name="Physics Expert",
+       instructions=(
+           "You are the Physics Subject Matter Expert (SME). "
+           "Preface each response with: 'This is your Physics SME. The answer to your question is as follows.' "
+           "Then, provide the detailed answer to the physics question."
+       )
+   )
+
+   chemistry_agent = Agent(
+       name="Chemistry Expert",
+       instructions=(
+           "You are the Chemistry Subject Matter Expert (SME). "
+           "Preface each response with: 'This is your Chemistry SME. The answer to your question is as follows.' "
+           "Then, provide the detailed answer to the chemistry question."
+       )
+   )
+
+   geography_agent = Agent(
+       name="Geography Expert",
+       instructions=(
+           "You are the Geography Subject Matter Expert (SME). "
+           "Preface each response with: 'This is your Geography SME. The answer to your question is as follows.' "
+           "Then, provide the detailed answer to the geography question."
+       )
+   )
+
+   # Define the triage agent with the input guardrail
+   triage_agent = Agent(
+       name="Triage Agent",
+       instructions=(
+           "You are responsible for directing questions to the appropriate subject matter expert. "
+           "If the question is about mathematics, hand it off to the Math Expert. "
+           "If it's about physics, hand it off to the Physics Expert. "
+           "If it's about chemistry, hand it off to the Chemistry Expert. "
+           "If it's about geography, hand it off to the Geography Expert. "
+           "If the question doesn't pertain to these subjects, respond with 'I'm sorry, I don't know the answer to that.'"
+       ),
+       handoffs=[math_agent, physics_agent, chemistry_agent, geography_agent],
+       input_guardrails=[inappropriate_language_guardrail],
+   )
+
+   # Function to run the triage agent
+   async def main():
+       question = "Explain the Riemann hypothesis to a 10 year old"
+       try:
+           result = await Runner.run(triage_agent, input=question)
+           print(result.final_output)
+       except InputGuardrailTripwireTriggered:
+           print("Your question contains inappropriate language and cannot be processed.")
+
+   if __name__ == "__main__":
+       asyncio.run(main())
+   '''''
+
+5. Conclusion
+   The Agent SDK is a cutting-edge framework that simplifies building multi-agent systems. 
+   It emphasizes simplicity and flexible defaults, enabling rapid development using native Python. 
+   With key features such as the Agent Loop, handoffs between agents, guardrails for content moderation, 
+   and automatic tool integration via Pydantic validation, the SDK makes it easy to build robust, collaborative AI systems.
+   This framework represents a significant step forward in agentic software development, reducing boilerplate code while enabling 
+   rich, scalable, and interactive AI experiences.
+
