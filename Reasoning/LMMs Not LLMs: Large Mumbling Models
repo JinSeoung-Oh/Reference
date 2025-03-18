@@ -1,0 +1,138 @@
+### From https://medium.com/aiguys/lmms-not-llms-large-mumbling-models-018ed28373fd
+
+1. Introduction: Memorization vs. Understanding in AI
+   Defining “reasoning” is notoriously challenging. When people ask whether LLMs can truly reason, the question often misses the point.
+   The more interesting inquiry is whether these models are limited to merely memorizing or interpolating from their training data—or 
+   if they can, in principle, generate novel solutions beyond what they’ve seen before.
+
+2. Memorization and Interpolative Retrieval
+   Consider a simple task like solving a linear equation (e.g., "solve ax + b = c"). Most LLMs, when prompted with such examples, 
+   perform well because they rely on memorized templates or patterns. 
+   In school, you might have memorized the “algorithm” for finding 𝑥 in a linear equation, and the LLM mimics that procedure. 
+   However, this is essentially pattern matching; the model is simply recalling or interpolating from its training data. 
+   The process is suboptimal because it represents a higher-order form of memorization rather than true reasoning. 
+   For instance, LLMs still struggle with basic arithmetic operations like digit addition—despite extensive training, 
+   they might only reach around 70% accuracy on new examples. This indicates that their internal “programs” are simply vector functions fitted to data, which are not ideal for handling discrete, symbolic operations.
+
+3. Generating Novel Solutions
+   In contrast, genuine reasoning involves synthesizing new programs or methods from existing parts—solving a problem like 
+   𝑎𝑥+𝑏=𝑐 without having seen that exact formulation before. This ability to generalize from a knowledge of basic arithmetic operations
+   to a novel equation is what we consider true reasoning. 
+   Unfortunately, current LLMs cannot do this on their own; they need to be integrated into systems that perform active inference 
+   or employ search loops to explore solution spaces.
+
+4. The Two Modes of “Reasoning” in AI
+   -a. Memorization/Interpolative Retrieval
+       -1. What It Is:
+           Most LLMs operate by memorizing examples and retrieving or interpolating them to handle tasks.
+       -2. Strengths:
+           They excel at tasks for which they have abundant training data—like solving well-known equations or continuing a sentence.
+       -3. Weaknesses:
+           Their reliance on memorized patterns means that when confronted with a novel task or one that deviates from their training
+           distribution, their performance can drop significantly. 
+           This is evident in tasks such as digit addition, where extensive training does not guarantee high accuracy.
+   -b. Synthesis of Novel Programs
+       -1. What It Is:
+           This form of reasoning would allow a model to combine known operations (addition, subtraction, etc.) in novel ways 
+           to solve tasks it has never directly seen during training.
+       -2. Why It Matters:
+           The ability to synthesize new problem-solving methods is far more valuable than rote memorization. 
+           It represents adaptability and true understanding—hallmarks of human intelligence.
+       -3. Current State:
+           On its own, an LLM typically cannot synthesize new methods; it remains bound to its memorized patterns. 
+           However, integrating LLMs into a broader framework that includes program search or active inference might enable 
+           this form of reasoning.
+       François Chollet’s formal definition of intelligence as “a measure of skill-acquisition efficiency over a scope of tasks” 
+       captures this distinction. 
+       A system that can adapt to entirely new environments—beyond the scope of its training data—demonstrates true reasoning ability.
+
+5. Types of Reasoning
+   Reasoning in AI can be broadly categorized into several types:
+   -a. Deductive Reasoning:
+       Deriving specific conclusions from general premises. For instance, knowing "all humans are mortal" and 
+       "Socrates is a human" allows one to deduce that "Socrates is mortal." 
+       LLMs tend to perform reasonably well in these scenarios when the premises and rules are clearly provided.
+   -b. Inductive Reasoning:
+       Generalizing from specific instances. For example, if the sun has risen every day in the past, 
+       one might inductively conclude it will rise again tomorrow. 
+       However, LLMs’ inductive abilities are limited by their reliance on statistical patterns from their training data.
+   -c. Abductive Reasoning:
+       Inferring the most likely explanation from incomplete data. For example, if the ground is wet, 
+       one might infer that it has recently rained. 
+       LLMs often struggle with this type because it requires a deeper understanding of causal relationships.
+   -d. Common Sense Reasoning:
+       Applying everyday knowledge to interpret typical situations. Despite vast training data, LLMs lack the intrinsic, 
+       experiential grounding that humans possess, leading to errors in common sense tasks.
+
+   Additionally, reasoning can be:
+   -a. Monotonic:
+       Where conclusions remain fixed even if new information is added.
+   -b. Non-monotonic:
+       Where new data can change previously drawn conclusions. 
+       LLMs, which are based on static patterns, particularly struggle with non-monotonic reasoning.
+
+6. Search Algorithms and Test-Time Scaling
+   In an effort to overcome the limitations of pure memorization, techniques like Chain-of-Thought (CoT) have been introduced. 
+   These methods attempt to simulate reasoning by prompting the model to explain its thought process step by step. 
+   While this approach has shown improvements, it primarily leads the model to mimic a chain of reasoning it has seen in 
+   its training data, rather than constructing genuinely novel reasoning paths.
+
+   Test-time scaling is another approach. By allocating extra computational resources during inference, 
+   models can generate multiple reasoning paths, evaluate them, and select the best one. 
+   Methods such as CoT voting, Tree-of-Thought exploration, and rejection sampling are used. 
+   However, these techniques optimize for better output by brute-force searching through many possibilities—they don’t fundamentally 
+   enhance the model’s internal reasoning capability.
+
+7. DeepSeek’s Approach to Reasoning
+   DeepSeek’s R1 system represents a departure from traditional test-time scaling. Instead of just sampling multiple chains of thought,
+   DeepSeek integrates Reinforcement Learning (RL) into a Markov Decision Process (MDP) framework where:
+   -a. States are represented by the full context window (sequences of tokens).
+   -b. Actions are the token emissions.
+   -c. Transitions are deterministic, simply appending tokens.
+   -d. Rewards are given when correct solutions emerge.
+   DeepSeek’s method uses Generalized Reward-weighted Policy Optimization (GRPO) to adjust the model’s parameters, 
+   encouraging the generation of improved reasoning trajectories. 
+   This approach transforms reasoning into a learnable skill rather than a byproduct of repeated inference, 
+   moving closer to the ideal of synthesizing novel solutions.
+
+8. “Prompt Augmentations” vs. Chain-of-Thought
+   One intriguing idea is “prompt augmentations” (PA). For any given task, adding a carefully crafted piece of extra text to
+   the prompt can significantly increase the probability that the model solves the task correctly. 
+   Unlike a full Chain-of-Thought (which attempts to explain the reasoning process), 
+   prompt augmentations are simply additional instructions that guide the model toward a correct answer. 
+   They might appear nonsensical to humans but can be highly effective for AI.
+
+   There are three types of prompt augmentations:
+   -a. Universal Instructions:
+       General phrases like “Let’s think step by step.”
+   -b. Task-Specific Instructions:
+       Custom prompts designed for particular problems.
+   -c. AI-Optimized Instructions:
+       Precisely tuned augmentations for both the task and the specific model, potentially produced through reinforcement learning.
+
+9. LLM “Reasoning Traces” and the Reversal Curse
+   A common misconception is that the intermediate tokens (or “mumbling”) produced by LLMs represent genuine reasoning traces. 
+   In reality, these are merely superficial imitations of reasoning. 
+   Studies have shown that these traces often do not follow logical rules and can even include operations that are not meaningful 
+   in a mathematical or algorithmic sense.
+
+   For example, research on the “Reversal Curse” demonstrates that a true reasoning model should produce consistent answers 
+   regardless of the order in which information is presented. 
+   However, many LLMs vary their responses when the order of inputs is changed—indicating that their reasoning is largely dependent on
+   memorized patterns rather than a stable, underlying logical process.
+
+10. Conclusion: Bridging the Gap
+    In conclusion, while current AI models are highly capable at memorizing and retrieving information, 
+    they fall short of true understanding. They primarily excel by interpolating from vast training data rather than synthesizing new,
+    abstract reasoning paths. 
+    This gap between memorization and genuine conceptual reasoning is a core limitation of transformer-based architectures.
+
+    To overcome this, researchers propose integrating structured reasoning components—such as cognitive frameworks, 
+    hierarchical knowledge embeddings, analogical reasoning modules, and neuro-symbolic hybrids—into AI architectures. 
+    The aim is to endow models with an internal, adaptable world model that supports both systematic, 
+    rule-based inference (System 2 thinking) and rapid, pattern-based processing (System 1 thinking).
+
+    By moving beyond mere statistical pattern matching and toward systems that can actively construct and revise internal
+    representations of knowledge, we may eventually develop AI that not only appears intelligent but truly understands 
+    and reasons about the world.
+
