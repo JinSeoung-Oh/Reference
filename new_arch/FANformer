@@ -1,0 +1,123 @@
+### From https://levelup.gitconnected.com/fanformer-is-the-new-game-changing-architecture-for-llms-d56999fab7f2
+
+1. Introduction
+   Large language models (LLMs) have long surprised us with their capabilities, and many expected that scaling them would eventually
+   lead to artificial general intelligence (AGI). 
+   However, recent benchmarks have shown that GPT‑4.5—the largest and most advanced OpenAI chat model—has underperformed compared
+   to several smaller models. 
+   For example, while DeepSeek‑V3 scores 39.2% Pass@1 accuracy on AIME 2024 and 42% on SWE‑bench Verified, GPT‑4.5 scores only 36.7% 
+   and 38%, respectively.
+
+   This performance gap raises the question: do we need a better LLM architecture to scale further?
+   Researchers believe we do. A promising candidate, called FANformer, is built by integrating a Fourier Analysis Network (FAN) 
+   into the traditional Transformer’s attention mechanism. 
+   Experimental results are very promising—FANformers consistently outperform standard Transformers when scaling up model size 
+   and training tokens. 
+   For instance, a FANformer with 1 billion parameters outperforms other open‑source LLMs of comparable size and training tokens.
+
+2. The Role of Fourier Analysis Networks (FANs)
+   Traditional deep neural networks and multi-layer perceptrons (MLPs) excel at capturing patterns from training data, 
+   but they struggle with modeling periodicity—hidden cyclical patterns that are common in many datasets. 
+   Consider a simple example: a Transformer might struggle to learn a modulo operation or a sine function even with 
+   ample training resources.
+
+   FANs directly address this shortcoming. They use principles from Fourier Analysis to encode periodic patterns alongside 
+   conventional linear and nonlinear transformations. 
+   This means that a FAN layer can capture the cyclical nature of data (using sine and cosine functions) in a way that an ordinary
+   MLP cannot.
+   
+   Mathematically, a FAN layer is defined as follows:
+   FANLayer(𝑋)=𝜎([𝑋⋅𝑊(𝑝)∥sin⁡(𝑋⋅𝑊(𝑝ˉ))+cos(𝑋⋅𝑊(𝑝ˉ))+𝐵(𝑝ˉ)])
+   where:
+   -a. 𝑋 is the input,
+   -b. 𝑊(𝑝) and 𝑊(𝑝ˉ) are learnable projection matrices,
+   -c. 𝐵(𝑝ˉ) is the bias term,
+   -d. 𝜎 represents a non-linear activation function,
+   -e. ∥ denotes concatenation.
+   In contrast, a standard MLP layer performs only a linear transformation followed by a non-linear activation, 
+   missing the opportunity to capture periodic features explicitly.
+
+   Visual and mathematical comparisons in the referenced research papers show that FAN layers significantly improve periodicity 
+   modeling—this capability is central to FANformer’s performance boost.
+
+3. Building the Attention Mechanism in FANformer
+   FANformer modifies the classic decoder-only Transformer architecture by replacing the standard attention module with
+   the ATtention-Fourier (ATF) module. Here’s how it works: 
+   -a. Step 1: Input Embedding and Fourier Transformation
+               Given an input sequence 𝑠 of length 𝑙, it is first mapped to an input embedding:
+               𝑋^(0)={𝑥(1),𝑥(2),…,𝑥(𝑙)}
+               Each input embedding 𝑋 is transformed using a modified FAN layer. In this step, the activation function 
+               𝜎 in the FAN layer is replaced by an identity function (𝜎(𝑥)=𝑥 for the Fourier transformation:
+               𝑋^(𝐹)=FANLayer′(𝑋)
+   -b. Step 2: Computing Query, Key, and Value
+               Next, the transformed embedding 𝑋^(𝐹) is passed through linear layers to compute the query (𝑄), key (𝐾), 
+               and value (𝑉) matrices:
+               𝑄=𝑋^(𝐹)⋅𝑊(𝑄), 𝐾=𝑋^(𝐹)⋅𝑊(𝐾), 𝑉=𝑋^(𝐹)⋅𝑊(𝑉)
+               where 𝑊(𝑄), 𝑊(𝐾), and 𝑊(𝑉) are learnable weight matrices.
+   -c. Step 3: Scaled Dot-Product Attention
+       The standard scaled dot-product attention is then computed:
+       Attention(𝑄,𝐾,𝑉)=softmax((𝑄⋅𝐾^⊤)/np.root(𝑑(ℎ)))⋅𝑉
+       Here, 𝑑(ℎ) is the model’s hidden dimension. Note that ATF(X) is mathematically equivalent to:
+       Attention(FANLayer′(𝑋))
+       This shows that the Fourier transformation enriches the input representations without changing the fundamental attention
+       mechanism.
+
+   -d. Multi-Head ATF
+       FANformer extends the ATF module to a multi-head setup. For a given input 𝑋, it is projected into 
+       𝑘 independent heads:
+       𝑄^(𝑖)=𝑋⋅𝑊(𝑄)^(𝑖), 𝐾^(𝑖)=𝑋⋅𝑊(𝐾)^(𝑖) , 𝑉^(𝑖)=𝑋⋅𝑊(𝑉)^(𝑖)
+       where 𝑑(𝑘)=𝑑(ℎ)/𝑘 is the dimension per head. 
+       The outputs of all heads are concatenated and passed through a final linear transformation using an output weight matrix 𝑊(𝑂)
+       A hyperparameter 𝑝 (defaulted to 0.25) controls the proportion of 𝑋 processed by the periodic vs. non-periodic components
+       within the FAN layer.
+
+4. Stacking Up to a FANformer
+   A FANformer is built by stacking 𝑁 FANformer layers, where each layer includes:
+   -a. Multi-head ATF Module: 
+       Processes the input through the modified attention mechanism described above.
+   -b. Feedforward Network (FFN) Module:
+       Applies a two-layer transformation with the SwiGLU activation function:
+       SwiGLU(𝑥)=(𝑥⋅𝑊(1))⊗𝜎(𝑥⋅𝑊(2))
+       where 𝑊(1), 𝑊(2), and 𝑊(3) are learnable weight matrices and ⊗ denotes element-wise multiplication.
+   -c. Residual Connections and Pre-Normalization:
+       Each layer’s input 𝑋(𝑛) is normalized, processed through the Multi-head ATF and FFN modules, 
+       and then added back to the original input (residual connection).
+
+   This stacking creates a deep model where each layer refines the conceptual representations through periodic transformations,
+   making FANformer both efficient and powerful in capturing long-range dependencies and periodic patterns.
+
+5. Experimental Results
+   -a. Scaling Experiments:
+       -1. FANformer consistently outperforms standard Transformers across all model sizes.
+       -2. A FANformer with 1 billion parameters shows superior performance compared to other open-source models of similar scale, 
+           while using only 69.2% of the parameters of a standard Transformer.
+       -3. Additionally, FANformer requires 20.3% fewer training tokens to achieve comparable performance, 
+           demonstrating enhanced efficiency.
+   -b. Downstream Tasks:
+       -1. FANformer-1B was evaluated on eight benchmarks including ARC-C, ARC-E, BoolQ, HellaSwag, OBQA, PIQA, SCIQ, and WinoGrande.
+       -2. FANformer-1B’s zero-shot performance outperforms many comparable models, even matching the performance of 
+           state-of-the-art models around the 1B parameter mark.
+       -3. In mathematical reasoning tasks, FANformer shows a distinct advantage by learning underlying rules rather than 
+           relying solely on memorization, as demonstrated in tasks like modular addition and linear regression.
+   -c. Training Dynamics:
+       -1. Initially, FANformer’s loss decreases more slowly than that of a standard Transformer, 
+           likely due to the model learning to capture periodic patterns.
+       -2. Over time, FANformer converges faster and exhibits better generalization on unseen data.
+   -d. Instruction-Following with SFT:
+       -1. When further fine-tuned on instruction-following data (e.g., tulu-3-sft-olmo-2-mixture), 
+           FANformer-1B-SFT outperforms OLMo-1B-SFT on benchmarks like MMLU, TruthfulQA, and AlpacaEval.
+
+6. Conclusion
+   FANformer represents a promising advancement in LLM architecture by integrating Fourier Analysis Networks (FANs) into 
+   the Transformer’s attention mechanism. 
+   By capturing periodic patterns explicitly and efficiently, FANformer scales better with model size and training tokens 
+   while achieving superior performance on both general and specialized tasks. 
+   It demonstrates that architectural modifications—rather than just scaling—can unlock significant improvements in efficiency 
+   and capability.
+
+   The experimental results highlight that FANformer-1B, despite using fewer parameters and training tokens, 
+   consistently outperforms traditional Transformers and even rivals state-of-the-art models in many cases. 
+   This makes FANformer a strong candidate for future large-scale language models, particularly in applications requiring
+   robust generalization and efficient computation.
+
+
