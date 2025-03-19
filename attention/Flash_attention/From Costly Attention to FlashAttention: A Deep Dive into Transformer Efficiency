@@ -1,0 +1,86 @@
+### From https://generativeai.pub/from-costly-attention-to-flashattention-a-deep-dive-into-transformer-efficiency-62a7bcbf43d6
+
+1. The Self-Attention Mechanism and Its Cost
+   In a Transformer, each input token is transformed into three vectors: queries (Q), keys (K), and values (V). 
+   The core idea is that every token in the sequence uses its query vector to "ask" about the relevance of all other tokens 
+   (whose keys represent what each token is about). 
+   The model then computes the dot product between the query and every key to generate a score matrix 𝑄𝐾^𝑇
+   These scores are scaled by np.root(𝑑𝑘)(where 𝑑_𝑘 is the dimensionality of the key vectors) to stabilize the gradients,
+   then passed through a softmax function to obtain a probability distribution. 
+   Finally, this distribution is used to compute a weighted sum of the value vectors,
+   resulting in an output that integrates information from across the entire sequence.
+
+   Mathematically, the attention is expressed as:
+   Attention(𝑄,𝐾,𝑉)=softmax((𝑄𝐾^𝑇)/np.root(𝑑_𝑘))𝑉
+   However, notice that:
+   -a. The matrix 𝑄𝐾^𝑇 is of size 𝑛×𝑛 for a sequence of length 𝑛
+   -b. Computing this matrix requires 𝑂(𝑛^2⋅𝑑) operations.
+   -c. Storing this matrix demands 𝑂(𝑛^2) memory.
+   For instance, if 𝑛=1024, the resulting matrix has over one million entries. 
+   Doubling 𝑛 to 2048 would quadruple the number of entries, rapidly escalating both computational time and memory usage.
+
+2. Hardware Constraints and Bottlenecks
+   Modern GPUs have high computational throughput, yet their performance is often limited by memory bandwidth. 
+   While GPUs such as the NVIDIA A100 or H100 boast terabytes per second of bandwidth in their high-bandwidth memory (HBM), 
+   the fast on-chip memory (shared memory or cache) is much smaller—only a few hundred kilobytes per streaming multiprocessor.
+
+   Standard self-attention implementations must repeatedly read from and write to the global memory to store large 
+   intermediate matrices (like 𝑄𝐾^𝑇 and the subsequent softmax output). 
+   These frequent and voluminous memory transfers lead to memory-bound operations, 
+   where the GPU’s compute cores are left waiting for data, severely hampering performance.
+
+3. FlashAttention: A Smart, IO-Aware Approach
+   FlashAttention was developed to address these inefficiencies without sacrificing the exactness of the attention calculation. 
+   Here’s how it works:
+   -a. Tiling and Blocking: 
+       Instead of computing the entire 𝑛×𝑛 attention matrix at once, FlashAttention partitions the matrices into smaller blocks 
+       that can fit entirely into the GPU’s fast on-chip memory (SRAM). For example, if blocks of 128 tokens are used, 
+       each block of 𝑄, 𝐾, and 𝑉 is processed separately.
+   -b. Block-wise Computation:
+       For each block, FlashAttention calculates the dot products between the corresponding queries and keys to obtain a submatrix. 
+       This block is immediately processed—applying the softmax and then multiplying with the corresponding block of values—to 
+       produce a partial output. 
+       By working on these blocks, intermediate results remain in fast memory and never have to be written to slower global memory.
+   -c. Online Softmax Accumulation:
+       One critical challenge is ensuring the softmax is correctly computed over the entire sequence. 
+       FlashAttention handles this by maintaining running statistics (like the current maximum and sum of exponentials) 
+       for each query across blocks. 
+       These accumulators adjust the softmax calculations so that the final results are mathematically equivalent to computing 
+       softmax over the full matrix.
+   -d. Fusion of Operations:
+       By fusing the operations into a single, optimized GPU kernel, FlashAttention minimizes the number of kernel launches 
+       and memory transfers. 
+       This fusion means that multiple steps—dot product, softmax, and weighted sum—are executed in a tightly coupled loop 
+       that maximizes data reuse and keeps all intermediate results in registers or shared memory.
+
+4. Performance Gains
+   Implementing FlashAttention has been a game-changer:
+   -a. Speed:
+       Training time can drop to nearly half of what it was with standard attention mechanisms, 
+       with reported speed improvements of 2–4×.
+   -b. Memory Efficiency:
+       The memory footprint for attention calculations is dramatically reduced—often to only 5–20% of the original memory usage. 
+       This allows for larger batch sizes or longer sequence lengths without running out of memory.
+   -c. Scalability:
+       With FlashAttention, context lengths can be increased from a few thousand tokens to tens of thousands (or more), 
+       enabling more sophisticated applications such as long document summarization and extended conversational AI.
+   On high-end GPUs like the H100, further iterations (FlashAttention-2 and FlashAttention-3) have pushed performance even higher 
+   by leveraging mixed-precision arithmetic and hardware-specific optimizations. 
+   These improvements unlock nearly the full theoretical throughput of the GPU, which is critical as model sizes and 
+   input lengths continue to grow.
+
+5. Conclusion
+   While self-attention has unlocked many capabilities of transformer models, its quadratic scaling in time and memory has become
+   a bottleneck—especially with longer sequences. 
+   FlashAttention addresses this core efficiency challenge by rethinking how attention is computed: 
+   tiling the computation, keeping intermediate data in fast on-chip memory, and fusing operations to reduce memory access overhead.
+
+   The result is an algorithm that delivers the exact same attention output as the standard method but with significant improvements 
+   in speed and memory usage. 
+   This optimization is vital for training larger models, extending context windows, 
+   and ultimately making transformer architectures more scalable and cost-effective.
+
+   In short, while the power of self-attention is undeniable, innovations like FlashAttention are essential for making 
+   that power practical. 
+   As we continue to push the boundaries of transformer models, efficient algorithms that leverage hardware capabilities 
+   to their fullest will be the key to unlocking the next generation of AI breakthroughs.
