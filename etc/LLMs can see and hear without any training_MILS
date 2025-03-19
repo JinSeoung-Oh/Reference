@@ -1,0 +1,108 @@
+### From https://arxiv.org/pdf/2501.18096
+### https://github.com/facebookresearch/MILS
+
+1. Introduction to Test-Time Reasoning and MILS
+   Test-time reasoning has emerged as a powerful method to solve challenging tasks with large language models (LLMs). 
+   Rather than relying solely on training to imbue models with robust problem-solving skills, 
+   recent approaches exploit additional compute at inference time—allowing models to “think” more deeply when they’re prompted.
+
+   OpenAI’s O1 is one such example: a model fine-tuned with reinforcement learning 
+   (using Generalized Reward-weighted Policy Optimization, or GRPO) that leverages extra test-time computation. 
+   O1’s design uses techniques like Chain-of-Thought (CoT) reasoning, 
+   where the model “rolls out” an execution plan for complex math or coding tasks. 
+   Even without extra training, simply using test-time compute can lead to impressive improvements on challenging tasks.
+
+   Building on these ideas, our approach—MILS: Multimodal Iterative LLM Solver—takes test-time reasoning further 
+   by addressing multimodal understanding and generation without any additional training. 
+   MILS leverages the innate reasoning ability of LLMs in a fully gradient-free, iterative process. 
+   It does this by splitting the reasoning process into two core modules: a GENERATOR and a SCORER.
+
+2. The MILS Framework
+   -a. The Generator Module
+       The GENERATOR is typically modeled using an LLM. Its goal is to propose candidate solutions to a given task. Here’s how it works:
+       -1. Input:
+           The GENERATOR takes a text description of the task, denoted as 𝑇. This text could describe the problem or 
+           provide contextual instructions.
+       -2. Candidate Generation:
+           It generates one or more candidate solutions, 𝐶. These candidates might be in the form of text, 
+           but they can also be adapted to other modalities (for example, text prompts that can be fed into a text-to-image model).
+       -3. Iterative Improvement:
+           In subsequent iterations, the GENERATOR incorporates feedback from the SCORER (if provided) to adjust and 
+           improve the candidate solutions. In some cases, the test sample itself is included as input (useful for tasks like image editing).
+   -b. The Scorer Module
+       The SCORER evaluates the candidate solutions produced by the GENERATOR. Its role is to provide a scalar score 𝑆∈𝑅
+       for each candidate 𝐶 based on how well the candidate solves the task. Key aspects include:
+       -1. Input for Evaluation:
+           The SCORER receives both the test sample (which could be text, image, video, etc.) and the candidate solution 𝐶
+       -2. Scoring Mechanism:
+           The SCORER can be implemented in various ways:
+           -1) It might be a learned model such as CLIP (especially for image-related tasks).
+           -2) It can also be a low-level function that compares visual or textual features.
+       -3. Output and Feedback:
+           After scoring, the SCORER sorts the candidates and returns the top-K candidates along with their scores. 
+           These scores are then fed back into the GENERATOR as part of its prompt for the next iteration.
+   -c. The Iterative Optimization Process
+       MILS operates in an iterative loop where the GENERATOR and SCORER collaborate:
+       -1. Initialization:
+           The process may start with an initial candidate set (e.g., a set of possible image captions) or 
+           may generate candidates from scratch.
+       -2. Iteration:
+           For a fixed number of iterations (or until convergence), the following steps occur:
+           -1) Candidate Generation:
+               The GENERATOR produces a set of candidate solutions 𝐶 based on the task description 𝑇 and any prior feedback.
+           -2) Evaluation:
+               The SCORER evaluates these candidates, producing scores that quantify their quality.
+           -3) Feedback Loop:
+               The scores and associated insights are fed back into the GENERATOR, guiding it to produce improved candidate solutions 
+               in the next round.
+      -3. Convergence:
+          The loop continues until the candidate solutions stabilize (i.e., the candidate set shows minimal change between iterations) 
+          or a maximum number of steps is reached.
+      -4. Final Output:
+          The best candidate, as determined by the SCORER, is selected as the final solution to the task.
+      This iterative process allows MILS to refine its answers over multiple rounds, effectively “reasoning” through complex tasks 
+      without any additional training.
+
+3. Applications and Advantages of MILS
+   -a. Multimodal Tasks
+       One of MILS’s most striking attributes is its versatility. By simply swapping out the GENERATOR and SCORER modules, 
+       MILS can tackle tasks across various modalities:
+       -1. Image Captioning:
+           MILS uses a standard LLM (like Llama) as the GENERATOR and a vision-language model (like CLIP) as the SCORER 
+           to generate and refine image captions.
+       -2. Text-to-Image Generation:
+           A GENERATOR may be created by chaining an LLM with a text-to-image model. Here, the LLM acts as a “prompt rewriter,”
+           improving the initial prompts and thereby boosting the quality of generated images.
+       -3. Multimodal Arithmetic and Editing:
+           By inverting multimodal embeddings into discrete text and then using the iterative feedback loop, 
+           MILS can support novel applications like multimodal arithmetic—combining information across modalities in creative ways.
+  -b. Emergent Zero-Shot Capabilities
+      What’s truly remarkable about MILS is that it achieves these sophisticated tasks without any additional training on 
+      the specific task. 
+      While most traditional systems rely on large amounts of task-specific paired data (e.g., image-caption pairs for captioning), 
+      MILS leverages test-time reasoning and iterative refinement. 
+      This emergent zero-shot capability means that MILS can adapt to a wide variety of tasks and domains using only 
+      the base reasoning power of LLMs combined with an off-the-shelf SCORER.
+  -c. Efficiency and Flexibility
+      MILS is a gradient-free approach—meaning it doesn’t require backpropagation during the iterative reasoning process. 
+      This significantly reduces computational costs while allowing the system to explore a vast space of potential solutions 
+      dynamically. 
+      It’s a powerful method that harnesses test-time compute to optimize outputs, making it a practical solution for complex tasks 
+      that would otherwise demand specialized training.
+
+4. Conclusion
+   In summary, MILS (Multimodal Iterative LLM Solver) leverages the inherent reasoning abilities of large language models at test time.
+   By using an iterative loop that couples a GENERATOR (which proposes candidate solutions) with a SCORER 
+   (which evaluates those candidates), MILS can refine its outputs on the fly—without any additional training. 
+   This approach not only enhances performance on complex tasks (ranging from multimodal captioning and text generation to editing 
+   and even multimodal arithmetic) but also exhibits emergent zero-shot capabilities that traditional models lack.
+
+   While many prior methods relied on specialized training data and complex gradient-based optimization, 
+   MILS stands out for its simplicity and adaptability. It exemplifies how test-time compute can be harnessed to improve reasoning, 
+   making AI systems more capable of tackling novel tasks and adapting to new modalities.
+
+   For further details on the implementation, theoretical underpinnings, and extensive experimental results, 
+   please refer to the complete paper and supplementary materials. 
+   This work demonstrates a promising pathway toward AI systems that can dynamically reason and improve their outputs—bringing us 
+   a step closer to models that truly understand the tasks they perform.
+
