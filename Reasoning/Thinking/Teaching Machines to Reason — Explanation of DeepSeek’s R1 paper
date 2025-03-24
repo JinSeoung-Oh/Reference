@@ -1,0 +1,121 @@
+### From https://medium.com/@nirdiamant21/teaching-machines-to-reason-explanation-of-deepseeks-r1-paper-bb7ba628a2e7\
+
+1. Introduction: Beyond Memorization
+   For years, the AI community has debated whether large language models (LLMs) truly "understand" language or simply memorize 
+   and retrieve patterns. 
+   Most LLMs—trained via supervised learning—excel at regurgitating memorized program templates 
+   (e.g., solving “ax + b = c” by recalling a fixed algorithm). 
+   While this approach works for many tasks, it limits the model’s ability to handle truly novel problems. 
+   In essence, these models are very good at interpolating from the data they have seen, 
+   but they struggle to synthesize new reasoning procedures when confronted with problems they haven’t explicitly encountered 
+   during training.
+
+   A major breakthrough in addressing this challenge has been the introduction of test‑time reasoning techniques. 
+   Models like OpenAI’s “o1” series have demonstrated that giving an LLM more time to think—using techniques such as Chain‑of‑Thought 
+   (CoT) reasoning—can substantially improve performance on complex tasks (like advanced math and coding). 
+   However, while these methods improve results through iterative planning, 
+   the key question remains: What’s the best way to teach an AI system how to reason in a truly novel, adaptive way?
+
+2. The Technical Innovation: Group Relative Policy Optimization (GRPO)
+   DeepSeek’s recent work introduces a core algorithm called Group Relative Policy Optimization (GRPO). 
+   GRPO reframes the reasoning process using reinforcement learning principles by treating the LLM as an agent in a decision‑making
+   process. Here’s a closer look at how it works:
+
+   -a. Candidate Generation as a Group Process:
+       When faced with a challenging task, instead of generating a single answer, the model produces a group of candidate solutions. 
+       Think of it as a student writing down several potential approaches to a problem.
+   -b. Scoring Through Advantage Normalization:
+       The model then compares these candidate answers by calculating an “advantage” for each one:
+       Advantage = (Answer’s Score−Average Group Score) / Standard Deviation of Scores
+       This normalization ensures that the model can identify which candidate truly stands out, 
+       independent of the problem’s inherent difficulty.
+   -c. Controlled Learning:
+       The model updates its internal parameters using reinforcement learning techniques 
+       (for example, Proximal Policy Optimization, or PPO) with two key safeguards:
+       -1. Clipping: Prevents drastic changes in behavior by limiting how much the policy can update in a single step.
+       -2. KL Divergence Monitoring: Ensures the model doesn’t deviate too far from its original, pre-trained behavior.
+       This group-based, reward-driven approach allows the model to iteratively refine its answers until it converges on 
+       a high-quality solution. 
+       Unlike conventional methods that simply sample multiple reasoning paths at inference time, 
+       GRPO actively changes the model’s behavior to favor better reasoning trajectories.
+
+3. The Two-Stage Breakthrough
+   DeepSeek’s solution is implemented in two major stages:
+   -a. Stage 1: DeepSeek‑R1‑Zero — Pure Reinforcement Learning
+       -1. No Example Dependency: 
+           In this stage, the model is trained using only reinforcement learning—without any explicit training examples. 
+           The idea is to see if the AI can learn to reason purely from trial and error.
+       -2. Learning Through Self-Feedback:
+           The model generates a candidate solution, then “thinks” about its reasoning by generating intermediate steps 
+           (encapsulated within <think> tags) before providing a final answer within <answer> tags.
+       -3. Emergent Behaviors:
+           Remarkably, the system learns to spend more time on harder problems, to self-verify its reasoning, 
+           and even to pause and restart its approach when it detects that its current strategy isn’t working.
+   -b. Stage 2: DeepSeek‑R1 — Refining the Diamond
+       -1. Building on a Strong Foundation:
+           Recognizing that pure trial and error can produce effective but sometimes idiosyncratic solutions, 
+           the team introduced a refinement phase. 
+           They curated a foundation of high-quality examples—thousands of well‑explained solutions—which serve as a solid base
+           for further training.
+       -2. Intensive Reasoning Training:
+           The model is then further trained using GRPO on a broad set of problems, not only being rewarded for correct answers 
+           but also for clear, logical explanations of its reasoning.
+       -3. Data Generation and Filtering:
+           The system generates hundreds of thousands of candidate solutions and filters out the best ones, 
+           ensuring the training data is of high quality.
+       -4. Balancing Capabilities:
+           Finally, the model is tuned to balance high-level reasoning skills with clear communication and safe behavior, 
+           ensuring it’s both an expert in problem-solving and easy for users to understand.
+  The result of this two-stage process is a model that not only excels on challenging benchmarks 
+  (such as nearly 80% accuracy on AIME problems) but also demonstrates robust reasoning abilities across diverse 
+  domains—from competitive programming to general knowledge.
+
+4. “Prompt Augmentations” vs. Chain-of-Thought
+   A further insight from this research is the concept of Prompt Augmentations (PA). 
+   While many approaches have focused on using Chain-of-Thought prompts to simulate reasoning, 
+   these often only lead the model to mimic the structure of human reasoning without genuine understanding.
+   -a. Prompt Augmentations:
+       These are extra pieces of text added to a task prompt that make it more likely for the model to produce the correct answer. 
+       Importantly, these augmentations don’t necessarily need to make sense to humans—they just need to work for the model.
+   -b. Different Types of PAs:
+       -1. Universal Instructions: Generic prompts like “Let’s think step by step.”
+       -2. Task-Specific Instructions: Custom prompts designed for particular problems.
+       -3. AI-Optimized Instructions: Precisely tuned augmentations that may seem odd to us but lead to much better performance.
+   This strategy acknowledges that the model doesn’t truly “understand” but can be guided to produce the right output 
+   if provided with the right cues.
+
+5. Implications and the Road Ahead
+   The key takeaway is that the future of AI reasoning isn’t simply about building bigger models or using more compute at inference
+   time. It’s about fundamentally changing how models learn to reason:
+   -a. From Memorization to Adaptation:
+       Rather than only memorizing patterns, models must learn to synthesize new reasoning paths—akin to a student solving 
+       a problem they’ve never seen before.
+   -b. Efficient Skill Acquisition:
+       As François Chollet described, intelligence is a measure of how efficiently a system can acquire new skills relative 
+       to prior knowledge and experience.
+   -c. Integration of Reinforcement Learning:
+       DeepSeek’s use of GRPO demonstrates that by framing reasoning as a learnable, iterative process, 
+       models can improve their performance in a stable and scalable way.
+   -d. Domain Specialization:
+       By applying RFT to already powerful models (especially those designed for logical reasoning), 
+       we can create specialized experts in fields like law, finance, or medicine with just a few dozen high-quality examples.
+   This research suggests that the next breakthrough in AI reasoning may not come from simply scaling up transformers, 
+   but from fundamentally rethinking how they learn and adapt to new challenges.
+
+6. Conclusion
+   The state of AI reasoning is rapidly evolving. While traditional transformer-based models excel at memorization and 
+   pattern retrieval, they struggle with genuine, adaptable reasoning. 
+   OpenAI’s recent innovations with the “o1” models, and DeepSeek’s pioneering GRPO algorithm, 
+   showcase a promising new direction: training models to refine their own reasoning through reinforcement learning. 
+   By shifting from merely memorizing to synthesizing new solutions through iterative feedback, 
+   these approaches pave the way for AI systems that are not only more accurate but also better at handling novelty.
+
+   Furthermore, by integrating strategies like prompt augmentations, we can further enhance the reasoning capabilities of these 
+   models. The result is a generation of AI that not only mimics human reasoning but gradually learns to reason in a more human-like,
+   flexible manner—moving closer to true understanding.
+
+   This represents a significant step forward in how we think about AI reasoning. 
+   Rather than relying solely on massive data and brute-force pattern recognition, 
+   we are developing systems that learn to reason, self-correct, and adapt—qualities that are essential for
+   achieving genuine artificial general intelligence.
+
