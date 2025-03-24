@@ -1,0 +1,85 @@
+### From https://medium.com/towards-artificial-intelligence/reinforcement-fine-tuning-rft-749021dc6752
+
+1. Introduction: RFT vs. SFT
+   Imagine you have a language model and you want it to answer questions exactly the way you want. 
+   Traditional approaches—what we call Supervised Fine-Tuning (SFT)—involve training the model on a vast number of input-output pairs.
+   You feed it thousands of examples, and it learns to mimic those responses. 
+   SFT is like filling the model’s “head” with information so that it can recall the right answer when prompted.
+
+   In contrast, Reinforcement Fine-Tuning (RFT) takes a different approach. Instead of requiring a mountain of data, 
+   RFT teaches the model through a feedback loop. 
+   Think of it as training a dog: you reward it for performing the correct trick and gently penalize it for mistakes. 
+   Here, instead of treats, the model receives numerical rewards based on how accurate its answers are. 
+   Over time, it learns not by memorizing every example but by refining its approach through trial and error.
+
+2. How RFT Works
+   -a. Step 1: Prepare a High-Quality Dataset
+       The first requirement is a dataset that contains tasks or questions along with objective, verifiable answers. 
+       For example, if you want a model to become a top-notch medical diagnosis assistant, 
+       you’d supply it with case descriptions and the corresponding correct diagnoses. 
+       The key here is that each task must have a clear right or wrong answer.
+   -b. Step 2: Designing the Grading Mechanism
+       The grading mechanism is central to RFT. Instead of simply copying answers, the model must produce an output that is 
+       then evaluated by a separate system—this could be a dedicated model or a heuristic function. 
+       The grader assesses the answer:
+       -1. Binary Feedback: It might simply indicate “correct” or “incorrect.”
+       -2. Partial Credit: It can also provide a nuanced score, awarding full credit for a perfect answer, 
+                           partial credit for a nearly correct response (perhaps if the logical steps are right but there’s a minor
+                           error), and zero for a completely wrong answer.
+
+       The feedback is quantified into a reward signal that guides the learning process. 
+       Evaluation metrics like top-1, top-5, or top-max accuracy help measure whether the model's answer ranks correctly
+       among multiple candidate answers.
+   -c. Step 3: The Training Loop
+       Now comes the iterative training loop, which is the heart of RFT:
+       -1. Candidate Generation:
+           The model generates one or more candidate answers for a given task. For instance, for a math problem, 
+           it might produce several potential solutions.
+       -2. Grading:
+           Each candidate answer is fed into the grading mechanism. 
+           The grader calculates a score for each candidate based on its correctness and adherence to the task criteria.
+       -3. Feedback and Update:
+           The scores are then used as rewards in a reinforcement learning algorithm—typically a variant of 
+           Proximal Policy Optimization (PPO). 
+           The model’s parameters are updated to increase the likelihood of producing high-scoring answers in future iterations. 
+           Essentially, the model is “aligned” to what we want it to say rather than simply memorizing a fixed set of examples.
+       -4. Iteration:
+           This process repeats over multiple iterations (or episodes) until the candidate answers stabilize and 
+           the model consistently produces correct responses.
+
+3. Comparison with Other Methods
+   -a. Supervised Fine-Tuning (SFT):
+       SFT teaches new concepts to a model by feeding it a large number of examples. 
+       It’s powerful for teaching a model things it hasn’t seen before (like a new language), 
+       but it typically requires vast amounts of data.
+   -b. Reinforcement Fine-Tuning (RFT):
+       RFT, on the other hand, is designed to align a model’s existing capabilities to our needs. 
+       It is particularly effective for models that are already strong at reasoning (e.g., the o3 series) because it fine-tunes 
+       how the model responds rather than what it knows. 
+       RFT is data-efficient—sometimes achieving great results with only a few dozen high-quality examples.
+   -c. RLHF vs. RFT:
+       While RLHF (Reinforcement Learning from Human Feedback) focuses on making models more polite and safe by incorporating 
+       subjective human ratings, RFT uses objective accuracy as its feedback. 
+       This makes RFT especially valuable in domains like math, coding, law, or finance, where precision is critical.
+
+4. Real-World Applications
+   Imagine a law firm that needs a specialized AI assistant for legal research. Instead of using a general-purpose model 
+   that might need thousands of examples to learn legal reasoning, 
+   they can take an already powerful reasoning model and apply RFT with just a few dozen high-quality legal cases. 
+   The model is rewarded for producing accurate legal analyses and penalized for errors, gradually honing its expertise.
+
+   Similarly, in financial risk assessment, banks can fine-tune a model using RFT on a small dataset of verified loan applications 
+   and fraud cases. 
+   The model learns to evaluate risks more precisely than if it were simply trained with SFT on vast amounts of data.
+
+5. Conclusion
+   Reinforcement Fine-Tuning (RFT) transforms how we customize AI models by teaching them to reason through trial and error rather 
+   than simply memorizing examples. 
+   This approach is highly efficient—achieving strong performance with much less data—and it aligns the model's responses 
+   with our precise requirements. 
+   For domains where objective accuracy is paramount, such as mathematics, law, or finance, RFT offers a powerful, 
+   cost-effective method to turn a strong, general-purpose AI model into a specialized expert.
+
+   By focusing on reward-based learning rather than massive supervised datasets, RFT represents a significant evolution in fine-tuning
+   methodology—making it possible to achieve tailored, high-quality performance without needing a mountain of training data.
+
