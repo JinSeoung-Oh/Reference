@@ -1,0 +1,21 @@
+### https://llm.hunyuan.tencent.com/#/blog/hy-t1?lang=en
+
+1. Hunyuan-T1 is an ultra-large Hybrid-Transformer-Mamba MoE model based on TurboS.
+2. Through large-scale post-training, it expands its reasoning capabilities and enhances performance in line with human preferences.
+3. TurboS’s long-text processing ability addresses issues of context loss and long-distance information dependency.
+4. The Mamba architecture optimizes long sequence processing, enabling efficient computation to capture information from lengthy texts.
+   -a. Under identical deployment conditions, its decoding speed is doubled.
+5. During the model’s post-training phase, 96.7% of the total computing power is allocated to reinforcement learning.
+   -a. It strengthens its reasoning abilities by gathering datasets that include various challenges such as mathematics, logical reasoning, science, and coding.
+   -b. Model performance is further enhanced through answer feedback and real-time user feedback.
+   -c. curriculum learning approach is applied, extending the model’s context length by progressively increasing the difficulty of the data.
+       -1. Efficient token utilization is also enhanced.
+6. Reinforcement learning strategies—such as data re-learning and policy resetting—improve training stability by over 50%.
+7. Reward System:
+   -a. A self-reward mechanism is adopted, in which the model self-evaluates and scores its outputs. A comprehensive reward system is implemented to boost the model’s information efficiency and content detail.
+
+8. Benchmark Performance Evaluation:
+   It demonstrates outstanding performance on both Chinese and English reasoning metrics, including MMLU-pro, CEval, AIME, and Zebra Logic, delivering results on par with or slightly better than DeepSeek R1. It also secures an advantage in cultural creativity, text summarization, and agent capabilities.
+   In the MMLU-PRO evaluation, it scored 87.2—proving excellent memory and comprehension across 14 domains such as humanities, social sciences, and science & technology.
+   It recorded a score of 69.3 in the GPQA-diamond evaluation, confirming its ability to solve PhD-level problems in physics, chemistry, and biology.
+   The model has demonstrated strong performance in coding, mathematics, and logical reasoning, scoring 64.9 on LiveCodeBench (confirming its code writing and comprehension abilities), 96.2 on MATH-500 (demonstrating math problem-solving skills comparable to DeepSeek R1), and 91.9 on ArenaHard (showing robust adaptability in various sorting, instruction-following, and tool utilization tasks).
