@@ -1,0 +1,118 @@
+### From https://medium.com/@jjn62/deploying-real-time-vision-applications-on-edge-c5c940042b89
+
+1. Motivation & Background
+   -a. Evolving Computer Vision Needs:
+       Computer vision applications require frequent updates during their lifecycle—whether to modify code for new business requirements or 
+       update model weights to improve accuracy. 
+       This drives the need for efficient production pipelines and is a major focus in the fast-evolving field of MLOps, 
+       which borrows heavily from traditional CI/CD (Continuous Integration/Continuous Delivery) practices.
+   -b. Challenges with Edge Devices:
+       Deploying models on edge devices adds complexity:
+       -1. Reliable Code Delivery: A robust protocol is needed to guarantee that updated code reaches the target device.
+       -2. Hardware Diversity: Edge devices come with various hardware configurations, necessitating compatibility across different accelerators 
+                               (e.g., GPUs, TPUs, FPGAs).
+2. Agnostic Machine Learning Systems
+   -a. Definition:
+       An agnostic ML platform is designed for compatibility in three main ways:
+       -1. Hardware Agnostic: Can run on mobile, embedded, or cloud platforms and utilize available accelerators with minimal modifications.
+       -2. Model Agnostic: Capable of serving different ML model types (e.g., LLMs, object detectors, scene classifiers) across frameworks like PyTorch, 
+                           TensorFlow, MXNet, etc.
+       -3. Application Agnostic: Supports a range of scenarios from low to high inference loads, handles multiple concurrent models, 
+                                 and meets varying latency demands.
+   -b. Interoperability Challenge:
+       Nearly every neural network requires specific hardware/software optimizations to run efficiently. 
+       To address this, several industry tools have emerged.
+
+3. Key Tools for Interoperability
+   -a. ONNX (Open Neural Network Exchange):
+       An open-source framework that allows models (e.g., from PyTorch) to be converted into a common format and deployed using ONNX Runtime 
+       for accelerated inference on various hardware platforms.
+   -b. Nvidia Triton Inference Server:
+       A containerized microservice that not only serves ONNX and TensorFlow models with Nvidia-specific optimizations 
+       (like parallel inference and multi-instance support) but also simplifies scaling.
+
+4. Setting Up a Triton Model
+   -a. Model Repository Structure:
+       Triton requires a model repository with a defined folder structure. For instance, a typical structure for an RT-DETR object detection model 
+       looks like:
+
+       models_repo
+       └── model_name
+           ├── config.pbtxt
+           └── 1
+               └── model.onnx
+
+       -1. The folder “1” represents the model version.
+       -2. The config.pbtxt file includes:
+           -1) Basic Details: Model name, execution platform (e.g., "onnxruntime_onnx" or "tensorrt_plan" for TensorRT models), 
+                              maximum batch size, and default model filename.
+           -2) Input Specification: For example, an input tensor of type FP32 with format FORMAT_NCHW and dimensions [3, 640, 640] for an RGB image.
+           -3) Output Specification: For RT-DETR, an output tensor of dimensions [300, 6] representing class, confidence, and bounding box parameters 
+                                     for 300 objects.
+           -4) Instance Group: Indicates whether to run on GPU or CPU, specifying GPU indices if necessary.
+   -b. Optional Optimizations:
+       ONNX and TensorFlow models can be compiled at runtime into Nvidia’s TensorRT format. Quantization (e.g., using FP16) is also possible 
+       to further reduce inference time, though it can take around 45 minutes for larger models.
+
+5. The Intelligent Internet of Things (IoT) & Edge Deployment
+   -a. Device Management Platforms:
+       Modern smart device platforms not only support over-the-air (OTA) updates but also include tools for role-based access, device monitoring, 
+       and fault detection. These platforms are crucial for safely deploying small vision models to edge devices.
+   -b. AWS Greengrass V2:
+       For this tutorial, AWS Greengrass is used due to its support for various operating systems (Windows, Linux) and target devices 
+       (like the Jetson AGX Xavier). Key features include:
+       -1. Device Authentication: Ensures that only authorized devices receive updates.
+       -2. Automatic Rollback: Provides safety in case a new update causes failures.
+       -3. Component-Based Deployment: Greengrass deployment packages, called Components, consist of:
+           -1) Artifacts: Source files (code, model weights, media files); Docker containers can also be deployed using AWS Lambda.
+           -2) Recipes: Configuration files with instructions for installation, running, and shutdown of applications.
+   -c. Setting Up AWS Greengrass:
+       -1. Create a new IAM user with policies like AWSGreengrassFullAccess and AmazonS3FullAccess.
+       -2. Create an S3 bucket to store artifacts.
+       -3. Attach a GetObject policy to allow the Greengrass user to access files in the S3 bucket.
+       -4. Install Greengrass IoT Core software on the target device (Jetson) to register it as a core device.
+
+6. Revisiting the Inference Pipeline with Nvidia Deepstream SDK
+   -a. Pipeline Components:
+       -1. Nvinferserver: Initializes Triton Inference Server and loads the selected models, offering broader model support compared to Deepstream’s 
+                          native nvinfer plugin.
+       -2. Nvtracker: Tracks objects across video frames, assigning unique IDs to maintain consistency.
+       -3. Nvdsanalytics: Filters out irrelevant detections based on predefined regions-of-interest (e.g., focusing on traffic in one direction).
+       -4. Nvmsgconv and Nvmsgbroker: Convert detection metadata into Kafka messages for further processing such as time series analysis or alert triggers.
+       -5. Sink Modification: Instead of an on-screen display, outputs bounding box visualizations to an RTSP stream 
+                              (essential for headless deployment via Greengrass).
+   -b. Code Deployment:
+       After cloning the repository, the source folder is zipped and uploaded to the S3 bucket. 
+       When deployed as a Greengrass Component, the Deepstream application is started as a subprocess that initializes Triton Inference Server 
+       with the ONNX model weights.
+
+7. Greengrass Deployment Architecture & Component Recipe
+   -a. Deployment Architecture:
+       If the target device lacks an Nvidia GPU, alternatives like OpenCV or Roboflow Inference can be used for a platform-agnostic solution.
+   -b. Component Recipe Example:
+       The deployment package for AWS Greengrass is defined using a recipe (in JSON or YAML) that includes:
+       -1. Metadata: Recipe format version, component name, version, type, description, and publisher.
+       -2. Component Configuration: For instance, a connection string for a Kafka server.
+       -3. Manifests: Define the target platform (e.g., Linux), lifecycle events (such as Run and optionally Install), and artifacts 
+                      (with URI, unarchiving instructions, and permissions).
+           -1) The Run lifecycle script typically includes commands to navigate to the decompressed artifact directory and start the Deepstream 
+               application with specified command-line arguments.
+       -4. Lifecycle Events:
+           -1) Install: For installing dependencies (e.g., pip install from requirements.txt).
+           -2) Run: To start the application using shell scripts.
+   -c. Deployment Process:
+       After configuring the recipe, the component is deployed to the selected device or device group via the AWS console. 
+       This ensures that updates are delivered reliably and securely.
+
+8. Conclusion
+   The tutorial provides a comprehensive guide on building agnostic ML systems to deploy computer vision models on edge devices. It covers:
+   -a. The need for frequent updates and MLOps in computer vision.
+   -b. The concept of agnostic ML platforms that ensure compatibility across hardware, model types, and applications.
+   -c. Key tools (ONNX, Nvidia Triton, AWS Greengrass) that enable interoperability and efficient deployment.
+   -d. Detailed instructions for setting up a Triton model repository, including configuration for inputs, outputs, and instance groups.
+   -e. Steps for deploying the model to edge devices using AWS Greengrass, including IAM setup, S3 bucket policies, and component recipe configuration.
+   -f. Modifications to the inference pipeline (Deepstream with plugins like nvinferserver, nvtracker, nvdsanalytics, etc.) to support headless
+       edge deployments.
+   -g. Overall, this approach emphasizes reducing integration complexity, ensuring scalability, and providing secure, efficient code delivery 
+       in production-level ML systems.
+
