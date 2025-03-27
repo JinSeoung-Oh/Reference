@@ -1,0 +1,91 @@
+### From https://medium.com/@aisagescribe/accelerating-large-language-model-inference-techniques-for-speed-and-efficiency-e5743bc3bbe5
+
+1. Overview of Inference Efficiency in LLMs
+   Inference efficiency refers to a model’s ability to generate predictions rapidly while using minimal computational 
+   resources. 
+   For large language models (LLMs), achieving low latency and high throughput is challenging due to high memory 
+   bandwidth requirements, latency constraints, redundant computations, and scalability issues when serving multiple 
+   requests concurrently.
+
+2. Key Optimization Strategies
+   -a. Speculative Decoding
+       -1. Concept: Uses a smaller, faster draft model to predict multiple future tokens in advance.
+       -2. Process:
+           -1) Generate candidate tokens speculatively.
+           -2) Validate these tokens with the main, larger model.
+           -3) Fall back to standard decoding if necessary.
+       -3. Benefits:
+           -1) Reduces the number of autoregressive steps.
+           -2) Speeds up inference by offloading some work to a lightweight model.
+      -4. Challenges:
+          -1) Requires training or fine-tuning an additional draft model.
+          -2) Increases implementation complexity.
+  -b. Group Query Attention (GQA)
+      -1. Concept: Optimizes the attention mechanism by grouping queries together so that key-value pairs 
+                   can be shared among them.
+      -2. Benefits:
+          -1) Reduces the memory footprint of the key-value (KV) cache.
+          -2) Improves inference speed, particularly in settings with multiple queries.
+      -3. Challenges:
+          -1) May slightly reduce model expressiveness.
+          -2) Requires modifications to the standard attention mechanism.
+  -c. Quantization
+      -1. Concept: Lowers the precision of model parameters (e.g., from 32-bit floating point to 8-bit integers)
+                   to create smaller models with reduced memory requirements.
+      -2. Benefits:
+          -1) Decreases memory usage and speeds up computation (especially on specialized hardware).
+          -2) Reduces energy consumption, beneficial for edge devices.
+      -3. Challenges:
+         -1) Must be carefully managed through quantization-aware training or post-training methods to avoid accuracy loss.
+         -2) Not all hardware platforms efficiently support low-bit operations.
+  -d. Parallelism in Inference
+      -1. Tensor Parallelism:
+          -1) Splits model parameters across multiple devices.
+          -2) Benefits:
+              - Lowers per-device memory usage.
+              - Enables the inference of extremely large models.
+          -3) Challenges:
+              - Introduces communication overhead (all-reduce operations) that can add latency.
+     -2. Pipeline Parallelism:
+         -1) Divides model layers across multiple devices to process different input segments concurrently.
+         -2) Benefits:
+             - Allows efficient scaling across devices.
+             - Reduces the memory footprint per device.
+         -3) Challenges:
+             - Requires synchronization between pipeline stages, potentially under-utilizing resources.
+  -e. Continuous Batching
+      -1) Concept: Dynamically accumulates incoming inference requests over a short time window and processes 
+                   them in a single batch.
+      -2) Benefits:
+          - Improves GPU utilization by increasing effective batch size.
+          - Reduces per-query latency through parallel processing.
+      -3) Challenges:
+          - May introduce a slight delay as the system waits for enough requests to form a batch.
+          - Needs fine-tuning of batch size and timeout conditions.
+  -f. Sliding Window Attention for Long Contexts
+      -1) Concept: Restricts the attention mechanism to a fixed-size window around each token rather than the full sequence.
+      -2) Benefits:
+          - Significantly reduces memory and computational costs for long-context models.
+          - Maintains effective performance on tasks needing local context.
+      -3) Challenges:
+          - Loses global context beyond the chosen window size.
+          - Requires careful selection of window size to balance efficiency and performance.
+  -g. Flash Attention
+      -1) Concept: A memory-efficient attention mechanism that optimizes key-value memory accesses 
+                   by reducing redundant memory operations.
+      -2) Benefits:
+          - Speeds up decoding significantly.
+          - Reduces memory bandwidth usage through a streaming approach to compute attention.
+      -3) Challenges:
+          - Often requires specialized GPU kernels.
+          - May necessitate modifications to existing Transformer architectures.
+
+3. Conclusion
+   Optimizing inference efficiency in LLMs is critical for real-world deployment, especially as models grow in 
+   size and complexity. 
+   Each technique—from speculative decoding and GQA to quantization, parallelism, continuous batching, 
+   sliding window attention, and flash attention—offers distinct advantages and challenges. 
+   These strategies collectively address high memory requirements, latency constraints, and computational 
+   inefficiencies, and ongoing research will likely refine and integrate these methods further into 
+   deep learning toolchains to make large-scale models more practical and accessible.
+
