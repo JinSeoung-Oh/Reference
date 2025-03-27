@@ -1,0 +1,231 @@
+### From https://pub.towardsai.net/adaptive-multi-teacher-distillation-for-enhanced-supervised-learning-e70062acce7e
+
+1. Introduction
+   In traditional supervised learning, it is common to use a single predictive model 
+   (such as XGBoost, LightGBM, or Random Forest). 
+   However, blending multiple models often boosts performance by leveraging each model’s strengths. 
+   Conventional blending uses fixed weights or simple logistic regression to combine predictions uniformly 
+   across all inputs. 
+   This static method, while simple, misses the opportunity to adjust dynamically to different situations.
+
+   -a. Our New Idea: Adaptive Multi-Teacher Distillation
+       Instead of static blending, this approach employs a lightweight neural network (the "student") 
+       that learns from several sophisticated "teacher" models simultaneously. 
+       Each teacher model (e.g., XGBoost, LightGBM, Random Forest) provides predicted probabilities. 
+       During training, the student not only learns to mimic these teachers but also develops 
+       an internal attention mechanism that dynamically assigns different weights to each teacher’s output 
+       based on the input. 
+       For example, the student might rely more on XGBoost for one customer segment and favor Random Forest 
+       for another.
+   -b. Key Advantages:
+       -1. Adaptive Weighting: Instead of fixed averaging, the student dynamically learns attention weights, 
+                               tailoring predictions to specific inputs.
+       -2. Knowledge Integration: Through distillation, the student internalizes the strengths of multiple teachers
+                                  into one compact and efficient model.
+       -3. Efficiency & Flexibility: The final model is lightweight, interpretable, and capable of higher accuracy 
+                                     and better generalization by combining diverse expertise.
+
+2. Motivation & Mechanism
+   -a. Combining Wisdom from Multiple Models
+       Traditional model blending often treats each teacher equally. 
+       In contrast, adaptive distillation allows the student to learn which teacher is most reliable for each 
+       prediction. The process works as follows:
+       -1. Teacher Models:
+           Train several models independently (e.g., XGBoost, LightGBM, Random Forest). 
+           Each outputs a probability that an input belongs to a particular class.
+       -2. Student Model with Attention:
+           The student neural network not only predicts outcomes but also computes attention weights for each teacher:
+           Attention weights(𝑋)=[𝑎XGB,𝑎LGB,𝑎RF]
+           These weights determine how much influence each teacher’s prediction has on the final blended output.
+       -3. Distillation Loss:
+           The student is trained with a loss that combines:
+           -1) Supervised Loss: Standard binary cross-entropy loss between the student’s prediction and the true label.
+           -2) Distillation Loss: Typically, mean squared error (MSE) or KL divergence between the student’s 
+                                  prediction and a weighted combination of teacher predictions.
+           The final loss is a weighted sum of these components.
+
+       Over training epochs, the student learns to assign higher attention weights to the teachers that perform 
+       best on specific input regions. 
+       For instance, if LightGBM performs better for certain customer profiles, 
+       the student’s attention weight for LightGBM will increase accordingly.
+
+   -b. Interpreting Attention Weights:
+       The learned weights offer insight into which teacher models are most influential. 
+       For example, if the average weights are:
+       XGBoost: 20%
+       LightGBM: 75%
+       Random Forest: 5%
+       this suggests that, for the given dataset, the student finds LightGBM most reliable while still valuing XGBoost’s input and largely discounting Random Forest.
+
+3. Code: Adaptive Multi-Teacher Distillation Implementation
+   The following code implements the adaptive distillation method, including preprocessing, teacher training, 
+   student model definition, training, and evaluation. Do not skip any code sections.
+   '''''
+   import numpy as np
+   import pandas as pd
+   from sklearn.model_selection import train_test_split
+   from sklearn.preprocessing import OneHotEncoder, StandardScaler
+   from sklearn.ensemble import RandomForestClassifier
+   from xgboost import XGBClassifier
+   from lightgbm import LGBMClassifier
+   from sklearn.metrics import roc_auc_score, accuracy_score
+   from scipy.stats import ks_2samp
+   import torch
+   import torch.nn as nn
+   import torch.optim as optim
+
+   df = pd.read_csv("marketdata.csv")
+   df = df[df["Promo"] == 1]  # Only use treatment data
+   train_df, test_df = train_test_split(df, test_size=0.4, random_state=42)
+
+   # Preprocessing
+   ohe = OneHotEncoder()
+   ch_train = ohe.fit_transform(train_df[["Channel"]]).toarray()
+   ch_test = ohe.transform(test_df[["Channel"]]).toarray()
+
+   X_train = pd.concat([
+       train_df[["Age", "Income", "Days", "Holiday", "Loyalty"]].reset_index(drop=True),
+       pd.DataFrame(ch_train).reset_index(drop=True)
+   ], axis=1)
+   y_train = train_df["Purchase"].values
+
+   X_test = pd.concat([
+       test_df[["Age", "Income", "Days", "Holiday", "Loyalty"]].reset_index(drop=True),
+       pd.DataFrame(ch_test).reset_index(drop=True)
+   ], axis=1)
+   y_test = test_df["Purchase"].values
+
+   # Convert column names to strings to avoid sklearn error
+   X_train.columns = X_train.columns.astype(str)
+   X_test.columns = X_test.columns.astype(str)
+
+   # Feature Scaling
+   scaler = StandardScaler()
+   X_train = scaler.fit_transform(X_train)
+   X_test = scaler.transform(X_test)
+
+   X_tr, X_val, y_tr, y_val = train_test_split(X_train, y_train, test_size=0.3, random_state=42)
+
+   # Train teacher models
+   xgb = XGBClassifier().fit(X_tr, y_tr)
+   lgb = LGBMClassifier().fit(X_tr, y_tr)
+   rf = RandomForestClassifier().fit(X_tr, y_tr)
+
+   teachers = {"XGBoost": xgb, "LightGBM": lgb, "RandomForest": rf}
+
+   def teacher_preds(X):
+       return np.vstack([
+           xgb.predict_proba(X)[:, 1],
+           lgb.predict_proba(X)[:, 1],
+           rf.predict_proba(X)[:, 1]
+       ]).T
+
+   tp_train = teacher_preds(X_tr)
+   tp_val = teacher_preds(X_val)
+   tp_test = teacher_preds(X_test)
+
+   # Prepare PyTorch tensors
+   X_tr_t = torch.tensor(X_tr, dtype=torch.float32)
+   y_tr_t = torch.tensor(y_tr, dtype=torch.float32).unsqueeze(1)
+   tp_train_t = torch.tensor(tp_train, dtype=torch.float32)
+
+   X_val_t = torch.tensor(X_val, dtype=torch.float32)
+   y_val_t = torch.tensor(y_val, dtype=torch.float32).unsqueeze(1)
+   tp_val_t = torch.tensor(tp_val, dtype=torch.float32)
+
+   X_test_t = torch.tensor(X_test, dtype=torch.float32)
+   y_test_t = torch.tensor(y_test, dtype=torch.float32).unsqueeze(1)
+   tp_test_t = torch.tensor(tp_test, dtype=torch.float32)
+
+   # Define student model
+   class AdaptiveDistillModel(nn.Module):
+       def __init__(self, input_dim):
+           super().__init__()
+           self.shared = nn.Sequential(
+               nn.Linear(input_dim, 128), nn.ReLU(),
+               nn.Linear(128, 64), nn.ReLU(),
+               nn.Linear(64, 32), nn.ReLU()
+           )
+           self.student_head = nn.Sequential(nn.Linear(32, 1), nn.Sigmoid())
+           self.attn_layer = nn.Linear(32, 3)
+           self.temperature = nn.Parameter(torch.tensor(1.0))
+
+       def forward(self, x):
+           h = self.shared(x)
+           attn_logits = self.attn_layer(h) / self.temperature
+           attn_weights = nn.Softmax(dim=1)(attn_logits)
+           student_output = self.student_head(h)
+           return student_output, attn_weights
+
+   model = AdaptiveDistillModel(X_tr.shape[1])
+   optimizer = optim.Adam(model.parameters(), lr=0.0005)
+   bce_loss_fn = nn.BCELoss()
+   kl_loss_fn = nn.KLDivLoss(reduction='batchmean')
+
+   best_auc, patience = 0, 10
+
+   for epoch in range(100):
+       model.train()
+       optimizer.zero_grad()
+       student_pred, att_w = model(X_tr_t)
+       blended_teacher = torch.sum(att_w * tp_train_t, dim=1, keepdim=True)
+       blended_teacher_log = torch.log(blended_teacher + 1e-7)
+       kl_loss = kl_loss_fn(blended_teacher_log, student_pred)
+       y_smooth = y_tr_t * 0.9 + 0.05
+       bce_loss = bce_loss_fn(student_pred, y_smooth)
+       loss = bce_loss + 0.5 * kl_loss
+       loss.backward()
+       optimizer.step()
+
+       model.eval()
+       with torch.no_grad():
+           val_pred, _ = model(X_val_t)
+           val_auc = roc_auc_score(y_val, val_pred.numpy())
+           if val_auc > best_auc:
+               best_auc = val_auc
+               torch.save(model.state_dict(), 'best_student.pt')
+               patience = 10
+           else:
+               patience -= 1
+               if patience == 0:
+                   break
+       print(f"Epoch {epoch+1}: Loss {loss.item():.4f}, Val AUC {val_auc:.4f}")
+
+   # Evaluation
+   model.load_state_dict(torch.load('best_student.pt'))
+   model.eval()
+   with torch.no_grad():
+       test_pred, att = model(X_test_t)
+       test_np = test_pred.numpy()
+       auc = roc_auc_score(y_test, test_np)
+       acc = accuracy_score(y_test, test_np > 0.5)
+       ks_stat = ks_2samp(test_np[y_test == 1], test_np[y_test == 0])[0]
+       att_mean = att.numpy().mean(axis=0)
+
+   import matplotlib.pyplot as plt
+   print("\n--- Final Student Model Performance ---")
+   print(f"AUC: {float(auc):.4f}, Accuracy: {float(acc):.4f}, KS: {float(ks_stat):.4f}")
+   print(f"Mean Attention Weights (XGB, LGB, RF): {att_mean}")
+
+   # Evaluate teacher models
+   print("\n--- Individual Teacher Model Performance ---")
+   for name, model_t in teachers.items():
+       prob = model_t.predict_proba(X_test)[:, 1]
+       auc_t = roc_auc_score(y_test, prob)
+       acc_t = accuracy_score(y_test, prob > 0.5)
+       ks_t = ks_2samp(prob[y_test == 1], prob[y_test == 0])[0]
+       print(f"{name} - AUC: {float(auc_t):.4f}, Accuracy: {float(acc_t):.4f}, KS: {float(ks_t):.4f}")
+   '''''
+5. Conclusion
+   This study presents an Adaptive Multi-Teacher Distillation method that:
+   -a. Uses several sophisticated teacher models (XGBoost, LightGBM, Random Forest) to guide a lightweight
+       student model.
+   -b. Incorporates an attention mechanism that dynamically learns how much to trust each teacher’s prediction 
+       per input instance.
+   -c. Combines supervised learning with a distillation loss (via KL divergence) to create a final model 
+       that is both efficient and more accurate.
+   The approach not only improves predictive performance but also offers interpretability by revealing 
+   which teacher models are most influential for different inputs. 
+   The complete code provided—from data preprocessing to model evaluation—demonstrates how to implement and
+   test this adaptive distillation strategy.
+
