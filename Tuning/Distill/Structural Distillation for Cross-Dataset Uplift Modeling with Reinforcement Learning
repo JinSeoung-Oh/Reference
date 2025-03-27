@@ -1,0 +1,523 @@
+### From https://medium.com/data-science-collective/structural-distillation-for-cross-dataset-uplift-modeling-with-reinforcement-learning-9818fa7dea10
+### https://github.com/datalev001/RL_DIST_UPLIFT
+
+1. Introduction
+   Marketing campaigns often rely on a complex “teacher” model to capture customer behavior across both control 
+   and treatment groups. 
+   Such models (e.g., ensembles or deep networks) are expensive and time‐consuming to retrain for each new promotion. 
+   To address this, the proposed approach introduces a two‐stage solution:
+
+   -a. Knowledge Distillation:
+       A lighter “student” model is derived from the heavy teacher. 
+       The distillation process transfers the teacher’s knowledge (both its output probabilities and internal 
+       structure) to the student. 
+       This is analogous to having a seasoned chef (teacher) who perfects a recipe, 
+       then training a junior chef (student) to replicate that recipe quickly for a new crowd.
+   -b. Reinforcement Learning (RL) Integration:
+       Instead of statically retraining the student for every campaign, RL is used to dynamically adjust the student 
+       model’s hyperparameters based on observed campaign performance. 
+       This enables the student to continuously optimize its performance 
+       (i.e., maximize the “uplift” or incremental effect of the promotion) while leveraging the teacher’s insights.
+
+2. Uplift Modeling in Marketing Campaigns
+   Uplift modeling moves beyond traditional AB tests (which compare average responses) by estimating the incremental
+   effect of a promotion on each individual customer. Two main approaches are highlighted:
+   -a. Two-Model Approach:
+       Two separate logistic regressions are built—one for the control group and one for the treatment group. 
+       For a given customer, the difference between the treatment and control predictions provides an estimate of uplift.
+   -b. One-Model Approach with Group Indicator:
+       A single logistic regression is built on a combined dataset that includes a binary treatment indicator.
+       Predictions are made for each customer twice—once assuming treatment and once assuming control—to derive the uplift.
+
+   Both approaches allow for individual-level insights, which are more informative than aggregate statistics.
+
+   -c. Code Example for Uplift Modeling
+       Below are code snippets (using Python and statsmodels) that demonstrate how to implement both approaches:
+       ''''
+       import pandas as pd
+       import statsmodels.api as sm
+
+       # (A) Two-Model Approach
+       df_control = df[df['treatment'] == 0].copy()
+       df_treat   = df[df['treatment'] == 1].copy()
+
+       # Fit logistic regression for control group
+       X_control = df_control[['const', 'zip_code_Urban', 'recency',
+                        'used_discount', 'used_bogo', 'is_referral']]
+       y_control = df_control['purchase']
+       model_control = sm.Logit(y_control, X_control).fit()
+
+       # Fit logistic regression for treatment group
+       X_treat = df_treat[['const', 'zip_code_Urban', 'recency',
+                           'used_discount', 'used_bogo', 'is_referral']]
+       y_treat = df_treat['purchase']
+       model_treat = sm.Logit(y_treat, X_treat).fit()
+
+       # Predict probabilities for entire dataset using each model
+       df['pred_control'] = model_control.predict(df[['const','zip_code_Urban','recency',
+                                                      'used_discount','used_bogo','is_referral']])
+       df['pred_treat']   = model_treat.predict(df[['const','zip_code_Urban','recency',
+                                                    'used_discount','used_bogo','is_referral']])
+       df['uplift_2model'] = df['pred_treat'] - df['pred_control']
+
+       # (B) One-Model Approach with Group Indicator
+       X_full = df[['const', 'zip_code_Urban', 'treatment', 'recency',
+                    'used_discount', 'used_bogo', 'is_referral']]
+       y_full = df['purchase']
+       model_one = sm.Logit(y_full, X_full).fit()
+
+       # For a given row i, compute predictions for treatment=1 and 0
+       X_for_predict_t1 = X_full.copy()
+       X_for_predict_t0 = X_full.copy()
+
+       X_for_predict_t1['treatment'] = 1
+       X_for_predict_t0['treatment'] = 0
+
+       df['p_treat'] = model_one.predict(X_for_predict_t1)
+       df['p_control'] = model_one.predict(X_for_predict_t0)
+       df['uplift_1model'] = df['p_treat'] - df['p_control']
+
+       print(df[['uplift_2model', 'uplift_1model']].head())
+
+3. Introducing Distillation: A Logistic Regression Example
+   When a new promotion arrives, retraining the entire teacher model is impractical. 
+   Instead, the solution is to create a simpler student model that learns from the teacher’s “soft” outputs 
+   (predicted probabilities) instead of hard labels. 
+   This technique—model distillation—reduces complexity while retaining critical insights.
+   -a. Teacher Model (Mother Regression):
+       A complex model generates soft probabilities 𝑃_mother(𝑥) that capture subtle relationships and uncertainties.
+   -b. Student Model (Distilled Regression):
+       A simpler logistic regression is trained using these soft labels. The loss function (often a KL divergence) 
+       measures the difference between the student’s predictions and the teacher’s,
+       guiding the student to mimic the teacher’s behavior.
+   Code Example for Distillation
+   '''''
+   import numpy as np
+   import pandas as pd
+   import statsmodels.api as sm
+
+   # Assume df contains features and 'soft_label' which is produced by the teacher model.
+   X_cols = ['featureA', 'featureB', 'featureC']  # Simplified feature set for the student model
+   df['const'] = 1.0
+   X_student = df[['const'] + X_cols]
+   y_soft = df['soft_label']  # Teacher's predicted probabilities
+
+   # Fit the student logistic regression using soft labels
+   model_student = sm.GLM(y_soft, X_student, family=sm.families.Binomial()).fit()
+
+   print(model_student.summary())
+
+   # Evaluate the closeness to teacher's predictions using an approximate KL divergence
+   student_preds = model_student.predict(X_student)
+   kl_div = np.mean(student_preds * np.log(student_preds / y_soft + 1e-8))
+   print("Approx KL Divergence:", kl_div)
+   '''''
+
+4. Unified Framework: Distillation, Dynamic RL, and Uplift Modeling
+   The approach is unified into three interconnected parts:
+   -a. Teacher Model (𝑓𝑇):
+       -1. Trained on control group data to capture baseline customer behavior.
+       -2. Its outputs (and internal structures such as feature importances) serve as a rich knowledge base.
+   -b. Cross-Dataset Distillation for the Student Model (𝑓𝑆):
+       -1. The student model is trained on treatment data using a composite loss:
+            -1) Supervised Loss: Evaluates predictions against real treatment labels.
+            -2) Distillation Loss: Aligns student predictions with the teacher’s outputs (e.g., via KL divergence).
+            -3) Structure Alignment Loss: Encourages the student’s internal representations 
+                (e.g., coefficients or SHAP values) to resemble the teacher’s.
+       -2. This ensures that even with new data, the student retains critical insights from the teacher.
+   -c. Reinforcement Learning (RL) for Uplift Optimization:
+       -1. The campaign is modeled as a Markov Decision Process (MDP):
+           -1) State (𝑠_𝑡): Captures current campaign conditions (e.g., discount level, historical performance).
+           -2) Action (𝑎_𝑡): Adjusts the student model’s hyperparameters (e.g. 𝛼, 𝛽, 𝛾).
+           -3) Reward (𝑟_𝑡): Reflects observed uplift (e.g., incremental revenue or purchase rate).
+       -2. An RL agent (using algorithms like PPO or A2C) iteratively updates its policy to maximize the reward, thereby refining the student model without needing to retrain the teacher.
+
+5. Code Experiment: RL, Distillation, and Uplift Modeling Integration
+   The complete code provided below demonstrates the entire framework. It includes:
+   -a. Teacher Model Training:
+        Using an XGBoost classifier trained on control data.
+   -b. Student Model Distillation and RL Loop:
+       The treatment data is split into campaign waves. For each wave, different hyperparameter combinations
+       for the student model are evaluated. 
+       The best configuration is selected based on a reward signal defined as negative total loss. 
+       Business-oriented plots (Gains Chart and Decile Analysis) provide insights into performance.
+   -c. Business Reporting:
+       The code prints out wave-by-wave results and generates plots that help in decision making
+       —e.g., focusing on the top predicted customer deciles for targeted promotions.
+   Full Integrated Code
+   '''''
+   import numpy as np
+   import pandas as pd
+   import matplotlib.pyplot as plt
+   from sklearn.model_selection import train_test_split
+   from sklearn.linear_model import LogisticRegression
+   from sklearn.metrics import roc_auc_score
+   from sklearn.preprocessing import StandardScaler
+   import xgboost as xgb
+
+   ##############################################################################
+   # Train a Teacher Model (Control)
+   ##############################################################################
+
+   def train_teacher_model(df_control):
+       """
+       Train a complex XGBoost model on the control subset, returning:
+         - the trained model,
+         - a dictionary of feature importances,
+         - the exact list of columns (teacher_col_list) used for training.
+       """
+       raw_features = [
+           "Age", "Income", "DaysSinceLastPurchase",
+           "IsHolidaySeason", "PreferredChannel", "LoyaltyScore"
+       ]
+       X = pd.get_dummies(df_control[raw_features], drop_first=True)
+       y = df_control["Purchase"]
+       teacher_col_list = list(X.columns)
+       X_train, X_val, y_train, y_val = train_test_split(
+           X, y, test_size=0.2, random_state=42
+       )
+    
+       model = xgb.XGBClassifier(
+           n_estimators=500,
+           max_depth=5,
+           learning_rate=0.1,
+           use_label_encoder=False,
+           eval_metric="logloss",
+           random_state=42
+       )
+       model.fit(X_train, y_train)
+    
+       y_val_pred = model.predict_proba(X_val)[:, 1]
+       auc_val = roc_auc_score(y_val, y_val_pred)
+       print(f"[Teacher Model] Control Validation AUC: {auc_val:.4f}")
+    
+       importance_dict = model.get_booster().get_score(importance_type='gain')
+       teacher_importance = {col: importance_dict.get(col, 0.0) for col in teacher_col_list}
+
+       return model, teacher_importance, teacher_col_list
+
+   ##############################################################################
+   # Plots: Gains Chart
+   ##############################################################################
+
+   def plot_gains(df_wave, model, teacher_col_list, wave_number=0):
+       """
+       Plots a Gains (Lift) chart for the final wave’s student model predictions.
+       This chart shows how many positive responses (purchases) you capture 
+       as you move from high to low predicted probability.
+       """
+       from sklearn.preprocessing import StandardScaler
+       # 1) Preprocess wave data
+       raw_features = ["Age", "Income", "DaysSinceLastPurchase",
+                       "IsHolidaySeason", "PreferredChannel", "LoyaltyScore"]
+       X_wave = pd.get_dummies(df_wave[raw_features], drop_first=True)
+       X_wave = X_wave.reindex(columns=teacher_col_list, fill_value=0.0)
+
+       y_true = df_wave["Purchase"].values
+    
+       # Scale similarly (demo approach; in production, re-use the same scaler)
+       scaler = StandardScaler()
+       X_scaled = scaler.fit_transform(X_wave)
+
+       # 2) Generate predicted probabilities
+       preds = model.predict_proba(X_scaled)[:, 1]
+
+       # 3) Sort by predicted probability descending
+       sort_idx = np.argsort(-preds)
+       y_sorted = y_true[sort_idx]
+
+       # 4) Compute cumulative gains
+       gains = np.cumsum(y_sorted) / y_sorted.sum()
+       x_vals = np.arange(1, len(y_true) + 1) / len(y_true)
+
+       # 5) Plot Gains chart
+       plt.figure(figsize=(8,5))
+       plt.plot(x_vals, gains, label="Model")
+       plt.plot([0,1],[0,1], 'r--', label="Random")
+       plt.title(f"Gains Chart (Wave {wave_number})")
+       plt.xlabel("Proportion of Customers (sorted by predicted probability)")
+       plt.ylabel("Proportion of Actual Purchases Captured")
+       plt.legend()
+       plt.grid(True)
+       plt.show()
+
+   ##############################################################################
+   # Plots: Decile Analysis
+   ##############################################################################
+
+   def decile_analysis(df_wave, model, teacher_col_list, wave_number=0, n_splits=10):
+       """
+       Splits the wave data into deciles based on predicted probability 
+       and shows average predicted probability vs. actual purchase rate in each decile.
+       """
+       from sklearn.preprocessing import StandardScaler
+       # 1) Preprocess wave data
+       raw_features = ["Age", "Income", "DaysSinceLastPurchase",
+                       "IsHolidaySeason", "PreferredChannel", "LoyaltyScore"]
+       X_wave = pd.get_dummies(df_wave[raw_features], drop_first=True)
+       X_wave = X_wave.reindex(columns=teacher_col_list, fill_value=0.0)
+
+       y_true = df_wave["Purchase"].values
+    
+       # Scale similarly (demo approach)
+       scaler = StandardScaler()
+       X_scaled = scaler.fit_transform(X_wave)
+    
+       # 2) Predicted probabilities
+       preds = model.predict_proba(X_scaled)[:, 1]
+
+       # Combine predictions with actuals
+       data = pd.DataFrame({"pred": preds, "actual": y_true})
+       data.sort_values("pred", ascending=False, inplace=True)
+       data.reset_index(drop=True, inplace=True)
+
+       # 3) Create deciles
+       data["decile"] = pd.qcut(data.index, n_splits, labels=False)
+
+       # 4) Compute average predicted prob and actual purchase rate per decile
+       decile_stats = data.groupby("decile").agg({
+           "pred": "mean",
+           "actual": "mean"
+       }).rename(columns={"pred": "avg_pred", "actual": "actual_rate"})
+    
+       print(f"\nDecile Analysis for Wave {wave_number} (top decile=0, bottom decile={n_splits-1}):")
+       print(decile_stats)
+
+       # 5) Optional: plot decile stats
+       decile_stats[["avg_pred","actual_rate"]].plot(
+           kind="bar", figsize=(8,5),
+           title=f"Wave {wave_number} Decile Analysis: Predicted vs. Actual"
+       )
+       plt.xlabel(f"Decile (0=top, {n_splits-1}=bottom)")
+       plt.ylabel("Rate")
+       plt.grid(True)
+       plt.show()
+
+   ##############################################################################
+   # RL Loop with Uplift-Like Reporting and Plots
+   ##############################################################################
+
+   def run_rl_experiment(
+       df,
+       teacher_model,
+       teacher_importance,
+       teacher_col_list,
+       n_waves=5,
+       random_state=42
+   ):
+       """
+       A RL-like loop for multiple 'campaign waves' in the treatment data.
+       For each wave, candidate hyperparameters (alpha, beta, gamma) are tried, and the best
+       combination (based on reward = -total_loss) is selected.
+       Outputs, business-oriented results and plots, plus Gains & Decile analyses.
+       """
+
+       np.random.seed(random_state)
+       df_treat = df[df["PromotionFlag"] == 1].copy()
+       wave_size = len(df_treat) // n_waves
+
+       alpha_candidates = [0.5, 1.0, 2.0]
+       beta_candidates = [0.1, 0.5, 1.0]
+       gamma_candidates = [0.0, 0.05, 0.1]
+
+       wave_results = []
+       # We'll store the best LR model + wave data for the final wave
+       final_wave_data = None
+       final_wave_best_model = None
+
+       for wave in range(n_waves):
+           start_idx = wave * wave_size
+           end_idx = len(df_treat) if wave == (n_waves - 1) else (wave + 1) * wave_size
+           df_wave = df_treat.iloc[start_idx:end_idx].copy()
+
+           if df_wave.empty:
+               print(f"Wave {wave+1}: No data slice available. Skipping.")
+               continue
+
+           print(f"\n=== Wave {wave+1} ===")
+           best_reward = float("-inf")
+           best_params = None
+           best_model_info = {}
+           best_model = None
+
+           for a in alpha_candidates:
+               for b in beta_candidates:
+                   for g in gamma_candidates:
+                       (
+                           lr_model,
+                           total_loss,
+                           alpha_loss,
+                           distill_loss,
+                           struct_loss,
+                           auc_stu
+                       ) = train_student_model(
+                           df_wave,
+                           teacher_model,
+                           teacher_importance,
+                           teacher_col_list,
+                           alpha=a,
+                           beta=b,
+                           gamma=g
+                       )
+                       reward = -total_loss
+                          if reward > best_reward:
+                           best_reward = reward
+                           best_params = (a, b, g)
+                           best_model_info = {
+                               "total_loss": total_loss,
+                               "alpha_loss": alpha_loss,
+                               "distill_loss": distill_loss,
+                               "struct_loss": struct_loss,
+                               "auc_student": auc_stu
+                           }
+                           best_model = lr_model
+
+           print(
+               f"Best hyperparams: alpha={best_params[0]}, beta={best_params[1]}, "
+               f"gamma={best_params[2]} with reward={best_reward:.4f}"
+           )
+           print(" -> Breakdown of losses for best model:")
+           print(f"    AUC-based loss (alpha_loss) : {best_model_info['alpha_loss']:.4f}")
+           print(f"    Distillation loss (beta)     : {best_model_info['distill_loss']:.4f}")
+           print(f"    Structure loss (gamma)       : {best_model_info['struct_loss']:.4f}")
+           print(f"    Student AUC                  : {best_model_info['auc_student']:.4f}")
+           print(f"    TOTAL LOSS                   : {best_model_info['total_loss']:.4f}")
+
+           wave_results.append(
+               {
+                   "wave": wave + 1,
+                   "alpha": best_params[0],
+                   "beta": best_params[1],
+                   "gamma": best_params[2],
+                   "reward": best_reward,
+                   "alpha_loss": best_model_info["alpha_loss"],
+                   "distill_loss": best_model_info["distill_loss"],
+                   "struct_loss": best_model_info["struct_loss"],
+                   "auc_student": best_model_info["auc_student"],
+                   "total_loss": best_model_info["total_loss"],
+               }
+           )
+
+           # If this is the final wave, store the best wave data + best model
+           if wave == n_waves - 1:
+               final_wave_data = df_wave
+               final_wave_best_model = best_model
+
+       df_summary = pd.DataFrame(wave_results)
+       print("\n=========== Summary of RL Campaign Waves ===========")
+       print(df_summary)
+
+       # Plot Student AUC vs. Wave
+       plt.figure(figsize=(8, 5))
+       plt.plot(df_summary["wave"], df_summary["auc_student"], marker="o", linestyle="-")
+       plt.title("Student Model AUC Across Campaign Waves")
+       plt.xlabel("Campaign Wave")
+       plt.ylabel("Student Model AUC")
+       plt.ylim(0.5, 0.7)
+       plt.grid(True)
+       plt.show()
+
+       # Plot Total Loss vs. Wave
+       plt.figure(figsize=(8, 5))
+       plt.plot(
+           df_summary["wave"],
+           df_summary["total_loss"],
+           marker="o",
+           linestyle="-",
+           color="red"
+       )
+       plt.title("Total Loss Across Campaign Waves")
+       plt.xlabel("Campaign Wave")
+       plt.ylabel("Total Loss")
+       plt.ylim(0.15, 0.22)
+       plt.grid(True)
+       plt.show()
+
+       # If we have final wave data and model, let's do Gains chart + Decile analysis
+       if final_wave_data is not None and final_wave_best_model is not None:
+           print("\n=== Additional Business-Focused Plots for Final Wave ===")
+           # Gains (Lift) Chart
+           plot_gains(final_wave_data, final_wave_best_model, teacher_col_list, wave_number=n_waves)
+           # Decile Analysis
+           decile_analysis(final_wave_data, final_wave_best_model, teacher_col_list, wave_number=n_waves)
+
+       # Business-friendly summary interpretation
+       if not df_summary.empty:
+           best_entry = df_summary.iloc[-1]
+           print("\nFriendly Interpretation:")
+           print(
+               f"In wave #{int(best_entry['wave'])}, the best approach used hyperparameters "
+               f"alpha={best_entry['alpha']}, beta={best_entry['beta']}, gamma={best_entry['gamma']}. "
+               f"This student model achieved an AUC of {best_entry['auc_student']:.4f} on the wave's data, "
+               "balancing the need to mimic the teacher's predictions while retaining a strong response signal. "
+               "This means we've identified a simpler, adaptable model for the treatment group, "
+               "which can help us target customers more effectively than a static AB test.\n"
+               "Overall, this dynamic approach provides a promising way to refine marketing strategies in real time.\n"
+               "Business Suggestion:\n"
+               "1. Focus on the top predicted customers in wave #5 for a targeted campaign.\n"
+               "2. Consider potential cost savings by limiting promotions to these high-likelihood responders.\n"
+               "3. Evaluate real ROI or revenue uplift from these top segments before scaling the approach further."
+           )
+
+       return df_summary
+
+   ##############################################################################
+   # 5. Main Execution
+   ##############################################################################
+
+   if __name__ == "__main__":
+       # Load data directly from CSV file
+       df_all = pd.read_csv("marketing_data.csv")
+    
+       # Split into control and treatment subsets
+       df_control = df_all[df_all["PromotionFlag"] == 0].copy()
+       df_treat = df_all[df_all["PromotionFlag"] == 1].copy()
+
+       # Train teacher model on control data
+       teacher_model, teacher_importance, teacher_col_list = train_teacher_model(df_control)
+
+       # Evaluate teacher model performance
+       raw_features = [
+           "Age", "Income", "DaysSinceLastPurchase",
+           "IsHolidaySeason", "PreferredChannel", "LoyaltyScore"
+       ]
+       X_control = pd.get_dummies(df_control[raw_features], drop_first=True)
+       X_control = X_control.reindex(columns=teacher_col_list, fill_value=0.0)
+       teacher_preds_control = teacher_model.predict_proba(X_control)[:, 1]
+       auc_teacher_control = roc_auc_score(df_control["Purchase"], teacher_preds_control)
+
+       X_treat = pd.get_dummies(df_treat[raw_features], drop_first=True)
+       X_treat = X_treat.reindex(columns=teacher_col_list, fill_value=0.0)
+       teacher_preds_treat = teacher_model.predict_proba(X_treat)[:, 1]
+       auc_teacher_treat = roc_auc_score(df_treat["Purchase"], teacher_preds_treat)
+
+       print(f"\n** Teacher Model AUC on Control = {auc_teacher_control:.4f}")
+       print(f"** Teacher Model AUC on Treatment = {auc_teacher_treat:.4f}")
+       print(
+           "This gives a sense of how the data distributions differ between "
+           "the control and treatment groups.\n"
+       )
+
+       # Run the RL-like loop with uplift-like reporting and generate plots
+       run_rl_experiment(
+           df_all, teacher_model, teacher_importance, teacher_col_list,
+           n_waves=5, random_state=123
+       )
+   '''''
+
+3. Final Thoughts & Business Recommendations
+   -a. Efficiency & Adaptability:
+       This integrated framework leverages the strengths of a complex teacher model without incurring its retraining 
+       cost by distilling its knowledge into a simpler student model. 
+       Reinforcement learning then fine-tunes the student model dynamically based on campaign performance.
+   -b. Business Impact:
+       By estimating the incremental effect (uplift) on individual customers, the approach allows for 
+       more targeted promotions. 
+       The detailed analyses (gains charts, decile analyses) demonstrate how focusing on top predicted segments 
+       can improve ROI and reduce unnecessary promotional spend.
+   -c. Recommendations:
+       -1. Target High-Value Segments: Focus on customers in the top deciles with high predicted purchase 
+                                       probabilities.
+       -2. Optimize Promotional Spend: Limit promotions for lower-ranked customers to improve overall cost efficiency.
+       -3. Continuous Adaptation: Regularly update the student model using this dynamic, RL-driven approach 
+                                  to adapt to changing market conditions.
