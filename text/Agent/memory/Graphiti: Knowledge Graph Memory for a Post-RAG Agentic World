@@ -1,0 +1,121 @@
+### From https://medium.com/neo4j/graphiti-knowledge-graph-memory-for-a-post-rag-agentic-world-0fd2366ba27d
+
+1. Context and Vision: Moving Beyond Basic RAG Chatbots
+    -a. Autonomous Agent Aspirations:
+        The text emphasizes that the true potential of artificial intelligence lies in creating autonomous agents—not 
+        just static chatbots. 
+        These agents are envisioned to independently handle a wide spectrum of tasks, 
+        from simple user interactions to intricate workflows.
+    -b. Beyond Retrieval-Augmented Generation (RAG):
+        Traditional RAG methods, which primarily combine static data retrieval with LLM responses, 
+        fall short when the underlying data is dynamic. 
+        The key issue is that these systems are designed for static datasets and therefore struggle to keep up with 
+        frequent updates, limiting their effectiveness in real-world, dynamic environments.
+
+2. Limitations of Conventional RAG Approaches
+   -a. Dependence on Static Data:
+       Systems like Microsoft’s GraphRAG work well when dealing with large, unchanging datasets by precomputing summaries 
+       and building thematic clusters (or “communities”). 
+       However, these methods require extensive recomputation whenever the data changes, 
+       making them unsuitable for environments with frequent updates.
+   -b. Latency and Inefficiency:
+       GraphRAG’s architecture involves multiple rounds of LLM calls. Initially, the system generates partial responses 
+       at a community level and then aggregates them into a final, comprehensive answer. 
+       This multi-step process inherently causes delays—often taking tens of seconds—which is impractical for real-time 
+       or interactive applications.
+
+3. Graphiti: A Next-Generation, Dynamic Memory Layer
+   -a. Purpose and Innovation:
+       Developed by Zep AI, Graphiti is designed as a dynamic, real-time memory system for agents. 
+       Unlike traditional RAG, Graphiti is built from the ground up to function as an always-on context provider 
+       that seamlessly integrates new information.
+   -b. Real-Time, Incremental Updates:
+       Graphiti is not based on batch recomputation. Instead, it incrementally processes incoming data 
+       (which could be chat histories, structured JSON, or unstructured text) by instantly updating the underlying 
+       knowledge graph. This continuous update mechanism ensures that the agent always operates with the most current context.
+   -c. Unified or Multiple Graphs:
+       Graphiti can consolidate diverse data types into a single, unified graph, or it can maintain several coexisting graphs.
+       This flexibility enables agents to have an evolving and comprehensive view of their operational environment, 
+       something static RAG systems cannot offer.
+
+4. Technical Underpinnings of Graphiti
+   -a. Temporally-Aware Knowledge Graph
+       -1. Bi-Temporal Model:
+           -1) Dual Time Tracking: Each event or message ingested by Graphiti is recorded with two timestamps: 
+                                   one indicating when the event occurred and another for when it was ingested.
+           -2) Validity Intervals: Every edge (relationship) in the knowledge graph carries explicit validity intervals 
+                                   (t_valid and t_invalid).
+           -3) Conflict Resolution: When new data conflicts with existing information, Graphiti uses these temporal markers
+                                    to intelligently decide whether to update, invalidate, or preserve historical data.
+                                    This ensures that outdated information is not discarded outright but is managed 
+                                    in a way that preserves historical accuracy.
+       -2. Historical Query Capabilities:
+           Thanks to its temporal architecture, Graphiti enables users to perform historical queries—reconstructing 
+           the state of knowledge at specific moments in time and tracking how data has evolved. 
+           This is particularly useful for applications requiring precise historical context.
+   -b. High-Speed Retrieval Mechanism
+       -1. Hybrid Search Approach:
+           Graphiti achieves a remarkable P95 latency of 300ms by blending several search methodologies:
+           -1) Semantic Embeddings: Leveraging vector representations to capture meaning.
+           -2) Keyword Search (BM25): Using traditional keyword-based search for relevance.
+           -3) Direct Graph Traversal: Quickly navigating the relationships in the graph.
+       -2. Elimination of LLM Calls During Retrieval:
+           By avoiding reliance on LLM calls at query time, Graphiti maintains near-constant time retrieval regardless
+           of graph size. 
+           This architecture makes it ideal for applications that demand real-time interaction, such as voice-controlled systems.
+   -c. Custom Ontology and Entity Management
+       -1. Automatic Ontology Construction:
+           Graphiti automatically builds an ontology by:
+           -1) De-duplicating nodes.
+           -2) Consistently labeling edge relationships.
+       -2. Support for Custom, Domain-Specific Entities:
+           Engineers can define custom entity types using familiar Pydantic models. 
+           This allows for precise context extraction tailored to specific domains—whether capturing personalized user 
+           details, procedural instructions, or business objects like products and sales orders.
+       -3. Example of a Custom Entity Definition:
+           The provided Python code snippet illustrates how to define a custom Customer entity:
+           '''''
+           python
+
+           from pydantic import BaseModel, Field
+
+           class Customer(BaseModel):
+               """A customer of the service"""
+               name: str | None = Field(..., description="The name of the customer")
+               email: str | None = Field(..., description="The email address of the customer")
+               subscription_tier: str | None = Field(..., description="The customer's subscription level")
+           '''''
+           This structure helps Graphiti match and integrate extracted entities with the custom types, thus enhancing the agent’s memory accuracy and contextual awareness.
+
+5. Comparative Analysis: GraphRAG vs. Graphiti
+   -a. GraphRAG (Microsoft Research Implementation):
+       -1. Strengths:
+           -1) Builds detailed, entity-centric knowledge graphs.
+           -2) Precomputes summaries that provide rich context for static datasets.
+       -2. Weaknesses:
+           -1) Inflexible with dynamic data; updates trigger costly recomputation.
+           -2) Involves multiple LLM calls that result in high latency.
+   -b. Graphiti (Zep AI’s Approach):
+       -1. Strengths:
+           -1) Designed from the outset for dynamic, real-time environments.
+           -2) Uses incremental updates to maintain an up-to-date memory layer.
+           -3) Achieves very low query latency without the need for LLM calls at query time.
+           -4) Supports flexible integration of diverse data sources into one or more graphs.
+           -5) Offers a robust bi-temporal model for historical data management and conflict resolution.
+       -2. Overall Impact:
+           Graphiti addresses the key shortcomings of traditional RAG methods by delivering a memory system 
+           that is both agile and efficient, thereby enabling more responsive and contextually aware agentic applications.
+
+6. Implications for the Future of Agent-Based AI
+   -a. Agentic Memory Infrastructure:
+       Graphiti represents a paradigm shift by providing a robust, dynamic memory layer tailored for autonomous agents. 
+       It removes the dependency on static data models and LLM-driven summarization at query time.
+   -b. Real-World Application Readiness:
+       With its hybrid indexing system, custom ontology support, and real-time incremental updates, 
+       Graphiti is positioned as a powerful tool for engineers developing interactive, 
+       real-time AI applications—from voice assistants to complex enterprise workflows.
+   -c. Enhanced Contextual Awareness:
+       By integrating multiple data sources and maintaining a detailed, temporally-aware history of interactions, 
+       Graphiti significantly improves an agent's ability to recall and utilize context. 
+       This leads to more consistent, relevant, and intelligent responses in dynamic environments.
+
