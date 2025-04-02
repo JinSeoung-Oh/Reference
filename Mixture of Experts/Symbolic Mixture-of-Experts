@@ -1,0 +1,133 @@
+### From https://medium.com/@techsachin/symbolic-mixture-of-experts-using-symbolic-output-to-combine-expert-llms-for-heterogeneous-e2eea6b5bc2f
+### From https://arxiv.org/abs/2503.05641
+### From https://github.com/dinobby/Symbolic-MoE/
+
+1. Overview and Motivation
+   Modern large-scale tasks are often heterogeneous—different instances require distinct expertise even within the same 
+   overall domain. 
+   Task-level expert selection (i.e., recruiting a fixed set of expert models for a given task) can be too coarse. 
+   SYMBOLIC-MOE addresses this by adaptively recruiting instance-level experts based on the specific skills needed 
+   for each problem (for example, “Algebra” for one question versus “Probability” for another). 
+   Moreover, instead of engaging in multiple rounds of discussion among experts, 
+   SYMBOLIC-MOE synthesizes a final answer in a single round via an aggregator, 
+   which leads to both improved performance and efficiency.
+
+2. Comparison: Current Multi-Agent Work vs. SYMBOLIC-MOE
+   -a. Current Multi-Agent Systems:
+       -1. Fixed Task-Level Experts: A set of experts (e.g., Phi, Mistral, Llama) is predetermined to tackle a problem.
+       -2. Resource-Intensive Discussion: Experts engage in several rounds of discussion, 
+           even though different questions may require different skills 
+           (e.g., one may need algebra while another requires probability reasoning).
+   -b. SYMBOLIC-MOE Approach:
+       -1. Instance-Level Recruitment: Experts are selected on a per-instance basis using fine-grained, skill-based routing.
+       -2. Single-Round Synthesis: After experts generate chain-of-thought (CoT) responses, 
+                                   a dedicated aggregator synthesizes these into a final answer—resulting in reduced 
+                                   computational overhead and faster inference.
+
+3. Framework Overview
+   -a. Preprocessing Phase
+       -1. Model Profile Creation:
+           -1) Skill Extraction: For each question in a validation set, a “Keyword LLM” (e.g., Qwen2.5–7B-Instruct) 
+                                 extracts 2–5 key skill-related keywords (e.g., “algebra,” “molecular biology”) 
+                                 by prompting the model with a structured query.
+           -2) Noise Reduction: Multiple annotations are generated per question, and only frequently recurring keywords are 
+                                retained.
+           -3) Performance-Based Scoring: Each model in the pool then attempts to solve these validation questions 
+                                          via chain-of-thought reasoning. A correct answer awards a +1 score for 
+                                          each associated skill; an incorrect answer incurs a –1 penalty.
+           -4) Model Profile: Each model’s performance is aggregated into a profile—a dictionary of skills with corresponding 
+                              scores (e.g., {‘Algebra’: 10, ‘Biology’: 3, ‘Chemistry’: –6, …}).
+       -2. Aggregator Selection:
+           -1) Synthetic Task Construction: Outputs from all models (both correct and incorrect reasoning chains) are
+                                            combined into a synthetic task.
+           -2) Aggregator Prompting: Models are then prompted to act as aggregators, synthesizing a final answer from 
+                                     a shuffled mix of responses.
+           -3) Selection Criterion: The best aggregator is chosen based on its ability to reliably synthesize correct 
+                                    answers from the given inputs.
+   -b. Inference Phase 
+       -1. Skill-Based Expert Recruitment:
+           -1) Keyword Extraction for Test Instances: The same keyword extraction process is applied to each test question.
+           -2) Matching via Sentence-BERT: The extracted keywords for a test instance are matched 
+                                           (using cosine similarity of embeddings) to the skills in each model’s profile.
+           -3) Local Suitability Score: For each model 𝑀_𝑖 and test sample 𝑞, a score is computed by summing the model’s skill
+                                        scores over the set of required keywords 𝐾_𝑞
+           -4) Global Competency: This local score is combined with an overall competency measure 
+                                  (the model’s total score normalized by the sum across models) to yield a relevance score.
+           -5) Expert Sampling: A softmax function (with temperature 0.5) is applied to the relevance scores, and the top 
+                                𝑘 experts are sampled for that particular instance. Models that rarely appear 
+                                (e.g., in fewer than 5% of cases) are filtered out to enhance efficiency.
+       -2. Final Answer Generation:
+           -1) Chain-of-Thought Responses: The selected experts generate their detailed reasoning paths for the test question.
+           -2) Aggregation: The chosen aggregator processes the concatenated outputs from the experts to produce a single, 
+                            refined answer.
+       -3. Scalable Batched Inference:
+           -1) Dynamic Expert Groups: Since the recruited set of experts may differ between test instances, 
+                                      a novel batching strategy is employed.
+           -2) Precomputation & Grouping: Instances are preprocessed to determine which experts they require, 
+                                          and then grouped by common expert requirements.
+           -3) Resource Balance: This strategy balances between hosting multiple GPUs (for immediate parallel processing) 
+                                 and a single GPU setup (with constant model swapping), thereby maximizing throughput while controlling latency.
+
+4. Methodological Details
+   -a. Problem Setup
+       -1. Pool of Models:
+           A set 𝑀={𝑀_𝑖}(^𝑛)(_𝑖=1) of diverse LLMs is used, each potentially trained on different datasets and architectures.
+       -2. Dynamic Allocation and Combined Reasoning:
+           The goal is to dynamically allocate the most suitable 𝑘 models per instance and combine their reasoning
+           to achieve enhanced performance.
+       -3. Use of Validation Set:
+           A small validation set is used to create both model profiles and aggregator profiles, 
+           benchmarking each model’s strengths as an expert and as an aggregator.
+  -b. Detailed Preprocessing Steps
+      -1. Model Profile Creation:
+          -1) A “Keyword LLM” is prompted with a standardized query to extract keywords.
+          -2) Each question is annotated multiple times to ensure consistency.
+          -3) Each model’s performance on the validation set is used to adjust the scores for each identified skill.
+      -2. Aggregator Selection Process:
+          -1) Synthetic tasks are constructed by mixing correct and incorrect reasoning chains.
+          -2) Aggregators are evaluated based on their ability to synthesize a coherent and correct answer.
+  -c. Inference-Time Operations
+      -1. Skill-Based Routing:
+          -1) Test questions are processed to extract relevant skills.
+          -2) A combination of local suitability (specific to the test instance) and global competency 
+              (overall model performance) guides expert recruitment.
+      -2. Final Answer Synthesis:
+          -1) The experts’ CoT outputs are merged, and an aggregator model processes the concatenated response to provide 
+              a final, high-quality answer.
+      -3. Batched Inference Strategy:
+          -1) Precomputing the required experts for each instance enables grouping, which minimizes the overhead of
+              dynamically loading different models.
+          -2) This approach effectively balances computational resource usage, reducing overall latency.
+
+5. Experimental Results and Key Findings
+   -a. Performance Gains:
+       -1. SYMBOLIC-MOE consistently outperforms single-model baselines and existing multi-model/debate frameworks.
+       -2. On average, it shows an absolute improvement of 8.15% over the most competitive multi-agent baseline (Self-MoA) 
+           with notable gains on domains like MMLU-Pro, AIME, GPQA, and MedMCQA.
+   -b. Generalization Across Tasks:
+       -1. The framework generalizes well across diverse reasoning tasks, especially excelling in domains where specialized 
+           skills are critical.
+   -c. Model Efficiency:
+       -1. SYMBOLIC-MOE matches or exceeds the performance of much larger models (e.g., 70B-parameter models) 
+           while using only four 7–8B models.
+       -2. It is more efficient—operating 44% faster on a single GPU compared to multi-round discussion frameworks, 
+           and nearly achieving a 2× speedup on 4 GPUs.
+   -d. Aggregator Discussion:
+       -1. Comparison between using discussion rounds and a single-round aggregator reveals that while discussion can 
+           offer marginal gains on some datasets, the efficiency and performance of the single-round approach are compelling.
+
+6. Limitations and Conclusion
+   -a. Inference Cost:
+       Running multiple models in parallel increases the inference cost.
+   -b. Dependency on Validation Set:
+       The quality of skill inference—and hence expert recruitment—relies on the small validation set used to build the model
+       profiles.
+
+   Conclusion:
+   SYMBOLIC-MOE is a scalable, symbolic, text-based, and gradient-free Mixture-of-Experts framework that dynamically 
+   recruits instance-level experts based on fine-grained skills. 
+   By leveraging skill-based routing, a single-round aggregation approach, and scalable batched inference, 
+   it outperforms traditional task-level multi-agent methods and matches the performance of larger proprietary models—all
+   without human intervention. 
+   This makes SYMBOLIC-MOE an effective strategy for tackling large-scale and diverse reasoning tasks.
+
