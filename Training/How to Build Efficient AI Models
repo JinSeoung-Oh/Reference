@@ -1,0 +1,127 @@
+### From https://pub.towardsai.net/how-to-build-efficient-ai-models-fe0768ba8dcb
+
+1. The Motivation: Large Models vs. Practicality
+   -a. Building from Scratch:
+       Building a model like Llama from scratch requires enormous computing power, vast training data, and complex architectures—resources 
+       that are out of reach for most researchers or organizations.
+   -b. A Smarter Alternative:
+       Rather than everyone training giant models, big companies can create one large “teacher” model (e.g., Llama 405B). 
+       From this teacher, we can distill smaller “student” models that are fine-tuned for specific tasks or data domains. 
+       This strategy not only saves on training costs but also makes advanced AI more accessible.
+   -c. Nvidia’s Minitron Approach:
+       Nvidia’s recent research explores this idea further. Their papers introduce a process to compress large models through pruning, quantization, 
+       and knowledge distillation—allowing for efficient, smaller models that can sometimes even outperform their larger counterparts.
+
+2. Key Techniques for Model Compression
+   A. Pruning
+      -1. Concept:
+          Large language models (LLMs) often have sparse parameters—many weights contribute little (or are even zeros). 
+          Pruning identifies and removes these unnecessary parameters, reducing model size and computational overhead.
+      -2. Metrics Used for Pruning:
+          -1) Taylor Gradient:
+              Uses Taylor expansion to estimate each weight’s impact on the loss function. Weights with minimal impact are pruned.
+          -2) Cosine Similarity:
+              Measures the similarity between neurons or layers. Highly similar components are redundant, so one can be removed.
+          -3) Perplexity:
+              Evaluates how well the model predicts data. Changes in perplexity after pruning indicate the importance of the pruned components.
+      -3. Types of Pruning Approaches:
+          -1) Width Pruning:
+              Focuses on components within layers—such as attention heads in the multi-head attention module, neurons in the MLP, 
+              and channels in embedding layers. 
+              A small calibration dataset is used to compute statistics (mean, variance, L2 norms) to decide which parts to remove.
+          -2) Depth Pruning:
+              Involves removing entire layers. Metrics like overall perplexity and “block importance” (using cosine similarity from input to output) 
+              guide this process.
+          -3) Iterative Importance:
+              Pruning is done in small steps; after each iteration, importance is recalculated, allowing for gradual reduction while maintaining 
+              performance.
+      -4. Transformer Architecture Recap:
+          The process starts with token embeddings, followed by multi-head attention (which captures relationships in the text), normalization, 
+          and a multi-layer perceptron. 
+          This cycle repeats over several layers, ending with a softmax that outputs probabilities for each token.
+      -5. Residual Information Preservation:
+          When an attention head is pruned, its residual information is redistributed to the remaining heads to ensure 
+          that critical context isn’t lost.
+   B. Quantization
+      -1. Concept:
+          Quantization reduces the bit precision of model weights and activations, speeding up computation and lowering memory usage. 
+          This step is crucial for deploying models on resource-constrained devices without significantly affecting accuracy.
+   C. Knowledge Distillation
+      -1. The Process:
+          Knowledge distillation involves training a smaller “student” model to mimic the behavior of a larger “teacher” model.
+      -2. Mechanism:
+          -1) Logit Matching:
+              The student model compares its output probabilities with those of the teacher using a logit-based loss function.
+          -2) Hidden State Alignment:
+              The student also learns to match the teacher’s intermediate hidden representations. 
+              Since the student’s architecture is smaller, a linear transformation is applied to align its states with the teacher’s.
+          -3) Loss Components:
+              The overall loss includes three parts:
+              - The standard prediction loss of the student.
+              - A logit-based distillation loss.
+              - A loss that matches the intermediate hidden states (weighted by an adjustable parameter, alpha).
+      -3. Why It Works:
+          This process allows the student to retain much of the knowledge of the teacher despite having fewer parameters, 
+          making it efficient and often surprisingly accurate.
+
+3. The Minitron Compression Strategy in Practice
+    -a. Teacher Correction
+        -1. Challenge:
+            Often, we do not have access to the original training data used to build the teacher model.
+        -2. Solution – Teacher Correction:
+            The large teacher model is fine-tuned on a separate dataset to “correct” its knowledge and reduce validation loss 
+            (in one experiment, by over 6%). 
+            This ensures that the teacher is current and more effective during the subsequent distillation process.
+    -b. Pruning and Retraining
+        -1. Pruning Process:
+            After teacher correction, pruning is applied to remove less important parameters. 
+            The researchers experiment with both width and depth pruning:
+            -1) Width Pruning:
+                Often yields better accuracy as it focuses on removing redundant neurons and attention heads.
+            -2) Depth Pruning:
+                Can yield significant speed improvements (e.g., a 2.7× speedup) but may hurt reasoning accuracy.
+    -c. Retraining via Distillation:
+        The pruned (compressed) model is then retrained using knowledge distillation. Two strategies are compared:
+        -1) Conventional Training:
+            Using ground truth labels.
+        -2) Distillation Training:
+            The student model learns from the teacher’s outputs and internal representations.
+    -d. Experimental Outcomes:
+        -1) Mistral NeMo 12B to MN-Minitron-8B:
+            The compressed model outperformed the original on benchmarks like GSM8K (improving from 55.7% to 58.5%) and HumanEval
+            (from 23.8% to 36.2%).
+        -2) Llama 3.1 8B to Llama-3.1-Minitron 4B:
+            In width pruning, the compressed model achieved a MMLU score of 60.5% (compared to 58.7% for depth pruning and 65% for the base model).
+            However, reasoning ability (as measured by GSM8K) dropped significantly with depth pruning (41.24% for width vs. 16.8% for depth) 
+            relative to the base model’s 50%.
+    -e. Trade-offs:
+        While depth pruning offers larger speed improvements, it may compromise accuracy—especially for tasks requiring strong reasoning abilities.
+        Width pruning, though less aggressive in speed gains, maintains higher accuracy.
+
+4. Practical Recommendations and Takeaways
+   -a. Train the Largest Model First:
+       Begin with a robust teacher model and fine-tune it (teacher correction) to ensure it’s well-adapted to your data before proceeding.
+   -b. Prune Close to Target Size:
+       Prune as near as possible to your intended model size; this minimizes the gap during retraining.
+   -c. Choose the Right Pruning Strategy:
+       -1. For models under 15B parameters, width pruning is generally preferable.
+       -2. For significant speed improvements, depth pruning might be acceptable if some accuracy loss can be tolerated.
+   -d. Retraining is Essential:
+       After pruning, a period of retraining—especially with knowledge distillation techniques—is necessary to recover and sometimes 
+       even enhance model performance.
+   -e. Distillation Loss Components: 
+       When reducing layers substantially, combine logit-based, hidden state, and embedding distillation losses. 
+       For smaller reductions, logit-only distillation might suffice.
+
+5. Conclusion
+   The article makes a compelling case for why training massive models from scratch is not necessary for most use cases. 
+   Instead, a large, state-of-the-art teacher model (like Llama’s 405B or Nvidia’s models) can be distilled into much smaller, 
+   task-specific models through a careful process of pruning, quantization, and knowledge distillation. 
+   Nvidia’s Minitron approach demonstrates that—even with significant compression—the resulting models can retain 
+   (and sometimes even improve upon) the teacher’s performance while being faster and more resource-efficient.
+
+   In essence, the future of building AI systems for most users lies not in replicating huge models from scratch
+   but in leveraging advanced compression techniques to create smaller, specialized models that are tailored to specific applications.
+   This approach democratizes AI by making it feasible to deploy high-performing models on limited hardware, 
+   thereby broadening access to powerful language technologies.
+
