@@ -1,0 +1,89 @@
+### From https://artgor.medium.com/paper-review-video-t1-test-time-scaling-for-video-generation-de8fde73801e
+
+1. Overview
+   The paper tackles the challenge of enhancing video generation quality by increasing inference-time computation instead of incurring higher training
+   costs. By reframing video generation as a search problem, the authors enable the model to find optimal video trajectories—from Gaussian noise
+   to high-quality outputs—using verifiers and heuristic search strategies. 
+   Two primary methods are investigated: a Random Linear Search and an autoregressive Tree-of-Frames (ToF) Search.
+
+2. Scaling Video Generation at Test Time
+   -a. Challenges Unique to Video Generation
+       -1. Spatial and Temporal Demands:
+           Videos must exhibit high spatial quality (clear, detailed frames) and maintain temporal consistency (smooth transitions across frames),
+           which are inherently more challenging than text generation.
+       -2. Multi-Step Diffusion Models:
+           Unlike single-step generation in some LLMs, video generation involves multi-step denoising processes that complicate direct scaling efforts.
+   -b. Reinterpreting Video Generation as a Path-Search Problem
+       -1. Path Search Perspective:
+           Instead of simply generating a video from noise, the process is seen as searching for the optimal trajectory—a sequence of frames—that 
+           leads from random noise to a video that best matches the text prompt.
+       -2. Three Core Components:
+           -1) Video Generator: Uses diffusion models to generate videos from text prompts.
+           -2) Test Verifier: Evaluates the generated video quality and its alignment with the prompt.
+           -3) Heuristic Search Algorithm: Guides the search through the space of noise samples, selecting the best video path based on verifier scores.
+
+3. Two Strategies for Test-Time Scaling
+   -a. Random Linear Search
+       -1. Method Overview:
+           -1) Multiple Gaussian noise samples are independently denoised into complete video sequences.
+           -2) Each sample is treated as a degenerate tree of 𝑇 steps (each non-leaf node has one child), forming a forest of 𝑁 trees.
+           -3) The best video is selected based on its score from the test verifier.
+       -2. Advantages:
+           -1) Simplicity: Easy to implement as each sample is processed independently.
+       -3. Limitations:
+           -1) Inefficiency: Exhaustive traversal without any optimization leads to high computational costs.
+           -2) Lack of Interaction: Samples do not interact or share information, leading to increased randomness and slower scaling 
+                                    as the number of samples grows.
+   -b. Tree-of-Frames (ToF) Search
+       -1. Method Overview:
+           -1) An autoregressive, stage-wise generation process is used where frames are generated in stages rather than 
+               full video sequences at once.
+           -2) The generation process is guided by test verifiers at each stage, allowing for dynamic expansion and pruning of 
+               promising frame trajectories.
+       -2. Three Generation Stages:
+           -1) Initial Frame Generation:
+               - Focuses on strong alignment with the text prompt, capturing key elements like color and layout.
+           -2) Intermediate Frame Generation:
+               - Emphasizes subject consistency, motion stability, and realism to ensure smooth transitions and coherent motion.
+           -3) Final Evaluation:
+               - Assesses overall video quality and its alignment with the prompt.
+       -3. Core Techniques in ToF:
+           -1) Image-Level Alignment:
+               - Frames are progressively evaluated during the denoising process to reject low-quality candidates early, concentrating computation 
+                 on promising paths.
+           -2) Hierarchical Prompting:
+               - Different prompts are employed at various stages to maintain temporal coherence and semantic consistency.
+           -3) Heuristic Pruning:
+               - A dynamic search tree is constructed from noise samples, with branches being expanded or pruned based on quality scores.
+       -4. Efficiency Gains:
+           -1) Although the worst-case time complexity remains the same, selective branching reduces the effective complexity from 
+               𝑂(𝑇𝑁) to 𝑂(𝑁+𝑇), leading to significant computational savings.
+
+4. Experimental Findings
+   -a. Impact of Increased Inference-Time Compute:
+       -1. Experiments show that higher test-time computation consistently improves video quality across various models and verifier configurations.
+       -2. Performance gains are observed with larger inference budgets, although they eventually plateau.
+   -b. Comparison of Strategies:
+       -1. Tree-of-Frames (ToF) Search is found to be significantly more efficient than Random Linear Search, making better use of 
+           computational resources.
+   -c. Model Size Matters:
+       -1. Larger models benefit more from test-time scaling because of their enhanced capacity to explore the search space, 
+           whereas smaller models show only limited improvement.
+   -d. Quality Dimensions:
+       -1. TTS enhances several evaluation dimensions such as scene clarity, object details, and overall image quality.
+       -2. However, improvements in complex temporal properties like motion smoothness and flickering remain challenging for current models.
+   -e. Verifier Role:
+       -1. Different verifiers focus on different aspects of video quality; combining them reduces bias and further boosts overall results.
+
+5. Conclusion
+   The authors demonstrate that reinterpreting video generation as a search problem—augmented with test-time scaling—leads to significant quality 
+   improvements. By employing two strategies:
+
+   -a. Random Linear Search provides a straightforward but less efficient baseline.
+   -b. Tree-of-Frames Search offers a more adaptive and efficient autoregressive approach that intelligently expands and prunes the search space.
+
+   Overall, the experiments confirm that increasing inference-time computation (test-time scaling) enhances video quality, 
+   particularly in spatial and semantic dimensions, even though some temporal challenges persist. 
+   This work highlights the potential of leveraging additional compute at inference to bridge the gap between training costs and output quality
+   in text-to-video generation.
+
