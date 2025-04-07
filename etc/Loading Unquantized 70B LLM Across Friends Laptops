@@ -1,0 +1,453 @@
+### From https://levelup.gitconnected.com/loading-unquantized-70b-llm-across-friends-laptops-e287b0c8b8f3
+
+1. Overview
+   Instead of relying on quantization—which is common for running large LLMs on low-end GPUs (e.g., Colab, Kaggle) 
+   but comes with reduced accuracy and increased hallucinations—the text explores a distributed approach. 
+   In this method, you and your friends can share a big LLM across your laptops by having each GPU host only part of 
+   the model’s blocks. This distributed hosting is achieved using Petals, enabling you to run massive LLMs without incurring 
+   high costs or relying on paid APIs.
+
+2. How LLMs Can Be Distributed
+   -a. Model Structure:
+       Every LLM is made up of independent blocks. For example, a 70B parameter LLaMA might have 10 blocks. 
+       Different machines can host different blocks, so the workload and inference are split across multiple GPUs.
+   -b. Scalability with Quantization:
+       Even larger models (like a 405B parameter LLaMA) can be hosted using quantization techniques combined with distribution,
+       allowing access to bigger models without using expensive API services or GPU hours.
+
+3. Setting Up the Environment
+   -a. Installing PyTorch with CUDA Support
+       '''
+       bash
+       
+       # Installing PyTorch with CUDA Support
+       pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+       '''
+   -b. Installing Petals from Source
+       '''
+       bash
+       
+       # Install Petals from source
+       pip install git+https://github.com/bigscience-workshop/petals
+       '''
+   After installation, you check for available GPUs to simulate a distributed environment using multiple GPU-based notebooks 
+   (from Colab, Kaggle, Lightning.ai, etc.).
+
+4. Creating a Distributed Model
+   To distribute the model blocks across GPUs, you run the Petals server on each machine. 
+   For example, to push blocks of a 70B LLaMA model to one GPU notebook, you run:
+   '''
+   bash
+   
+   # Pushing 70B LLaMA blocks to one of our running GPU
+   python -m petals.cli.run_server meta-llama/Llama-3.1-70B-Instruct
+   '''
+   This command checks for available GPU resources, measures throughput (tokens/sec per block), 
+   and decides how many blocks (e.g., 7 blocks) to host on that notebook. 
+   The Petals backend automatically manages block distribution and memory, and the hosted blocks are visible on Petals’ public health
+   monitor page.
+
+5. Serving LLaMA 70B
+   After hosting blocks on multiple notebooks, the distributed model becomes available for inference. 
+   Even if not all blocks are hosted, most can be used to generate outputs similar to a fully local LLM.
+
+6. Greedy Inference on the Distributed Model
+   You can create a distributed model for text generation. 
+   In this setup, your local machine downloads a small part of the model while other computers handle the remaining blocks. 
+   Petals integrates with PyTorch and HF Transformers, making it similar to running a local model.
+   '''''
+   python
+   
+   import torch
+   from transformers import AutoTokenizer
+   from petals import AutoDistributedModelForCausalLM
+
+   # Specify model name from Hugging Face Hub (LLaMA 70B in our case)
+   model_name = "meta-llama/Llama-3.1-70B-Instruct"
+
+   # Load tokenizer with specific configurations
+   tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False, add_bos_token=False)
+
+   # Load distributed model for causal language modeling
+   model = AutoDistributedModelForCausalLM.from_pretrained(model_name)
+
+   # Move model to GPU for faster computations
+   model = model.cuda()
+   '''''
+   Now, generate text using the model:
+   ''''
+   python
+   
+   # Tokenize input text and move to GPU
+   inputs = tokenizer('A boy is riding "', return_tensors="pt")["input_ids"].cuda()
+
+   # Generate output tokens with a limit on the number of new tokens
+   outputs = model.generate(inputs, max_new_tokens=3)
+
+   # Decode and print the generated output
+   print(tokenizer.decode(outputs[0]))
+   '''''
+
+7. Properly Generating Tokens
+   For interactive or real-time token generation (e.g., for a chatbot), the inference session interface is used. 
+   This interface prints tokens as they are generated and efficiently manages attention caches.
+   '''''
+   python
+   
+   # Create a fake token to preserve leading spaces when decoding text
+   fake_token = tokenizer("^")["input_ids"][0]  
+
+   # Define the initial text prompt
+   text = "What is a good chatbot? Answer:"
+
+   # Tokenize the prompt and move it to the GPU
+   prefix = tokenizer(text, return_tensors="pt")["input_ids"].cuda()
+
+   # Start an inference session with a max length of 30 tokens
+   with model.inference_session(max_length=30) as sess:
+       for i in range(20):  # Generate up to 20 tokens iteratively
+           # Provide the prefix only for the first generated token
+           inputs = prefix if i == 0 else None  
+
+           # Generate one token at a time with sampling (temperature 0.9, top-p 0.6 for diversity)
+           outputs = model.generate(
+               inputs, max_new_tokens=1, session=sess,
+               do_sample=True, temperature=0.9, top_p=0.6
+           )
+
+           # Decode the newly generated token and append it to the text
+           text += tokenizer.decode([fake_token, outputs[0, -1].item()])[1:]
+        
+           # Print the updated text at each step
+           print(text)
+
+   # Start an inference session with a max length of 512 tokens
+   with model.inference_session(max_length=512) as sess:
+       while True:
+           # Take user input for the chatbot prompt
+           prompt = input('Human: ')
+        
+           # Exit the loop if input is empty
+           if prompt == "":
+               break
+        
+           # Format the input to simulate a conversation
+           prefix = f"Human: {prompt}\nFriendly AI:"
+        
+           # Tokenize and move the prompt to the GPU
+           prefix = tokenizer(prefix, return_tensors="pt")["input_ids"].cuda()
+        
+           print("Friendly AI:", end="", flush=True)
+
+           while True:
+              # Generate one token at a time using sampling for diverse responses
+               outputs = model.generate(prefix, max_new_tokens=1, session=sess,
+                                         do_sample=True, temperature=0.9, top_p=0.6)
+            
+               # Decode the output token while preserving leading spaces
+               outputs = tokenizer.decode([fake_token, outputs[0, -1].item()])[1:]
+
+               # Print the generated token immediately
+               print(outputs, end="", flush=True)
+
+               # Break the loop if a newline or end-of-sequence token is detected
+               if "\n" in outputs or "</s>" in outputs:
+                   break
+
+               # Set prefix to None after the first token, as further tokens are generated in the same session
+               prefix = None
+   '''''
+
+8. How Our Model Looks
+   Even though only a part of the LLM is loaded on your local GPU, the overall architecture remains the same. 
+   Some components run locally (e.g., word embeddings) while others run remotely via Petals’ RemoteSequential.
+   '''''
+   python
+   
+   # printing the model architecture
+   print(model)
+   '''''
+   You can also access specific layers:
+   '''''
+   # Extract the first five layers from the model's internal layer stack
+   # model.model.layers assumes a model structure with a '.model' attribute containing the layers
+   first_five_layers = model.model.layers[0:5] 
+
+   # Display the extracted layers (this will print their details or structure)
+   first_five_layers
+   '''''
+
+9. Prompt Tuning
+   Since the remotely hosted transformer blocks are frozen, fine-tuning is done using parameter-efficient methods like trainable
+   prompts or adapters. For instance, you can teach the model to change the sentence:
+   '''''
+   python
+   
+   # Tokenize the input text and move it to the GPU
+   inputs = tokenizer("A small white rabbit ", return_tensors="pt")["input_ids"].cuda()
+
+   # Generate up to 7 new tokens using the model
+   outputs = model.generate(inputs, max_new_tokens=7)
+
+   # Decode and print the generated text
+   print("Generated:", tokenizer.decode(outputs[0]))
+   '''''
+
+   For deep prompt tuning, you add extra trainable tokens (for example, 3 tokens) at each transformer block:
+   '''''
+   python
+   
+   # Load a pre-trained causal language model with deep P-Tuning using a specified model name
+   # Pre-sequence length (pre_seq_len=3) is set for tuning
+   model = AutoDistributedModelForCausalLM.from_pretrained(model_name, tuning_mode='deep_ptune', pre_seq_len=3)
+
+   # Move the model to the GPU for faster computation
+   model = model.cuda()
+   '''''
+
+   Next, set up an optimizer and fine-tune the model with a self-supervised task:
+   '''''
+   python
+   
+   # Initialize the Adam optimizer with a learning rate of 0.001 to update model parameters
+   opt = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+   # Tokenize the input sentence and move it to the GPU
+   the_rabbit_did_not_hop = tokenizer("A small white rabbit did not hop across the green field", return_tensors="pt")["input_ids"].cuda()
+
+   # Perform 12 training steps
+   for i in range(12):
+       # Forward pass: Calculate the loss by comparing model predictions to the input (self-supervised learning)
+       loss = model(input_ids=the_rabbit_did_not_hop, labels=the_rabbit_did_not_hop).loss
+       print(f"loss[{i}] = {loss.item():.3f}")
+
+       # Reset gradients to prevent accumulation from previous steps
+       opt.zero_grad()
+
+       # Perform backpropagation to compute gradients
+       loss.backward()
+
+       # Update model parameters using the optimizer
+       opt.step()
+       print("opt.step()")
+   ''''''
+
+   After fine-tuning, test the model’s output:
+   '''''
+   python
+   
+   # Tokenize the input text "A small white rabbit" and move it to the GPU
+   inputs = tokenizer("A small white rabbit", return_tensors="pt")["input_ids"].cuda()
+
+   # Generate up to 7 new tokens using the model
+   outputs = model.generate(inputs, max_new_tokens=7)
+
+   # Decode and print the generated text
+   print("Generated:", tokenizer.decode(outputs[0]))
+   '''''
+
+10. Fine-tuning a Trainable Adapter
+    Another fine-tuning approach is to add small, trainable adapter layers. In this example, a linear layer-based adapter and
+    a classification head are added to the model:
+   '''''
+   python
+   
+   import torch.nn as nn
+   import torch.nn.functional as F
+
+   # Load a pre-trained causal language model and move it to the GPU
+   model = AutoDistributedModelForCausalLM.from_pretrained(model_name)
+   model = model.cuda()
+
+   # Define a classifier based on the LLM (Large Language Model)
+   class LLMBasedClassifier(nn.Module):
+       def __init__(self, model):
+          super().__init__()
+
+           # Extract the model's transformer layers for distributed processing
+           self.distributed_layers = model.transformer.h
+
+           # Add an adapter module with two linear layers for dimensionality reduction and expansion
+           self.adapter = nn.Sequential(
+               nn.Linear(model.config.hidden_size, 32),
+               nn.Linear(32, model.config.hidden_size)
+           )
+
+           # Classification head to map hidden states to 2 output classes
+           self.head = nn.Linear(model.config.hidden_size, 2)
+
+       def forward(self, embeddings):
+           # Divide the model into two parts and process embeddings through the first half
+           mid_block = len(self.distributed_layers) // 2
+           hidden_states = self.distributed_layers[:mid_block](embeddings)
+
+           # Pass through the adapter for transformation
+           hidden_states = self.adapter(hidden_states)
+
+           # Process through the second half of the model layers
+           hidden_states = self.distributed_layers[mid_block:](hidden_states)
+
+           # Perform mean pooling across the sequence to get a fixed-size representation
+           pooled_states = torch.mean(hidden_states, dim=1)
+
+           # Pass the pooled output through the classification head to get class predictions
+           return self.head(pooled_states)
+   '''''
+   
+   Now, train this adapter using dummy data:
+   '''''
+   python
+   
+   # Initialize the LLMBasedClassifier and move it to the GPU
+   classifier = LLMBasedClassifier(model).cuda()
+
+   # Define the optimizer using Adam with a learning rate of 3e-5 for the classifier's parameters
+   opt = torch.optim.Adam(classifier.parameters(), 3e-5)
+
+   # Create dummy input data (3 samples, 2 tokens, hidden size) and move it to the GPU
+   inputs = torch.randn(3, 2, model.config.hidden_size, device='cuda')
+
+   # Define the true labels for the samples (binary classification with class labels 0 and 1)
+   labels = torch.tensor([1, 0, 1], device='cuda')
+
+   # Training loop for 5 iterations
+   for i in range(5):
+       # Compute the loss using cross-entropy between the classifier's predictions and true labels
+       loss = F.cross_entropy(classifier(inputs), labels)
+       print(f"loss[{i}] = {loss.item():.3f}")
+
+       # Zero out the gradients from the previous step
+       opt.zero_grad()
+
+       # Perform backpropagation to compute gradients
+       loss.backward()
+
+       # Update the classifier's parameters using the optimizer
+       opt.step()
+
+   # Print the predicted class labels by taking the argmax of the classifier's output
+   print('Predicted:', classifier(inputs).argmax(-1))  # This will output the predicted class labels (0 or 1)
+   '''''
+
+11. Sampling Methods
+    You can implement custom sampling methods by manually performing forward passes through all layers instead of using 
+    the standard model.generate() method. For example, the following code reimplements token generation using greedy decoding:
+    '''''
+    python
+    
+    from hivemind import get_logger
+    import torch
+
+    # Initialize logger for logging output at each step
+    logger = get_logger()
+
+    # Workaround to ensure tokenizer.decode() keeps leading spaces
+    fake_token = tokenizer("^")["input_ids"][0]  
+
+    # Define the input prompt
+    text = "How can I improve my writing skills? Answer:"
+    token_ids = tokenizer(text, return_tensors="pt")["input_ids"].cuda()  # Convert input text to token IDs and move to GPU
+
+    # Set the maximum length for the generated text
+    max_length = 100
+
+    # Disable gradient calculation for inference
+    with torch.inference_mode():
+        # Start the inference session
+        with model.inference_session(max_length=max_length) as sess:
+           # Continue generating tokens until max_length is reached
+            while len(text) < max_length:
+                # Get word embeddings for the tokenized input
+                embs = model.transformer.word_embeddings(token_ids)
+                embs = model.transformer.word_embeddings_layernorm(embs)
+
+                # Perform a forward pass through the model
+                h = sess.step(embs)
+                h_last = model.transformer.ln_f(h[:, -1])  # Get the last hidden state
+                logits = model.lm_head(h_last)  # Compute logits for the next token
+
+                # Select the token with the highest probability (greedy decoding)
+                next_token = logits.argmax(dim=-1)
+
+                # Append the decoded token to the text output
+                text += tokenizer.decode([fake_token, next_token.item()])[1:]
+
+                # Update token_ids with the newly generated token
+                token_ids = next_token.reshape(1, 1)
+
+                # Log the generated text at each step
+                logger.info(text)
+    ''''''
+
+12. Private Swarm
+    If privacy is a concern, you can create a private Petals swarm. 
+    This ensures that only you and your trusted peers can access the distributed LLM blocks.
+
+    -a. Setting Up a Bootstrap Peer
+        On a reliable machine (which doesn’t even need a GPU), start a bootstrap peer:
+        ''''''
+        bash
+
+        # Start a bootstrap peer listening on a specific port (e.g., 31337)
+        # It saves its unique ID to bootstrap1.id
+        python -m petals.cli.run_dht --host_maddrs /ip4/0.0.0.0/tcp/31337 --identity_path bootstrap1.id
+        ''''''
+        Watch the output for the full address
+         (e.g., /ip4/YOUR_PUBLIC_IP_OR_LAN_IP/tcp/31337/p2p/QmTPAIfTh1sIsMyUnique1DDontCopyThisPart...). Copy this address.
+
+   -b. Starting the Server on Each GPU Machine
+       On each GPU machine (laptops, Colab notebooks, etc.), export the bootstrap peer address and run the Petals server:
+       ''''''
+        bash
+        
+        # Store the bootstrap peer's address in a variable (makes it cleaner)
+        export MY_INITIAL_PEERS="/ip4/YOUR_PUBLIC_IP_OR_LAN_IP/tcp/31337/p2p/QmTPAIfTh1sIsMyUnique1DDontCopyThisPart..."
+
+        # Start the server for LLaMA 3.1 70B, connecting to YOUR private swarm
+        python -m petals.cli.run_server meta-llama/Llama-3.1-70B-Instruct --initial_peers $MY_INITIAL_PEERS
+        '''''
+
+    -c. Using the Private Swarm for Inference
+        Finally, point your Python script to your private swarm when loading the model:
+        '''''
+        python
+        
+        import torch
+        from transformers import AutoTokenizer
+        from petals import AutoDistributedModelForCausalLM
+
+        # The address(es) of your bootstrap peer(s)
+        # (Can be a list if you started more than one for reliability)
+        INITIAL_PEERS = ["/ip4/YOUR_PUBLIC_IP_OR_LAN_IP/tcp/31337/p2p/QmTPAIfTh1sIsMyUnique1DDontCopyThisPart..."]
+
+        # Specify model name
+        model_name = "meta-llama/Llama-3.1-70B-Instruct"
+
+        # Load tokenizer as usual
+        tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False, add_bos_token=False)
+
+        # Load the distributed model, telling it where YOUR private swarm is
+        model = AutoDistributedModelForCausalLM.from_pretrained(
+            model_name,
+            initial_peers=INITIAL_PEERS # <-- The important bit!
+        )
+
+        # Move model to GPU if you have one locally for the client part
+        model = model.cuda()
+
+        # Now you can use model.generate() or the inference session like before!
+        # inputs = tokenizer('A question: "', return_tensors="pt")["input_ids"].cuda()
+        # outputs = model.generate(inputs, max_new_tokens=5)
+        # print(tokenizer.decode(outputs[0]))
+        '''''
+        This setup lets you run the massive LLM entirely within your private circle, enhancing control and privacy.
+
+13. Key Conclusion
+    -a. Prompt Template & Hosted Blocks:
+        The quality of the generated output depends largely on the prompt template and the number of blocks hosted.
+    -b. Scalability with Quantization:
+        Quantization can allow even larger models to be distributed, and Petals supports various parameters to manage block hosting 
+        and avoid duplicates.
+    -c. Recommendation:
+        Try hosting an 8B LLM first to test performance—it might surprise you with its capabilities.
+
