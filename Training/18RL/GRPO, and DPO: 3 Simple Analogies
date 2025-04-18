@@ -1,0 +1,40 @@
+### From https://medium.com/ai-exploration-journey/the-best-way-to-understand-ppo-grpo-and-dpo-3-simple-analogies-0d0ece916e3b
+
+1. Key terms (baking‑contest metaphor)
+   -a. Policy model – the contestant baker who actually makes the cakes.
+   -b. Model parameters – the baker’s secret techniques and ingredient ratios.
+   -c. Output – the cake served for judging.
+   -d. Reward model – a professional judge who assigns a numeric score to each cake.
+   -e. Value function – a “prophet” estimating the baker’s long‑term potential before the cake is tasted.
+   -f. Reference model – the classic recipe everyone must stay close to.
+   -g. KL‑divergence constraint – the rule that says, “don’t let your new cake stray too far from the classic flavor.”
+   -h. Binary cross‑entropy loss – the math DPO uses to lean toward the cake voters preferred and away from the one they rejected.
+   -i. Preference data – audience votes that tell which of two cakes tastes better.
+
+2. PPO (Proximal Policy Optimization)
+   A traditional baking contest:
+   -a. The baker follows the reference recipe, bakes a cake (output), and hands it to the reward model—our numeric judge.
+   -b. The judge scores appearance, aroma, taste; the value function adds a forecast of future potential.
+   -c. The baker tweaks ingredients slightly, but the KL constraint forbids wild changes.
+   -d. Round after round, small, judged‑guided updates lead to steady improvement—reliable but expensive because every cake needs 
+       a professional score and a prophet’s estimate.
+
+3. GRPO (Guided Reward Policy Optimization)
+   A classroom bake‑off:
+   -a. Instead of one cake, the baker produces a batch of cakes in parallel; the same professional judge rates them all.
+   -b. The baker learns by comparing scores within the batch—copying what worked, discarding what didn’t—so no value function is needed.
+   -c. The KL constraint still limits drastic shifts.
+   -d. Cost drops (fewer evaluations per improvement) but the method remains dependent on a possibly biased reward model.
+
+4. DPO (Direct Preference Optimization)
+   A live audience taste test:
+   -a. For each prompt, the baker serves two cakes derived from the reference recipe.
+   -b. The crowd votes for its favorite; that simple preference data replaces numeric judging.
+   -c. Training nudges the recipe toward the winning cake and away from the loser, implemented by binary cross‑entropy loss plus the usual KL guardrail.
+   -d. No professional judge, no prophet—cheaper and faster. Performance now hinges on having honest, representative audience votes.
+
+5. In short
+   -a. PPO – judge + prophet + tiny recipe steps → most stable, most costly.
+   -b. GRPO – judge only, learns from group comparisons → cheaper, still needs numeric scores.
+   -c. DPO – audience votes, no judge or prophet → lightest, but success rises or falls with vote quality.
+
