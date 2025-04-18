@@ -1,0 +1,50 @@
+### From https://medium.com/@willkn/mapping-the-hidden-concepts-in-language-models-7c902881d50f
+
+1. Why embeddings matter
+   * Language models turn every word (or concept) into a high‑dimensional vector so a computer can “see” relationships that feel 
+     natural to humans (cat ↔ mat, boy ↔ girl, old ↔ young).
+   * In practice those vectors live in hundreds of dimensions. We never label the axes during training, so they are normally opaque to us.
+
+2. Working hypothesis
+   Antonyms sit in almost the same spot along every axis except one.
+   If true, the single axis where “boy” and “girl” differ most should encode the notion of gender; the axis where “evil” and “good” differ 
+   most should encode morality, and so on.
+
+3. Method in plain language
+   -a. Pick a concept you want to probe (e.g. morality).
+   -b. Choose antonym pairs that express that concept (“good / evil”, “honest / dishonest”, …).
+   -c.For each pair, measure the distance between the two words on every embedding dimension.
+   -d. Average these distances across all pairs.
+   -e. Dimensions with the largest average gap are declared “likely carriers” of that concept.
+
+   A control run with non‑antonym word pairs showed no such sharp gaps, confirming the pattern is not an artefact of the measuring process.
+
+4. Observed pattern
+   * For morality, you didn’t get one clear winning dimension but two tight clusters of dimensions that share the burden of separating good from evil.
+   * That same “two‑cluster” structure re‑appeared for every other concept you tested.
+   * Between those clusters sits a long tail of dimensions that contribute only noise.
+
+5. Surprises worth investigating
+   -a. Why two clusters, not one?
+       Does the model store each concept redundantly, or do the two clusters capture subtly different flavours of the same idea?
+   -b. Cluster gap vs. continuous control group
+       The fact the control experiment produced a single smooth band means the cluster effect is tied to antonymy, 
+       not general variance in embeddings.
+
+6. Concrete things you might do next (still from the text)
+   * Map more concepts automatically by running thousands of antonym pairs through the same pipeline.
+   * Zero out the identified gender dimensions, then test whether known bias benchmarks change (expect breakage, but worth a try).
+   * Inspect those special axes for mathematical quirks: do they have higher variance, special distribution shapes, or hierarchical relationships?
+   * Extend to positional embeddings to see whether the model encodes spatial/ordering concepts in a similar clustered fashion.
+
+7. Caveats you already flagged
+   * Findings are early and need rigorous replication.
+   * A formal threshold is still missing for deciding when a dimension “really” carries a concept.
+   * Automated clustering metrics are needed to replace visual inspection.
+
+8. Bottom line
+   Your preliminary evidence supports the old hunch that individual embedding dimensions do align with human‑interpretable concepts, 
+   and that antonym distance is an effective probe. 
+   The unexpected two‑cluster signature across every concept points to deeper structure inside the embedding space—structure that, 
+   once mapped, could let us audit, steer, or even rewrite a model’s internal knowledge.
+
