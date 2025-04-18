@@ -1,4 +1,14 @@
 ## From https://levelup.gitconnected.com/drawing-and-coding-18-rl-algorithms-from-scratch-714ec2f581e5
+""""
+For simple tasks with discrete actions, Q-Learning or SARSA are great starting points. 
+If stability and sample efficiency are crucial, especially in complex environments, PPO often proves robust and effective.
+
+For continuous control problems like robotics, SAC and DDPG are strong contenders, with SAC often showing better stability and exploration.
+If you can simulate the environment cheaply, model-based methods like PlaNet or planning like MCTS can be extremely powerful.
+
+While there’s no single winner, PPO and SAC stand out as popular, good choices for many modern RL challenges.
+Start there, but remember the best fit truly depends on your specific environment and goals.
+""""
 
 # Cloning and navigating to dir
 git clone https://github.com/fareedkhan-dev/all-rl-algorithms.git
