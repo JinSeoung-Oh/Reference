@@ -1,0 +1,80 @@
+### From https://discuss.pytorch.kr/t/nanoahamoment-llm/6738
+
+The nanoAhaMoment project is a miniature, “Karpathy‑style” implementation of DeepSeek R1‑Zero‑style reinforcement 
+learning for large language models that fits in ≈ 700 lines of code, 
+trains a 3‑billion‑parameter model end‑to‑end on a single 80 GB GPU in under ten hours, 
+and reaches roughly 60 % accuracy on the arithmetic Countdown benchmark.​
+Created by researchers at McGill‑NLP, it is meant to be fully transparent and easily hackable, 
+avoiding heavyweight RL libraries while demonstrating how “Aha‑moment” reasoning abilities can emerge
+from pure RL fine‑tuning.​
+
+1. Project Goals & Origins
+   -a. Pedagogical minimalism. 
+       The codebase shrinks the DeepSeek R1‑Zero algorithm—whose larger vision is to cultivate reasoning 
+       without any supervised pre‑training—into a single script/notebook (nano_r1_script.py / nano_r1.ipynb).​
+   -b. One‑GPU accessibility. 
+       All experiments target an 80 GB H100 (or A100‑80 GB) so that independent researchers can reproduce 
+       R1‑Zero behavior without a cluster.​
+   -c. Community demand. 
+       Since DeepSeek‑AI’s R1‑Zero paper showed strong reasoning with pure RL — dubbed the “Aha moment” 
+       by the authors and press — numerous labs have raced to replicate it.​
+       NanoAhaMoment offers the fastest re‑creation path known to date.
+
+2. Technical Design
+   2.1 Base stack
+       -a. Model : Qwen 2.5‑3B (easily swappable) loaded with vLLM for fast generation.​
+       -b. Optimizer : AdamW in  bf16; DeepSpeed ZeRO‑2 handles sharded states.​
+       -c. Efficient kernels : Flash‑Attention 2 compiled for CUDA 12.4.​
+   2.2 Training loop (≈ 50 lines)
+       -a. Generate N = 4 candidate answers per prompt with temperature = 1.0.​
+       -b. Compute a composite reward: (a) format correctness + (b) arithmetic solution correctness.​
+       -c. Calculate token‑wise advantages, add KL divergence to a frozen reference model, 
+           and apply PPO‑style policy updates.​
+       -c. Sync new weights back to vLLM and iterate 1 000 times (≈ 10 h).​
+   2.3 Dataset & Reward Signal
+       -a. Uses Countdown‑Tasks‑3to4, a 490 k‑sample arithmetic puzzle set.​
+       -b. Reward function is completely automatic—no human preference data needed—mirroring DeepSeek’s 
+           self‑reinforcement philosophy.​
+
+3. Repository Layout
+   File	| Purpose
+   nano_r1.ipynb	| Walk‑through notebook with inline commentary.​
+   nano_r1_script.py	| CLI‑friendly, same logic as notebook.​
+   utils.py	| Reward helpers, WandB logging, checkpoint utils.​
+   notebooks/checkpoint_playground.ipynb |	Compare multiple checkpoints interactively.​
+
+4. Results & Checkpoints
+   -a. The released Hugging Face model McGill‑NLP/nano‑aha‑moment‑3b achieves ≈ 60 % top‑1 accuracy 
+       on held‑out Countdown puzzles after ~10 hours of training.​
+   -b. The entire training run fits inside the 80 GB H100 memory budget without gradient checkpointing 
+       thanks to ZeRO‑2 partitioning.​
+   -c. YouTube lectures (Part 1 & 2) explain every code block line‑by‑line.​
+
+5. Quick‑Start Installation
+   git clone https://github.com/McGill-NLP/nano-aha-moment.git
+   cd nano-aha-moment
+   pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+   pip install -r requirements.txt      # includes flash-attn‑2, deepspeed, vllm
+   python nano_r1_script.py --model_name Qwen/Qwen2.5-3B --kl_coeff 0.001
+
+   Training logs and checkpoints default to $SCRATCH/deepseek_r1/….​
+
+6. Strengths, Limitations, Extensions
+   Strengths	| Limitations	| ➜ Possible Extensions
+   Single‑file transparency, excellent for teaching and rapid prototyping.​ | Currently capped at 3 B parameters—larger models require multi‑GPU refactor.​ | Swap in your own reward function (e.g., unit‑test pass rate) or dataset to explore different RL objectives.
+   Reproduces “Aha moment” reasoning without any SFT data.​ | Evaluation limited to arithmetic puzzles; general reasoning not guaranteed.​ | Integrate symbolic‑verifier agent for more complex tasks, or port to multimodal R1‑Zero variants.
+   No dependence on TRL or RLlib; pure PyTorch + DeepSpeed.​ | Still inherits RL instabilities (reward hacking, variance).	 | Scale to 7 B+ via DeepSpeed‑ZeRO‑3 or FSDP; compare to TinyZero or Mini‑R1 baselines.
+
+7. Key Resources
+   -a. GitHub repo — https://github.com/McGill‑NLP/nano‑aha‑moment​
+   -b. Hugging Face checkpoint — McGill‑NLP/nano‑aha‑moment‑3b​
+   -c. DeepSeek R1‑Zero paper (background) — arXiv:2501.12948​
+   -d. Announcement threads — Threads on X by @a_kazemnejad & @MAghajohari​, Bluesky & Facebook posts​
+   -e. Community coverage — AI Minds newsletter summary​, Financial Times & Business Insider reporting on 
+       the broader R1 trend​
+
+8. Bottom line
+   nanoAhaMoment distills the essence of DeepSeek‑style self‑reinforcement into a textbook‑size script 
+   that anyone with one modern GPU can run, inspect, and extend—an ideal playground for researchers probing 
+   how far pure RL can push LLM reasoning.
+
