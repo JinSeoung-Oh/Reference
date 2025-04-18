@@ -1,0 +1,80 @@
+### From https://arxiv.org/abs/2504.02495
+
+1. Key takeaway — DeepSeek‑AI’s Self‑Principled Critique Tuning (SPCT) shows that reward models become 
+   far more accurate and scalable when they (i) generate task‑specific “principles” on‑the‑fly before judging answers,
+   (ii) train those principle+critique skills with a two‑stage Rejective‑Fine‑Tuning → rule‑based online RL pipeline,
+   and (iii) exploit parallel sampling plus a lightweight “meta RM” to vote out bad judgments at inference time. 
+   Together, these ideas let a single pointwise Generative Reward Model (GRM) outperform larger, 
+   pairwise scalar RMs across diverse benchmarks while enjoying linear gains from extra inference compute.​
+
+2. Preliminaries
+   2.1 Taxonomy of Reward‑Model (RM) Approaches
+       Dimension |	Categories |	Pros |	Cons
+       Reward generation	| Scalar – single number; Semi‑scalar – number + free‑text critique; Generative – free‑text only (score is parsed)	| Scalar is cheap; generative gives rich signal	| Scalar can’t exploit sampling diversity; generative needs extraction heuristics.​
+       Scoring pattern	| Pointwise – score each answer independently; Pairwise – pick the best among candidates	| Pointwise can handle any #answers; pairwise aligns with preference data	| Pairwise struggles to rate single answers; needs tricks for >2 answers.​
+      
+       Inference‑time scalability depends on whether repeated sampling actually yields different rewards. 
+                 Scalar methods output the same score every time, so they saturate quickly; 
+                 generative RMs can output diverse critiques and thus aggregate better. 
+                 Input flexibility is highest for pointwise generative RMs because they naturally handle 1‑N answers 
+                 without special wrappers.​
+   2.2 Why “Principles” boost reward quality
+       “Principles” are concise, criterion‑specific rules that guide critique generation 
+       (a direct riff on Constitutional AI). When GPT‑4o was asked to write principles and then judge answers 
+       on RewardBench‑Chat‑Hard and PPE‑IFEval, raw self‑generated principles helped little, 
+       but filtered principles (kept only if their resulting rewards matched ground truth) lifted accuracy by 5‑10 pp.​
+       This suggests that good principles matter, yet producing them automatically remains hard.
+
+3. Self‑Principled Critique Tuning (SPCT)
+  3.1 Unpinning principles from preprocessing to generation
+      SPCT lets a single GRM first sample a set of principles conditioned on the query + candidate answers, 
+      then generate critiques/rewards using those principles:
+      -1. {𝑝_𝑖}∼𝑝_𝜃(𝑥,{𝑦_𝑖})  → adaptive principles
+      -2. 𝐶∼𝑟_𝜃(𝑥,{𝑦_𝑖},{𝑝_𝑖}) → critique
+      -3. 𝑆_𝑖=𝑓_extract(𝐶) → discrete score 1‑10
+      Making principle generation part of the forward pass turns the RM into a self‑prompting critic
+      that can refine its own rubric per task.​
+  3.2 Two‑phase optimisation
+      -1. Rejective fine‑tuning (RFT) – sample many (principles + critiques + scores) trajectories; 
+                                        keep only those whose scores match ground‑truth preference labels; 
+                                        discard trivial samples where every trajectory is correct. 
+                                        This teaches the right format and basic reasoning.​
+      -2. Rule‑based online RL (GRPO style) – continue training with a binary outcome reward 
+                                              (+1 if the extracted scores correctly rank answers, –1 otherwise) 
+                                              and a stronger KL penalty (no extra format reward). 
+                                              This sharpens both principle quality and critique fidelity.​
+
+4 Inference‑Time Scaling Techniques
+  4.1 Voting with multiple sampled rewards
+      Draw k independent (principle, critique, score) sets, then sum the scores for each answer: 
+      𝑆_𝑖\* = ∑(𝑗=1 to 𝑗=𝑘)𝑆_(𝑖,𝑗). Because each sample expands the discrete reward space, 
+      accuracy improves roughly √k until saturation. Shuffling answers before each rollout mitigates position bias.​
+  4.2 Meta‑RM guided voting
+      Some samples are noisy. A lightweight scalar meta RM is trained (binary BCE) to predict 
+      whether a sampled trajectory ranks answers correctly. 
+      At inference, keep only the top kₘₑₜₐ samples by meta‑score before voting. 
+      This filters out systematic hallucinations and yields another 2–3 pp accuracy bump across RewardBench variants.​
+
+
+ * SPCT not only beats training‑time scaling (bigger models) but also shows near‑linear gains with additional 
+   inference compute up to k ≈ 32.​
+
+6 Why It Matters
+  -a. General‑purpose evaluator. Because pointwise GRMs accept any number of answers,
+      DeepSeek‑GRM can serve as a drop‑in replacement for static pairwise RMs in RLHF or offline evaluation.​
+  -b. Co‑scaling with policy models. As policies grow, you can spend more inference FLOPs on the RM 
+      rather than retraining it, mirroring the sampling‑time scaling ideas in chain‑of‑thought generation.​
+  -c. Automatic rubric discovery. Self‑generated principles remove much of the manual effort in writing
+      constitutions or rule lists, while still grounding critiques in simple natural‑language heuristics.​
+
+7 Remaining Challenges & Open Questions
+  -a. Principle correctness guarantees. While meta‑RM helps, there is no formal proof that generated 
+      principles are logically sound or unbiased.
+  -b. Resource overhead. Parallel sampling (e.g., k = 32) can multiply inference cost; 
+      efficient batching or caching is needed for production.
+  -c. Beyond text. Adapting SPCT to multimodal RMs (images, code execution traces) requires redefining 
+      both principles and extraction rules.
+
+Bottom line: SPCT shows that letting a reward model write its own grading rubric—and refining that skill 
+             with online RL—may be the missing piece for reliable, compute‑scalable evaluation across open‑ended tasks.
+
