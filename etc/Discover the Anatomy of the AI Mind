@@ -1,0 +1,75 @@
+### From https://medium.com/@ignacio.de.gregorio.noblejas/discover-the-anatomy-of-the-ai-mind-89e3a687c70e
+
+Anthropic’s recent paper undertakes a mechanistic interpretation of large language models (LLMs) by treating them not as inscrutable “black boxes,” 
+but as assemblies of interacting computational units (“neurons”) whose activations can be mapped to human‐readable concepts. 
+This approach aims to replace vague intuitions with concrete, first‐principles analysis, 
+revealing how LLMs internally represent knowledge and perform reasoning‐like operations.
+
+1. Neurons (Hidden Units) & Their Activations
+   -a. Definition: In this context, each “neuron” is a scalar activation in a model layer (more precisely, a “hidden unit”).
+   -b. Behavior: For a given input token sequence, every neuron outputs a value—often zero if it does not “fire.” 
+                 Deeper neurons depend on upstream activations, forming a cascade of information flow.
+   -c. Challenge: With hundreds of billions of such units interacting, isolating why specific predictions occur is extremely difficult.
+
+2. From Polysemantic Neurons to Monosemantic Features
+   -a. Polysemanticity: Individual neurons often respond to multiple, seemingly unrelated topics
+                        (e.g., one neuron might fire for both Shakespearean text and wallpaper discussions).
+   -b. Feature Discovery: Rather than focus on single neurons, researchers found that specific combinations of neurons reliably co‐activate
+                          for one semantic concept (“monosemantic features”).
+       -1. These combinations form the basis of “features”, each representing a coherent topic or function within the model.
+
+3. Sparse Autoencoders & Feature Mapping
+   -a. Sparse Autoencoders (SAEs) are used to factorize the model’s vast activation space into a sparse set of features.
+   -b. By training an SAE on recorded activations, one learns a dictionary of features such that any activation pattern can be approximated 
+       by a small subset of them.
+   -c. This yields a mapping from high‑dimensional neuron activations to a tractable set of interpretable features.
+
+4. Attribution Graphs → Feature Graphs
+   -a. Attribution Graphs trace the activation path of raw neurons leading to a prediction, but remain complex.
+   -b. Feature Graphs abstract this by showing how features (not individual neurons) combine over layers to produce an output.
+       -1. Nodes represent features (e.g., “Texas,” “capital,” “say a capital”), and edges indicate causal activation flows among them.
+
+5. Case Study: The “Capital Circuit”
+   -a. Prompt: “Texas capital?”
+   -b. Feature Activation:
+       -1. “Texas” feature fires upon reading “Texas.”
+       -2. “Capital” feature fires upon “capital.”
+   -c. Circuit Combination: Features promoting the act of naming capitals merge with the state feature to drive the “Austin” feature.
+   -d. Result: The model predicts “Austin.”
+   -e. Implication: Prediction is not magic or raw memorization, but the mechanical interaction of concept‐specific circuits.
+
+6. Generalizable & Modular Circuits
+   -a. Intervention Studies:
+       -1. Clamping a feature (forcing its activation) compels the model to speak as if it embodies that concept
+           (e.g., always referencing the Golden Gate Bridge).
+       -2. Suppressing the “Texas” feature still yields a capital via the same circuit, just for a different state, 
+           showing generalization beyond memorized prompt patterns.
+   -b. Multi‐Hop Reasoning:
+       -1. For “The capital of the state containing Dallas is…,” the model:
+           -1) Activates “capital” and “state” features.
+           -2) Activates “Texas” via “Dallas.”
+           -3) Combines them to reach “Austin.”
+       -2. Demonstrates chained feature activations resembling simple reasoning.
+
+7. Autoregressive Planning
+   -a. Despite strictly predicting one token at a time, LLMs exhibit look‑ahead: upon encountering a line‐break token in poetry, 
+       they already promote multiple rhyming words internally—even before generating any of them.
+   -b. This indicates a form of internal planning, adjusting current activations to satisfy future constraints (e.g., semantic coherence and rhyme).
+
+8. Broader Examples of Feature Circuits
+   -a. Multilingual Understanding: Shared circuits work across languages, adapting outputs to the input language.
+   -b. Arithmetic: Simple addition tasks use dedicated subcircuits, while more complex sums engage combinations of arithmetic features.
+   -c. Medical Reasoning: Symptoms activate diagnostic features, which then drive follow‐up question features and treatment explanations.
+
+9. Implications & Future Directions
+   -a. Beyond Memorization: Circuits are reusable, modular, and composable, proving that LLMs internalize abstract relationships, 
+                            not just raw text sequences.
+   -b. Interpretability & Control: By identifying and intervening in these circuits, we can steer model behavior—a cornerstone for 
+                                   robust alignment in sensitive applications.
+   -c. Algorithmic Breakthroughs Needed: To scale from these primitive reasoning-like circuits to truly data-efficient, human‑level reasoning,
+                                         new architectures or training methods will be required.
+
+10. Conclusion
+    Anthropic’s work reframes LLMs as mechanistic systems of concept‐specific circuits, offering the first detailed glimpse into how these models
+    might be performing primitive reasoning. This paradigm paves the way for transparent, controllable, and more reliable AI systems.
+
