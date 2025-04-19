@@ -1,0 +1,83 @@
+### From https://medium.com/data-science-collective/cupy-numpy-on-steroids-0b931c94fedf
+
+1. What is NumPy?
+   NumPy is a Python library written in C that enables fast number crunching, particularly for multidimensional 
+   arrays and matrices, with a collection of mathematical functions to operate efficiently on these arrays.
+
+2. What is CuPy and Why Use It?
+   CuPy is an open-source library developed by Preferred Networks that provides a NumPy-compatible interface 
+   for performing calculations on NVIDIA GPUs using CUDA. 
+   It's designed as a drop-in replacement for NumPy, allowing users to leverage GPU parallel computing power 
+   with minimal code changes.
+   The main benefit of CuPy is speed. For operations that can be parallelized, 
+   CuPy can leverage the GPU to perform computations much faster than a CPU, 
+   especially for large-scale numerical calculations. 
+   This is particularly beneficial for scientific computing, data analytics, machine learning, and image processing tasks.
+
+3. Prerequisites for Using CuPy
+   -a. An NVIDIA GPU with compute capability 3.0 or larger
+   -b. Proper NVIDIA drivers installed
+   -c. CUDA toolkit installed
+
+"""
+import numpy as np
+import cupy as cp
+from timeit import default_timer as timer
+
+# CPU with for loop
+def func1(a):
+    for i in range(len(a)):
+        a[i] += 1
+
+# GPU with for loop
+def func2(a):
+    for i in range(len(a)):
+        a[i] += 2
+
+# CPU with vectorization
+def func3(a):
+    a += 3
+
+# GPU with vectorization
+def func4(a):
+    a += 4
+
+# Set up arrays
+n1 = 300000000
+a1 = np.ones(n1, dtype=np.float64)
+n2 = 300000
+a2 = cp.ones(n2, dtype=cp.float64)
+n3 = 300000000
+a3 = np.ones(n1, dtype=np.float64)
+n4 = 300000000
+a4 = cp.ones(n2, dtype=cp.float64)
+
+# Test each method
+start = timer()
+func1(a1)
+print("without GPU/for loop:", timer()-start)
+
+start = timer()
+func2(a2)
+cp.cuda.Stream.null.synchronize()
+print("with GPU:/for loop", timer()-start)
+
+start = timer()
+func3(a3)
+print("without GPU:vectorization", timer()-start)
+
+start = timer()
+func4(a4)
+cp.cuda.Stream.null.synchronize()
+print("with GPU:vectorization", timer()-start)
+"""
+
+Results:
+  -a. CPU with for loop: 25.49 seconds
+  -b. GPU with for loop: 4.36 seconds (using 1000x smaller array)
+  -c. CPU with vectorization: 0.14 seconds
+  -d. GPU with vectorization: 0.07 seconds
+Key finding: Loops using data on the GPU are slow because the for loop runs on the CPU and causes data transfer 
+             between CPU and GPU on each iteration. 
+             For vectorized operations, the GPU processed data twice as quickly as the CPU.
+
