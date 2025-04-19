@@ -1,0 +1,147 @@
+### From https://levelup.gitconnected.com/training-deep-learning-models-at-ultra-scale-using-pytorch-74c6cbaa814b
+
+Full Walk‑Through of “5 (+1)‑Dimensional Parallelism”
+
+0. Why We Need Parallelism
+   -a. LLM progress depends on scale – new “state‑of‑the‑art” results appear almost daily because researchers
+                                       can now train/validate on hundreds or thousands of GPUs simultaneously.
+   -b. Bottlenecks:
+       -1. Memory → a single GPU cannot hold billions of parameters + activations.
+       -2. Compute → one device cannot finish training in a reasonable time.
+   -c. Parallelism family addresses both: we break the work across devices in complementary ways.
+
+1. Data Parallelism (DP)
+   Item	 | Detail
+   What is split?	| Mini‑batch – each GPU gets a chunk of input samples.
+   What stays identical?	| Full model weights and optimizer states.
+   When useful?	 | Model weights fit on one GPU, dataset is huge.
+   How it works |	① Broadcast parameters → ② Each GPU computes forward/backward on its mini‑batch → ③ All‑reduce gradients → ④ Every replica applies the same update.
+
+   -a. PyTorch API Choices
+       -1. torch.nn.DataParallel (single node, simple, but slower comm)
+       -2. torch.nn.parallel.DistributedDataParallel (DDP) (multi‑node, overlaps comm/compute; industry standard)
+       """
+       import torch, torch.nn as nn, torch.optim as optim
+       model = nn.Linear(10,1).cuda()
+       model = nn.parallel.DistributedDataParallel(model)  # preferred over DataParallel
+       ...
+       """
+   -b. Key Benefits
+       -1. Minimal code changes.
+       -2. Near‑linear speed‑up on image/NLP classification when communication cost is low.
+   -c. Caveats
+       -1. Comm overhead grows with parameter count and number of GPUs.
+       -2. Still limited by one‑GPU memory.
+
+2. Tensor Parallelism (TP)
+   Item |	Detail
+   What is split?	| Individual weight matrices / tensors (e.g., rows or columns).
+   Goal |	Fit monster layers (e.g., 65 B‑param attention matrices) that don’t fit on one GPU.
+   Forward pass |	Each GPU computes partial matmul; results are gathered or reduced as needed.
+   """
+   def row_parallel_matmul(A, B, devices):
+       A_parts = A.chunk(len(devices), dim=0)   # split rows
+       outputs = [torch.matmul(part.to(dev), B.to(dev)) for part,dev in zip(A_parts,devices)]
+       return torch.cat(outputs, dim=0)
+
+   -a. Frameworks
+       -1. Megatron‑LM, DeepSpeed, Tensor Parallel module in NVIDIA NeMo handle low‑level collectives automatically.
+   -b. Benefits
+       -1. Extends model size beyond single‑GPU RAM.
+   -c. Challenges
+       -1. Must synchronize intermediate activations; sophisticated communication scheduling needed.
+       -2. Manual partitioning can cause load imbalance.
+
+3. Context (Sequence) Parallelism (CP)
+   Item	| Detail
+   What is split?	| Token/sequence length dimension (context) of input.
+   Why?	| Very long texts (10 k–1 M tokens) break GPU memory when processed in one shot.
+   Mechanism	| Slice the sequence into equal windows; run self‑attention (or other contextual ops) on each window in parallel; later merge.
+   """
+   segments = x.view(batch, num_seg, ctx, dim)  # ctx = context_size slice
+   # loop or map across GPUs
+
+   -a. Edge Handling
+       Need overlap or extra attention layers to capture token dependencies across boundaries.
+
+4. Pipeline Parallelism (PP)
+   Item |	Detail
+   What is split?	| Model layers (depth) into sequential stages.
+   Scheduling	 | Global batch → split into micro‑batches that flow in a pipeline (assembly‑line).
+   Supported by	 | PyTorch torch.distributed.pipeline.sync.Pipe.
+   """
+   from torch.distributed.pipeline.sync import Pipe
+   model = nn.Sequential(seg1, seg2)
+   model = Pipe(model, devices=['cuda:0','cuda:1'], chunks=4)
+   """
+   -a. Pros
+       -1. Increases compute utilization when model is deep.
+   -b. Cons
+       -1. Additional latency (fill & drain).
+       -2. Must balance flops per stage or some GPUs idle.
+
+5. Expert Parallelism (MoE / EP)
+   Item	 | Detail
+   What is split? |	Experts: many specialized sub‑nets; only k activated per token.
+   Routing	| Gating network chooses experts based on input.
+   Compute	| Only selected experts run → large model capacity with limited FLOPs.
+
+   Simplified PyTorch MoE snippet
+   """
+   scores = gate(x)               # B × n_experts
+   topk   = torch.topk(scores, k)[1]
+   for i in range(batch):
+       out_i = sum(expert[j](x[i]) for j in topk[i]) / k
+   """
+   -a. Benefits
+       -1. Scales model capacity super‑linearly with compute.
+       -2. Works nicely with DP or TP (experts can be sharded).
+   -b. Challenges
+       -1. Load balancing; uneven routing causes underutilized GPUs.
+       -2. Complex to debug.
+
+6. ZeRO (Zero Redundancy Optimizer)
+   Stage	| Partitions |	Result
+   ZeRO‑1	 | Optimizer states |	Significant memory save
+   ZeRO‑2	 | + Gradients	| More saving
+   ZeRO‑3	 | + Parameters	 | Max saving; enables trillion‑param models
+   """
+   "zero_optimization": {
+       "stage": 3,                       # full param partitioning
+       "reduce_scatter": true,
+       "overlap_comm": true,
+       ...
+   }
+   """
+   Trade‑off: More communication & gather/scatter overhead.
+
+7. Putting It All Together (Hybrid Training)
+   Dimension	| Typical Role in SOTA LLM
+   Data	| Spreads huge dataset across nodes.
+   Tensor	| Shards giant weight matrices (attention, MLP) across GPUs inside a node group.
+   Context	| Allows billion‑token contexts (e.g., long‑context GPT) by splitting sequences.
+   Pipeline	| Chains multi‑TP blocks across still more GPUs, hiding compute/comm latency.
+   Expert | Adds conditional capacity; only part of the network active per token.
+   ZeRO	| Keeps memory fit by partitioning states/params.
+
+   -a. Execution Stack Example
+       -1. User launches DeepSpeed w/ ZeRO‑3 on 8 nodes.
+       -2. Within each node, 8 GPUs use tensor parallel group.
+       -3. Two adjacent nodes form a pipeline stage.
+       -4. Inside each transformer block, tokens may be context‑partitioned if sequence is huge.
+       -5. Selected layers are MoE with expert parallelism (experts spread over TP group).
+       -6. Data loader feeds DDP shards to every node.
+
+8. Practical Checklist
+   -a. Does model fit a single GPU?
+       -1. Yes → use Data Parallel only.
+       -2. No → add Tensor Parallel (or ZeRO‑3).
+   -b. Is sequence length huge? → Add Context Parallel.
+   -c. Is model >2‑3 B params and deep? → Introduce Pipeline.
+   -d. Need more capacity w/o linear FLOPs? → Integrate Experts.
+   -e. Memory still a limit? → Tune ZeRO stage/bucket sizes.
+
+Take‑home message:
+Master where each dimension applies—data, tensor, context, pipeline, expert, ZeRO—and you can architect LLM training 
+pipelines that scale from a single GPU to thousands, enabling the relentless pace of modern LLM breakthroughs.
+
