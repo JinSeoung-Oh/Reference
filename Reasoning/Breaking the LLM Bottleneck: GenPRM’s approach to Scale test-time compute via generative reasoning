@@ -1,0 +1,113 @@
+### From https://medium.com/@techsachin/breaking-the-llm-bottleneck-genprms-approach-to-scale-test-time-compute-via-generative-reasoning-0e90e3ffa71e
+### From https://arxiv.org/abs/2504.00891
+### From https://github.com/RyanLiu112/GenPRM
+### From https://huggingface.co/collections/GenPRM/genprm-67ee4936234ba5dd16bb9943
+
+1. Background and Motivation
+   Process Reward Models (PRMs) are used as verifiers to evaluate step-by-step reasoning of language models. 
+   However, traditional PRMs have three major limitations:
+   -a. Weak process supervision & generalization: 
+       Most PRMs lack fine-grained supervision during training, limiting their ability to generalize across diverse reasoning processes.
+   -b. Scalar prediction without generation: 
+       They typically output a classification score (e.g., 0/1) without leveraging the generative capacities of LLMs.
+   -c. Limited test-time compute scaling: 
+       They cannot efficiently utilize multiple verification paths or refinement at inference time.
+
+2. GenPRM: Generative Process Reward Model
+   GenPRM is a novel PRM that:
+   -a. Performs explicit Chain-of-Thought (CoT) reasoning.
+   -b. Uses code verification to validate reasoning steps.
+   -c. Applies Relative Progress Estimation (RPE) for better PRM labels.
+   GenPRM transforms PRMs from discriminative classifiers into generative reasoning agents capable of producing rationales, 
+   verifying them via code, and judging correctness based on execution feedback.
+
+3. Preliminaries
+   -a. MDP Formulation of PRM Inference
+       -1. PRM evaluation modeled as an MDP: (𝑆,𝐴,𝑃,𝑟,𝛾)
+           -1) 𝑆: states (e.g., current reasoning trace)
+           -2) 𝐴: actions (e.g., next reasoning step)
+           -3) 𝑟: reward function (binary or continuous)
+           -4) Objective: Optimize per-step or final reward (e.g., Best-of-N)
+   -b. Supervised Fine-Tuning (SFT)
+       -1. Trains language models to predict next tokens via cross-entropy loss over data pairs (𝑥^(𝑖),𝑦(^𝑖))
+   -c. Test-Time Scaling (TTS)
+       -1. Two strategies:
+           -1) Majority Voting: Pick the most common final answer across samples.
+           -2) Best-of-N (BoN): Select response with highest reward score.
+
+4. GenPRM Framework Overview
+   GenPRM architecture includes six components:
+   -a. Policy Model: Generates solution steps; Monte Carlo (MC) scores are estimated from rollouts.
+   -b. Relative Progress Estimation (RPE): Computes reward labels using step-wise MC comparison.
+   -c. Data Synthesis: Generates high-quality reasoning data via CoT + code execution.
+   -d. Consensus Filtering + SFT: Trains the generative verifier model using filtered supervision.
+   -e. Verifier Role: GenPRM scores response quality during test-time sampling.
+   -f. Critic Role: Refines model responses step-by-step via sequential TTS.
+
+5. From Discriminative to Generative PRMs
+   -a. Discriminative PRM
+       -1. Dataset: 𝐷_(Disc)={(𝑠_𝑡,𝑎_𝑡),𝑟_𝑡}
+       -2. Training: Cross-entropy on binary labels 𝑟_𝑡∈{0,1}
+   -b. Direct Generative PRM
+       -1. Dataset: 𝐷_(Direct-Gen)={(𝑠_𝑡,𝑎_𝑡),𝑟_𝑡}, where 𝑟_𝑡=Yes/No
+       -2. Learns to generate “Yes”/“No” via SFT
+       -3. Prediction: Use probability of “Yes” token as 𝑟^_𝑡
+   -c. Full Generative PRM
+       -1. Dataset: 𝐷_(Gen)={(𝑠_𝑡,𝑎_𝑡,𝑣_(1:𝑡−1)),(𝑣_𝑡,𝑟_𝑡)}
+       -2. Model generates rationale 𝑣_𝑡, then estimates correctness score from that
+   -d. Generative PRM + Code Verification
+       -1. Adds code execution:
+           -1) Generate rationale 𝑣_𝑡 with inline code.
+           -2) Execute code → get feedback 𝑓_𝑡
+           -3) Combine (𝑠_𝑡,𝑎_𝑡,𝑣_(1:𝑡),𝑓_(1:𝑡)) to compute final reward.
+
+6. Test-Time Scaling with GenPRM
+   -a. Verifier
+       -1. Sample N outputs from policy model.
+       -2. GenPRM scores each → pick best using reward scores.
+   -b. Critic
+       -1. GenPRM improves answers by iterative refinement (sequential feedback).
+   -c. Self-TTS
+       -1. GenPRM generates multiple verification paths (N), then majority vote on predicted rewards.
+       -2. If code verification is enabled, uses execution feedback to inform judgment.
+       -3. Scores > 0.5 → correct; ≤ 0.5 → incorrect.
+
+7. Training Dataset Construction
+   -a. Stage 1: Solution Generation + MC Estimation
+       -1. Step Forcing Generation:
+           -1) Use Qwen2.5–7B-Instruct to generate responses in structured steps.
+           -2) Prefix each step with “Step i: ...” (up to 2048 responses).
+           -3) Discard problems with no valid correct/incorrect paths.
+       -2. MC Estimation:
+           -1) For each step 𝑠_𝑡, use Qwen2.5-Math-7B-Instruct to sample 𝐾 completions.
+           -2) Estimate probability of correctness using empirical pass@1 comparison:
+               MC(𝑠_𝑡)=1/𝐾 ∑(𝑗=1 to 𝑗= 𝐾) 1(𝑞_𝑗=𝑞∗)
+   -b. Stage 2: Relative Progress Estimation (RPE)
+       -1. For each step 𝑡, compare MC score before and after action:
+           𝑃_𝑡=MC(𝑠_(𝑡+1))−MC(𝑠_𝑡)
+       -2. Reward thresholding:
+           𝑟^_𝑡= { 1,𝑃_𝑡>𝜖 
+                 { 0, otherwise
+   -c. Stage 3: Rationale Generation and Filtering
+       -1. Prompt Design:
+           -1) Use QwQ-32B to generate <analyze> (CoT) and <verify> (Python code) for each step.
+           -2) Prompt asks model to:
+               - Analyze the reasoning.
+               - Write Python code to verify it.
+               - Return the paragraph ID of the first error (or -1 if none).
+       -2. Code Execution:
+           -1) System runs the generated code.
+           -2) Appends execution results as [Code output: ...] to use as input for subsequent generation.
+       -3. Label Judgment:
+           -1) Output is the index of the first incorrect step, used as ground-truth supervision.
+
+8. Limitations
+   -a. CoT + code introduces extra inference cost.
+   -b. Focused only on mathematical reasoning tasks so far.
+   -c. Needs extension to coding/general domains.
+
+9. Conclusion
+   -a. GenPRM is a generative, interpretable, and code-verified PRM that outperforms discriminative PRMs.
+   -b. It leverages explicit reasoning and verification, offering strong supervision and powerful inference capabilities. 
+   -c. It serves as a scalable verifier and critic that improves reasoning quality at test time.
+   -d. Empirical results demonstrate state-of-the-art performance on ProcessBench and beyond, even with smaller models.
