@@ -1,0 +1,53 @@
+### From https://medium.com/data-science-collective/forge-a-hybrid-framework-bridging-foundational-and-non-foundational-models-for-forecasting-d7ef52c9a7dd
+
+1. Introduction to Foundation Models for Time Series
+   -a. Definition & Appeal: 
+       Foundation models are large, general‑purpose AI systems that require no task‑specific training—enabling zero‑shot inference 
+       on new time series by feeding in a small context window and predicting a future horizon purely at inference time.
+   -b. Key Players: 
+       Early entrants include Nixtla’s TimeGPT; Salesforce’s MOIRAI; Morgan Stanley/ServiceNow’s Lag‑Llama; Google’s TimesFM; and Amazon’s Chronos.
+   -c. Multivariate vs. Univariate:
+       -1. TimeGPT & MOIRAI can ingest multiple series and external covariates (marketing spend, weather, etc.).
+       -2. Chronos & TimesFM are strictly univariate and cannot leverage cross‑series or external features.
+   -d. Motivation for FORGE: 
+       To combine Chronos’s strong zero‑shot capability with a multivariate model that handles external data 
+       and learns inter‑series dependencies—overcoming Chronos’s three limitations: univariate forecasts, no covariate use, 
+       and inability to predict beyond seen value ranges.
+
+2. Chronos (Amazon) Fundamentals
+   -a. Architecture: Adapts a T5‑style text‑to‑text Transformer for numerical forecasting by:
+       -1. Scaling each real‑valued input into a normalized range suitable for tokenization.
+       -2. Quantization into 4 096 uniform bins, each represented as a discrete token.
+   -b. Training: Exposed to 796 000 series across domains (energy, finance, retail, etc.), giving powerful zero‑shot forecasting without any retraining.
+   -c. Drawbacks:
+       -1. Only models one series at a time.
+       -2. Cannot incorporate static/dynamic covariates.
+       -3. Limited to values seen during training (cross‑entropy loss over fixed token set).
+
+3. TiDE (Google) Overview
+   -a. Purpose: A “dense” MLP encoder‑decoder designed for long‑term forecasts that also natively handles both static and dynamic covariates.
+   -b. Architecture Highlights
+       -1. Feature Projection: Reduces dimensionality of high‑cardinality dynamic inputs.
+       -2. Dense Encoder: Merges historical values + static covariates into a fixed‑size embedding.
+       -3. Dense Decoder: Produces a preliminary forecast from that embedding.
+       -4. Temporal Decoder: Refines predictions via residual connections to past projections, capturing temporal patterns.
+   -c. Trade‑offs: Simpler and faster than Transformers, but highly sensitive to hyperparameter tuning.
+
+4. FORGE: Hybridizing Chronos + TiDE
+   -a. Concept:
+       -1. Base Forecast from Chronos (zero‑shot, univariate).
+       -2. Residual Forecast from a multivariate model (TiDE), trained on Chronos’s errors (residuals) plus static/dynamic covariates 
+           and cross‑series dependencies.
+   -b. Residuals Dataset Creation:
+       -1. Use an expanding‑window over historical data to compute residuals = (actual – Chronos forecast) at each time point.
+   -c. Inference Pipeline:
+       -1. Run Chronos on each series to get base forecasts.
+       -2. Train TiDE on the residuals timeseries (grouped by series ID), with covariates, to predict future residuals.
+       -3. Sum TiDE’s residual forecast to Chronos’s base forecast to obtain the final, enhanced prediction.
+
+5. Conclusion
+   FORGE effectively fuses a foundation model’s zero‑shot strengths (Chronos) with a flexible multivariate engine (TiDE), yielding more accurate,
+   covariate‑aware, inter‑series forecasts. 
+   Its hybrid design is particularly beneficial for longer horizons and datasets where external factors strongly influence the target, 
+   marking a promising direction for combining foundational and traditional forecasting methods.
+
