@@ -1,0 +1,160 @@
+### From https://generativeai.pub/forget-traditional-web-scrapers-crawl4ai-is-engineered-for-ai-llms-and-data-processing-f1cb39e9d29e
+
+1. What is Crawl4AI?
+   Crawl4AI is a web crawler tailored specifically for AI use cases. Unlike traditional crawlers (e.g., BeautifulSoup or Scrapy),
+   it directly outputs clean, structured, AI-ready data — like Markdown or JSON — without needing extra parsing.
+   It’s:
+   -a. Optimized for training data (e.g., LLMs)
+   -b. Ideal for RAG (Retrieval-Augmented Generation)
+   -c. Useful for structured ML datasets
+   -d. Open-source, flexible, and fast
+   It even supports optional LLM-based refinement, turning noisy web content into meaningful context with user-defined prompts 
+   (though at a higher compute cost).
+
+2.  Getting Started
+    -a. Create environment:
+        """
+        conda create --name crawl4ai python=3.11 --no-default-packages
+        conda activate crawl4ai
+        """
+   -b. Install:
+       """
+       pip install -U crawl4ai
+       """
+   -c. Setup Playwright:
+       """
+       crawl4ai-setup
+       """
+   -d. Verify setup:
+       """
+       crawl4ai-doctor
+       """
+
+3. Simple Python Crawl Example
+   """
+   from crawl4ai import AsyncWebCrawler
+   import asyncio
+
+   async def main():
+       async with AsyncWebCrawler() as crawler:
+           result = await crawler.arun(url="https://www.nbcnews.com/business")
+           print(result.cleaned_html if result.success else result.error_message)
+
+   asyncio.run(main())
+   """
+
+4. Cache Usage
+   -a. Avoids redundant fetches. You can pick from:
+       -1. ENABLED
+       -2. DISABLED
+       -3. READ_ONLY
+       -4. WRITE_ONLY
+       -5. BYPASS
+   """
+   from crawl4ai import CacheMode, CrawlerRunConfig
+
+   crawler_config = CrawlerRunConfig(cache_mode=CacheMode.ENABLED)
+   """
+
+5. Markdown Output
+   Built-in conversion from HTML to clean Markdown:
+   """
+   print(result.markdown)
+   """
+
+6. Configuring Markdown Output
+   Control what to include/exclude (links, images, etc):
+   """
+   from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
+
+   crawler_config = CrawlerRunConfig(
+       markdown_generator=DefaultMarkdownGenerator(
+           options={
+               "ignore_links": True,
+               "ignore_images": True,
+               "skip_internal_links": True,
+               ...
+              }
+       )
+   )
+   """
+
+7. Filtering: BM25ContentFilter
+   Focuses output on user-relevant query terms using BM25 ranking.
+   """
+   from crawl4ai.content_filter_strategy import BM25ContentFilter
+
+   content_filter = BM25ContentFilter(user_query="American", bm25_threshold=1.2, language="english")
+   """
+
+8. Filtering: PruningContentFilter
+   No query required. Removes footers/navbars via structure analysis.
+   """
+   from crawl4ai.content_filter_strategy import PruningContentFilter
+
+   content_filter = PruningContentFilter(threshold=0.5, threshold_type="fixed", min_word_threshold=10)
+   """
+
+9. Filtering: LLMContentFilter
+   Uses an LLM to extract semantically relevant content:
+   """
+   from crawl4ai.content_filter_strategy import LLMContentFilter
+
+   content_filter = LLMContentFilter(
+       llm_config=LLMConfig(provider="openai/gpt-4o-mini", api_token="your-api-key"),
+       instruction="Extract tech content. Remove nav, sidebar, footer.",
+       chunk_token_threshold=4096,
+   )  
+   """
+   LLM-based filtering is accurate but costly (tokens + time).
+
+10. JSON Extraction (No LLM)
+    Structured extraction using CSS selectors:
+   """
+   schema = {
+     "name": "business news",
+     "baseSelector": "div.wide-tease-item__wrapper",
+     "fields": [
+         {"name": "title", "selector": "h2.wide-tease-item__headline", "type": "text"},
+         {"name": "content", "selector": "div.wide-tease-item__description", "type": "text"},
+     ],
+   }
+   """
+   Use with JsonCssExtractionStrategy.
+
+10. JSON Extraction (With LLM)
+    If unstructured HTML makes CSS selectors hard to use:
+   """
+   class BusinessNews(BaseModel):
+       title: str
+       content: str
+   """
+   Use LLMExtractionStrategy with schema + prompt instructions.
+   High token cost, slower, and not ideal for simple tasks.
+
+11. Combine Filter + LLM
+    Use PruningContentFilter to reduce content before LLM processing:
+   """
+   markdown_generator = DefaultMarkdownGenerator(content_filter=PruningContentFilter(...))
+   extraction_strategy = LLMExtractionStrategy(...)
+   """
+   Result: token usage reduced from 12k → ~3.7k, though runtime increased slightly.
+
+12. Multi-URL Concurrency
+    Thanks to asyncio and Playwright, Crawl4AI can process multiple URLs at once:
+    """
+   urls = ["https://github.com/unclecode/crawl4ai", "https://docs.crawl4ai.com", ...]
+   results = await crawler.arun_many(urls=urls)
+   """
+   Can combine with filters for clean parallel crawls.
+
+13. Summary of Core Features
+    -a. Cleans HTML into Markdown
+    -b. Caches intelligently
+    -c. Filters using BM25, Pruning, or LLM
+    -d. Extracts structured data in JSON
+    -e. Supports LLM-assisted extraction and filtering
+    -f. Asynchronous multi-URL crawling
+    -g. Highly configurable with clear APIs
+
+
