@@ -1,0 +1,98 @@
+### From https://ai.plainenglish.io/skywork-r1v-pioneering-multimodal-reasoning-with-chain-of-thought-758816e8bea8
+
+1. Context & Motivation
+   -a. LLMs like GPT-4 and Claude 3.5 have demonstrated human-expert level performance in textual reasoning, 
+       such as logical and mathematical problem-solving.
+   -b. However, Vision-Language Models (VLMs) still struggle with deep multimodal reasoning (e.g., geometric proofs, scientific analysis).
+   -c. This gap motivated Skywork AI to develop Skywork R1V, a multimodal reasoning model.
+
+2. What is Skywork R1V?
+   -a. A 38B parameter multimodal model designed to transfer the reasoning ability of Skywork's R1 text model into the visual domain.
+   -b. It introduces three innovations:
+       -1. Efficient Multimodal Transfer via a lightweight visual projector.
+       -2. Hybrid Optimization Framework using SFT + RL (GRPO).
+       -3. Adaptive-Length Chain-of-Thought Distillation (AL-CoTD).
+
+3. How Skywork R1V Works
+   -a. Efficient Multimodal Transfer
+       -1. Problem: Directly linking a vision backbone with a reasoning LLM requires large multimodal datasets.
+       -2. Solution: Decouple the vision-language alignment from reasoning transfer.
+       -3. Three-step process:
+           -1) MLP Initialization
+               - Train a Multi-Layer Perceptron (MLP) to bridge a ViT encoder with Qwen2.5–32B-Instruct (non-reasoning LLM).
+           -2) Model Re-Assembly
+               - Reuse the trained MLP to connect the same ViT to the reasoning-capable DeepSeek-R1-distill-Qwen2.5–32B model.
+           -3) Parameter-Efficient Fine-Tuning
+               - Only the MLP is fine-tuned. Both ViT and LLM weights are kept frozen.
+      ViT (Vision Transformer) is the vision encoder used and stays unchanged throughout.
+  -b. Hybrid Optimization Framework
+      -1. Combines Supervised Fine-Tuning (SFT) with Group Relative Policy Optimization (GRPO).
+      -2. Three stages:
+          -1) Initial SFT
+              - Train base model using the entire dataset.
+          -2) Iterative SFT
+              - Use a reward model to select high-quality samples.
+              - Threshold for quality increases over iterations (e.g., score ≥2 → ≥3 → ... ≥5).
+              - Also includes “hard” misclassified examples from previous steps.
+          -3) GRPO Reinforcement Learning
+              - Uses a ReLU-based reward to improve bad responses without harming good ones.
+      This progressively aligns visual and textual features for multimodal reasoning.
+  -c. Adaptive-Length Chain-of-Thought Distillation (AL-CoTD)
+      -a. Purpose: Prevent overthinking or generating unnecessarily long reasoning chains.
+      -b. Components:
+          -1. QDAM (Quality and Difficulty Assessment Module)
+              -1) Uses GPT-4o to score image-text queries:
+                  - Vision score (clarity, relevance)
+                  - Text score (difficulty, reasoning depth)
+          -2. VTIA (Vision-Text Integration Analyzer)
+              -1) Analyzes syntactic & semantic structure to determine reasoning depth.
+          -3. DRLC (Dynamic Reasoning Length Controller)
+              -1) Modulates repetition penalty based on query complexity:
+                  - Hard → low penalty → longer chain
+                  - Easy → high penalty → shorter chain
+     Enables dynamic chain-of-thought lengths for efficient inference.
+
+4. Performance & Evaluation
+   -a. Benchmarks
+       -1. Textual Reasoning:
+           -1) MATH-500: 94.0
+           -2) AIME 2024: 72.0
+       -2. Multimodal Reasoning:
+           -1) MathVista: 67.5
+           -2) MMMU: 69.0
+   -b. Comparison with other models:
+       -1. Outperforms Claude 3.5 Sonnet on MathVista (67.5 vs. 65.3)
+       -2. Matches GPT-4o on MMMU (69.0 vs. 69.1)
+       -3. With only 38B parameters, matches/exceeds many larger closed/open models
+
+5. Case Studies: Reasoning Examples
+   -a. Pentagon Angle Problem (Geometry + Algebra):
+       -1. Applies geometric rules
+       -2. Builds linear equation from symbolic angles
+       -3. Solves for variable
+       -4. Performs solution verification
+   -b. Chart Analysis (Graph + Calculation):
+       -1. Analyzes life expectancy trends
+       -2. Identifies gender differences
+       -3. Computes year-over-year changes
+       -4. Re-validates results
+   → These illustrate systematic reasoning and multimodal integration.
+
+6. Training Progress and Observations
+   -a. Iterative SFT raised performance from 60.2 → 65.6
+   -b. GRPO RL further boosted it to 69.0
+   -c. RL phase caused longer, more complete answers, aligning with prior "aha moment" trends in RL-trained models.
+
+7. Open Source Commitment
+   -a. All model weights and components are open-sourced
+   -b. Goal: Encourage reproducibility, community research, and innovation in multimodal reasoning.
+
+8. Conclusion
+   -a. Skywork R1V is a breakthrough multimodal reasoning model that:
+   -b. Bridges visual and textual reasoning efficiently.
+   -c. Uses minimal additional data through MLP transfer.
+   -d. Boosts performance with a smart hybrid training strategy.
+   -e. Avoids overthinking with dynamic reasoning control.
+   -f. Competes with models nearly twice its size.
+   -g. Fully open-source, empowering the community to build further.
+
