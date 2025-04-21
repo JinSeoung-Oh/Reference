@@ -1,0 +1,82 @@
+### From https://medium.com/data-and-beyond/agent2agent-a2a-protocol-all-about-it-in-one-go-ea1eb2d93de6
+
+1. Historical ladder that led to A2A
+   Period	| Standard / project	| What the text says it contributed
+   Early‑1990 s	| KQML	| First “agent communication language”; messages = actions (query, assert…) for knowledge sharing.
+   Late‑1990 s	| FIPA‑ACL	| Formalized messages with performatives (inform, request, propose…) + machine‑readable fields (sender, receiver, language, ontology). Implemented in frameworks such as JADE.
+   2000‑2010	| Result	| Technically elegant but commercially niche; real systems often defaulted to simple APIs or blackboards because the performative / mental‑state formalism was heavy.
+
+2. 2023–2024: renewed need for cross‑agent talk
+   -a. LLM chains (e.g., AutoGPT) proved agents can converse, but lacked a protocol.
+   -b. Anthropic MCP (Model Context Protocol): a tool / data interface that lets one agent call external resources through a standard wrapper.
+   -c. Cisco‑AGNTCY & LangChain “Agent Protocol”: drafts for framework‑agnostic agent interfaces.
+
+3. Why Google and partners proposed Agent2Agent (A2A) in 2025
+   -a. Enterprise silos – IT‑help agent, HR agent, finance agent etc. needed to collaborate yet sat in different stacks.
+   -b. Not just “wrap it as a tool” – some agents (e.g., tax advisor) require multi‑turn decisions, not one rigid API call.
+   -c. Cross‑system permissions – agent with System A credentials may need secure help from agent with System B credentials.
+   -d. Google’s field feedback – customers cited lack of interoperability, security friction, difficulty tracking long dialogs.
+
+4. Five founding design principles (quoted / paraphrased from text)
+   #	| Principle	| What it explicitly means in the article
+   1  | Embrace agentic capabilities	| Let agents converse in free form without shared memory or internal tool bundling.
+   2	| Build on existing web standards	| Transport = HTTP, payload = JSON, structured call style = JSON‑RPC, streaming = Server‑Sent Events.
+   3	| Secure by default	| Re‑use OpenAPI auth schemes (API keys, OAuth tokens …).
+   4	| Long‑running tasks	| Protocol covers instant calls and hours‑long workflows with real‑time status / input‑required / cancel.
+   5	| Modality‑agnostic	| Messages may carry text, images, audio, video, etc., each as a first‑class part.
+
+5. A2A object model in full detail
+   Object	| Role in protocol	| Properties explicitly cited
+   Agent Card |	Discovery descriptor published at https://<domain>/.well‑known/agent.json.	| • Endpoint URL ‑ where to send A2A calls • Protocol version • Skills / functions offered • Auth requirements(All in JSON so any client can parse.)
+   Task	| Unit of work identified by Task ID (UUID).	| States mentioned: “submitted”, “working”, “input‑required”, terminal states “completed”, “failed”, “canceled”. 
+   Message	| One turn inside a Task conversation.	| • role = "user" (client side) or "agent" (remote) • Contains ≥ 1 Part
+   Part	| Atomic content block inside a Message.	| Can be text block, binary file (URI / attachment) or structured data (JSON), each labelled with metadata like content‑type.
+   Artifact	| Final (or interim) deliverable of a Task.	 | Is itself made of Parts (e.g., a ZIP file, a JSON report, an image…).
+
+6. Canonical HTTP methods (exact list from article)
+   -a. tasks/send – submit new Task or send another Message in an existing Task.
+   -b. tasks/sendSubscribe – same but keeps connection open for SSE stream.
+   -c. tasks/status – poll Task state.
+   -d. tasks/pushNotification/set – register webhook for async callbacks.
+   -e. tasks/cancel – request cancellation.
+   -f. Discovery = fetch Agent Card; other capability‑negotiation endpoints may appear later.
+
+7. Allowed communication modes
+   Mode	| Transport details	| When article says to use it
+   Synchronous	| Standard HTTP POST with JSON reply.	| Very quick tasks; or polling pattern.
+   Streaming	| Server‑Sent Events over same HTTP connection (tasks/sendSubscribe).	| Medium‑length tasks where client benefits from progress bars or incremental answers.
+   Asynchronous push	| Remote agent POSTs to client’s webhook (registered via tasks/pushNotification/set). |	Lengthy workflows measured in minutes/hours; avoids open sockets or constant polling.
+   All three share the same Task / Message / Part schema; only delivery differs.
+
+8. End‑to‑end Task lifecycle (four explicit phases)
+   -a. Discovery – client fetches Agent Card to learn skills, endpoint, auth.
+   -b. Initiation – client generates Task ID and calls tasks/send (or sendSubscribe) with initial user message.
+   -c. Processing & multi‑turn dialog –<br> • Remote sets Task state → “working”.<br> • If clarification needed, remote sets “input‑required” and returns an agent message asking.<br> • Client responds with another tasks/send message within same Task.<br> • Streaming or push events (TaskStatusUpdate, TaskArtifactUpdate) may flow continuously.
+   -d. Completion – Task enters completed / failed / canceled and remote returns final Artifact (or error).
+   Everything is correlated by Task ID; multiple messages form a coherent thread.
+
+9 Capability discovery / negotiation facets mentioned
+  -a. Skill matching – client reads Agent Card’s skill list to pick the right remote agent.
+  -b. UX / modality negotiation – Parts carry content‑type metadata so agents agree on format (text vs audio, etc.).
+  -c. Language selection – agents can decide on a specific human language if both sides note preferences.
+  -d. Tool availability – Agent Card can declare external resources (databases, knowledge bases) the agent can reach; client picks accordingly.
+
+10 Security & governance points explicitly named
+   -a. Uses same auth schemes as OpenAPI: API‑key headers, OAuth2 bearer tokens, etc.
+   -b. All traffic travels over TLS.
+   -c. Enterprises can place A2A behind API‑management gateways for zero‑trust enforcement, logging, auditing.
+   -d. Standard JSON structure (roles, task IDs) enables policy engines to inspect or block certain content.
+   -e. Community will explore prompt‑injection defenses & content filtering at message boundaries.
+
+11. Scalability properties (per article)
+    -a. Stateless HTTP → remote agents can be load‑balanced across many instances.
+    -b. SSE streams handle many connections on one socket; webhooks externalize wait time.
+    -c. Task‑ID + shared datastore allow any backend replica to process subsequent calls.
+
+12. How A2A relates to other named protocols
+    Protocol	| Layer / scope difference (article wording)
+    MCP (Anthropic)	| Lets an agent call external tools / data. A2A lets agents call other agents. They are complementary; many scenarios embed MCP tool calls inside an A2A conversation.
+    FIPA‑ACL	| Earlier academic standard with formal speech‑acts; A2A drops rigid performatives, uses web JSON & natural language for flexibility and easier adoption.
+    LangChain Agent Protocol / Cisco AGNTCY |	Share same interoperability goal; authors are A2A partners; likely alignment or merger to avoid ecosystem fragmentation.
+
+
