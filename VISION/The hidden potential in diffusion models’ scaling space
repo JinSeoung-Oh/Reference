@@ -1,0 +1,93 @@
+### From https://ai.plainenglish.io/the-hidden-potential-in-diffusion-models-scaling-space-7a0c29c77e27
+
+1. Introduction & Motivation
+   -a. Diffusion models are powerful for image generation/editing, but their scaling space—the way noise predictions are scaled—remains underexplored.
+   -b. Current models use a single scalar (ω) to scale the guidance direction (Δϵ), which blends both low-frequency (structure/layout) 
+       and high-frequency (texture/detail) components.
+   -c. FreSca proposes frequency-aware scaling, independently scaling different frequency bands (low & high) to enhance editing precision
+       and generalization in both image editing and image understanding (like depth estimation).
+
+2. How Diffusion Models Work (Baseline Understanding)
+   -a. A diffusion model generates images by gradually denoising a noise vector using a denoising model 𝜖_𝜃
+   -b. There are two types of noise predictions:
+       -1. Conditional (on a text prompt)
+       -2. Unconditional (no prompt)
+   -c. Their difference Δ𝜖=𝜖_(cond)−𝜖_(uncond) reflects the semantic effect of the prompt.
+   -d. This Δϵ is scaled by a factor 𝜔 to control edit intensity.
+
+3. Limitations of Vanilla Scaling
+   -a. Global scalar (ω) affects all frequencies the same way, mixing coarse layout and fine texture control.
+   -b. Makes it hard to perform precise edits (e.g., shape vs. style tweaks).
+   -c. No awareness of how different frequencies behave during denoising:
+       -1. Early steps affect structure
+       -2. Late steps refine details
+
+4. FreSca: Frequency-Aware Scaling
+   -a. Key Idea:
+       -1. Move to the Fourier domain and independently scale:
+           -1) Low-frequency components (structure, layout)
+           -2) High-frequency components (edges, texture)
+   -b. Steps:  
+       -1. Decompose Δ𝜖 into low- and high-frequency components via Fourier Transform.
+       -2. Apply independent scaling factors:
+           -𝑙 for low frequencies
+           -ℎ for high frequencies
+       -3. Reconstruct the scaled noise via Inverse Fourier Transform.
+       -4. Plug this modified guidance back into the diffusion denoising process.
+   -c. Control Mechanism:  
+       -1. Adjusting 𝑙 enhances or suppresses structure-related edits.
+       -2. Adjusting ℎ enhances or suppresses fine details and contours.
+
+5. Benefits
+   -a. No retraining required: Works as a plug-in in existing pipelines.
+   -b. More precise control over edits by decoupling structure vs. texture influence.
+   -c. Generalizable: Can improve depth estimation and other vision tasks beyond editing.
+
+6. Applications
+-------------------------------------------------------------------------------------------------   
+1. Image Editing
+   -1. Integrated FreSca into training-free methods like LEdits++ and DDPM Inversion.
+   -2. FreSca modifies only the forward diffusion process—no change to denoising model.
+   
+  -a. Evaluation:
+      -1. Used TEdBench (40 images × editing prompts).
+      -2. Metrics:
+          - CLIP-text score: measures alignment with prompt.
+          - FID-30k: evaluates image realism.
+      -3. Also used InternVL2.5–8B (VLM) for binary success judgment and quality scoring.
+  -b. Result:
+      -1. FreSca significantly improves both metrics across baselines.
+      -2. Visuals show more coherent edits and better fidelity to target prompts.
+-------------------------------------------------------------------------------------------------  
+2. Depth Estimation
+   -1. Applied FreSca to:
+       -1) Marigold: monocular depth estimation model
+       -2) ChronoDepth: video depth estimation
+   -2. Used frequency scaling during noise prediction to enhance fine geometry and edge detail.
+   -3. Achieved better depth maps, especially in complex regions with high-frequency structures.
+------------------------------------------------------------------------------------------------- 
+
+7. Analysis and Ablation
+   -a. Low-frequency scale 𝑙:
+       -1. Acts like ω; larger 𝑙 → stronger semantic editing.
+   -b. High-frequency scale ℎ:
+       -1. ℎ>1: enhances fine detail & contour.
+       -2. ℎ<1: suppresses noise or restores original shape.
+   -c. Shows that FreSca gives independent control unlike prior methods that entangle them.
+
+8. Why It Works: Theoretical Insight
+   -a. Fourier analysis reveals:
+       -1. Early steps affect low-frequency structures.
+       -2. Later steps affect high-frequency textures.
+   -b. FreSca aligns the scaling method with this natural progression of diffusion models.
+
+9. Broader Implications
+   -a. FreSca introduces a new dimension of control: frequency-domain guidance in diffusion.
+   -b. Scalable & low-cost: minimal code changes, no retraining.
+   -c. Universally applicable to any denoising diffusion model.
+
+10. Conclusion
+    -a. FreSca is a general-purpose, training-free frequency-aware scaling technique.
+    -b. It enhances both image editing and understanding (depth) by decoupling guidance across frequency bands.
+    -c. Opens new research directions in Fourier-guided diffusion control, offering stronger editing quality and new use-case potential.
+
