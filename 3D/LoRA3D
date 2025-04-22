@@ -1,0 +1,115 @@
+### From https://kimjy99.github.io/%EB%85%BC%EB%AC%B8%EB%A6%AC%EB%B7%B0/lora3d/
+
+1. Introduction
+   Recently, numerous 3D geometric foundation models have emerged as promising solutions 
+   for various 3D computer vision tasks such as 3D reconstruction, camera pose estimation, and novel view rendering. 
+   These models can rapidly establish cross-view correspondences and directly predict 3D scene geometry 
+   from sparse RGB images.
+   Generally, due to extensive Transformer pretraining on large datasets, they show strong zero-shot performance 
+   across new tasks.
+
+   However, the performance of these pretrained models can degrade under challenging conditions. 
+   For instance, DUSt3R's pairwise reconstruction accuracy significantly drops when certain regions are observed 
+   from only a single viewpoint. 
+   This performance degradation is attributed to the intrinsic complexity of 3D shape inference tasks, 
+   which ideally require much larger datasets to fully capture the distribution of real-world 3D data. 
+   Nevertheless, high-quality training data is scarce due to the difficulty in annotating real 3D scenes, 
+   limiting the performance of pretrained models.
+
+   To address this issue, this paper proposes an efficient self-calibration technique. 
+   Using only sparse RGB images, the method specializes a pretrained 3D foundation model to a target scene—without
+   requiring manual labeling, camera calibration, or external priors.
+   Specifically, by leveraging multi-view consistency of 3D point locations, 
+   the model’s predictions are refined and selected to generate pseudo-labels. 
+   To ensure the accuracy of these pseudo-labels, the authors develop a robust global optimization method 
+   that aligns and calibrates multi-view predictions while correcting prediction confidence. 
+   Since the calibrated confidence strongly correlates with pseudo-label accuracy, 
+   the method enables selecting high-confidence data for LoRA fine-tuning of the pretrained model.
+
+   LoRA3D, the proposed method, completes the self-calibration process in under 5 minutes on a single GPU 
+   and can achieve performance improvements of up to 88%.
+
+2. Preliminaries
+   -a. DUSt3R
+       DUSt3R takes a pair of RGB images (𝐼_𝑖,𝐼_𝑗) as input and directly predicts point maps 𝑋_(𝑖,𝑖),𝑋_(𝑗,𝑖)∈𝑅^(𝐻×𝑊×3)
+       and confidence maps 𝐶_(𝑖,𝑖),𝐶_(𝑗,𝑖)∈𝑅^(𝐻×𝑊×1):
+       (𝑋_(𝑖,𝑖),𝐶_(𝑖,𝑖)),(𝑋_(𝑗,𝑖),𝐶_(𝑗,𝑖)) = DUSt3R(𝐼_𝑖,𝐼_𝑗)
+       The point maps represent 3D coordinates for views 𝑖 and 𝑗 in the coordinate frame of view 𝑖
+
+3. Recovering Camera Parameters
+   Camera intrinsics can be recovered from the predicted point maps. 
+   Assuming a pinhole camera model with square pixels and the principal point at the image center, 
+   the focal length 𝑓_𝑖 of camera 𝑖 can be estimated by solving:
+   𝑓^∗_𝑖 = arg min_(𝑓_𝑖) ∑(𝑝=1 to 𝑝=𝐻𝑊)𝐶^𝑝_(𝑖,𝑖)∥(𝑢′_𝑝,𝑣′_𝑝)−𝑓_𝑖((𝑋^𝑝_(𝑖,𝑖)[0], 𝑋^𝑝_(𝑖,𝑖)[1] / 𝑋^𝑝_(𝑖,𝑖)[2]))∥
+   where (𝑢′_𝑝,𝑣′_𝑝)=(𝑢_𝑝−𝑊/2,𝑣_𝑝−𝐻/2)
+   The relative camera pose between image pairs (𝐼_𝑖,𝐼_𝑗) is estimated by comparing predictions for both directions. 
+   Using point maps 𝑋_(𝑖,𝑖) and 𝑋_(𝑖,𝑗), the relative pose 𝑇_(𝑖,𝑗)∈𝑆𝐸(3) and point map scale 
+   𝜎_(𝑖,𝑗) are estimated by:
+   (𝑇_(𝑖,𝑗),𝜎_(𝑖,𝑗))^∗=arg min_(𝑇_(𝑖,𝑗),𝜎_(𝑖,𝑗)) ∑_𝑝 𝐶^𝑝_(𝑖,𝑖)𝐶^𝑝_(𝑖,𝑗)∥𝜎_(𝑖,𝑗)𝑇_(𝑖,𝑗)𝑋^𝑝_(𝑖,𝑖)−𝑋^𝑝_(𝑖,𝑗)∥^2
+
+4. Multi-view Point Map Alignment
+   DUSt3R refines initial estimates by minimizing 3D-3D projection errors between a global point map 
+   𝜒 and transformed predictions:
+   (𝜒,𝑇,𝜎)^∗=arg min_(𝜒,𝑇,𝜎) ∑_((𝑖,𝑗)∈𝐸) ∑_(𝑣∈{𝑖,𝑗}) ∑_(𝑝=1 to 𝑝= 𝐻𝑊) 𝐶^𝑝_(𝑣,𝑖)∥𝜒^𝑝_𝑣−𝜎_(𝑖,𝑗)𝑇_(𝑖,𝑗)𝑋^𝑝_(𝑣,𝑖)∥
+   The global point map 𝜒^𝑝_𝑣 is derived via depth back-projection:
+   𝜒^𝑝_𝑣=𝑇_𝑣 𝐾^(-1)_𝑣 𝐷_𝑝 (𝑢_𝑝,𝑣_𝑝,1)^⊤ = 𝑇_𝑣𝐷_𝑝𝑓_𝑣(𝑢′_𝑝,𝑣′_𝑝,1)^⊤
+   Thus, the optimization problem becomes:
+   (𝑇,𝜎,𝑓,𝐷)^∗=arg min_(𝑇,𝜎,𝑓,𝐷)∑_((𝑖,𝑗)∈𝐸 ∑_(𝑣∈{𝑖,𝑗})∑_(𝑝=1 to 𝑝=𝐻𝑊)𝐶^𝑝_(𝑣,𝑖)∥𝑇_𝑣𝐷_𝑝𝑓_𝑣(𝑢′_𝑝,𝑣′_𝑝′,1)^⊤ − 𝜎_(𝑖,𝑗)𝑇_(𝑖,𝑗)𝑋^𝑝_(𝑣,𝑖)∥
+   𝑇_(𝑖,𝑗) and 𝑇_𝑖 represent the same transformation but are separated for optimization flexibility.
+   Optimization is done via gradient descent with a constraint ∏_(𝑖,𝑗)𝜎_(𝑖,𝑗)=1 to avoid degenerate 
+   𝜎_(𝑖,𝑗)=0
+
+5. Method
+   -a. Self-Calibration Pipeline
+       The process begins by predicting point and confidence maps for all image pairs using pretrained DUSt3R. 
+       When views overlap little, DUSt3R predictions may contain errors or outliers, 
+       and the predicted confidence may not accurately reflect prediction quality. 
+       Thus, relying directly on confidence for pseudo-label selection can hurt performance.
+
+       However, each 3D point in a scene is jointly observed from many image pairs. 
+       This allows using accurate predictions to refine erroneous ones. 
+       The authors develop a robust multi-view alignment method to optimize point maps and calibrate 
+       prediction confidence. 
+       The refined maps and calibrated confidence scores are then used to generate pseudo-labels for images 
+       {𝐼_𝑖}^𝑁_𝑖=1, which are in turn used to fine-tune DUSt3R via LoRA.
+
+   -b. Robust Multi-view Alignment with Confidence Calibration
+       The authors incorporate predicted confidence into global optimization by reparameterizing each confidence score 
+       𝐶^𝑝_(𝑣,𝑖) as a learnable weight 𝑤^𝑝_(𝑣,𝑖). Although initial confidence may be inaccurate, 
+       it still contains useful signal. 
+       Therefore, they introduce a regularization term to encourage weights to remain close to the predicted
+       confidence and avoid trivial solutions.
+
+       This formulation aligns with the Geman-McClure robust M-estimator, which uses regularization terms to keep 
+       weights near 1 in least-squares optimization. The revised objective becomes:
+       (𝑇,𝜎,𝑓,𝐷,𝑊)^∗=arg min_(𝑇,𝜎,𝑓,𝐷,𝑊)∑_((𝑖,𝑗)∈𝐸)∑_(𝑣∈{𝑖,𝑗} ∑_(𝑝=1 to 𝑝=𝐻𝑊)𝑤^_(𝑣,𝑖)∥𝑒^𝑝_(𝑣,𝑖)∥+𝜇(np.root(𝑤^𝑝_(𝑣,𝑖)) - np.root(𝐶^𝑝_(𝑣,𝑖)))^2
+       where:
+       𝑒^𝑝_(𝑣,𝑖)=𝑇_𝑣𝐷_𝑝𝑓_𝑣(𝑢′_𝑝,′𝑣_𝑝,1)^⊤−𝜎_(𝑖,𝑗)𝑇_(𝑖,𝑗)𝑋^𝑝_(𝑣,𝑖)
+       Instead of using gradient backpropagation to update weights, the authors derive a closed-form update rule 
+       for faster recalibration:
+       𝑤^𝑝_(𝑣,𝑖)=𝐶^𝑝_(𝑣,𝑖) / (1+∥𝑒^𝑝_(𝑣,𝑖)∥/𝜇)^2
+       Predictions consistent across views retain confidence similar to their original estimates; 
+       inconsistent ones are heavily down-weighted, improving alignment and pseudo-label accuracy.
+
+   -c. Multi-view Pseudo-label Generation
+       Pseudo-labels are created from the refined point maps and calibrated confidences. 
+       To do this, global optimization results are transformed into local image pair coordinate frames. 
+       Depth maps 𝐷_𝑝 are back-projected into 3D, then transformed between views:
+       𝑋^~_(𝑗,𝑖)^𝑝=𝑇^(∗−1)_𝑖 𝑇^∗_𝑗 𝐷^∗_𝑝 𝑓^∗_𝑗(𝑢′_𝑝,𝑣′_𝑝′,1)⊤, for 𝑝∈{𝑝∣𝑤^(∗𝑝)_(𝑗,𝑖)>𝑤_(cutoff)}
+       A threshold of 𝑤_(cutoff)=1.5 works well in most scenes. Dynamic points violating multi-view 
+       consistency are automatically filtered, making LoRA3D robust to moving objects.
+
+   -d. Fine-tuning with LoRA
+       The pretrained DUSt3R is fine-tuned using LoRA on the pseudo-labeled data, 
+       employing the same loss function as original training. 
+       DUSt3R weights are frozen, while LoRA injects low-rank trainable matrices into Transformer layers—reducing 
+       trainable parameters significantly.
+
+       This approach improves memory/runtime efficiency and avoids catastrophic forgetting of pretraining. 
+       Through extensive experiments, fine-tuning all attention weights with rank-16 LoRA achieves 
+       the best trade-off between performance and efficiency—matching full fine-tuning performance 
+       while reducing parameter count by over 99%.
+
+       With rank-16 LoRA, fine-tuning on 10 images (batch size 2) converges in under 3.5 minutes with 
+       <20GB GPU memory, and each LoRA adapter is under 18MB.
+
