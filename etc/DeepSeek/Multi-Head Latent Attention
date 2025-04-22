@@ -1,0 +1,107 @@
+### From https://pub.towardsai.net/deepseek-v3-explained-part-1-understanding-multi-head-latent-attention-bac648681926
+
+1. Background Concepts (Before MLA)
+   -a. Transformer Architectures (Decoder-only)
+       MLA is designed to accelerate inference in autoregressive decoding, so the article focuses on 
+       decoder-only Transformers. It compares three architectures:
+       -1. The original encoder-decoder model from “Attention is All You Need”
+       -2. The decoder-only Transformer used in models like GPT
+       -3. A further optimized decoder-only Transformer that uses RMSNorm instead of LayerNorm, 
+           applied to the input of sublayers rather than the output. 
+           This structure provides more stable training and is the default in DeepSeek-V3.
+   -b. Multi-Head Attention (MHA) Review
+       Let nₕ be the number of attention heads and dₕ be the dimension per head. 
+       Then the concatenated output dimension is nₕ · dₕ.
+       Let hₜ ∈ ℝᵈ be the input to a transformer layer for token t. 
+       First, hₜ is projected to query (qₜ), key (kₜ), and value (vₜ) using linear layers W^Q, W^K, and W^V.
+       Each of these vectors is split across nₕ heads. Every head performs scaled dot-product attention independently
+       as:
+          Attention(q, k, v) = softmax(q · kᵗ / √dₕ) · v
+       Then all heads are concatenated and passed through an output projection matrix W^O.
+       These steps are performed per token, so during inference, this needs to be repeated at every decoding step, 
+       leading to redundant computation.
+
+2. KV Caching
+   To avoid repeated computations during decoding, Key-Value (KV) caching is used:
+   -a. At each step, only the new query Q is computed.
+   -b. Previous K and V are stored and reused.
+   -c. The new token’s K and V are appended to the rolling cache buffer.
+   This improves speed but costs memory, scaling with:
+   (batch size × sequence length × hidden size × number of heads)
+   This becomes a bottleneck in long sequences or large batches.
+
+3. MQA and GQA
+   -a. Multi-Query Attention (MQA)
+       -1. All query heads share a single key and a single value head.
+       -2. Reduces memory significantly.
+       -3. However, expressiveness is reduced since each head doesn’t have its own unique attention context.
+   -b. Grouped-Query Attention (GQA)
+       -1. An intermediate between MQA and MHA.
+       -2. Shares a K,V pair within a group of query heads.
+       -3. A compromise offering better performance than MQA but still less expressive than MHA.
+   Both MQA and GQA reduce cache size but suffer from performance degradation compared to full MHA.
+
+4. RoPE (Rotary Positional Embedding)
+   RoPE encodes positional information directly into the attention mechanism via sinusoidal rotation matrices 
+   applied to queries and keys.
+   Given a 4-element vector (x₁, x₂, x₃, x₄), group into pairs:
+   -a. (x₁, x₂) → position 1
+   -b. (x₃, x₄) → position 2
+
+   Each pair is rotated using a matrix determined by the position. The rotation angle is position-dependent:
+   -a. θ(p) = p · θ₀
+   So, pair (x₁, x₂) is rotated by θ₀
+   Pair (x₃, x₄) is rotated by 2θ₀
+   This position-dependence is central to RoPE’s ability to encode relative position.
+   However, it introduces complexities when trying to integrate with MLA, because rotation is applied after projection,
+   and MLA does dimensionality reduction before projection.
+
+5. Multi-head Latent Attention (MLA)
+   -a. Motivation
+       To reduce memory usage in attention layers during inference without sacrificing performance, 
+       MLA introduces a new strategy:
+       -1. Compress the input vector hₜ into a low-dimensional latent vector.
+       -2. Reconstruct K and V later via learned up-projections.
+       -3. Avoid storing full-dimension K and V for each token.
+       This saves KV cache memory and supports scalable inference.
+   -b. Detailed Process  
+       Let d be the original input dim, dₕ per head, and d_c ≪ d be the compressed latent dimension.
+       -a. Compress input:
+           cₜ^{KV} = W^{DKV} · hₜ
+           (W^{DKV} ∈ ℝ^{d_c × d})
+       -b. Reconstruct:
+           kₜ = W^{UK} · cₜ^{KV}
+           vₜ = W^{UV} · cₜ^{KV}
+           (W^{UK}, W^{UV} ∈ ℝ^{(nₕ · dₕ) × d_c})
+           This allows only cₜ^{KV} to be cached, drastically reducing memory.
+       Similar process can be applied to queries:   cₜ^Q = W^{DQ} · hₜ 
+                                                    qₜ = W^{UQ} · cₜ^Q
+       Additionally, authors observe that W^{UK} can be absorbed into W^Q under certain formulations 
+       (since qᵗ · (W^{UK} · cₜ^{KV}) = (W^Q · hₜ)^T · kₜ), allowing fewer matrices to be stored.
+
+6. Problem with RoPE
+   RoPE requires position-dependent transformations. When MLA is used, the latent vector is computed before RoPE, 
+   so the needed rotation can no longer be absorbed into the projection matrix.
+   Thus, the standard MLA process is incompatible with RoPE.
+
+7. Decoupled RoPE
+   To resolve this, DeepSeek proposes Decoupled RoPE, which:
+   -a. Introduces extra query vectors and a shared key vector
+   -b. Applies RoPE only to these auxiliary vectors
+   -c. Keeps main K and V unrotated
+   -d. Ensures RoPE positional information is preserved while maintaining the memory efficiency of MLA
+   This architectural change ensures MLA and RoPE can coexist.
+
+8. Summary of MLA Benefits
+   -a. Compression of KV Cache:
+       -1. Cache size becomes proportional to d_c, not d or nₕ · dₕ
+   -b. Projection Flexibility:
+       -1. Query and KV projections are decoupled and can be manipulated independently
+   -c. Inference Efficiency:
+       -1. Significantly less memory used during generation
+       -2. Retains performance unlike MQA/GQA
+   -d. RoPE Compatibility via Decoupled RoPE:
+       -1. Maintains long-sequence positional understanding
+       -2. Integrates seamlessly into MLA pipeline
+   -e. Upstream/Downstream Flexibility:
+       -1. Projections can be selectively stored/merged/absorbed as needed
