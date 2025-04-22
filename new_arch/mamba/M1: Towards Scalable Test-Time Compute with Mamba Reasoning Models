@@ -1,0 +1,108 @@
+### From https://artgor.medium.com/paper-review-m1-towards-scalable-test-time-compute-with-mamba-reasoning-models-94955cfd4267
+
+1. Overview: M1 – A Hybrid Linear RNN Reasoning Model Based on Mamba
+   M1 is a hybrid autoregressive reasoning model built on the Mamba architecture, 
+   optimized for efficient generation and high-quality mathematical reasoning. 
+   It is positioned as a faster and competitive alternative to transformer-based models of similar scale, 
+   particularly in mathematical tasks.
+
+2. Key Characteristics:
+   -a. Architecture: Linear RNN core via Mamba, replacing standard attention layers.
+   -b. Distillation Target: Transformer-based reasoning models (e.g., Llama3.2–3B-Instruct).
+   -c. Performance:
+       -1. Competitive with DeepSeek R1 models at similar scale.
+       -2. >3× faster than same-size transformers on vLLM.
+       -3. Higher accuracy under fixed generation time via self-consistency voting.
+
+3. Approach & Training Pipeline
+   -a. Stage 1: Distillation
+       -1. Objective: Transfer knowledge from a pretrained transformer to M1.
+       -2. Target model: Llama3.2–3B-Instruct.
+       -3. Method: Modified MAMBAINLLAMA approach.
+           -1) Transformer weights are mapped to Mamba-equivalent components.
+           -2) Additional Mamba-specific parameters added:
+               - Sampling rate
+               - Dynamic parameter
+           -3) New linear layers added to handle GQA (Grouped-Query Attention) architecture adaptations.
+       -4. Replacement Strategy:
+           -1) All attention layers are replaced in a single step with Mamba layers.
+           -2) The model is then fully fine-tuned.
+       -5. Loss Function: Uses reverse KL divergence to enforce mode-seeking alignment between student (Mamba) 
+                          and teacher (Transformer), rather than average behavior.
+   -b. Stage 2: Supervised Fine-Tuning (SFT)
+       -a. After distillation, M1 undergoes fine-tuning on two datasets:
+           -1. OpenMathInstruct-2: Pre-curated math instruction set.
+           -2. 8B-token mixed dataset:
+               -1) Includes model-generated solutions from:
+                   - OpenR1
+                   - OpenThoughts
+                   - ServiceNow-AI
+                   - MagpieReasoning
+       This stage allows the model to learn reasoning processes by absorbing diverse solution styles and logic flows.
+   -c. Stage 3: Reinforcement Learning for Reasoning
+       -1. Final phase involves training with RL to enhance reasoning accuracy.
+       -2. Algorithm: Group Relative Policy Optimization (GRPO)
+           -1) KL penalty is removed to improve training stability.
+           -2) Entropy bonus is added to encourage output diversity.
+       -3. Prompt format:
+           Ends with “Let’s think step by step and output the final answer within \boxed{}” to promote 
+           chain-of-thought reasoning and structured final answers.
+
+4. Experimental Setup & Evaluation
+   -a. Target for Distillation:
+       -1. Llama3.2–3B-Instruct (32k context, temperature = 0.7)
+   -b. Evaluation Methods:
+       -1. pass@1 over 64 runs
+       -2. Majority voting over 100 trials
+       -3. Evaluated on:
+           -1) AIME24
+           -2) MATH500
+   -c. Model Comparisons:
+       -1. M1–3B is benchmarked against:
+           -1) Llama3.2–3B
+           -2) DeepSeek-R1-Distill-Qwen-1.5B
+   -d. Inference Setup:
+       -1. All models evaluated using vLLM on a single NVIDIA H100 GPU
+       -2. Decoding length: 4096
+       -3. Prompt length: 256
+
+5. Performance & Efficiency
+   -a. Inference Speed
+       -1. M1 achieves 3× faster generation than similarly-sized transformers.
+       -2. At long sequence lengths, it reaches up to 2.64× speedup over baselines.
+       -3. Throughput comparison:
+           -1) M1: 15,169 tokens/sec
+           -2) Baseline: 7,263 tokens/sec
+   -b. Accuracy vs. Time Budget
+       -1. With majority voting, M1 reaches high accuracy faster because it generates more samples per unit time.
+       -2. When scaling generation length, M1 shows:
+           -1) Higher accuracy per compute budget
+           -2) Better trade-off between sequence length and quality
+
+6. Training Dynamics & Observations
+   -a. Impact of Sequence Length during RL
+       -1. Longer training sequences → significantly improved reasoning ability:
+           -1) AIME25 accuracy rises from <7.5% at 4K tokens to 22.5% at 24K tokens
+   -b. Training Stage Contributions
+       -1. Biggest gains come from:
+           -1) Fine-tuning on model-generated reasoning solutions
+       -2. Performance Boost:
+           -1) MATH500: +29% accuracy
+           -2) AIME24: +17% accuracy
+   -c. Ablation Insight
+       -1. Directly distilling from DeepSeek-R1-Qwen-1.5B on the 8B reasoning dataset fails to match 
+           the performance of the 3-stage pipeline.
+           -1) Conclusion: 8B tokens alone are insufficient.
+           -2) Effective transfer requires:
+               - Distill first on standard math tasks
+               - Then fine-tune on reasoning chains
+
+7. Conclusion
+   -a. M1 showcases a novel blend of:
+       -1. Transformer-to-Mamba distillation
+       -2. Instruction tuning
+       -3. Reinforcement learning-based reasoning optimization
+   -b. With its:
+       -1. Faster generation
+       -2. Learned logical reasoning pathways
+       -3. Efficient self-consistency scaling
