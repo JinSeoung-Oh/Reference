@@ -1,0 +1,63 @@
+### From https://cdn.prod.website-files.com/67160e0e6bd76875921fe9a7/67d3e9e44cdcbabf47c1bc16_7a1f7f7d4b4c1e218586375fb60a0078_A_Feature_Level_Approach_to_Mitigating_Bias_and_Censorship_in_LLMs.pdf
+
+1. Context & Motivation
+   Large-scale LLMs often over-censor or exhibit unwanted biases because alignment training and imbalanced data embed filters 
+   and cultural/political slants. Traditional fixes—fine-tuning or RLHF—are costly, static, and can introduce new biases. 
+   Prompt engineering offers only coarse control. 
+   Recent interpretability work hints at latent features (“monosemantic” neurons) tied to behaviors, 
+   but extracting or steering them at scale is prohibitive.
+
+   This work proposes a lightweight, fine-grained framework that directly locates and modifies the internal features responsible
+   for censorship (or other biases) at inference time, with zero retraining.
+
+2. Core Idea
+   LLMs’ hidden states contain latent variables (neurons or subspace directions) aligned with high-level behaviors—e.g., 
+   a “censorship trigger.” 
+   By (a) identifying those features, 
+      (b) verifying they causally drive refusals, 
+      and (c) inserting a tiny intervention module that shifts activations, 
+  one can toggle or tune censorship on the fly without touching model weights.
+
+3. Methodology Overview
+   The procedure has three stages:
+   -a. Feature Identification
+   -b. Feature Isolation & Characterization
+   -c. Dynamic Feature Modification at Runtime
+
+   3.1 Feature Identification
+       -a. Data Collection: Assemble two prompt sets:
+           -1. Trigger prompts that reliably induce refusal or safe-completions 
+               (e.g. “Tell me about Tiananmen Square protest”, “How to bypass censorship?”).
+           -2. Control prompts on similar topics that should be answered normally.
+      -b. Activation Recording: Run the base model on all prompts, log hidden activations (across layers) and final refusal vs. answer.
+      -c. Cluster & Correlate: Find mid/penultimate-layer representations where trigger prompts cluster separately. 
+          Identify candidate features 𝑓_𝑖 whose average activation differs strongly between trigger vs. control. 
+          Formally, compute
+          Δ_𝑖=𝐸[𝑓_𝑖∣refusal]−𝐸[𝑓_𝑖∣allowed]
+          and correlate 𝑓_𝑖 with the logit or probability of the “[REFUSAL]” token.
+   3.2 Feature Isolation & Characterization
+       -a. Causality Test: Manually amplify or suppress a candidate feature in the model’s activations and observe output:
+                           boosting it should force refusal; damping it yields normal answers.
+       -b. Concept Vector: Solve for a unit direction 𝑣_censor in hidden space that best separates censored vs. allowed activations 
+           (e.g., via logistic regression or PCA on activations). Denote that direction as the “censorship concept.”
+       -c. Equation: To neutralize the feature at runtime, project and subtract:
+           ℎ′=ℎ−𝛼(ℎ⋅𝑣_censor),
+           where ℎ is the hidden state, and 𝛼 controls intervention strength (0 ≤ α ≤ 1 for partial to full suppression).
+   3.3 Dynamic Modification at Runtime
+       -a. Insertion Point: Add a tiny module in the inference pipeline at the layer housing 𝑣_censor
+       -b. Adaptive Triggering:
+           -1. Unconditional mode: Always apply intervention for an “uncensored” setting.
+           -2. Heuristic mode: Monitor ℎ⋅𝑣_censor; if above a threshold (i.e. censorship spike), apply the subtraction.
+       -c. Tunability & Reversibility: No weight changes—just a runtime transform. Users can adjust α 
+           (e.g., a “strictness slider”) per request or jurisdiction.
+       -d. Overhead: Negligible latency; immediate effect on the very next token.
+
+4. Extensions & Benefits
+   -a. Bias Mitigation: Apply the same pipeline to identify “gender-bias” or other demographic concept vectors and neutralize them.
+   -b. Multi-Concept Steering: Maintain a set of concept vectors (censorship, toxicity, style, demographic biases), 
+                               and apply simultaneous adjustments in hidden space for complex behavioral control.
+   -c. Advantages over Retraining:
+       -1. Immediate: No hours/days of fine-tuning.
+       -2. Lightweight: Modest compute and no new data.
+       -3. Reversible: Toggle or tune at runtime without altering core model.
+       -4. Fine‐Grained: Direct control over specific behaviors, preserving overall model capacity and factual accuracy.
