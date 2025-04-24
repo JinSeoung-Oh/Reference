@@ -1,0 +1,203 @@
+### From https://medium.com/eni-digitalks/experimental-design-in-the-ai-era-98f7cb095635
+
+1. Introduction to Experimental Design and OED
+   -a. Experimental Design (ED):  
+       -1. ED methods are widely used in R&D to:
+           -1) Find optimal conditions/configurations
+           -2) Minimize experimental cost
+           -3) Maximize information gained
+  -b. Optimal Experimental Design (OED):
+      -1. OED is a modern formulation of ED, often treated as a Bayesian Optimization (BO) problem.
+      -2. A machine learning (ML) surrogate model approximates the system, capturing:
+          -1) Predictive mean (performance estimate)
+          -2) Predictive uncertainty
+          -3) Constraints
+      -3. Optimization is conducted over an Acquisition Function (AF) that balances:
+          -1) Performance
+          -2) Uncertainty
+          -3) Cost and constraints
+      OED presumes availability of some trusted data, and uses a proxy (surrogate) model that:
+      -1) Approximates the real experimental system
+      -2) Allows extensive querying at low cost
+      -3) Supports gradient-free optimization of the AF
+
+2. OED Workflow
+   The general loop includes:
+   -a. Defining the experimental domain
+   -b. Building the proxy model (surrogate of the real experiment)
+   -c. Optimizing the acquisition function to suggest new experiments
+   Each step is elaborated in the article.
+
+3. Dealing with Categorical Data
+   -a. Data Types:
+       -1. Numerical (quantitative): Preferred; more informative and efficient
+       -2. Categorical (qualitative): Common but challenging for ML
+       Binary or categorical responses discard 38–60% of information compared to continuous [Cohen 1983, Hamada 2002].
+       Solution: If possible, use numerical responses and convert to categorical if needed, not the reverse.
+   -b. Encoding Approaches:
+       -1. Integer encoding
+       -2. One-hot encoding
+       -3. Leave-one-out encoding
+   -c. Physics-based encoding (recommended for lab experiments):
+       -1. Incorporates domain knowledge or physical laws:
+           -1) Replace additive names with chemical property vectors
+           -2) Enforce physical constraints (e.g., mutually exclusive categories)
+           -3) Include physics-inspired rules (e.g., conservation laws)
+       -2. Time-consuming but produces semantically aligned and physically plausible encodings
+
+4. Definition of Experimental Domain
+   The domain refers to the range and limits of experimental parameters.
+   -a. Initial mapping methods:
+       -1. One Factor at a Time (OFAT):
+           -1) Vary one input while others fixed
+           -2) Inefficient, cannot detect interactions
+       -2. Factorial Design:
+           -1) Full factorial: all combinations
+           -2) Fractional factorial: subset to save resources
+           -3) Captures interactions between variables
+       -3. Latin Hypercube Sampling (LHS):
+           -1) Efficient for high-dimensional input space
+           -2) Each dimension divided into equal intervals
+           -3) Samples ensure orthogonality and low correlation
+   -b. Key Benefit of LHS:
+       -1. Sample efficiency independent of dimensionality
+
+5. Data Harvesting from Literature
+   Before starting experiments, gather existing data to:
+   - Reduce cost
+   - Enrich datasets
+
+   Suggested sources:
+   - Google Scholar
+   - Semantic Scholar
+   - ScienceDirect
+   - arXiv
+   - Perplexity AI
+
+   Merge validated literature data with experimental records for a stronger starting point.
+
+6. Building a Proxy Model
+   The surrogate approximates the black-box function of the experiment and returns both:
+   - Prediction
+   - Uncertainty estimate
+
+   -a. Surrogate Modeling Techniques:
+       -1. Gaussian Processes (GPs):
+           -1) Probabilistic, gives mean and variance
+           -2) Ideal for exploration-exploitation
+           -3) Expensive (O(N³) complexity), better for small/medium datasets
+           -4) Integrated in BoTorch
+       -2. Tree-Based Models:
+           -1) Decision trees, random forests, CatBoost
+           -2) Handle high-dimensional spaces, robust to noise
+           -3) Lack native uncertainty estimates (workarounds: quantile regression forests, etc.)
+       -3. Bayesian Neural Networks (BNNs):
+           -1) Deep models with uncertainty estimation
+           -2) Scalable to large data
+           -3) Harder to train, more resource-demanding
+
+7. Sensitivity Study
+   Key to understand which features impact model output the most:
+
+   -a. Methods:
+       -1. Feature Importance (e.g., in XGBoost or RF)
+       -2. Permutation Importance:
+           -1) Shuffle a feature, observe performance drop
+       -3. Shapley Values:
+           -1) Game-theoretic method to attribute contribution of each feature
+           -2) Considers all subsets; implemented in SHAP library
+   -b. Goal:
+       -1. Improve model interpretability
+       -2. Prune uninformative inputs
+       -3. Enhance efficiency of the OED
+
+8. Bayesian Optimization of the Target Function
+   -a. Goal:
+       Maximize an unknown function
+          f: 𝒳 → ℝ
+       based on limited, expensive evaluations
+       Only noisy measurements available:
+          y = f(x) + ε, where ε ∼ N(0, σ²)
+  -b. Optimization is performed over a surrogate model, not the original system.
+      -1. Acquisition Function (AF):
+          -1) Cheap to evaluate
+          -2) Balances exploration and exploitation
+          -3) Guides next point selection
+     -2. Popular AFs:
+         -1) Upper Confidence Bound (UCB):   AF(x) = μ(x) + k·σ(x)
+               k tunes exploration level
+         -2) Expected Improvement (EI):   AF(x) = E[max(f(x) − f_best, 0)]
+               Seeks regions likely to outperform current best
+         -3) Probability of Improvement (PI):   AF(x) = P(f(x) > f_best + ε)
+               Purely exploitative
+  -c. Each acquisition function has trade-offs:
+      -1. UCB: simple and tunable
+      -2. EI: balanced
+      -3. PI: greedy but fast
+      See [ACQF] for full derivations.
+
+9. Constraints in Acquisition Function
+   Constraints define realistic experiment space.
+   -a. Categories:
+       -1. Operational Constraints (Boundaries):
+           -1) E.g., temperature or concentration limits
+           -2) Cannot be exceeded
+       -2. Weak Constraints (Penalties):
+           -1) E.g., cost or priority
+           -2) Not strictly forbidden but discouraged
+       -3. Strong Constraints:
+           -1) E.g., availability of materials or conflicting process steps
+           -2) Must not be violated
+  All constraints must be embedded in the acquisition function via:
+  - Mathematical boundaries
+  - Penalty functions
+
+10. Multi-objective Optimization
+    Often multiple conflicting goals exist:
+    -a. Maximize performance
+    -b. Minimize cost
+    -c. Minimize risk
+
+    Solution:
+    Aggregate them into a single composite objective using weighted sum:
+       f* = w₁f₁ + w₂f₂ + ... + wₙfₙ
+    Weights normalize scales and encode relative importance, in collaboration with domain experts.
+    If constraints are unknown or noisy, define them as functions:   c₁(x), ..., cₖ(x) ≤ 0
+
+11. Toy Example: Bioplastic Optimization
+    Objective: Minimize density of bioplastic while keeping other properties constant.
+    -a. Variables:
+        -1. Process temperature (continuous)
+        -2. Additive type (categorical → encode chemically)
+        -3. Additive concentration (continuous)
+    -b. Steps:
+        -1. Gather literature data
+        -2. Define experimental ranges with domain experts
+        -3. Encode additive type using chemical descriptors
+        -4. Choose initial mapping (e.g., LHS)
+        -5. Build a proxy model using collected/lit data
+        -6. Run Bayesian Optimization to identify next best experiments
+        -7. Add each result to dataset, retrain, and repeat the OED loop
+
+12. Frameworks
+    -a. For Experimental Design:
+        -1. PyDOE: Design of Experiments, factorials, etc.
+    -b. For Bayesian Optimization:  
+        -1. BoTorch:
+            -1) Built on PyTorch
+            -2) Includes:
+                - Gaussian Processes
+                - Acquisition Functions
+                - Optimizers
+
+13. Final Takeaways
+    -a. OED minimizes experiments and maximizes insights.
+    -b. It combines:
+        -1. Surrogate modeling (e.g., GPs, trees, BNNs)
+        -2. Bayesian optimization
+        -3. Acquisition function design and customization
+    -c. Categorical encoding, physics-aware representation, and constraint handling are essential.
+    -d. Optimization must respect feasibility, cost, and domain expertise.
+    -e. Use sensitivity analysis to refine models and prioritize variables.
+    -f. Real success in OED relies on tight collaboration with domain experts, proper modeling, and iterative experimentation
+        guided by intelligent search.
