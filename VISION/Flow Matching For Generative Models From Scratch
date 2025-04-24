@@ -1,0 +1,127 @@
+### From https://medium.com/correll-lab/flow-matching-for-generative-models-from-scratch-8264bad4e0ba
+
+1. From Diffusion to Flow Matching
+   -a. Diffusion models corrupt data by gradually adding Gaussian noise via a forward process 𝑞, then train a network 𝑝_𝜃
+       to predict and remove that noise, reconstructing the original image.
+   -b. Flow matching treats each pixel (or data dimension) as a random variable following a Gaussian. 
+       Instead of predicting noise, it learns a time-dependent velocity field 𝑣_𝜃(𝑥,𝑡) that moves particles from a simple
+       “prior” (e.g. 𝑁(0,1)) to the target distribution (the clean image) over a unit time interval.
+   -c. Because flow matching directly models how samples should flow between distributions, 
+       it often requires less training data and can converge faster than diffusion.
+
+2. Images as Random Variables
+   -a. Noisy image generation: An 8×8 RGB image 𝑥_0 can be turned into a random image by adding 𝑁(0,𝜎^2) noise:
+       𝑥_𝑡=𝑞(𝑥_0)=𝑥_0+𝜖,𝜖∼𝑁(0,𝜎^2)
+   -b. Inverse mapping: A neural network 𝑝_𝜃 learns to predict how much noise to remove.
+   -c. Unified view: All 64 pixels form a 64-dimensional Gaussian. Flow matching instead learns 
+                     𝑣_𝜃 that transports samples from 𝑁(0,𝐼) to the image’s Gaussian.
+
+3. Transforming Distributions via Velocity Fields
+   -a. Single-pixel example:
+       -1. Source: samples 𝑥_0∼𝑁(0,1)
+       -2. Target: samples 𝑥^~∼𝑁(2,0.5)
+   -b. A velocity field 𝑣(𝑥,𝑡) describes how a sample at position 𝑥 at time 𝑡 should move:
+      𝑑_𝑥/𝑑_𝑡=𝑣(𝑥,𝑡)
+   -c. Integration over 𝑡∈[0,1] via Euler’s method transforms the entire distribution.
+   -d. Sampling pairing trick: Randomly pair 𝑥_0∼𝑝_0 and 𝑥_1∼𝑝_1. Connect them with straight lines; 
+       averaging over many such pairs reveals the average velocity field—no explicit correspondence needed.
+
+4. Code Walk-through
+   4.1 Visualization of Source vs. Target
+   """
+   # Plot histograms of N(0,1) vs. N(2,0.5)
+   plt.hist(source_distribution(1000), bins=50, density=True, alpha=0.6, label='N(0,1)')
+   plt.hist(torch.normal(2.0, 0.5, (1000, 1)), bins=50, density=True, alpha=0.6, label='N(2,0.5)')
+   """
+   Purpose: Shows how noisy samples (orange) compare to target samples (green), motivating the need for a transporting velocity field.
+
+   4.2 Defining the Velocity-Field Model
+   """
+   class VelocityField(nn.Module):
+       def __init__(self, input_dim=1, hidden_dim=128):
+           super().__init__()
+           self.input_layer = nn.Linear(input_dim + 1, hidden_dim)
+           # ... two more hidden layers with LayerNorm+ReLU and residuals ...
+           self.output_layer = nn.Linear(hidden_dim, input_dim)
+
+       def forward(self, x, t):
+           xt = torch.cat([x, t], dim=-1)
+           h = self.relu(self.norm1(self.input_layer(xt)))
+           # residual blocks ...
+           return self.output_layer(h)
+   """
+   -a. Inputs: current sample 𝑥 and time 𝑡
+   -b. Architecture:
+       -1. Input layer projects (𝑥,𝑡) into a 128-dim latent space.
+       -2. Two residual hidden layers (with LayerNorm + ReLU).
+       -3. Output layer returns a velocity scalar.
+
+   4.3 Training Loop (Euler Integration)
+   """
+   for epoch in range(epochs+1):
+       x = source_distribution(n_samples).to(device)
+       # Simulate flow
+       for t in time_steps[:-1]:
+           v = model(x, t * torch.ones(...))
+           x = x + v * dt   # Euler step
+       loss = torch.mean((x - target_samples)**2)
+       loss.backward(); optimizer.step()
+   """
+   Goal: minimize mean-squared error between the final transported samples and true target samples.
+   Observation: Loss drops from ~4.44 to ~0.60 over 30 epochs.
+
+5. Improving with Maximum Mean Discrepancy (MMD)
+   -a. Issue: Simple MSE between random pairs can collapse variances.
+   -b. MMD offers a non-parametric measure between distributions based on a kernel 𝑘(𝑥,𝑦)=exp(−∥𝑥−𝑦∥^2 / (2𝜎^2))
+   -c. Implementation:
+   """
+   def compute_mmd(x, y, sigma=1.0):
+       # pairwise distance matrices xx, yy, xy
+       kernel_xx = torch.exp(-xx / (2*sigma**2))
+       ...
+       mmd = xx.mean() + yy.mean() - 2*xy.mean()
+       return mmd
+   # then simply:
+   loss = compute_mmd(x, target_samples)
+   Result: Loss plummets to ~0.0003 by epoch 80, preserving correct target variance.
+   """
+
+6. Generating and Visualizing Results
+   -a. Sample generation:
+   """
+   def generate_samples(model, n_steps=50):
+       x = source_distribution(n_samples)
+       for t in torch.linspace(0,1,n_steps)[:-1]:
+           v = model(x, t*ones)
+           x = x + v * dt
+       return x
+   """
+   -a. Comparison plot overlays:
+       -1. Source histogram (blue)
+       -2. Generated histogram (green)
+       -3. True target PDF (red curve)
+
+7. Extending to Complex Distributions
+   -a. By swapping in any desired target sampler—e.g., a Gaussian mixture
+   """
+   target_samples = torch.cat([
+       torch.normal(2.0,0.5,(n//2,1)),
+       torch.normal(-3.0,0.5,(n//2,1))
+   ])
+   """
+   the same training loop learns to map 𝑁(0,1) into a bimodal distribution.
+
+8. Conclusion
+   -a. Flow matching leverages an ODE-based viewpoint (Continuous Normalizing Flows) to transport simple priors into 
+       complex data distributions via a learned velocity field.
+   -b. Advantages over diffusion include faster convergence, fewer samples, and no need for U-Net architectures, 
+       while still supporting conditioning (text or image embeddings).
+   -c. For deeper dives, the original paper (“Flow Matching for Generative Modeling”) and accompanying YouTube summary are recommended.
+
+9. Appendix: Velocity-Field Visualization
+   -a. Linear trajectories plotted by sampling random pairings and drawing straight-line paths over time.
+   -b. Estimated velocity field 𝑣(𝑥,𝑡) obtained by binning interpolated samples and averaging their true displacements,
+       then plotted across 𝑥 for several 𝑡 values.
+   -c. Code relies on NumPy and Matplotlib and mirrors the principles shown above to illustrate how the learned field evolves 
+       in grayscale over time.
+
