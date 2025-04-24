@@ -1,0 +1,50 @@
+### From https://medium.com/@ericbroda/agent-discovery-filtering-signal-from-noise-in-the-agent-ecosystem-f18fb707f77f
+
+1. Metadata Repository (Agent Registry)
+   -a. Purpose: Acts like a data catalog, but for agents and their tools.
+   -b. Contents: For each agent, stores metadata such as name, purpose, capabilities, policies, version, endpoints, etc.
+   -c. Access:
+       -1. Programmatic: Agents query the registry to learn about peers.
+       -2. Human‐facing: A marketplace UI lets people browse or search available agents.
+
+2. Agentic Mesh (Ecosystem Fabric)
+   -a. Role: Provides the runtime platform and networking layer through which agents:
+       -1. Register themselves in the registry.
+       -2. Discover other agents.
+       -3. Interact safely (message passing, authentication, policy enforcement).
+
+3. Beyond “Top-N” Search → Relevant Discovery
+   -a. Traditional search returns a ranked list of many candidates.
+   -b. Goal: Identify the single agent that is most contextually appropriate—not merely the most capable—given:
+       -1. Task specifics (what needs doing)
+       -2. Constraints (privacy, compliance, latency)
+       -3. Policies (corporate rules, regulatory requirements)
+
+4. Discovery Scoping Rules
+   Two complementary filtering strategies guide an agent toward the right collaborator:
+
+   -a. Visibility Scoping (Coarse-Grained)
+       Explicitly limits which agents are even considered.
+       -1. Strict naming: A fixed list (e.g. in regulated domains where only certified agents may be used).
+       -2. Pattern-based naming: A namespace or regex filter (e.g. “agent.*.finance” to include all finance agents).
+   -b. Characteristics Scoping (Fine-Grained)
+       Filters based on detailed attributes of each agent. Common attributes include:
+       -1. Purpose: What the agent is fundamentally designed to do.
+       -2. Description: Human-readable narrative of capabilities and use cases.
+       -3. Policies: Which corporate or regulatory rules it enforces.
+       -4. Inputs/Outputs: Data formats, protocols, performance characteristics.
+       -5. Dependencies: Required services or data sources.
+   Agents apply these scoping rules—first narrowing the candidate set via visibility, then selecting the best match via 
+   characteristics—to pinpoint the one best collaborator.
+
+5. The Importance of Contextual Fit
+   -a. Most capable ≠ Most appropriate.
+   -b. A scheduling agent that’s lightning-fast isn’t useful if it can’t operate under your company’s data-privacy policy.
+   -c. Effective discovery balances functional matching (does it solve the task?) with non-functional criteria (compliance, cost, SLA).
+
+6. Why This Matters
+   As the agent ecosystem scales from dozens to thousands (and beyond), the ability to discover the right agent quickly—and 
+   with confidence that it’ll respect your constraints—becomes a foundational capability. 
+   Without precise discovery, agents either resort to brute forcing through too many options (inefficient) or risk choosing a suboptimal
+   or non-compliant partner.
+
