@@ -1,0 +1,217 @@
+### From https://blog.cubed.run/100-accurate-ai-step-by-step-part-one-bsd-neural-networks-509d8b74f6b1
+
+1. Introduction to BSD Neural Networks
+   BSD (Bounded-Scope Deterministic) Neural Networks are a new training method for neural networks designed to achieve 100%
+   accuracy on language tasks. 
+   Unlike conventional stochastic methods, BSD enforces determinism 
+   — every input has only one correct output, and transformations must follow explicit, repeatable rules.
+
+   This method allows BSD networks to achieve perfect accuracy across:
+   -a. Low-level NLP tasks (e.g., sentence splitting, named entity recognition)
+   -b. High-level tasks (e.g., summarization, coreference resolution)
+   -c. LLM use-cases (e.g., hallucination-free Q&A and chatbot responses)
+
+2. Discovery Origin — Formatted Facts
+   BSD was discovered while trying to create Formatted Facts (FFs):
+   -a. Split complex sentences into simple ones.
+   -b. Resolve coreference (replace pronouns with full references). This transformation enables LLMs to answer questions 
+       with perfect precision.
+
+   Problem: No existing sentence splitting or coreference resolution method was reliable.
+   -a. State-of-the-art (SOTA) sentence splitting had a 20% error rate.
+   -b. SOTA coreference resolution had a 17.4% error rate.
+   -c. Errors compound across steps in NLP pipelines.
+   Acurai Inc. believes “Less broken is still broken” — 80% accuracy is unacceptable.
+
+3. AI Accuracy Plateau
+   The NLP field has plateaued:
+   -a. Adding more data does not improve accuracy after a point.
+   -b. SOTA models hallucinate more as complexity increases.
+   -c. Even fine-tuned LLMs can’t count letters or split sentences reliably.
+   BSD breaks this plateau by enforcing deterministic rules, not expanding data variety.
+
+4. Empirical Proof: 5 BSD Entries > 1 Million SOTA Entries
+   -a. SOTA sentence splitting uses datasets like BiSECT, WebSplit (each has ~1 million examples).
+   -b. These models still fail to go beyond 80% accuracy.
+   -c. BSD approach: only 5 carefully constructed examples used in a few-shot prompt.
+       -1. Result: 100% accurate sentence splitting across 500 BBC news articles.
+   -d. Demonstrates that determinism and structure, not size or variety, lead to accuracy.
+
+5. Problem with SOTA Training: Too Much Variation
+   SOTA datasets like WebSplit:
+   -a. Provide many alternative outputs for a single input.
+   -b. Ex: 64 variations of how to split one sentence — all grammatically correct.
+   -c. But this variety confuses the model and prevents deterministic learning.
+
+   BSD training enforces:
+   -a. One correct transformation per input.
+   -b. All other outputs (even if grammatically correct) are considered wrong during training.
+
+6. The Seven Criteria of BSD Neural Network Training
+   -a. One unique output per input
+   -b. Output must be deterministically derived
+   -c. Transformation choice must be based on input
+   -d. Transformations must be applied consistently
+   -e. If output has reorderable values, apply deterministic sorting (e.g., by first position in input)
+   -f. Include inputs where no transformation occurs (output = input)
+   -g. Include counterexamples for each transformation decision
+   These criteria make the neural network learn the deterministic path — the path of least resistance is doing 
+   the correct transformation.
+
+7. Example: Deterministic Transformation X
+   A rule that splits on the word “and” only if:
+   -a. “And” is a coordinating conjunction
+   -b. Followed by a noun
+   -c. Then capitalize the next word
+   -d. Add a period
+   -e. Include the full subject noun phrase in the new sentence
+
+   For example:
+   -a. Input: “The cat sat on the chair and it was purring.”
+   -b. Output: “The cat sat on the chair. It was purring.”
+   BSD says: this is the only valid transformation. Other grammatically correct versions are not valid during training.
+
+8. BSD vs. SOTA Sentence Splitting
+   Aspect	| BSD	| SOTA
+   Transformation	| Deterministic, rule-based	| Free-form, stochastic
+   Outputs	| One per input |	Many per input
+   Consistency	| Yes, across all data	| No, varies by annotator
+   Accuracy	| Up to 100%	| ~80%
+   Training goal	| Eliminate ambiguity	| Capture linguistic diversity
+
+9. Neural Networks Learn the Path of Least Resistance
+   BSD’s philosophy: Neural networks do not learn intelligence — they learn shortcuts. Examples from other fields:
+   -a. Pneumonia detection learned hospital logos, not symptoms.
+   -b. CNNs learn texture, not object shape.
+   -c. Cancer detection models learn to look for rulers in images.
+
+   BSD applies this principle to NLP:
+   -a. It guides the network toward the right output path — by removing all ambiguity.
+
+10. BSD Sentence Splitting Implementation
+    Example pairs:
+    -a.“The cat sat on the chair and it was purring.” → “The cat sat on the chair. It was purring.”
+    -b. “Tom drove home.” → “Tom drove home.” (no transformation needed)
+    -c. “Tom and Mary drove home.” → “Tom and Mary drove home.” (no transformation, ‘and’ isn’t a coordinating clause)
+    Each pair conforms to the 7 criteria.
+
+11. BSD Core Strengths
+    -a. Can handle multiple transformation rules
+    -b. Can apply them hierarchically
+    -c. Can achieve 100% accuracy even in complex multi-step tasks (e.g., people fact extraction, grouped summaries)
+    -d. Uses first-position sorting for NLP tasks involving lists of items (e.g., summarizing people and their actions)
+
+12. BSD for Summarization and Chatbot Reliability
+    Apple’s headline summarization failed (e.g., hallucinating “Rafael Nadal comes out as gay”). BSD eliminates such hallucinations.
+
+    -a. BSD Summarization Methods:
+        -1. Use BSD to convert article to Formatted Facts → LLM picks most representative FF.
+            -1) 100% accurate, but not always optimal in relevance.
+        -2. Normalize article → BSD → FFs → Let LLM summarize → Use vector search to match with closest FF.
+            -1) Achieved 100% hallucination-free, relevant summarization.
+    -b. BSD pipeline:
+        -a. Sentence Simplification (BSD)
+        -b. Coreference Resolution (BSD)
+        -c. Formatted Facts (FFs)
+
+13. BSD Neural Network Training Workflow
+    Training:
+    -a. Convert training input to tokenized numerical form (e.g., SentencePiece, TikTokens)
+    -b. Feed into supervised neural network (e.g., GPT, BERT, etc.)
+    -c. Use BSD-compliant outputs as targets
+    -d. Compute loss using Cross-Entropy, KL, or RL (with BSD Target Outputs)
+    -e. Update weights
+    -f. Repeat until loss < threshold
+    -g. Save model
+    This yields zero-loss, 100%-accurate networks.
+
+14. BSD: The Only Path to 100% Accuracy
+    -a. Current NLP plateau is due to non-determinism and excessive variation in training data.
+    -b. BSD flips this on its head — by enforcing structure and singularity of output.
+    -c. BSD produces superior results with far less data (e.g., 5-shot prompt > 1M samples).
+    -d. Other projects like LIMO inadvertently support BSD’s premise by normalizing inputs.
+
+15. Conclusion: BSD = Dawn of Perfect NLP
+    -a. BSD makes 100% accurate NLP systems possible — for sentence splitting, summarization, coreference, reasoning, and chatbots.
+    -b. The method is fully revealed in this article, including deterministic rules, criteria, examples, and architecture.
+    -c. BSD flips conventional NLP training on its head — by rejecting variety in favor of deterministic precision.
+    -d. Acurai, the inventing company, is committed to open-sourcing BSD methodology.
+
+-----------------------------------------------------------------------------------------------------------
+1. Sentence Simplification (BSD)
+   -a. Definition:
+       Sentence Simplification in BSD means breaking down complex, long, or compound sentences into shorter, 
+       simpler, and clearer ones — using deterministic (rule-based) logic.
+   -b. How it works in BSD:
+       -1. The process follows strict transformation rules, not guesses.
+       -2. A single complex sentence is turned into multiple standalone sentences, each expressing a clear fact.
+       -3. These rules are deterministic, meaning the model is trained to follow only one correct way of simplifying a sentence.
+   -c. Example from the article:
+       -1. Original complex sentence:
+           “The last 4 kilometres (2.5 mi) of the remaining original Reichsautobahn, a section of A 11 northeast of Berlin near 
+            Gartz built in 1936 — the westernmost remainder of the never-finished Berlinka — was scheduled for replacement around 2015.
+            Roadway condition is described as 'deplorable'; the 25 metres (82 ft)-long concrete slabs, too long for proper expansion, 
+            are cracking under the weight of the traffic as well as the weather.”
+       -2. BSD Sentence Simplification produces:
+           -1) The last 4 kilometres (2.5 mi) of the remaining original Reichsautobahn was scheduled for replacement around 2015.
+           -2) The last 4 kilometres of the remaining original Reichsautobahn is a section of A 11.
+           -3) The section of A 11 is northeast of Berlin.
+           -4) The section of A 11 is near Gartz.
+           -5) The section of A 11 was built in 1936.
+           -6) The section of A 11 is the westernmost remainder of the never-finished Berlinka.
+           -7) Roadway condition is described as “deplorable.”
+           -8) The 25 metres (82 ft)-long concrete slabs are too long for proper expansion.
+           -9) The slabs are cracking under the weight of the traffic.
+           -10) The slabs are cracking under the weather.
+      Each sentence now expresses one clean idea — with no ambiguity, no pronouns, no coordination.
+
+2. Coreference Resolution (BSD)
+   -a. Definition:
+       BSD Coreference Resolution replaces ambiguous pronouns (like he, she, it, they) with explicit noun phrases, 
+       so that each sentence becomes fully understandable on its own.
+   -b. How it works in BSD:
+       -1. Every pronoun in a sentence is replaced with the full name or subject it refers to.
+       -2. It follows deterministic rules to decide what noun to substitute and how exactly to write it 
+           (e.g., full name, nested noun phrase, etc.).
+       -3. This makes each simplified sentence self-contained and factually clear.
+   -c. Why it matters:
+       -1. It eliminates confusion.
+       -2. It prepares each sentence to be accurately processed or used by other systems (like chatbots or search engines).
+   -d. Example (implied in text):
+       -1. Original sentence:
+           “Tom and Mary went to the park. He brought sandwiches.”
+       -2. After BSD Coreference Resolution:
+           “Tom and Mary went to the park. Tom brought sandwiches.”
+       It replaces “he” with “Tom” in a deterministic and consistent way.
+
+3. Formatted Facts (FFs)
+   -a. Definition:
+       Formatted Facts are final, self-contained, accurate sentences generated by applying both BSD Sentence Simplification 
+       and BSD Coreference Resolution to raw input text.
+   -b. Why they matter:
+       -1. Each FF is an independent, simple, factual sentence.
+       -2. They are free from pronouns, free from ambiguity, and logically sound.
+       -3. They are easy for models to retrieve and reason over.
+       -4. FFs are the building blocks for 100% accurate question answering, summarization, and chatbot responses.
+   -c. How FFs are built:
+       -1. Start with raw input (complex article or paragraph)
+       -2. Apply BSD sentence simplification → split complex sentences into clean short ones.
+       -3. Apply BSD coreference resolution → resolve pronouns and ambiguous references.
+       -4. The result = Formatted Facts
+   -d. Why it's powerful:
+       With FFs, language models can:
+       -1. Answer questions with no hallucination
+       -2. Understand context without guesswork
+       -3. Perform reasoning or summarization with true facts
+   -e. Example:
+       -1. Input:
+           “Mary and John went to the concert. He said it was boring.”
+       -2. Formatted Facts (after simplification + coreference resolution):
+           -1) Mary and John went to the concert.
+           -2) John said the concert was boring.
+
+4. How they connect:
+   Component	| Role
+   BSD Sentence Simplification	| Breaks complex sentences into smaller ones
+   BSD Coreference Resolution	| Replaces pronouns with exact references
+   Formatted Facts (FFs)	| The final clean, clear, self-contained factual sentences
