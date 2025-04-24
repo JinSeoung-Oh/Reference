@@ -1,0 +1,120 @@
+### From https://arxiv.org/pdf/2411.19146
+
+## When we use this? - can find out right LLM algorithm
+You’d reach for Puzzle anytime you’ve got a hefty, off-the-shelf LLM and you need to squeeze it down to a real-world inference
+budget without retraining from scratch. Concretely:
+
+-a. Hardware-Specific Deployment
+    -1. You’ve chosen a GPU (e.g. H100, A100, edge device) with fixed memory and compute, and you need maximum throughput 
+        or minimum latency under those limits.
+-b. Closed-Data, Open-Weights
+    -1. You have access to the model’s weights but not its original training data. Puzzle thrives in that “open-weights, 
+        closed-data” scenario by distilling from the parent.
+-c. Multiple Usage Profiles
+    -1. You want different variants for:
+        -1) High-batch, long-context (max throughput)
+        -2) Low-batch, short-context (min latency)
+        -3) Mixed workloads (balanced)
+-d. Resource Constraints
+    -1. You must fit within a strict memory cap (including KV-cache), or meet a throughput minimum, or cap end-to-end latency
+        for interactive applications.
+-e. Rapid Iteration on Architecture
+    -1. Rather than training dozens of custom models from scratch, Puzzle lets you explore thousands of layer-level tweaks in parallel, 
+        then instantly solve for the best combination via MIP.
+-f. Tiered Developer Needs
+    -1. From “quick proof-of-concept” with minimal extra tokens (BLD only) to “production-ready” with final Global KD,
+        Puzzle scales your investment to the importance of the deployment.
+
+In short, use Puzzle when you need to turn a powerful parent LLM into a lean, hardware-tuned child that hits 
+your exact inference targets—fast, memory-safe, and without the exorbitant cost of retraining.
+
+---------------------------------------------------------------------------------
+1. Introduction & Background
+   -a. Trend & Challenge
+       -1. LLMs continually grow (in both parameters and inference complexity) to boost accuracy, driving toward AGI.
+       -2. Problem: Huge models are prohibitively expensive at inference—high GPU memory use, slower latency, 
+                    limited scalability for real‐world deployment.
+   -b. Overparameterization During Training vs. Inference
+       -1. Large parameter counts help training converge and store knowledge but leave redundant computations at inference.
+       -2. Existing “efficiency” hacks (pruning, quantization, etc.) treat the symptom rather than the uniform‐layer design itself.
+   -c. Puzzle’s Goal
+       -1. Reconfigure a trained “parent” LLM into a non‐uniform, hardware‐aware “child” model optimized for inference—without 
+           retraining from scratch or needing the original training data.
+       -2. Explore a vast design space of per‐layer alternatives, then automatically assemble the best combination under given
+           hardware and performance constraints.
+   -d. Key Steps
+       -1. Define a rich search space of attention & FFN layer variants (incl. skipping layers).
+       -2. Blockwise Local Distillation (BLD): Train all those layer variants in parallel to mimic the parent.
+       -3. Mixed‐Integer Programming (MIP) Search: Score each variant’s accuracy & resource cost,
+                                                   then solve a knapsack‐style MIP to pick one variant per layer that meets memory/latency/throughput targets.
+       -4. Global Knowledge Distillation (GKD): Fine‐tune the assembled child model end‐to‐end to smooth out inter‐block mismatches.
+   -e. Why It’s Practical
+       -1. Cost: < 50 B tokens for BLD+GKD vs. > 15 T tokens for original training.
+       -2. Data: Only needs parent model weights—perfect for “open‐weights, closed‐data.”
+       -3. Results: Derived Nemotron-51B (a 51 B‐param child of Llama-3.1-70B) that breaks the efficiency frontier on 
+                    an NVIDIA H100—much higher throughput/memory efficiency at near-parent accuracy.
+
+2. Search Space
+   -a. Blocks & Subblocks
+       -1. A block = one transformer layer.
+       -2. Two subblocks per layer:
+           -1) Attention variants (multi‐head, grouped-query with 8/4/2/1 KV heads, single‐linear, or no‐op).
+           -2) FFN variants (full or pruned intermediate dims at 87%, 75%, 50%, 25%, 20%, 10%; linear‐only; or no‐op).
+   -b. Scale
+       -1. For Llama-3.1-70B: 80 layers × (6 attention × 9 FFN) = 54 choices per layer.
+       -2. Total theoretical architectures: 54⁸⁰ ≈ 10¹³⁸—vastly infeasible to brute‐force.
+
+3. Blockwise Local Distillation (BLD)
+   -a. Purpose: Create a library of trained “puzzle pieces” (all attention & FFN variants) without retraining full child models.
+   -b. Decoupled vs. Coupled
+       -1. Coupled BLD: train every combined [Aᵢⱼ, Fᵢₖ]ᵢ → m·n·l variants.
+       -2. Decoupled BLD: separately train each Aᵢⱼ with frozen parent FFN, and each Fᵢₖ with frozen parent attention → (m + n)·l variants.
+       -3. Benefit: decoupled cuts training count by roughly m×n, enabling block‐level parallelism.
+   -c. Training Details
+       -1. Data: “Distillation Mix” of ~1 B tokens (code, wiki, books, news).
+       -2. Loss: normalized MSE between parent‐block outputs (oₚ) and child‐block outputs (o_c):
+                 𝐿=MSE(𝑜_𝑝, 𝑜_𝑐) / MSE(𝑜_𝑝, 0)
+       -3. Initialization:
+           -1) FFN pruning via Channel Contribution (prune low‐impact channels).
+           -2) Attention head reduction by mean‐pooling KV projections.
+           -3) Linear replacements via projection‐matrix products.
+
+4. Decomposed NAS Search Algorithm
+   -a. Block Library (from BLD)
+   -b. Resource Estimation
+       -1. Measure each variant’s prefill/generation latencies and memory (parameters + KV‐cache) on target hardware 
+           (e.g. H100, A100) across batch sizes & sequence lengths.
+   -c. Block Scoring
+       -1. Replace‐1‐block test: swap one variant into the parent, measure impact on a validation metric
+                                 (LM loss, KL divergence, or downstream accuracy). Record each variant’s score(i,j).
+   -d. MIP Formulation
+       -1. Variables: xᵢⱼ ∈ {0,1}: pick variant j for layer i.
+       -2. Objective: maximize ΣᵢΣⱼ score(i,j)·xᵢⱼ.
+       -3. Constraints:
+           -1) Total memory (params + batch∙KV) ≤ Memoryₘₐₓ.
+           -2) Throughput (batch∙seq_len / Σ runtimes) ≥ Throughputₘᵢₙ.
+           -3) Latency Σ runtimes ≤ Latencyₘₐₓ.
+           -4) Exactly one variant per layer.
+   -e. Diversity: optional constraint to force new solutions to differ ℓ% from prior ones.
+   Outcome: Fast (< seconds) discovery of non‐uniform architectures optimized for real‐world inference constraints.
+
+5. Post-Puzzle Inter-Block Uptraining (Global KD)
+   -a. Why: BLD trains blocks on parent activations, so child blocks may mis‐match each other when assembled.
+   -b. How: One final round of end‐to‐end distillation (∼ 5 B tokens) using the parent as teacher.
+       -1. Loss: Cosine similarity of hidden states + KL divergence on logits (no cross‐entropy LM loss).
+       -2. Result: Child model regains near‐parent performance; LM loss was found unnecessary or harmful in ablations.
+
+6. Fast Inference in TensorRT-LLM
+   -a. Challenge: TensorRT-LLM assumed uniform KV‐head counts across layers.
+   -b. Solution:
+       -1. Paged KV cache enhancements to handle variable GQA ratios.
+       -2. Full support for FP8 quantization on weights, activations, and KV cache.
+       -3. Maintains TensorRT-LLM’s high‐performance kernels (paged attention, scheduling) for Puzzle architectures.
+
+In Essence: Puzzle turns a monolithic, uniform LLM into a tailored, hardware‐aware model by:
+-a. Splitting layers into many efficient variants,
+-b. Distilling them blockwise,
+-c. Scoring & solving a resource‐constrained selection problem with MIP,
+-d. Fine‐tuning the assembled model with minimal distillation, and
+-e. Running it seamlessly on optimized inference engines—yielding massive efficiency gains at minimal extra cost.
+
