@@ -1,0 +1,57 @@
+### From https://arxiv.org/pdf/2503.18908
+
+1. Context & Motivation
+   -a. LLM Explosion & Cost: Modern large language models (LLMs) have grown to hundreds of billions of parameters, 
+                             yielding amazing capabilities in reasoning and generation—but their sheer size makes inference extremely 
+                             expensive in latency, memory, and dollar‐per‐token.
+   -b. Existing Efficiency Hacks
+       -1. Quantization shrinks precision (e.g. 8-bit, 4-bit) but hits accuracy limits at very low bits.
+       -2. Pruning removes weights but must be carefully structured or it degrades quality.
+       -3. Mixture-of-Experts (MoE) activates only a few “expert” sub-modules per token—great for very large batches but inefficient 
+           at smaller batch sizes due to unused capacity.
+   There’s a gap: we need new techniques that preserve the simplicity of dense transformers yet unlock fresh efficiency gains, 
+   especially on real-world hardware and moderate batch sizes.
+
+2. Key Innovation: FFN Fusion
+   -a. Observation: In many LLMs, after pruning out some attention layers (via methods like Puzzle), you end up with long runs 
+                    of consecutive Feed-Forward Network (FFN) layers that actually depend little on each other.
+   -b. FFN Fusion takes advantage of this:
+       -1. Parallelize all those back-to-back FFNs by feeding them the same input, removing the strict sequential dependency.
+       -2. Mathematically, summing N separate FFNs with identical inputs is equivalent to a single, wider FFN whose weights are
+           simply the concatenation of each smaller FFN’s weights (see Theorem 3.1).
+   -c. Practical Impact:
+       -1. Fewer sequential steps → fewer synchronization points across GPUs in tensor-parallel setups.
+       -2. Larger, chunkier compute kernels → better hardware utilization (GPUs run most efficiently on big GEMMs).
+       -3. Minimal accuracy loss, since these fused FFNs preserve the original functions.
+
+3. Building & Validating Ultra-253B-Base
+   Using FFN Fusion together with attention pruning on Llama-3.1-405B‐Instruct:
+   -a. Puzzle Search & Attention Pruning
+       -1. First, run the Puzzle NAS workflow to remove roughly half the attention layers under the constraint of a 1.5× latency speedup 
+           on an 8× H100 node.
+   -b. Identifying Fusion Sequences
+       -1. Of the remaining attention‐skipped blocks, pick 49 consecutive FFN layers with low inter-layer dependency 
+           (using a cosine-distance dependency matrix).
+       -2. Split into four fusion groups (due to GPU memory limits) and fuse each group into one wide FFN.
+   -c. Lightweight Post-Fusion Distillation
+       -1. After fusion, the raw fused model drops slightly in accuracy (e.g., MMLU from 84.23 → 82.76).
+       -2. Recover and surpass parent performance by a multi-stage distillation:
+           -1) 54 B tokens at 8K context, then 5 B tokens at 16K & 32K contexts, and 0.8 B tokens at 128K.
+       -3. Optionally add instruction-tuning and RLHF to align downstream behavior.
+   -d. Result: Ultra-253B-Base
+       -1. Parameter count: 253 B (down from 405 B).
+       -2. Speed: 1.71× faster single-user latency on 8× H100; 35× cheaper per token at batch 32.
+       -3. Memory: 2× smaller KV-cache footprint.
+       -4. Accuracy: Matches or exceeds Llama-405B on benchmarks (e.g., Arena Hard, HumanEval, MMLU, MT-Bench).
+
+4. Broader Implications
+   -a. Orthogonal to Other Techniques: FFN Fusion composes well with quantization, pruning, and MoE—potentially stacking 
+                                       for multiplicative efficiency gains.
+   -b. A New Architectural Paradigm: Early evidence suggests even full transformer blocks (attention + FFN) might be parallelized under
+                                     the same principle, opening paths to radically new model designs.
+
+   In summary, FFN Fusion is a simple yet powerful way to collapse long chains of FFN layers into fewer, 
+   wider layers—slashing synchronization overhead and boosting GPU utilization—while retaining or even improving model quality, 
+   as spectacularly demonstrated by Ultra-253B-Base.
+
+
