@@ -1,0 +1,66 @@
+### From https://medium.com/h7w/an-introduction-to-variational-autoencoders-vaes-305bacb75fbb
+
+1. Motivation and Generative Example
+   -a. Blending features across images: By encoding two faces (one with a moustache, one without) into latent features, 
+                                        combining those features, and decoding, you can transplant the moustache onto the clean-shaven face.
+   -b. Classic autoencoders vs. VAEs: Both are autoencoders at heart, but only VAEs reliably support new‐sample generation, interpolation,
+                                      and smooth “walking” through latent space.
+
+2. Traditional (Vanilla) Autoencoders
+   2.1 Architecture
+       -a. Encoder: Maps input 𝑥 into a low-dimensional latent vector 𝑧
+       -b. Decoder: Reconstructs 𝑥^ from 𝑧
+       -c. Training objective: Minimize reconstruction loss (e.g. MSE or cross-entropy) so 𝑥^≈𝑥
+   2.2 Common Variants
+       -a. Undercomplete AE: Hidden layers smaller than input/output, forcing a strict bottleneck.
+       -b. Sparse AE: Hidden layers as large as input but regularized (e.g. L1 or dropout) so only a few neurons activate.
+       -c. Denoising AE: Adds noise to inputs and trains to recover the clean version.
+       -d. Convolutional/Recurrent AEs: Replace dense layers with conv or RNN layers for images or sequences.
+   2.3 Applications
+       -a. Noise removal (e.g. denoising autoencoders).
+       -b. Nonlinear dimensionality reduction (as an alternative to PCA).
+   2.4 Why They Fail for Generation
+       -a. Latent-space “holes”: Encoder maps each sample to a single point 𝑧. When you sample between points, the decoder produces garbage.
+       -b. Lack of continuity: Nearby 𝑧’s don’t guarantee similar outputs.
+       -c. Lack of completeness: Large regions of latent space are unseen during training and decode to nonsense.
+
+3. Two Necessary Properties for Generative Latent Spaces
+   -a. Continuity: Small moves in latent space produce small changes in output.
+   -b. Completeness: Every point in latent space decodes to a plausible output.
+
+4. Variational Autoencoders (VAEs)
+   VAEs overcome these limits via two key innovations:
+
+   4.1 Encodings as Probability Distributions
+       -a. Dual outputs per dimension: Instead of a single 𝑧-value, the encoder predicts a mean 𝜇 and standard deviation 𝜎 for each latent dimension.
+       -b. Latent distribution: 𝑧∼𝑁(𝜇,𝜎^2)
+       -c. Reparameterization trick: Sample 𝜖∼𝑁(0,1) and set 𝑧=𝜇+𝜎⋅𝜖 to allow backpropagation.
+       This makes each input correspond not to one point but to an 𝑁-dimensional Gaussian “cloud,” ensuring that slight variations around 
+       𝜇 still decode to similar outputs—i.e., local continuity and local completeness.
+   4.2 KL-Divergence Regularization
+       -a. Additional loss term:
+           𝐿=𝐸_𝑞(𝑧∣𝑥)[−log𝑝(𝑥∣𝑧)] + 𝐷_KL((𝑞(𝑧∣𝑥)∥𝑁(0,𝐼)))
+                    ⏟                        ⏟
+              reconstruction            regularization
+       -b. Effect of KL term: Forces the learned posteriors 𝑞(𝑧∣𝑥)=𝑁(𝜇,𝜎^2) toward the standard normal 𝑁(0,𝐼), causing the 
+                              many Gaussian clouds to overlap and fill the space.
+       -c. Global completeness: By “pulling” every (𝜇,𝜎) pair toward (0,1), the entire latent space becomes uniformly covered,
+                                greatly reducing “holes.”
+
+5. Visualizations and Intuition
+   -a. Classic AE latent plot (2D): Discrete clusters with large gaps; moving through gaps yields nonsense.
+   -b. VAE without KL term: Clusters form but remain disjoint—continuity holds locally, completeness fails globally.
+   -c. VAE with KL term: All clusters shrink toward the origin; the latent plane is densely populated; 
+                         walking from one cluster to another yields smooth, meaningful interpolations.
+
+6. Why VAEs Work for Generation
+   -a. Sampling flexibility: Because each data point is encoded as a distribution, you can sample many nearby 𝑧s, and decoding any of them yields valid outputs.
+   -b. Smooth interpolation: Overlapping distributions ensure that interpolations—e.g. blending moustaches—stay on the data manifold.
+   -c. Complete coverage: KL regularization prevents “dead” regions, so random samples from 𝑁(0,𝐼) almost always decode into plausible images.
+
+In summary, by (a) encoding inputs as Gaussians instead of single points and (b) adding a KL-divergence term that tethers those Gaussians
+to a global standard normal, VAEs learn latent spaces that are both continuous and complete—making them true generative models, 
+capable of blending, interpolating, and sampling entirely new—but coherent—data.
+
+
+
