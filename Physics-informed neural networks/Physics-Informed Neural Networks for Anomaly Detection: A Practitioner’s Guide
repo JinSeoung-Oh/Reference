@@ -1,0 +1,78 @@
+### From https://shuaiguo.medium.com/physics-informed-neural-networks-for-anomaly-detection-a-practitioners-guide-53d7d7ba126d
+
+1. Why Do We Even Care? — The Real-World Pain
+   Problem	| Plain-language explanation	| Industrial consequence
+   Anomalies	| Data points or patterns that don’t behave like the rest.	| Sudden pump failure, off-spec chemical batch, cyber-attack on a power grid, etc.
+   Three faces of anomalies |	1 Point (one weird spike) • 2 Contextual (number looks normal but in that context it’s wrong) • 3 Collective (a whole segment of data looks odd together).	| Different shapes mean one algorithm rarely catches them all.
+
+   1.1 Why Conventional ML Often Trips Up
+       -a. Black-box logic
+           ML sees statistics, not physics. It will call something “normal” if numbers look common—even if those numbers break 
+           the laws of thermodynamics.
+       -b. Data hunger
+           -1. Supervised ML needs labeled failures (rare).
+           -2. Semi-/unsupervised still need lots of normal data, which is expensive to verify.
+           -3. Synthetic data tricks may copy noise, not physics.
+       -c. Poor extrapolation
+            Train on summer, fail in winter. Any new regime ⇒ retrain loop (𝑑𝑎𝑡𝑎→𝑙𝑎𝑏𝑒𝑙→𝑟𝑒𝑡𝑟𝑎𝑖𝑛→⋯)
+       -d. Sensor blind spots
+           If you don’t measure it, classic ML can’t detect it.
+       -e. Thin root-cause clues
+           A single “anomaly score” says “something’s wrong” but not “what and where.”
+
+2. What Makes a PINN Different? — The Nuts and Bolts
+   Standard Neural Net	| Physics-Informed Neural Net (PINN)
+   Learns only from data loss (difference between prediction and measurement).	| Learns from data loss + physics loss (difference from governing equations).  
+   
+   -a. How physics loss is computed
+       -1. Pick random space-time points called collocation points.
+       -2. Use automatic differentiation to get derivatives of the network output at those points.
+       -3. Plug those derivatives into the actual PDE/ODE that describes the machine.
+       -4. The residual (how much the PDE is violated) becomes a penalty term in training.
+   Result: The network is rewarded when it matches measurements and obeys physics, punished otherwise.
+
+   2.1 How This Fixes the Five Pain-Points
+       Pain-point	| How PINNs help (in article’s words)
+       Black-box	| Physics baked-in → Physical consistency guaranteed.
+       Data hunger	| Physics counts as “new data”. Fewer labels needed.
+       Extrapolation	| Physics-based regularization. As long as the equation holds, new seasons/loads are handled.
+       Missing sensors	| Virtual sensing. PINN predicts the whole field, including unmeasured spots.
+       Root-cause	| Physics-driven interpretability. High residuals point straight to which law is broken → causal clue.
+
+3. Three Ways People Build PINN Detectors
+   Pattern	| Step-by-step in plain words	| Success story from article
+   Digital-Twin PINN	| 1 Feed the same inputs (e.g., laser power) to both the real machine and the PINN. 2 PINN predicts the temperature/pressure/etc. that should happen. 3 Compare prediction vs sensor reading. 4 Big gap ⇒ anomaly.	| Additive manufacturing (Uhrich et al.): thermal PINN caught porosity-producing heat spikes in real time.
+   Inverse-Problem PINN	| 1 Make hidden physical parameter (e.g., local wave speed) a learnable variable. 2 Train PINN so both states and that hidden field fit data + physics. 3 After training, inspect the learned field; unusual pockets = anomaly.	| Ultrasonic inspection (Shukla et al.): PINN learned lower wave speed in cracked zones—no defect labels needed.
+   Hybrid (PINN + ML)	| Two common flavours: (a) Physics-informed auto-encoder: add physics violation penalty to AE loss. (b) PINN → residual → classic detector pipeline.	| Power-grid cybersecurity (Zideh et al.): physics-informed convolutional AE exposed stealthy false-data attacks.
+
+4. What Could Go Wrong?
+   Limitation	| Why it matters (article’s wording simplified)
+   Implementation complexity	| No “pip install anomaly-pinn”. You must encode PDEs, losses, pipeline yourself.
+   Compute cost	| Every epoch evaluates physics residuals → many more gradients → slow & pricey.
+   Training art-work	| Juggle multiple loss weights, learning rates, architectures. Needs hands-on babysitting.
+   Physics fidelity ceiling	| If your PDE is oversimplified, high residuals might just mean bad model, not real fault.
+
+5. Should You Use a PINN? — Scorecard from the Article
+   Seven questions, 0–2 points each (higher is better).
+   -1. Q1 Physics relevance 
+   -2. Q2 Ease of encoding 
+   -3. Q3 Labeled anomalies 
+   -4. Q4 Normal-data sufficiency
+   -5. Q5 Current ML performance 
+   -6. Q6 Need for physical explanation 
+   -7. Q7 Expertise/resources
+
+   if. 12–14 points: Pivot to PINNs.
+   if. 8–11 points: Pilot study first.
+   if. 0–7 points: Stick with conventional ML.
+   (If Q1, Q2, or Q7 scores 0 → fix those first.)
+
+6. Take-Home Messages in One Glance
+   Conventional ML	| PINN upgrade
+   Data-only, physics-blind.	| Data + equations respected.
+   Needs lots of labels.	| Governing equations act as extra supervision.
+   Fails in new regimes.	| Generalises while equations stay valid.
+   Blind where no sensor.	| Predicts hidden fields (virtual sensors).
+   Little insight why.	| High residual pinpoints violated physics → root cause clue.
+
+   But: expect heavier coding, longer GPU hours, and the need for accurate physics models.
