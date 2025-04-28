@@ -1,0 +1,79 @@
+### From https://openreview.net/pdf?id=xoXn62FzD0
+### From https://github.com/genlm/genlm-control
+
+1. Problem Setting: Controlled LM Generation with Heterogeneous Signals
+   -a. Controlled generation = produce sequences that satisfy syntactic/semantic constraints.
+   -b. Examples of usable signals
+       -1. Static checks (type-checking, linting).
+       -2. Dynamic checks on partial programs (run a test case).
+       -3. Physics / environment simulations with numeric rewards.
+       -4. Partial roll-outs with max/min/avg scoring.
+       -5. Critiques from another LM.
+   -c. Signals differ in cost, granularity, and hard vs. soft nature.
+   -d. Unified formalism
+       -1. Represent every signal as a non-negative potential ϕ(x).
+       -2. Given a set Φ, define their product Φ(x)=∏ϕ∈Φϕ(x).
+       -3. Target distribution (global product of experts) over complete sequences:
+           𝑔(𝑥)=1/𝑍 𝑝(𝑥)Φ(𝑥)   𝑍=∑_𝑦 𝑝(𝑦)Φ(𝑦)
+           where p is the base LM.
+
+2. Shortcomings of Common Baselines
+   Method	| Mechanism	| Core Weaknesses
+   Locally constrained decoding	| Bias / mask logits by evaluating Φ at every step.	| • Needs cheap per-token signals. • Myopic; distorts distribution relative to g (greedy).
+   Sample-rerank (best-of-n, verifier filtering)	| Generate full sequences → rescore with Φ.	| • Ignores incremental info → many wasted samples.
+
+   MCMC alternatives exist but are not the focus here.
+
+3. Proposed Solution: Sequential Monte Carlo (SMC) for Constrained Semantic Parsing
+   SMC has shown promise for other LM inference tasks; authors adapt it to code-generation problems.
+   -a. Conceptual recipe
+       -1. Partition potentials
+           -1) Φ_eff: cheap, incrementally evaluable → folded into proposal distributions (ℓ_eff).
+           -2) Φ_exp: costly → handled as twist functions (likelihood corrections).
+   -b. Particles & Weights
+       -1. Maintain N partial sequences (“particles”).
+       -2. Extend each with a token proposed by ℓ_eff.
+       -3. Reweight using two factors:
+           -1) Greediness correction (ratio of LM prefix probabilities vs. proposal).
+           -2) Φ_exp contribution for the new token/sequence.
+   -c. Adaptive resampling
+       -1. After reweighting, resample to focus compute on high-weight particles.
+   -d. Programmable inference
+       -1. Potentials/proposals are hand-crafted (static analyzers, simulators) rather than learned; 
+           easy to plug domain libraries (molecules, robotics, SQL).
+
+4. Algorithmic Details (Section 2)
+   -a. Notation
+       -1. x = token sequence; x<t prefix; A vocabulary; EOS terminal token.
+       -2. p(x) prefix probability via autoregressive LM.
+       -3. Potentials satisfy monotonicity: ϕ(x)=0 ⇒ ϕ(xy)=0.
+   -b. Local product of experts proposal
+       ℓΦ_eff(𝑥_𝑡∣𝑥_(<𝑡))=𝑝(𝑥_𝑡∣𝑥_(<𝑡))Φ_eff(𝑥<𝑡X𝑡) / 𝐿_eff(𝑥_(<𝑡))
+       where 𝐿_eff is the normalizer over next-token vocabulary.
+   -c. Importance-sampling correction (complete sequences):
+       𝑤^(𝑖) = [∏_𝑡 𝐿_eff(𝑥^(𝑖)_<𝑡)]Φ_exp(𝑥^(𝑖))
+   -d. Sequential Monte Carlo
+       -1. Extend incomplete particles with ℓ_eff token.
+       -2. Reweight using factor 𝐿_eff and Φ_exp ratio.
+       -3. Resample ancestors ∝ weights → concentrates on promising prefixes.
+   -e. Advantages over pure importance sampling: early weight correction lets SMC prune bad prefixes sooner.
+   -f. Further extensions
+       -1. Stochastic approximation of ℓ_eff when evaluating Φ_eff across full vocab is still pricey.
+       -2. Coarser intermediate targets: e.g., treat each line of code as one step (better particle alignment).
+
+5. Contributions Claimed
+   -a. SMC architecture for constrained code generation that mixes cheap per-token constraints and expensive sporadic ones.
+   -b. Empirical study on four domains (Python data-science, text-to-SQL, goal inference, molecule synthesis)
+       → small open models with SMC beat much larger baselines; SMC needs 5-10× fewer particles than pure sample-rerank.
+   -c. Ablations show three key contributors:
+       -1. Weight-correction term (anti-greedy).
+       -2. Inclusion of expensive potentials.
+       -3. Adaptive resampling.
+   -d. KL-divergence analysis verifies that methods nearer to the true global product of experts correlate with better task performance.
+
+6 High-Level Take-Away
+  Sequential Monte Carlo provides a principled middle ground between locally constrained decoding (fast but myopic) and sample-rerank 
+  (flexible but wasteful). 
+  By programmatically mixing incremental and costly constraint signals, SMC produces distributions that are both closer to the desired posterior
+  and practically more effective for constrained semantic parsing and code generation.
+
