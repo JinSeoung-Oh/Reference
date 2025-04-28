@@ -1,0 +1,67 @@
+### From https://pub.towardsai.net/deepseek-v3-part-2-deepseekmoe-f3ae6ff9e296
+
+1 Mixture-of-Experts (MoE) inside Transformer LLMs
+  -a. Architecture swap
+      -1. Dense baseline: every layer = MHA → FFN.
+      -2. MoE variant: in alternating (or otherwise configurable) layers the FFN sub-layer is replaced by an MoE layer.
+  -b. Inside one MoE layer
+      -1. Gating module computes a route for each token.
+      -2. Experts are independent FFNs; only K of N are activated per token, making the forward pass sparse and cheap.
+  -c. Classical MoE equations (using original numbering 5 → 4 → 3)
+      (5) 𝑠_(𝑖,𝑡) = softmax(𝑢^𝑙_𝑡⋅𝑒^𝑙_𝑖)              similarity to expert centroid
+      (4) 𝑔_(𝑖,𝑡) = TopK(𝑠_(𝑖,𝑡))                   sparse gate (K non-zero values)
+      (3) ℎ^𝑙_𝑡 =∑(𝑖=1 to 𝑖=𝑁)𝑔_(𝑖,𝑡)FFN_𝑖(𝑢^𝑙_𝑡)     token output
+      Only K experts expend compute, although the model holds N≫K full FFNs—e.g. 236 B parameters total, 21 B active.
+
+2 Why MoE? Benefits and Challenges
+  Benefit	| Explanation
+  Capacity ↑ with cost ≈ constant	| Total weights grow; per-token FLOPs stay low (only K experts run).
+  Real-world analogy	| Many specialist chefs + head-chef router vs. one “do-everything” chef.
+
+  ----------------------------------------------------------------------------------------------------
+
+  Challenge	| Symptom
+  Expert-collapse / load imbalance	| Few experts overused, others under-trained.
+  Instability	| Wrongly routed tokens hit poorly trained experts.
+  Specialization ↔ Sharing trade-off	| Over-specialization hurts coverage; redundancy wastes parameters.
+
+3 DeepSeekMoE Architecture
+  DeepSeekMoE adds two mechanisms to balance specialization and sharing without raising compute:
+  3.1 Fine-Grained Expert Segmentation
+      Multiply experts 𝑁→𝑚𝑁; shrink each FFN width 1/𝑚; route each token to 𝑚𝐾 experts.
+      Result: same FLOPs as classic MoE but greater decomposition of knowledge → stronger specialization.
+  3.2 Shared-Expert Isolation
+      Reserve 𝐾_𝑠 shared experts that every token always visits (no routing).
+      Router then selects (𝑚𝐾−𝐾_𝑠) specialist experts from (𝑚𝑁−𝐾_𝑠)
+      Common knowledge is centralized; redundancy among specialists drops.
+
+4 DeepSeekMoE Equations—Complete Explanation
+  Eqn.	| Formula |	Meaning in the text	| Key points
+  (11)	| 𝑠_(𝑖,𝑡)=softmax(𝑢_𝑡⋅𝑒_𝑖)	| Computes token–expert similarity scores and normalizes them into a probability distribution. Captures how similar the current token 𝑢_𝑡 is to expert 𝑖’s historical centroid 𝑒_𝑖 | Generates the raw routing signal; identical to classic Eq.(5).
+  (10)	| 𝑔_(𝑖,𝑡)=TopK_(𝑚𝐾−𝐾_𝑠)(𝑠_(𝑖,𝑡) (𝑖∈non-shared) | 	From those similarity scores, keep only the top (𝑚𝐾−𝐾_𝑠) among the non-shared experts. The gate values for all other non-shared experts are set to zero. Shared experts are excluded from this Top-K step because they are always active.	| Determines which specialist experts are activated for this token.
+  (9)	  | ℎ_𝑡=∑(𝑖∈shared)FFN_𝑖(𝑢_𝑡) + ∑(𝑖∈routed)𝑔_(𝑖,𝑡)FFN_𝑖(𝑢_𝑡) | The token’s final hidden state ℎ_𝑡 is the sum of two disjoint contributions: (1) all shared experts (always on), and (2) the gated set of specialist experts. The total number of active experts equals 𝐾_𝑠+(𝑚𝐾−𝐾_𝑠)=𝑚𝐾, exactly matching the compute budget implied by fine-grained segmentation | Implements a two-path design that (i) concentrates universal knowledge in shared experts, (ii) allows specialists to focus on niche knowledge, and (iii) preserves constant per-token FLOPs.
+                  ⏟                              ⏟
+          shared-expert path               specialist path
+
+  -a. Flow of computation
+      -1. Eqn 11 – score similarities → probability distribution.
+      -2. Eqn 10 – pick top (𝑚𝐾−𝐾_𝑠) specialist routes (shared experts already selected).
+      -3. Eqn 9 – add outputs of shared + specialist experts to produce the token representation.
+
+5 Empirical Findings (Fig. 7–8)
+  -a. Overall quality
+      -1. With equal activated parameters, MoE ≫ Dense.
+      -2. DeepSeekMoE outperforms GShard at the same compute budget.
+  -b. Specialization test (disable top-routed experts)
+      -1. Pile loss increases faster for DeepSeekMoE → its experts are more specialized and less replaceable.
+  -c. Redundancy test (remove shared expert, add one extra specialist)
+      -1. Pile loss jumps 1.808 → 2.414 → shared expert holds unique general knowledge not replicated by specialists.
+
+6 Key Takeaways from the Text
+  -a. MoE principle: grow total capacity massively but keep per-token compute small via sparse expert activation.
+  -b. DeepSeekMoE advances:
+      -1. Fine-grained segmentation spreads knowledge across many small experts, boosting specialization.
+      -2. Shared-expert isolation funnels general knowledge into a fixed subset, cutting redundancy among specialists.
+  -c. Result: better benchmark scores and demonstrably stronger specialization/sharing balance than previous MoE variants—without 
+              increasing computational cost per token.
+
