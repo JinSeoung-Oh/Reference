@@ -1,0 +1,70 @@
+### From https://pub.towardsai.net/orthogonal-polynomials-in-kolmogorov-arnold-networks-use-case-and-scenarios-694f10acb468
+
+1. Orthogonality 
+   For any two degrees 𝑚≠𝑛, an orthogonal polynomial family {𝑃_𝑛(𝑥)} on [−1,1] satisfies
+   ∫_−1^1 𝑃_𝑚(𝑥)𝑃_𝑛(𝑥)𝑤(𝑥)𝑑𝑥=0,
+   
+   and for 𝑚=𝑛,
+   ∫_−1^1[𝑃_𝑛(𝑥)]^2𝑤(𝑥)𝑑𝑥=ℎ_𝑛,
+
+   where 𝑤(𝑥) is the family’s weight function and ℎ_𝑛 a normalizer. 
+   This guarantees linear independence across orders—no redundancy in your learned basis, 
+   unlike B-splines whose local control knots can overlap information.
+
+2. Common Families & Weights (Table 1)
+   Family	| Weight w(x)	 | Constraints
+   Jacobi	| (1−𝑥)^𝛼(1+𝑥)^𝛽 | 𝛼,𝛽>−1
+   Gegenbauer	| (1−𝑥^2)^(𝜆−1/2) | 𝜆>−(1/2)
+   Chebyshev I | 	1/np.root(1−𝑥^2) |	—
+   Chebyshev II	| np.root(1−𝑥^2) |	—
+   Legendre	| 1 |	uniform on [−1,1]
+
+   Each family lives on [−1,1]; outside that range the weight becomes non-integrable or complex.
+
+3. Recurrence Relations (Table 2)
+   From initial seeds 𝑃_0, 𝑃_1, higher orders follow a three-term recurrence:
+   𝑃_(𝑛+1)(𝑥)=𝐴_𝑛 𝑥 𝑃_𝑛(𝑥)−𝐵_𝑛𝑃_(𝑛−1)(𝑥),
+   with family-specific 𝐴_𝑛,𝐵_𝑛. For example:
+   -a. Legendre (𝛼=𝛽=0):
+       𝑃_0=1, 𝑃_1=𝑥, 𝑃_(𝑛+1)(𝑥)=(2𝑛+1)/(𝑛+1) 𝑥 𝑃_𝑛(𝑥)−(𝑛)/(𝑛+1)𝑃_(𝑛−1)(𝑥)
+   -b. Chebyshev I (𝜆=0):
+       𝑇_0=1, 𝑇_1=𝑥, 𝑇_(𝑛+1)(𝑥)=2𝑥 𝑇_𝑛(𝑥)−𝑇_(𝑛−1)(𝑥)
+   This lets you compute 𝑃_𝑛(𝑥) in 𝑂(𝑛) without splines’ knot-grid overhead.
+
+4. Global vs. Local Control
+   -a. B-Splines: tweak a single knot → only that local segment shifts (Figure 2).
+   -b. Orthogonal Polynomials: adjust one coefficient 𝑎_𝑛 → the entire curve reshapes (Figure 3).
+   This global control simplifies networks—fewer hyperparameters, no dynamic grids—but loses the ability to fine-tune isolated regions.
+
+5. KAN Implementations
+   -a. Chebyshev-KAN
+       -1. Basis: Chebyshev I polynomials.
+       -2. Pros: far fewer parameters than B-splines, super-fast recurrence, strong global approximation (see fractal fits in Figure 4).
+       -3. Cons: no local tweaking; all control is global.
+   -b. Legendre-SiLU-KAN
+       -1. Activation: SiLU ∘ Legendre expansion.
+       -2. Rationale: SiLU gives a stable smooth baseline; the Legendre term injects high-order patterns—excellent for symbolic tasks 
+                      and high-dimensional functions
+       -3. Benefit: SiLU also regularizes the polynomial’s oscillations.
+   -c. OrthogPolyKANs repo
+       -1. Offers Bessel, Hermite, Laguerre, etc., plus range-clamping to [−1,1]
+       -2. Community is exploring these for even better trade-offs.
+   In each, you only swap the basis-generation step: the rest of the KAN architecture (edge expansions, learnable coefficients) remains identical.
+
+6. Advantages
+   -a. Reduced Complexity: Recurrence is 𝑂(1) per term vs. 𝑂(𝑘) for 𝑘-knot splines.
+   -b. Stronger Global Patterns: Better fractal/function fits without over-fitting local noise.
+   -c. Simpler Networks: No grid-definition or spline-gradient logic.
+   -d. Linear Independence: Guaranteed non-redundancy—no pruning needed post-training.
+
+7. Disadvantages
+   -a. Strict Input Normalization: You must map every feature into [−1,1], risking distribution shifts.
+   -b. Poor Local Variation: Hard to capture isolated anomalies—changing one coefficient ripples everywhere.
+   -c. Runge’s Phenomenon: High-degree polynomials can oscillate wildly at ±1
+   -d. Degree vs. Grid Trade-off: Very high polynomial degrees may be costlier than small-knot splines.
+
+8. Hybrid Outlook
+   A promising path is hybrid bases—combine a low-order spline for local control plus a global orthogonal-poly term:
+   𝜙(𝑥)=∑_𝑖 𝑏_𝑖 𝐵_𝑖(𝑥) + ∑_𝑛 𝑎_𝑛 𝑃_𝑛(𝑥),
+   thus regaining local tweakability while keeping recurrence and independence benefits.
+
