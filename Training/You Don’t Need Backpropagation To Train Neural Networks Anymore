@@ -1,0 +1,57 @@
+### From https://ai.gopubby.com/you-dont-need-backpropagation-to-train-neural-networks-anymore-e989d75564cb
+
+1. What Is Backpropagation?
+   -a. Forward pass: Input x propagates through each layer of a deep network; 
+                     each neuron applies z = W·x + b, then an activation, up to the final output.
+   -b. Loss computation: The network’s prediction is compared to the true label y via a loss (e.g. cross-entropy).
+   -c. Backward pass: Using the chain rule, backpropagation computes ∂loss/∂θ for every weight and bias θ by walking backwards through the layers,
+                      accumulating gradients.
+   -d. Parameter update: An optimizer (SGD, Adam, etc.) uses those gradients to adjust θ, reducing loss on future examples.
+   -e. Key drawbacks
+      -1. Memory cost: All intermediate activations from the forward pass must be stored until the backward pass.
+      -2. Sequential dependency: You can’t compute layer-wise gradients in parallel—each layer waits on the next.
+      -3. Catastrophic forgetting: Shared gradients can interfere across tasks or samples.
+
+2. How NoProp Works
+   NoProp—“no backprop”—borrows the denoising diffusion idea and applies it to label prediction, training each layer independently.
+   -a. Training (“Denoising” each layer)
+       -1. Label embedding: Map true label y to an embedding u(y).
+       -2. Noise schedule: Add Gaussian noise step by step to u(y), producing noisy targets z(0), z(1), …, z(T).
+       -3. Layerwise denoising: For each layer t:
+           -1. Input: previous noisy target z(t−1) and feature input x.
+           -2. Networkûtθ predicts a denoised version of the label embedding.
+           -3. Loss: a combination of
+               -1) Cross-entropy on the final (t = T) output,
+               -2) KL-divergence regularizer matching z(0) to standard Gaussian,
+               -3) L₂ denoising loss at each layer scaled by SNR (later layers incur higher penalty).
+      -4. Independent updates: Each layer’s parameters θ(t) update using only its own denoising loss—no global backward pass is required.
+  -b. Inference (Progressive denoising)
+      -1. Start from pure Gaussian noise z(0).
+      -2. For t = 1…T, feed z(t−1) and x through layer t’s network to produce z(t).
+      -3. At t = T, z(T) is fed to a simple classifier to predict ŷ.
+
+3. Variants of NoProp
+   -a. NoProp-DT (Discrete-Time): Fixed T discrete steps of noise→denoise.
+   -b. NoProp-CT (Continuous-Time): A continuous noise schedule over [0,T].
+   -c. NoProp-FM (Flow Matching): Learns a continuous vector field via an ODE, carrying noise to the label embedding.
+
+4. Performance & Trade-Offs
+   On MNIST, CIFAR-10 and CIFAR-100:
+   -a. Accuracy: Comparable to—or slightly above—standard backprop-trained networks and better than prior “no-backprop” methods.
+   -b. Memory: Uses substantially less GPU memory, since intermediate activations aren’t stored.
+   -c. Compute: Removes the sequential backward dependency, letting each layer train in isolation (great for parallelism),
+                but incurs the cost of multiple denoising steps per layer.
+
+5. Pros & Cons
+   Pros |	Cons
+   Eliminates large activation storage	| Requires careful noise-scheduling design
+   Enables layer-parallel training	| More complex per-layer loss setup
+   Reduces inter-layer gradient interference | May need more total compute per epoch
+   Naturally integrates with diffusion insights	| Relies on hyperparameters (SNR weighting, T)
+
+6. Bottom line:
+   NoProp shows that backprop-free learning can match gradient descent on standard vision benchmarks, 
+   while drastically lowering memory use and decoupling layer updates. 
+   It’s an exciting proof-of-concept—especially if you need ultra-parallel or low-memory training—but it still requires tuning noise schedules
+   and may trade off some total compute.
+
