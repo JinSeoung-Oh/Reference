@@ -1,0 +1,46 @@
+### From https://medium.com/ai-exploration-journey/corag-teaching-rag-to-retrieve-like-a-thinking-human-ai-innovations-and-insights-36-1c4012653d20
+### https://github.com/microsoft/LMOps/tree/main/corag
+
+1. Summary of CoRAG: Chain-of-Retrieval Augmented Generation
+   CoRAG (Chain-of-Retrieval Augmented Generation) is an advanced multi-step RAG (Retrieval-Augmented Generation) framework
+   designed to improve complex question answering by transforming retrieval from a static, 
+   single-shot process into a dynamic, iterative loop.
+
+2. Vivid Analogy
+   The process is likened to navigating a maze:
+   -a. Traditional RAG = Uses a single, static map (one-time retrieval) → can easily hit dead ends on complex queries.
+   -b. CoRAG = Like an adaptive explorer:
+       -1. Breaks down the problem into sub-questions.
+       -2. Uses retrieved clues (intermediate results).
+       -3. Adapts its path via query reformulation and further retrieval.
+       -4. Result: A more thorough, flexible exploration that is better at arriving at the correct answer.
+
+3. Core Differences vs Traditional RAG
+   Traditional RAG	| CoRAG
+   One retrieval step before generation	| Iterative “retrieve–generate–retrieve again” loop
+   Static process	| Decision-driven, adaptive process
+   Less reliable for multi-hop or knowledge-intensive tasks	| Significantly improved accuracy and robustness
+
+4. Methodology
+   -a. Rejection Sampling for Data Construction:
+       -1. CoRAG converts QA-only datasets into retrieval chains by:
+           -1) Sampling multiple sub-question/answer sequences.
+           -2) Selecting the chain that leads to the highest-likelihood final answer.
+       -2. These chains simulate how humans explore knowledge step-by-step.
+   -b. Training:
+       -1. An open-source LLM is fine-tuned to:
+           -1) Decide next actions based on the current state of the chain.
+           -2) Learn how to conduct effective multi-step retrieval.
+   -c. Inference:
+       -1. At test time, decoding strategies control computational costs and determine how many retrieval-generation cycles are executed.
+
+5. Insights and Challenges
+   -a. Strength:
+       -1. CoRAG introduces dynamic, active information construction, allowing the model to build and adjust its understanding 
+           in real-time — a key trait for future AI systems.
+   -b. Main Challenge:
+       -1. Rejection Sampling, while central to training CoRAG, is costly and unstable:
+           -1) Many sampled chains may still fail to yield valid reasoning paths.
+           -2) Chains leading to high-likelihood answers may be semantically misleading or flawed in reasoning.
+
+
