@@ -1,0 +1,77 @@
+### From https://medium.com/@techsachin/clustering-based-iterative-data-mixture-bootstrapping-framework-for-optimizing-data-mixture-to-7daa2a7bd225
+### From https://arxiv.org/abs/2504.13161
+
+1. Summary of CLIMB: Clustering-based Iterative Data Mixture Bootstrapping
+   CLIMB is an automated framework for discovering, evaluating, and refining optimal data mixtures for language model pre-training. 
+   It addresses the challenge of identifying high-performing data mixtures by embedding, clustering, 
+   and iteratively searching through large-scale datasets using proxy models and a performance predictor.
+
+2. Key Contributions
+   -a. Embedding-driven Data Mixing
+       CLIMB eliminates the need for manual, predefined domain-specific datasets by embedding and grouping
+       semantically similar data clusters, allowing for efficient domain-specific training.
+   -b. Iterative Search and Refinement
+       The framework introduces an iterative process that dynamically adjusts data mixtures to enhance both domain 
+       relevance and diversity, while also tackling challenges associated with clustering and large-scale data filtering.
+   -c. New Dataset Contributions
+       -1. A filtered 1.2-trillion-token corpus grouped into 20 semantic clusters as a research playground.
+       -2. A 400-billion-token high-quality dataset (ClimbMix) for efficient pretraining.
+
+3. Framework Overview
+   -a. Data Preprocessing
+       Three steps are followed to prepare data:
+       -1. Text Embedding
+           A large dataset 𝐷^={𝐷_1,...,𝐷_𝑛} is embedded into a semantic vector space using an embedding model 
+           𝑀_𝑒, producing vectors 𝐸={𝐸_1,...,𝐸_𝑛}
+       -2. Embedding Clustering
+           Vectors are clustered using a method like k-means into 𝐾_𝑖𝑛𝑖𝑡 clusters (e.g., 1000), allowing for fine-grained grouping.
+       -3. Cluster Merging
+           Low-quality clusters are pruned using classifier-based quality metrics, yielding 𝐾_𝑝𝑟𝑢𝑛𝑒𝑑 clusters. 
+           These are merged based on centroid distances into 𝐾_𝑒𝑛ℎ𝑎𝑛𝑐𝑒𝑑 clusters, forming the final dataset 𝐷
+   -b. Iterative Bootstrapping: Mixture Weight Search
+       -1. Bi-level Optimization Objective
+           Given clusters 𝐷={𝐷_1,...,𝐷_𝑘}, the goal is to find optimal mixture weights 𝛼∗∈𝐴 that maximize the performance function 
+           ℓ(𝛼,𝜔), where 𝜔 are model weights trained on mixture 𝛼
+       -2. Predictor Approximation
+           CLIMB uses a predictor 𝑓_𝜃(𝛼) to estimate ℓ(𝛼,𝜔), drastically reducing compute by training on a limited budget 𝐶
+           and minimizing predictor loss 𝐿
+       -3. Iterative Refinement (Bootstrapping)
+           The system evolves the sampling strategy 𝑆 and predictor 𝑓_𝜃in tandem using coordinate descent:
+           -1) At each iteration 𝑘, top-N promising configurations (TopN(𝑃~_𝑘) are retained.
+           -2) t-SNE visualizations show how the search space becomes more refined over iterations (CLIMB-Iter1 → Iter3).
+   -c. Implementation Details
+       -1. Initialization
+           Randomly sample configurations from 𝐴 to form 𝑆_1, train proxy models, and collect performance.
+       -2. Subroutine 1 – Configuration Sampling
+           At iteration 𝑘+1, rank remaining configurations by predicted performance 𝑃~_𝑘, randomly sample 
+           𝑀 from top-N, and form 𝑆_(𝑘+1)
+       -3. Subroutine 2 – Predictor Fitting
+           Train predictor 𝑓^(𝑘+1)_𝜃 on 𝑆_(𝑘+1), then use it to update performance predictions 
+           𝑃~_(𝑘+1)
+       -4. These two steps are repeated for several iterations to improve both the predictor and sampling strategy, 
+           ultimately selecting the best-performing configuration as the final mixture.
+
+4. Experimental Results
+   -a. Comparison with Baselines
+       -1. CLIMB outperforms random mixtures (52.17%) and Regmix (53.78%) with an average accuracy of 54.83%.
+       -2. On a 1B model, CLIMB achieves 60.41% average accuracy, beating all tested baselines.
+   -b. Comparison with SOTA Language Models
+       -1. On general reasoning benchmarks, CLIMB-trained models (350M and 1B) outperform all sub-500M and sub-1.2B models, 
+           including Llama-3.2 and AMD-OLMo.
+       -2. CLIMB leads by a 2.0% margin over the next best (Llama-3.2) in overall average score.
+
+5. ClimbMix: A New Pre-training Dataset
+   -a. CLIMB is applied to merge Nemotron-CC and smollm-corpus, creating a 1.2T-token corpus organized into 20 semantic clusters (ClimbLab).
+   -b. CLIMB-search identifies the optimal mixture, from which a 400B-token dataset (ClimbMix) is extracted.
+   -c. A 1B model trained from scratch on ClimbMix significantly outperforms models trained on existing datasets under the same token budget.
+
+6. Conclusion
+   CLIMB is a clustering-based, iterative data mixture bootstrapping framework that automates the discovery and optimization of 
+   pre-training data mixtures. It leverages:
+   -a. Unsupervised semantic clustering
+   -b. Iterative proxy model training
+   -c. Performance predictors
+   This enables efficient exploration of large data composition spaces without requiring domain labels or manual curation. 
+   By training with CLIMB-generated mixtures, models achieve state-of-the-art results across 12 reasoning tasks.
+
+
