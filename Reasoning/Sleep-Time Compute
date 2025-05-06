@@ -1,0 +1,84 @@
+### From https://medium.com/@ignacio.de.gregorio.noblejas/sleep-time-compute-a-path-to-affordable-ai-2ab5a4f57b32
+
+1. Test-Time Compute: Salvation or Doom?
+   -a. Core Concept: Test-Time Compute
+       -1. Definition: Allocating more compute resources during inference (test time) to improve model performance.
+       -2. Analogy: Just like humans perform better when they take more time to think,
+                    AI models perform better when given more compute (i.e., more tokens, more processing steps).
+       -3. Application: Especially beneficial for complex tasks like math or coding, where deeper reasoning improves accuracy.
+   -b. The Downside: Compute Becomes a Bottleneck
+       -1. Generative AI is compute-expensive:
+           -1) Hardware: Primarily relies on GPUs (e.g., NVIDIA’s A100/B200), costing $30,000–$40,000 each.
+           -2) Scale: Massive AI services require hundreds of thousands to millions of GPUs.
+           -3) CapEx Breakdown: ~50% GPUs, ~50% other infrastructure or leases (often capitalized).
+       -2. Key Metric: Arithmetic Intensity (AI):
+           -1) Definition: FLOPs (floating point operations) per byte of data moved.
+           -2) Goal: Maximize AI to maximize return on GPU use.
+           -3) Problem: Reasoning models reduce AI by increasing data movement during inference (due to KV cache and token generation),
+                        making workloads memory-bound.
+   -c. Compute vs. Memory-Bound Workloads
+       -1. Compute-Bound: Arithmetic intensity exceeds GPU’s threshold; good utilization.
+       -2. Memory-Bound: AI below threshold; GPU cores sit idle waiting for data.
+       -3. Example: Blackwell B200 has 5 PFLOPS compute and 8 TB/s memory bandwidth → ideal AI = 625 FLOPs/byte.
+           -1) If workload achieves only 60 FLOPs/byte, GPU is idle ~90% of the time.
+   -d. Reasoning Models: The Inefficiency Problem
+       -1. Reasoning models (e.g., chain-of-thought generation) demand long inference chains.
+       -2. KV Cache improves latency by storing intermediate outputs but increases memory traffic.
+       -3. Inference becomes memory-bound: High data transfer, low arithmetic intensity, poor GPU utilization.
+       -4. Estimated Cost: Reasoning models can require 20x more compute than simpler models.
+       -5. Impact: AI providers risk running billion-dollar GPU clusters at <10% utilization, which is economically unsustainable.
+   -e. Inference Efficiency Trade-Offs
+       -1. Latency vs. Utilization:
+           -1) Fast response times (crucial for user experience) demand caching and small batches.
+           -2) These reduce throughput and worsen GPU efficiency.
+       -2. Industry Dilemma:
+           -1) Even tech giants may not sustain returns.
+           -2) Smaller players and Neoclouds (e.g., CoreWeave) face greater risk due to financial constraints and lack of diversified revenue.
+
+2. Solution: Sleep-Time Compute
+   -a. What Is It?
+       -1. Idea: Precompute the “reasoning” (chain-of-thought) during off-peak times before user queries arrive.
+       -2. Mechanism:
+           -1) Predict likely user queries.
+           -2) Generate reasoning steps (not final outputs) in advance.
+           -3) Store these precomputed chains.
+           -4) When a query arrives, fetch and reuse the reasoning chain — no need to recompute it live.
+   -b. Benefits:
+       -1. Improved arithmetic intensity:
+           -1) Can run large batches slowly and efficiently during off-peak times.
+           -2) Use older GPUs or cheap energy (e.g., nighttime rates).
+       -2. Reduced inference burden:
+           -1) Prefetching reduces latency load.
+           -2) Real-time inference becomes faster and more efficient.
+       -3. Extended asset life:
+           -1) Offloads workloads from expensive, time-sensitive inference clusters.
+           -2) Delays GPU upgrades and reduces CapEx cycles.
+   -c. Distinction from RAG:
+       -1. RAG augments input with contextual knowledge (retrieved memory).
+       -2. Sleep-time compute pre-generates reasoning paths to save real-time compute.
+       -3. Complementary, but not interchangeable.
+
+3. Business Implications
+   -a. Improved infrastructure ROI:
+       -1. Makes expensive GPU fleets more profitable via increased utilization.
+   -b. Enables margin recovery:
+       -1. Helps offset the inherently thin margins in AI inference businesses.
+   -c. Supports scaling:
+       -1. Makes LLM adoption more economically sustainable across providers.
+
+4. Strategic Risks
+   -a. Misallocation of CapEx:
+       -1. Inference inefficiency could bankrupt even well-funded AI startups.
+   -b. Investor skepticism:
+       -1. Current models rely on demand projections, not actual returns (e.g., DeepSeek’s “profitable if demand grows” claim).
+   -c. Tech industry fragility:
+       -1. A single hyperscaler pausing AI investments could trigger broader collapse in AI infrastructure funding.
+
+5. Final Insight
+   The real bottleneck in AI isn’t model intelligence — it’s compute, efficiency, and economics.
+   -a. Sleep-time compute is a critical innovation for reconciling performance needs with infrastructure costs.
+   -b. It may extend the viability of reasoning-heavy models by offloading compute to more efficient times and hardware.
+   -c. If such techniques fail to deliver profitability, AI’s exponential buildout risks implosion due to investor pressure
+       and infrastructure strain.
+
+
