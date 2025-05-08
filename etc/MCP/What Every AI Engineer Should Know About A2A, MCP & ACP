@@ -1,0 +1,86 @@
+### From https://medium.com/@elisowski/what-every-ai-engineer-should-know-about-a2a-mcp-acp-8335a210a742
+
+1. Model Context Protocol (MCP)
+   -a. Definition
+       -1. Introduced by Anthropic, MCP defines a standardized interface for supplying structured, 
+           real-time context to any LLM runtime.
+   -b. Core Functionalities
+       -1. Contextual Data Injection
+           -1) Pull in external resources (files, database rows, API responses) via a uniform JSON/HTTP interface.
+           -2) Keeps prompts lightweight by fetching only the needed context.
+       -2. Function Routing & Invocation
+           -1) Register external “tools” (e.g. searchCustomerData, generateReport) with an MCP server.
+           -2) Let the model invoke those tools on demand—no hard-coding APIs into the LLM itself.
+       -3. Prompt Orchestration
+           -1) Assemble just the relevant context on-the-fly rather than dumping every detail into one big prompt.
+           -2) Reduces token usage and focuses model outputs.
+   -c. Implementation Characteristics
+       -1. Operates over HTTP(S) with JSON-based “capability descriptors.”
+       -2. Model-agnostic: any LLM with a compatible runtime can speak MCP.
+       -3. Integrates with standard enterprise gateways and auth (OAuth2, mTLS).
+   -d. Engineering Use Cases
+       -1. LLM ↔ Internal APIs: Secure, read-only or interactive access to business data without exposing raw endpoints.
+       -2. Enterprise Agents: Give autonomous agents runtime access to tools like Salesforce, SAP, or internal knowledge bases.
+       -3. Dynamic Prompt Construction: Tailor prompts by session, system state, or pipeline logic to optimize relevance and efficiency.
+
+2. Agent Communication Protocol (ACP)
+   -a. Definition
+       -1. Open standard (from BeeAI & IBM) for structured, local-first communication, discovery, 
+           and coordination among co-located AI agents.
+   -b. Protocol Design & Architecture
+       -1. Decentralized environment:
+           -1) Each agent advertises identity, capabilities, and state via a local broadcast/discovery layer.
+           -2) Agents exchange event-driven messages over a local bus or IPC.
+           -3) Optional runtime controller can orchestrate behaviors, collect telemetry, and enforce policies.
+       -2. Agents run as lightweight, stateless services/containers sharing a communication substrate.
+   -c. Implementation Characteristics
+       -1. Optimized for low latency (robotics, on-device assistants, edge AI).
+       -2. Transport options: gRPC, ZeroMQ, or custom in-process buses.
+       -3. Emphasizes local sovereignty—no cloud dependency or external registration.
+       -4. Supports capability typing and semantic descriptors for automated task routing.
+   -d. Engineering Use Cases
+       -1. Edge-device orchestration: Drones, IoT clusters, robotic fleets coordinating in real time.
+       -2. Local-first LLM systems: Models managing sensor inputs and actions without cloud round-trips.
+       -3. Autonomous runtimes: Fully offline environments (factory floors, remote edge nodes) where agents must self-coordinate.
+
+3. Agent-to-Agent Protocol (A2A)
+   -a. Definition
+       -1. Google’s open spec for cross-platform communication, collaboration, and task delegation among heterogeneous AI agents.
+   -b. Protocol Overview
+       -1. HTTP-based JSON-RPC 2.0 core.
+       -2. Each agent publishes an “Agent Card” (JSON) listing identity, capabilities, endpoints, and auth requirements.
+       -3. Agents can discover, negotiate, and exchange messages, data, and streaming updates over the open web.
+   -c. Core Components
+       -1. Agent Cards: Machine-readable JSON descriptors of an agent’s functions, endpoints, message types, and auth.
+       -2. Client/Server Interface: Agents may act as clients (initiators), servers (executors), or both for dynamic task routing.
+       -3. Message & Artifact Exchange: Supports multipart tasks, streaming (SSE), and persistent artifacts (files, knowledge chunks).
+       -4. User-Experience Negotiation: Agents adapt message format and content granularity based on downstream capabilities.
+   -d. Security Architecture
+       -1. OAuth 2.0 and API‐key authorization.
+       -2. Capability-scoped endpoints expose only declared interactions.
+       -3. “Opaque” mode lets an agent hide internal logic but still expose callable services.
+   -e. Implementation Characteristics
+       -1. Web-native: built atop HTTP, JSON-RPC, and standard web security.
+       -2. Model-agnostic: any agent system (LLM or otherwise) can implement it.
+       -3. Supports task streaming and multi-turn collaboration with lightweight payloads.
+   -f. Engineering Use Cases
+       -1. Cross-vendor agent ecosystems: Secure interop among agents from different teams or runtimes.
+       -2. Cloud-native orchestration: Distributed workflows in platforms like Vertex AI, LangChain, or HuggingFace Agents.
+       -3. Enterprise multi-agent frameworks: Spanning CRM, HR, IT, and other systems in complex AI workflows.
+
+4. Protocols in Concert
+   -a. A2A + MCP
+       -1. MCP = “AI ↔ Tools” layer (context & API access)
+       -2. A2A = “AI ↔ AI” layer (agent discovery, negotiation, collaboration)
+       -3. Together they form a modular base for building interoperable, collaborative AI systems.
+   -b. ACP’s Niche
+       -1. Local-first, offline, low-latency agent orchestration without cloud overhead.
+       -2. Ideal for privacy-sensitive or bandwidth-constrained scenarios (robotics, edge nodes).
+       -3. Not competing with A2A but filling a different deployment niche; in some settings, 
+           ACP may outright replace web-native protocols.
+  -c. Future Outlook
+      -1. Convergence: A unified platform where A2A manages agent collaboration, MCP handles tools/context, 
+                       and ACP covers edge/offline runtimes.
+      -2. Fragmentation: Divergent vendor-specific forks requiring custom glue code.
+      -3. Middleware: Open-source bridges that abstract protocol differences, presenting developers with a single unified API.
+
