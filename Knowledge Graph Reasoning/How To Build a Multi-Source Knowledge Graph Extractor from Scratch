@@ -1,0 +1,98 @@
+### From https://medium.com/data-science-collective/how-to-build-a-multi-source-knowledge-graph-extractor-from-scratch-60f0a51e17b5
+
+1. Introduction
+   Knowledge Graphs (KGs) represent information as entities (nodes) linked by relations (edges), enabling models to capture complex, 
+   multi-step connections that dense vector retrieval alone often misses. 
+   While KGs have powered search and recommendation systems for years, 
+   their role in Retrieval-Augmented Generation (RAG) has grown dramatically. 
+   In particular, GraphRAG—which retrieves context from a KG before feeding it into an LLM—addresses key weaknesses of vanilla RAG 
+   by improving entity disambiguation, multi-hop question answering, and cross-source integration.
+
+2. Benefits of GraphRAG vs. Vanilla RAG
+   -a. Vanilla RAG uses dense vector stores for semantic similarity, which can:
+       -1. Struggle to distinguish entities with similar embeddings
+       -2. Fail at chained (“multi-hop”) queries requiring reasoning across several facts
+       -3. Miss connections when information is scattered across multiple documents
+   -b. GraphRAG augments retrieval with an explicit graph structure, allowing:
+       -1. Clear modeling of relationships between entities
+       -2. Combining facts from disparate sources via graph traversal
+       -3. More precise, contextualized prompts for the LLM
+
+3. Challenges in Knowledge Graph Construction
+   -a. High Cost & Expertise Requirements
+       -1. Traditional KG building demands manual annotation, ontology design, and domain specialists—often feasible 
+           only for large organizations.
+   -b. LLM-Based Automation as a Solution
+       -1. Recent advances in LLMs allow automated extraction of entity–relation–entity triplets at much lower cost.
+       -2. Although LLM-extracted KGs may be noisier than human-curated ones, “imperfect but extensive” graphs often outperform 
+           having no KG in GraphRAG workflows.
+       -3. Downstream LLMs can ignore irrelevant edges, and original sources remain available for detailed lookups.
+
+4. Approaches to Automated Knowledge Graph Creation
+   A common pattern uses a two-phase pipeline:
+   -a. Extraction Phase
+       -1. LLMs extract triplets of the form (subject, relation, object), often with entity types (e.g., Person, Chemical).
+   -b. Aggregation Phase
+       -1. Normalize entity names and relation labels to resolve variations (e.g., Marie Curie vs. Maria Salomea Skłodowska-Curie) 
+           and avoid duplicates.
+
+5. Why Simple Long-Context Extraction Falls Short
+   -a. Even LLMs with million-token context windows degrade in accuracy and consistency over very long inputs.
+   -b. Very long contexts often force smaller maximum outputs, limiting how many triplets can be extracted in one pass.
+   -c. Original source documents may not always be re-available for KG expansion, necessitating full re-extraction.
+   -d. Chunk-based extraction offers better localization for each relation, aiding:
+       -1. GraphRAG retrieval (linking edges back to specific chunks)
+       -2. Human verification of extracted facts
+
+6. Agentic Workflow for KG Extraction & Expansion
+   The blog post presents an agentic workflow—inspired by Anthropic’s notion of “workflows”—composed of two LLM-driven agents:
+   -a. Extractor (Extract phase)
+   -b. Builder (Build phase)
+   The workflow orchestrates both agents to ensure coherence and incremental graph growth.
+
+7. Extract Phase
+   -a. Chunking
+       -1. Split source documents into manageable text chunks.
+       -2. Chunk size is tuned to downstream tasks (e.g., GraphRAG retrieval granularity).
+   -b. LLM-driven Triplet Extraction
+       -1. Prompt the Extractor to output only directed triplets in the format:
+           (subject:EntityType, relation, object:EntityType)
+       -2. Guidelines include:
+           -1) Only use specified entity types
+           -2) Avoid duplicates and non-entity attributes
+           -3) Keep entity names concise and consistent
+   -c. Validation & Parsing
+       -1. A regex-based parser pulls triplets from LLM output.
+       -2. Discard any that violate the format or wrong entity types.
+
+8. Build Phase
+   For each extracted triplet:
+   -a. Similarity Retrieval
+       -1. Gather a small set of most similar existing graph relations (e.g., via neural embedding similarity).
+   -b. LLM-driven Decision
+       -1. The Builder is prompted to either:
+           -1) Discard triplets whose information already exists
+           -2) Modify entity names/types to match existing graph conventions
+           -3) Add new, consistent triplets to the KG
+   -c. Prompt Structure
+       {thought_start} brief reasoning {thought_end}
+       {add_key} (subject:EntityType, relation, object:EntityType)
+       
+       Ensures the model shares its reasoning and returns exactly one action.
+
+9. Linking Relations to Source Passages
+   Every triplet in the final KG is annotated with the original text chunk it was extracted from, enabling:
+   -a. GraphRAG to combine semantic graph edges with raw text context
+   -b. Human evaluation by tracing each fact back to its source
+
+10. Conclusion & Considerations
+    -a. Methodology Recap: A two-phase, LLM-driven, agentic workflow that enforces consistency and incremental KG expansion.
+    -b. Benefits: Improved coherence across sources and clear provenance for each relation.
+    -c. Limitations:
+        -1. Hallucinations may introduce spurious edges.
+        -2. Entity duplication if the model misses name variations.
+        -3. Inability to retroactively revise previously added triplets without extending the workflow.
+    -d. Cost vs. Quality: The Build phase doubles LLM calls, raising costs—yet remains far cheaper than manual labeling.
+    -e. Human–Machine Synergy: The workflow shines when paired with human oversight for factual verification and fine-tuning.
+    -f. Future Outlook: As LLM performance improves and API costs fall, automated KG construction will scale further,
+                        unlocking vast unstructured data for GraphRAG and beyond.
