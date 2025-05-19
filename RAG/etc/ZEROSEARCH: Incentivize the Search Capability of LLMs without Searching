@@ -1,0 +1,88 @@
+### From https://arxiv.org/pdf/2505.04588
+
+1. Motivation & Challenges
+   -a. Static Knowledge & Hallucination: Pretrained LLMs cannot update their knowledge post-pretraining, 
+                                         leading to outdated or fabricated outputs.
+   -b. Retrieval-Augmented Generation (RAG): Integrating external knowledge mitigates this, 
+                                             but existing RAG methods either rely on heavy prompt engineering, 
+                                             supervised fine-tuning, or expensive test-time search (e.g., MCTS), 
+                                             making deployment costly and complex.
+   -c. Reinforcement Learning (RL) for Retrieval: RL can improve reasoning and search strategies
+                                                  (e.g. Search-R1, R1-Searcher, DeepResearcher), 
+                                                  but real-world search integration is hindered by unpredictable
+                                                  document quality and prohibitive API costs.
+
+2. ZEROSEARCH: Key Insight
+   -a. Simulated Search Engine: Leverage an LLM (fixed parameters) to generate search results rather
+                                than querying real engines.
+   -b. Controlled Document Quality: Through lightweight supervised fine-tuning, the simulator learns to produce 
+                                    both useful and noisy documents by simple prompt tweaks,
+                                    enabling curriculum-style difficulty scheduling.
+   -c. Cost & Noise Management: Eliminates API costs and allows precise control over retrieval noise, 
+                                stabilizing RL training.
+
+3. Formal RL Objective (Without Real Search)
+   max_(𝜋_𝜃) 𝐸_(𝑥∼𝐷, 𝑦∼𝜋_𝜃(⋅∣𝑥;𝜋_𝜓))[𝑟_𝜙(𝑥,𝑦)−𝛽 𝐷_KL(𝜋_𝜃(⋅∣𝑥; 𝜋_𝜓)∥𝜋_ref(⋅∣𝑥; 𝜋_𝜓))]
+   -a. 𝜋_𝜃: policy model being trained
+   -b. 𝜋_𝜓: fixed simulation LLM
+   -c. 𝜋_ref: reference policy (e.g. base LLM)
+   -d. 𝑟_𝜙 : reward (F1-based)
+   -e. 𝛽: KL penalty weight
+
+4. Interaction & Training Template
+   Each training/inference episode follows a three-stage script:
+   -a. Reasoning
+       <think> … internal reasoning steps … </think>
+   -b. Retrieval
+       <search> query </search>
+       <information> … returned docs … </information>
+   -c. Answering
+       <answer> final response </answer>
+   This enforces explicit separation of reasoning, searching, and answering for transparency and structure.
+
+5. Search Simulation Tuning
+   -a. Data Collection: Gather real search interaction trajectories to extract (query, document) pairs.
+   -b. Labeling: Use the LLM as a judge—prompt it to classify each document as useful or noisy for answering
+                 the query.
+   -c. SFT: Fine-tune the simulation LLM so that, given a query and the ground-truth answer,
+            it can generate either useful or noisy documents based on a keyword in the prompt.
+   -d. Prompt Template:
+       """
+       You are the Google search engine.
+       Query: [query]
+       [Useful / Noisy] Output:
+       """
+       plus instructions to produce five ~30-word documents.
+
+6. Curriculum Rollout Strategy
+   -a. Noise Probability Schedule: At training step 𝑖 of 𝑚, the chance 𝑝_𝑖 of generating noisy docs transitions 
+                                   from 𝑝_𝑠 to 𝑝_𝑒 via
+                                   𝑝_𝑖=𝑝_𝑠+((𝑖/𝑚)^𝑏−1 / 𝑏−1)(𝑝_𝑒−𝑝_𝑠),
+                                   where 𝑏 controls curvature (default 𝑏=4).
+   -b. Effect: Early training uses mostly useful documents; later, noise increases, forcing the 
+                policy to handle harder retrieval scenarios.
+
+7. Reward Design
+   -a. F1-Score Reward: Balances precision & recall of the model’s final <answer> against ground truth.
+   -b. Avoids Reward Hacking: Unlike Exact Match (EM), F1 discourages overly verbose answers.
+
+8. Training Algorithms & Stability
+   -a. Compatibility: ZEROSEARCH works with REINFORCE, PPO, and GRPO.
+   -b. Loss Masking: During rollout, only gradients for the policy’s own tokens are computed; 
+                     document tokens from the simulator are masked out to prevent instability.
+
+9. Empirical Findings
+   -a. Simulator Scale: Even a 3 B LLM can effectively teach a policy model; 7 B matches real-search training;
+                        14 B outperforms it.
+   -b. Generalization: Works across base & instruction-tuned LLMs of various sizes.
+   -c. Cost Efficiency: Zero API cost, scalable with GPU parallelism.
+
+10. Contributions & Limitations
+    -a. Contributions:
+        -1. ZEROSEARCH framework for RL-driven search strategy without real search engines.
+        -2. Simulation tuning plus curriculum rollout for controlled, scalable training.
+        -3. Broad compatibility with RL algorithms and LLM sizes.
+    -b. Limitations:
+        -1. Requires GPU infrastructure to run the simulator, which, while cheaper than live APIs,
+            still incurs hardware and operational costs.
+
