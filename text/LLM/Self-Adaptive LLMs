@@ -1,0 +1,77 @@
+### From https://medium.com/@lmpo/transformer%C2%B2-self-adaptive-llms-e529d2d790dc
+
+* Overview
+  Transformer² (by Sakana AI) introduces self-adaptive LLMs that autonomously adjust their parameters 
+  “on the fly,” enabling dynamic specialization to each input’s task without external retraining. 
+  Drawing inspiration from an octopus’s color-changing camouflage, the model shifts 
+  its “color” (its weights) to suit distinct tasks such as math, reasoning, or general language.
+
+1. Self-Adaptive LLMs: Core Idea
+   -a. Dynamic Weight Adaptation
+       -1. Instead of static pretrained weights, the model evaluates each input and modifies its own weights
+           to better solve the current task.
+       -2. Eliminates the need for separate fine-tuning cycles; adaptation happens per example at inference time.
+
+2. Transformer²’s Two-Step Process
+   -a. First Pass (Task Identification)
+       -1. The model ingests the full user prompt and classifies its task-type 
+           (e.g. “math question,” “language query,” “logical reasoning”).
+   -b. Second Pass (Task-Specific Generation)
+       -1. Based on the identified task, the model updates its weights (its “color”) and then produces
+           a specialized response.
+   -c. Visualization
+       -1. Depicted as the model shifting from black (general-purpose) to red (task-focused) between passes.
+
+3. Architectural Variants
+   -a. Multiple Specialist LLMs
+       -1. A pool of separate models, each expert in one domain.
+       -2. A router sends the input to the appropriate expert (ensemble-like).
+   -b. Single LLM with Modular Specialization
+       -1. One base model containing internal expert modules (akin to a Mixture-of-Experts).
+       -2. Task routing activates only the relevant submodule, reducing computation and improving specialization.
+
+4. Sample-Level Module Selection
+   -a. Key Differentiator vs. token-level MoE:
+       -1. Transformer² makes routing decisions per entire input (sample level), not per token.
+       -2. Ensures that the full context of the query drives the choice of specialist module.
+
+5. SVD-Based Fine-Tuning
+   -a. 5.1. Method
+       -1. Singular Value Decomposition splits any weight matrix 𝑊 into
+           𝑊=𝑈Σ𝑉^⊤
+       -2. Fine-tune only the diagonal matrix Σ to adapt weights.
+   -b. 5.2. Benefits
+       -1. Minimal Parameters: Only Σ (a diagonal) is trainable → drastic parameter reduction.
+       -2. Full-Rank Control: Unlike low-rank adapters (e.g. LoRA), SVD allows full-rank modifications.
+       -3. Compositionality: You can algebraically add or interpolate Σ’s across tasks.
+       -4. Regularization: Constraining updates to Σ acts as a natural regularizer, 
+                           mitigating overfitting on small task-specific datasets.
+
+6. Training & Inference Workflow
+   -a. 6.1. Training with REINFORCE
+       -1. Reinforcement Learning (REINFORCE): each generated response is scored in 
+           [−1,1], and a KL penalty keeps outputs close to the base model.
+       -2. Outcome: a set of K Σ-vectors (e.g. math Σ, reasoning Σ, language Σ) that embed task-specialized weight 
+                    adjustments.
+   -b. 6.2. Two-Pass Inference
+       -1. Pass 1: Classify the input’s task.
+       -2. Pass 2: Load the corresponding Σ-vector into the model and generate the response.
+
+       Task Selection Techniques
+       -1. Prompt Engineering: Embed a classifier prompt to coerce the model into self-identifying the task.
+       -2. Separate Classification Head: Train a lightweight classifier to predict the task category.
+       -3. Few-Shot Adaptation: Compute a weighted combination of all Σ-vectors based on prompt similarity,
+                                allowing soft multi-task blending.
+
+7. Empirical Results
+   -a. Benchmarked against LLaMA-3 8B, Mistral 7B, and LLaMA-3 70B.
+   -b. Outperforms LoRA-based fine-tuning in both accuracy and model efficiency.
+   -c. Demonstrates strong gains on vision-language tasks, confirming versatility across modalities.
+
+8. Conclusion & Implications
+   Transformer²’s combination of sample-level routing, SVD-based fine-tuning, and on-the-fly weight adaptation
+   delivers a powerful, flexible framework for self-adaptive LLMs. 
+   By minimizing additional parameters and leveraging dynamic specialization, 
+   it enables high accuracy with low overhead—paving the way for more intelligent, 
+   resource-efficient AI in real-world deployments.
+
