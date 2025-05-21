@@ -1,0 +1,111 @@
+### From https://arxiv.org/pdf/2505.03335
+
+1. Motivation
+   Existing methods like RLVR (Reinforcement Learning with Verifiable Rewards) use only outcome-based 
+   feedback to train LLMs. 
+   However, they still rely on human-curated datasets of questions and answers. 
+   This dependency introduces a long-term scalability bottleneck and limits the autonomous evolution of AI systems.
+
+   -a. Absolute Zero removes this dependency, enabling a model to:
+       -1. Propose its own tasks
+       -2. Solve them
+       -3. Learn from interaction with a verifiable environment
+           → all in a fully self-play, zero-data setup.
+
+2. Reinforcement Learning Frameworks Recap
+   2.1. Supervised Fine-Tuning (SFT)
+        -a. Given expert-labeled tuples:
+            𝐷={(𝑥,𝑐∗,𝑦∗)}
+            where 𝑥 is the query, 𝑐∗  is the CoT, 𝑦∗ is the answer.
+        -b. Objective:
+            𝐿_SFT(𝜃)=−𝐸_((𝑥,𝑐∗,𝑦∗)∼𝐷) log𝜋_𝜃(𝑐∗,𝑦∗∣𝑥)
+   2.2. Reinforcement Learning with Verifiable Rewards (RLVR)
+        Uses only (𝑥,𝑦∗) pairs; model generates 𝑦, receives scalar reward 𝑟(𝑦,𝑦∗)
+        -a. Objective:
+            𝐽_RLVR(𝜃)=𝐸_((𝑥,𝑦∗)∼𝐷, 𝑦∼𝜋_𝜃(⋅∣𝑥)) [𝑟(𝑦,𝑦∗)]
+
+3. Absolute Zero Paradigm
+   3.1. Objective
+        No external data. A single model 𝜋_𝜃 acts as both:
+        -a. Proposer: 𝜋_𝜃^propose
+        -b. Solver: 𝜋_𝜃^solve
+
+        Workflow:
+        -a. Propose a task 𝜏∼𝜋_𝜃^propose(⋅∣𝑧)
+        -b. Environment constructs task from 𝜏: (𝑥,𝑦∗)∼𝑓_𝑒(⋅∣𝜏)
+        -c. Solve task: 𝑦∼𝜋_𝜃^solve(⋅∣𝑥)
+        -d. Rewards:
+            -1. 𝑟_𝑒^propose(𝜏,𝜋_𝜃): measures learnability
+            -2. 𝑟_𝑒^solve(𝑦,𝑦∗): solution accuracy
+
+        Final training objective:
+        𝐽(𝜃):=max_𝜃 𝐸_(𝑧∼𝑝(𝑧)) [𝐸_((𝑥,𝑦∗)∼𝑓_𝑒(⋅∣𝜏))    [𝑟_𝑒^propose(𝜏,𝜋)𝜃)+𝜆𝐸_(𝑦∼𝜋_𝜃^solve(⋅∣𝑥) 𝑟_𝑒^solve(𝑦,𝑦∗)]]
+                                   (𝜏∼𝜋_𝜃^propose(⋅∣𝑧)
+4. Reward Formulation
+   4.1. Proposer Reward
+        Let 𝑟ˉ_solve be the average success rate from 𝑛 Monte Carlo solver rollouts:
+        𝑟ˉ_solve = 1/𝑛 ∑(𝑖=1 to 𝑛) 𝑟^(𝑖)_solve
+        Then,
+        𝑟_propose={0              if 𝑟ˉ_solve=0 or 1
+                   1−𝑟ˉ_solve     otherwise
+   4.2. Solver Reward
+        Simple binary indicator:
+        𝑟_solve=𝐼(𝑦=𝑦∗)
+   4.3. Composite Reward with Format Penalty
+        𝑅(𝑦_𝜋)={𝑟_role      if passable (correct format)
+                −0.5        if incorrect but well-formatted
+                −1          if formatting error
+
+5. Reasoning Modes in AZR
+   All tasks are framed as code triplets (𝑝,𝑖,𝑜) where 𝑜=𝑝(𝑖)
+   5.1. Deduction
+        -a. Given: 𝑝,𝑖
+        -b. Predict: 𝑜
+        -c. Verification: 𝑜_𝜋=𝑜∗
+   5.2. Abduction
+        -a. Given: 𝑝,𝑜
+        -b. Predict: 𝑖
+        -c. Verification: 𝑝(𝑖_𝜋)=𝑜∗
+   5.3. Induction
+        -a. Given: {(𝑖_𝑛,𝑜_𝑛)}^(𝑁/2)_(𝑛=1), 𝑚
+        -b. Predict: program 𝑝_𝜋
+        -c. Verification: ∀_𝑛>𝑁/2, 𝑝_𝜋(𝑖_𝑛)=𝑜_𝑛
+
+6. Self-Play Learning Algorithm
+   -a. Algorithm 1: AZR Self-Play
+       -1. Seed buffers 𝐷_ded, 𝐷_abd, 𝐷_ind
+   -b. For each training step 𝑡∈[1,𝑇]
+       -1. For each batch 𝑏∈[1,𝐵]:
+           -1) Propose tasks (deduction, abduction, induction)
+           -2) Validate proposed triplets with:
+               - Syntax check
+               - Safety check (no os/sys/shutil etc.)
+               - Determinism:
+                 ∀_𝑖∈𝐼, lim_(𝑗→∞)𝑝(𝑖)^(1)=𝑝(𝑖)^(2)=⋯=𝑝(𝑖)^(𝑗)
+           -3) Solve proposed tasks
+           -4) Compute rewards 𝑟^propose, 𝑟^solve
+           -5) Update policy using Task-Relative REINFORCE++
+
+7. Task-Relative REINFORCE++ (TRR++)
+   Classic REINFORCE uses global baseline 𝑏=𝐸[𝑟]. TRR++ computes task-role specific normalized advantages:
+   𝐴^(task, role)_norm = 𝑟−𝜇_(task,role) / 𝜎_(task,role) ,task∈{ind,ded,abd}, role∈{propose,solve}
+   This gives six distinct baselines, reducing variance per task-role configuration.
+
+8. Key Findings
+   -a. Code priors help general reasoning: AZR-Coder-7B outperforms base Qwen-7B on math despite a worse 
+                                           starting point.
+   -b. Cross-domain generalization: AZR-trained on code improves math by +15.2 points vs. +0.65 from RLVR.
+   -c. Scaling trend: Bigger base → bigger gains (3B: +5.7, 7B: +10.2, 14B: +13.2).
+   -d. Scratchpad behavior emerges: Comments and plans appear organically during code generation.
+   -e. Reasoning length varies by task: Abduction → longest sequences (trial-and-error), deduction/induction
+                                        → more concise.
+   -f. Safety: Some models (e.g., Llama3.1-8B) show "uh-oh moments", signaling the need for safety-aware RL training.
+
+9. Conclusion
+   Absolute Zero shows that superhuman reasoning capabilities can emerge from pure self-play — 
+   with no human-curated data. Through carefully designed rewards, role unification, and a verifiable environment, 
+   AZR sets a new precedent in self-evolving LLM training.
+   It is an important step toward:
+   -a. Autonomous, open-ended reasoning models
+   -b. Scalable RL with verifiable rewards
+   -c. Sustainable post-human intelligence training regimes
