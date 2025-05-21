@@ -1,0 +1,180 @@
+### From https://medium.com/data-science-collective/intent-driven-natural-language-interface-a-hybrid-llm-intent-classification-approach-e1d96ad6f35d
+
+Intent-to-SQL System for Data Clean Rooms (DCRs): An Understandable Summary
+
+1. Introduction: Why Intent Understanding Matters
+   When users (e.g., marketers or analysts) ask questions like “Which cohorts should we retarget?”, 
+   they’re not writing SQL—they’re expressing intent.
+   But turning vague, human-friendly prompts into safe, compliant SQL requires:
+   -a. Semantic understanding
+   -b. Business/domain knowledge
+   -c. Security-aware execution
+
+  This article presents a hybrid natural language interface that converts such prompts into safe SQL, 
+  especially for Data Clean Rooms where:
+  -a. Different teams collaborate across brands
+  -b. SQL knowledge is limited
+  -c. Privacy is a priority (no customer-level data allowed)
+
+2. System Architecture Overview
+   This system translates user prompts (in natural language, any language) into secure SQL queries using a hybrid pipeline:
+   -a. Key Components:
+       -1. Intent classification via embeddings
+       -2. Semantic search (via FAISS) to match prompt with SQL templates
+       -3. Template-based SQL generation
+       -4. LLM fallback (schema-aware) if templates don’t suffice
+   -b. Flow:
+       -1. User asks a question → system classifies intent (e.g., cohort_overlap)
+       -2. FAISS finds best matching SQL template
+       -3. Entities (like store or cohort names) are extracted
+       -4. SQL is generated, following strict schema and privacy rules
+       -5. If no template fits, LLM (e.g., GPT-4) generates SQL using schema-constrained prompts
+
+3. Why Intent Classification is the Core
+   -a. What it does:
+       Maps natural language to one of a few clear categories (like lookalike_request or cohort_comparison)
+   -b. Why it matters:
+       -1. Disambiguation: Clarifies vague queries
+       -2. Security: Routes only to pre-approved SQL templates
+       -3. Speed: Avoids expensive, slow LLM calls when not needed
+   -c. Example:
+       Prompt: “Which ComfyWearCo cohorts are similar to cohort 5 in SportStyleShop?”
+               → Intent: lookalike_request
+
+4. Embedding-Based Intent Classification with FAISS
+   Instead of a traditional classifier, this system uses:
+   -a. OpenAI’s text-embedding-3-small or similar embedding model
+   -b. FAISS index for nearest-neighbor search
+
+   Why FAISS?
+   -a. No training required
+   -b. Easy to update with new examples
+   -c. Transparent & explainable
+   -d. Works well with multilingual prompts (English, French, German, etc.)
+
+5. Intent Label Examples
+   Example prompt-intent pairs used for indexing:
+
+   Prompt	Intent
+   "Suggest untested high-value cohorts..."	| cohort_recommendation
+   "Compare cohorts from different stores"	| cohort_comparison
+   "Montre-moi des cohortes similaires" (FR)	| lookalike_request
+   "Welche Kohorten überschneiden sich?" (DE)	| cohort_overlap
+
+   Each is embedded and indexed via FAISS for fast retrieval at runtime.
+
+6. Schema-Aware Store & Brand Mapping
+   Natural language refers to brands (e.g., “ComfyWearCo”), but SQL needs store IDs and table names.
+
+   This mapping is handled using a brand_registry.json file like:
+   {
+     "ComfyWearCo": {
+       "store_id": "comfy_wear_store_view",
+       "table": "hll_cohort_sketches_store_x1"
+     }
+   }
+  Entity extraction (via regex) auto-maps brand names to the correct database identifiers, 
+  making it scalable for many stores.
+
+7. Template-Based SQL Generation
+   Each intent type has hand-coded SQL templates.
+
+   -a. Example: cohort_comparison
+       """
+       SELECT 'ComfyWearCo' AS store_name, ...
+       FROM hll_cohort_sketches_store_x1
+       WHERE cohort_id = 2 ...
+
+       UNION ALL
+
+       SELECT 'SportStyleShop' AS store_name, ...
+       FROM hll_cohort_sketches_store_y1
+       WHERE cohort_id = 4 ...
+       """
+   -b. Benefits:
+       -1. No hallucinated columns
+       -2. Fully aligned with known schema
+       -3. Privacy-safe (e.g., only SELECTs, HLL functions)
+
+8. Schema-Constrained LLM Fallback
+   If no matching template is found, the system uses GPT-4 (or others) with tight schema constraints:
+
+   -a. Prompt includes:
+       -1. Full schema
+       -2. Privacy constraints (e.g., no COUNT(DISTINCT))
+       -3. Approved functions (e.g., hll_estimate, hll_merge_agg)
+    This ensures that even LLM-generated SQL is safe, compliant, and interpretable.
+
+9. Example Queries by Intent
+   lookalike_request:
+   “Which cohorts in SportStyleShop are similar to cohort 5 in ComfyWearCo?”
+   SELECT cohort_b, similarity_score_proxy ...
+
+   cohort_recommendation:
+   “Suggest high-value untapped cohorts.”
+   SELECT cohort_id ...
+   WHERE cohort_hll_sketch IS NULL ...
+
+   cohort_overlap:
+   “Which cohorts overlap?”
+   SELECT store_a, cohort_a, store_b, cohort_b ...
+
+   nl_to_sql_query:
+   “Rank cohorts by recency”
+   SELECT cohort_id, avg_standardized_days_since_last_purchase ...
+
+10. Advanced DCR Support: HyperLogLog (HLL) Sketches
+    In Data Clean Rooms, row-level data isn’t allowed — so we use HLL sketches for privacy-safe user count estimation.
+    The system ensures:
+    -a. hll_estimate(...) for single cohort estimates
+    -b. hll_merge_agg(...) only in group aggregation
+    -c. LLM and templates both respect these rules
+
+    Example:
+     SELECT 
+       store_id, 
+       hll_estimate(hll_merge_agg(cohort_hll_sketch)) ...
+     GROUP BY store_id;
+
+11. Evaluation
+    Tested on 30+ prompts → mapped accurately to 5+ intents
+
+    Prompt	| Intent	| Output	| ✅
+    “Compare cohort 4 and 1”	| cohort_comparison	| Correct SQL | 	✅
+    “Which cohorts overlap?”	| cohort_overlap	| Correct SQL	| ✅
+    “Which cohort is most recent?”	| nl_to_sql_query	| Correct SQL	| ✅
+
+    Edge cases (e.g., missing brands) handled gracefully with fallback or warnings.
+
+12. Extensibility: Swappable LLMs & Embeddings
+    You can easily replace:
+    -a. LLM (Claude, Gemini, LLaMA 3)
+    -b. Embeddings (Hugging Face, local models)
+
+    Example: Local embeddings
+    """
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    embedding = model.encode("your prompt")
+    """
+
+    Example: Claude fallback
+    """
+    response = client.messages.create(
+                 model="claude-3-opus",
+                 messages=[{"role": "user", "content": prompt}])
+
+   Because intent classification is embedding + FAISS, it's independent of LLM — making the system modular
+   and flexible.
+
+13. Conclusion
+    This system offers a production-grade architecture for natural language SQL interfaces in privacy-sensitive 
+    environments like Data Clean Rooms.
+    -a. Key Benefits:
+        -1. Intent-based routing using embeddings + FAISS
+        -2. Safe SQL templates grounded in schema
+        -3. LLM fallback with strict constraints
+        -4. Supports multilingual, privacy-first, and schema-compliant scenarios
+        -5. Extensible to any embedding or LLM provider
+    A practical blueprint for building intelligent, explainable, and safe data interfaces in regulated environments.
+
