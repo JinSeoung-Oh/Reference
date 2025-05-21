@@ -1,0 +1,83 @@
+### From https://medium.com/google-cloud/a-foundational-framework-for-agentic-ai-ecosystems-enabling-development-discovery-and-2aeb120949f6
+
+1. Context: From Models to Agents
+   As AI systems evolve from standalone models into Agentic AI ecosystems, 
+   we need something similar to what API management provided for microservices 
+   — a foundation that supports development, discovery, and composition of autonomous agents.
+
+   The core pillars of this foundation are:
+   -a. Agent Development & Publishing
+   -b. Agent Discovery
+   -c. Agent Composition (stitching agents together to complete complex tasks)
+
+2. Agent Development & Publishing
+   -a. Google Agent Development Kit (ADK)
+       ADK is an open-source framework that helps developers build intelligent agents. 
+       It offers structured components:
+       -1. Agents: Core execution units
+       -2. Tools: External capabilities agents can use
+       -3. Memory/State: Mechanisms for remembering across steps
+       -4. Runners: Manage agent lifecycles
+       -5. Callbacks: Allow logging and monitoring
+       -6. UI/CLI + Evaluation Tools: Help in building and debugging
+       -7. Multimodal support: Includes audio/video streaming for interactive agents (like Project Astra)
+   -b. Google Agent2Agent Protocol (A2A)
+       ADK builds agents. A2A lets them communicate.
+       -1. It's an open, vendor-neutral protocol.
+       -2. Agents can publish themselves by exposing an Agent Card (a machine-readable profile).
+       -3. A2A standardizes how agents discover each other, exchange data, and collaborate 
+           — even across different platforms or frameworks (ADK, LangGraph, CrewAI, etc).
+
+3. Agent Discovery
+   -a. Google Agentspace + Agent Gallery
+       After agents are published via A2A, users (or other agents) need a way to find them.
+       -1. Agentspace: A unified enterprise platform that connects AI agents with enterprise data 
+                       (SharePoint, Salesforce, etc.).
+       -2. Agent Gallery: A catalog within Agentspace that shows all discoverable agents.
+   -b. This enables:
+       -1. Browsing/searching agents based on capabilities
+       -2. One-click activation or integration
+       -3. Enterprise-level access control and search relevance
+   Agentspace bridges technical capabilities (ADK + A2A) and real users in the enterprise.
+
+4. Agent Execution at Runtime
+   -a. Google Vertex AI Agent Engine
+       To make agents useful, they must run in production.
+       -1. Agent Engine is a managed runtime inside Google Vertex AI.
+       -2. It handles:
+           -1) Infrastructure (containers, networking)
+           -2) Scaling
+           -3) Security
+           -4) Deployment lifecycle
+       Agents running here can appear in the Agent Gallery, ready for users or orchestrating agents to use.
+       Developers focus on logic; Agent Engine takes care of everything else.
+
+5. Agent Composition: Stitching Multiple Agents Together
+   Complex tasks often require multiple agents to work together.
+   -a. How the Full Stack Supports This:
+       Stage	| Technology	| Purpose
+       Create Agents	| ADK	| Define logic, tools, workflows (e.g., Sequential, Parallel, Loop)
+       Let Them Talk | 	A2A	| Standardized messaging, task negotiation, data exchange
+       Find Each Other	| Agentspace + Agent Gallery	| Discovery via searchable, structured Agent Cards
+       Connect to Tools	| ADK + MCP	| External tool use via Model Context Protocol (e.g., databases, APIs)
+       Run in Production	| Agent Engine	| Managed, scalable execution of single or multi-agent systems
+   -b. Agent composition could be:
+       -1. Intra-agent (within a single ADK app, using multi-agent structures)
+       -2. Inter-agent (across frameworks or organizations, via A2A protocol)
+   -c. Real-World Example:
+       -a. A support bot (ADK) finds a customer’s profile (via another agent using Salesforce)
+       -b. Queries shipping status (via API tool using MCP)
+       -c. Hands off to a specialized returns agent
+       -d. All agents communicate over A2A, discovered via Agent Gallery, and execute on Agent Engine
+
+6. Summary: How It All Fits
+   The full Agentic AI stack from Google includes:
+   Component	| Role
+   ADK	| Build individual agents with tools, memory, structure
+   A2A	| Let agents from anywhere talk to each other
+   Agentspace	| Connect users and agents to enterprise data
+   Agent Gallery	| Discover and catalog agents
+   MCP	| Connect agents to APIs and data sources
+   Agent Engine	| Deploy and run everything at scale
+   Just like microservices needed APIs + discovery + runtime, Agentic AI needs ADK + A2A + Agent Engine to scale.
+
