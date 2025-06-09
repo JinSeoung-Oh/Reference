@@ -1,0 +1,136 @@
+### From https://shuaiguo.medium.com/using-physics-informed-neural-networks-as-surrogate-models-from-promise-to-practicality-3ff13c1320fc
+
+1.  PINN Architecture & Loss Formulation
+    1.1 Network Setup
+        -a. Inputs: (𝑥,𝑡,𝜃), where:
+            -1. 𝑥: spatial coordinates (vector in 𝑅^𝑑)
+            -2. 𝑡: time (scalar).
+            -3. 𝜃∈𝑅^𝑝: parametric inputs (e.g., Reynolds number, material constants).
+       -b. Outputs: state variables 𝑢^(^)(𝑥,𝑡,𝜃)∈𝑅^𝑞 (e.g., velocity, pressure, temperature fields).
+       -c. Neural network: a multi-layer perceptron (MLP) with layers 𝐿≥4, widths 64+ neurons, using smooth activations like Tanh or Softplus to aid in differentiation.
+    1.2 Loss Components
+        -a. Data Loss
+            For 𝑁_𝑑 data points {𝑥^𝑖_𝑑,𝑡^𝑖_𝑑,𝜃^𝑖_𝑑,𝑢^𝑖_𝑑}:
+            𝐿_data=1/𝑁_𝑑 ∑_(𝑖=0 to 𝑖=𝑁_𝑑)∥𝑢^(^)(𝑥^𝑖_𝑑,𝑡^𝑖_𝑑,𝜃^𝑖_𝑑)−𝑢^𝑖_𝑑∥^2
+        -b. Physics (PDE) Loss
+            Consider governing PDEs:
+            -1. Example: Heat equation
+                ∂𝑢/∂𝑡 − 𝜅Δ_𝑥𝑢=0
+            -2. Residual 𝑟(𝑥,𝑡,𝜃)=∂_𝑡𝑢^ − 𝜅Δ_𝑥𝑢^
+            -3. Collocation loss over 𝑁_𝑐 points (𝑥^𝑗_𝑐,𝑡^𝑗_𝑐,𝜃^𝑗_𝑐):
+                𝐿_PDE=1/𝑁_𝑐 ∑(𝑗=0 to 𝑗=𝑁_𝑐)∥𝑟(𝑥^𝑗_𝑐,𝑡^𝑗_𝑐,𝜃^𝑗_𝑐)∥^2
+        -c. Boundary / Initial Condition Loss (if applicable)
+            If boundary data is available, include:
+            𝐿_BC=1/𝑁_𝑏 ∑(𝑘=1 to 𝑘=𝑁_𝑏)∥𝑢^ (𝑥^𝑘_𝑏,𝑡^𝑘_𝑏,𝜃^𝑘_𝑏)−𝑢^𝑘_𝑏∥^2
+        -d. Total Loss
+            Balance all components with weights 𝜆:
+            𝐿=𝐿_data + 𝜆_PDE 𝐿_PDE + 𝜆_BC 𝐿_BC
+    1.3 Training Workflow
+         -a. Sampling: Generate training (data), collocation, boundary datasets.
+         -b. Model definition: Initialize weights, choose activation.
+         -c. Loss computation: Use AD to compute ∂_𝑡, ∇_𝑥,  Δ_𝑥
+         -d. Optimization: Train with Adam or L-BFGS for thousands of epochs.
+         -e. Validation: Evaluate on separate test sets to check physical accuracy and generalization.
+
+2. Parametric PINNs & Parameter Embedding
+   -a. Add 𝜃 as separate input channels.
+   -b. Network input shape becomes (𝑑+1+𝑝)
+   -c. Learned mapping:
+       𝑢^:(𝑥,𝑡,𝜃)↦state space
+   -d. Allows continuous multi-query evaluation over parameter space without retraining.
+
+3. Sample Industrial Applications — In-Depth Case Studies
+   3.1 Parametric Study: Ghosh et al. 2024
+       -a. Problem
+           Predict velocity 𝑢(𝑥,𝑡) and pressure 𝑝(𝑥,𝑡) in turbulent flow across geometry parameter 𝜃 (e.g., nozzle size, Re number).
+       -b. Key Components
+           -1. Data: CFD simulations at ~50 (𝜃) samples, each with ~10k spatial points.
+           -2. PINN Setup: Input (𝑥,𝑡,𝜃); Outputs (𝑢,𝑝)
+           -3. Physics: Navier–Stokes PDE:
+                        ∂𝑢/∂𝑡+𝑢⋅∇𝑢+∇𝑝−𝜈Δ𝑢=0, ∇⋅𝑢=0
+           -4. Training: ~200k data + 300k collocation points + boundary/initial conditions.
+           -5. Results: Surrogate reproduces fields with <1% relative error, and provides ~10k× speed-up over CFD.
+   3.2 Uncertainty Quantification: Panahi et al. 2024
+       -a. Problem
+           Track pollutant breakthrough curves with uncertain sorption parameters 𝜃
+       -b. Method
+           -1. Stage-wise training: First trained on deterministic PDE; then added parameter randomness.
+           -2. Monte Carlo: 10⁶ samples using PINN surrogate → fast histogram estimation.
+           -3. Outcome: Computed probability distribution of output at <1 minute (vs days via simulators).
+   3.3 Heat Sink Optimization: Cai et al.
+       -a. Objective
+           Minimize peak GPU temperature 𝑇_max(𝜃) subject to pressure drop constraint 
+           Δ𝑃(𝜃)≤threshold
+       -b. PINN Structure
+           -1. Inputs: fin dimensions 𝜃, spatial and temporal coordinates.
+           -2. Output: Temperature field 𝑢(𝑥,𝑡)
+           -3. Used for:
+               -1) Objective eval: direct forward pass gives 𝑇_max
+⁡               -2) Gradient: AD yields ∇𝜃 𝑇_max, enabling L-BFGS.
+       -c. Results
+           Converged ~50x faster than optimization via CFD loops.
+   3.4 MPC in Soft Robotics: Habich et al. 2025
+       -a. System
+           Multi-joint soft arm with nonlinear PDE dynamics.
+       -b. Controller
+           MPC using surrogate for prediction over horizon 𝑇
+       -c. PINN Use
+           -1. Inputs: current state, control variables 𝑢(𝑡+Δ𝑡)
+           -2. Outputs: next state prediction.
+           -3. Training: Data + PDE constraint losses.
+       -d. Achievements
+           -1. ≤ 1.3° tracking error.
+           -2. Real-time control (<50 ms prediction latency).
+   3.5 Anomaly Detection: Khakpoor et al. 2025
+       -a. Problem
+           Detect microgrid faults using physics model.
+       -b. Implementation 
+           -1. PINN trained on healthy data (voltages 𝑢).
+           -2. Predicts expected voltage; compute residual:
+               𝑟=𝑢_sensor−𝑢^
+           -3. Classifier or threshold verifies anomaly.
+       -c. Outcome
+           Early detection, fault type classification w/ high accuracy and low false alarm rate.
+
+4. Advanced Enhancements
+   4.1 Bayesian PINNs
+       Incorporate epistemic uncertainty in weights:
+       max 𝑃(𝑊∣𝑑𝑎𝑡𝑎)∝𝑃(𝑑𝑎𝑡𝑎∣𝑊)𝑃(𝑊)
+       Output includes confidence intervals in predictions.
+   4.2 Multifidelity PINNs
+       -a. Low-fidelity simulations (coarse mesh) provide cheap data;
+       -b. High-fidelity simulations (fine mesh) used selectively.
+       -c. Combined using multifidelity loss, yielding faster convergence with better physical accuracy.
+   4.3 Transfer Learning in PINNs
+       Pre-train on related PDE setup, then fine-tune with fewer data. Helps with faster learning in new yet similar systems.
+   4.4 Active Learning
+       -a. Iteratively:
+           -1. Evaluate PINN uncertainty (e.g., gradient norm of residual).
+           -2. Run simulator at highest-uncertainty point.
+           -3. Add to training dataset → retrain.
+               Feedback loop reduces dataset requirement.
+
+5. When & How to Use Surrogate PINNs
+   -a. When it Fits
+       -1. Known physics (PDE/ODE).
+       -2. Costly simulations.
+       -3. Desire for continuous parameter-space evaluation.
+       -4. Need for gradients (optimization/control).
+       -5. Scarce data.
+   -b. Quick Implementation Checklist
+       -1. Survey PDE & boundary conditions.
+       -2. Decide input–output modalities.
+       -3. Select network architecture (depth, width, activation).
+       -4. Generate data and collocation points.
+       -5. Construct weighted loss with AD-driven derivatives.
+       -6. Train with optimizer schedule (Adam, L-BFGS).
+       -7. Validate on held-out conditions.
+       -8. Deploy surrogate for specific use case (MC, optimization, MPC, monitoring).
+
+6. Final Takeaways
+   -a. Surrogate PINNs embed physics directly in data-driven models.
+   -b. They offer speed, accuracy, and physical consistency.
+   -c. Applicable to design, uncertainty, control, and monitoring.
+   -d. Advanced techniques like Bayesian inference, multifidelity, and active learning push performance further.
+   -e. Fully differentiable, enabling end-to-end integration into optimization/control systems.
+
