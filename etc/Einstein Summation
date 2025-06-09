@@ -1,0 +1,210 @@
+### From https://ai.gopubby.com/still-avoiding-einsum-its-time-to-fix-that-6779be94c7ed
+
+1. Introduction to Einstein Summation Notation (ESN)
+   -a. Core Concept
+       Einstein Summation Notation (ESN) is a compact mathematical notation where:
+       -1. If an index appears twice in a single term, it implies a summation over that index.
+       -2. No need to explicitly write the ∑ (summation) symbol.
+   -b. Example: Matrix Multiplication
+       -1. Regular matrix multiplication:
+           𝐶_(𝑖𝑘)=∑_𝑗 𝐴_(𝑖𝑗)⋅𝐵_(𝑗𝑘)
+       -2. Einstein notation:
+           𝐶_(𝑖𝑘)=𝐴_(𝑖𝑗)𝐵_(𝑗𝑘)
+
+       -3. j is the summation index (dummy)—appears in input, not output.
+       -4. i, k are free indices—appear in both input and output.
+   -c. In NumPy
+       """
+       import numpy as np
+
+       A = np.random.randn(4, 3)
+       B = np.random.randn(3, 3)
+
+       C = np.einsum("ij,jk->ik", A, B)
+       """
+
+       Equivalent to:
+       """
+       np.dot(A, B) or A @ B
+       """
+       But einsum() generalizes to more complex operations involving multiple axes and reductions.
+
+2. Understanding the Basic einsum() Syntax
+   -a. Syntax Style
+       -1. Explicit syntax: Specifies the output explicitly ("ij,jk->ik").
+       -2. Implicit syntax: Does not specify the output ("ij,jk"). Avoid this for clarity.
+   -b. Index Rules
+       For a string like "ij,jk->ik":
+       -1. Each character (i, j, k) represents one axis.
+       -2. If a character is in the input but not output → summation.
+       -3. If a character is in input & output → retained in output.
+       -4. If repeated in one input → operation like diagonal extraction.
+       -5. If repeated across inputs → contraction or summation.
+
+   2.1 Outer Product
+       Given vectors a ∈ ℝⁿ and b ∈ ℝᵐ:
+       """
+       np.einsum("i,k->ik", a, b)
+       """
+       -a. Multiplies each a[i] with each b[k].
+       -b. Output shape: (n, m)
+
+   2.2 Batched Outer Product
+       """
+       np.einsum("bi,bk->bik", A, B)
+       """
+       -a. b is the batch dimension.
+       -b. For each batch, computes outer product.
+       -c. Output shape: (batch_size, dim1, dim2)
+
+   2.3 Extract Diagonal
+       """
+       np.einsum("ii->i", matrix)
+       """
+       -a. Same index used twice in input, once in output = diagonal extraction.
+       -b. Output: 1D array of diagonal elements.
+
+   2.4 Trace (Sum of Diagonal)
+       """
+       np.einsum("ii->", matrix)
+       """
+       -a. Repeated index only in input = summation over diagonal.
+       -b. Output: scalar
+   
+   2.5 Weighted Sum
+       Given:
+      -a. Matrix A ∈ ℝ^{n×m}
+      -b. Weight vector w ∈ ℝ^m
+
+      """
+      np.einsum("ij,j->i", A, w)
+      """
+      -a. j is summed, i preserved.
+      -b. Each row A[i] gets dot product with w.
+      -c. Output: vector of shape (n,)
+
+   2.6 Simple Transpose
+       """
+       np.einsum("ij->ji", A)
+       """
+       -a. Swaps rows and columns.
+
+   2.7 Matrix Multiplication with Transpose
+       """
+       np.einsum("ij,kj->ik", A, B)
+       """
+       -a. B’s second axis is shared (j), so it is implicitly transposed.
+
+   2.8 Swapping Axes in Images
+       -a. Used to change between formats:
+           -1. TensorFlow: (B, H, W, C) — channels last
+           -2. PyTorch: (B, C, H, W) — channels first
+       """
+       np.einsum("bhwc->bchw", image)
+       """
+       -b. Swaps axes explicitly, and only views are created—not full copies.
+
+3. Advanced Syntax
+   3.1 Multi-Head Attention (MHA)
+       -a. In Transformer models:
+           -1. Inputs: Query (Q), Key (K), Value (V)
+           -2. Multiple attention heads and batch dimensions
+       -b. To compute attention scores:
+           """
+           Q ∈ ℝ^{B×H×D×I}, K ∈ ℝ^{B×H×D×J}
+           S = np.einsum("bhdi,bhdj->bhij", Q, K)
+           """
+           This computes:
+           𝑆_(𝑏ℎ𝑖𝑗)=∑_𝑑 𝑄_(𝑏,ℎ,𝑑,𝑖)⋅𝐾_(𝑏,ℎ,𝑑,𝑗)
+
+​   3.2 Ellipsis (...) Operator
+       -a. Represents any leading dimensions.
+           """
+           S = np.einsum("...di,...dj->...ij", Q, K)
+           """
+       -b. Supports variable number of dimensions (e.g., omit batch and head explicitly).
+
+   3.3 Multiple Inputs: Linear Transformer
+       -a. Goal: reduce standard attention complexity from O(n²) → O(n)
+       -b. In Linear Transformers:
+           -1. Use a kernel function φ(.) for query and key: Qφ, Kφ
+           -2. Compute:
+               """
+               Qφ ∈ ℝ^{B×H×D×I}, Kφ ∈ ℝ^{B×H×D×J}, V ∈ ℝ^{B×H×D×J}
+               np.einsum("bhdi,bhdj,bhdj->bhdi", Qφ, Kφ, V)
+               """
+
+       But this is expensive! So we:
+       -c. Use np.einsum_path()
+           """
+           path_optimal = np.einsum_path("bhdi,bhdj,bhdj->bhdi", Qφ, Kφ, V, optimize="optimal") 
+           """
+       -d. Einsum Path Output (Explained)
+           -1. Naive FLOPs: total computation without optimization.
+           -2. Optimized FLOPs: computation after choosing better order.
+           -3. Speedup: ratio of naive to optimized.
+           -4. Intermediate sizes: helps avoid memory overflow.
+       From:
+            15.6s → 36.6ms
+       With over 400x speedup.
+
+4. Pitfalls
+   4.1 Implicit Syntax Dangers
+       -a. Index order can break the logic.
+           """
+           np.einsum("bc,cd", a, b)  # Shape: (10,30)
+           np.einsum("bc,ca", a, b)  # Shape: (30,10)
+           """
+
+           Also, repeated index is automatically summed, so:
+           """
+           np.einsum("ii", np.ones((20,20)))  # Output: 20 (trace)
+           """
+
+           But:
+           """
+           np.einsum("ii->i", matrix)  # Output: diagonal
+           """
+           Stick to explicit syntax for clarity and safety.
+
+   4.2 No Type Promotion
+       Einsum does not automatically convert data types:
+       """
+       a = np.ones(200, dtype=np.int8)
+       np.einsum("i->", a)  # Output: -56 due to int8 overflow
+       """
+       Whereas np.sum(a) handles this safely.
+
+  4.3 BLAS Subroutines
+      -a. NumPy uses optimized BLAS for matrix ops.
+      -b. Not all einsum() calls use BLAS.
+
+      Example:
+      """
+      np.einsum("di,dj->ij", Q, K, optimize=True)  # Uses BLAS
+      np.einsum("bdi,bdj->bij", Qb, Kb)  # No BLAS
+      """
+
+      PyTorch:
+      """
+      torch.einsum("bdi,bdj->bij", Q, K)  # Uses batched BLAS
+      """
+
+ 4.4 Framework Differences
+     -a. NumPy, PyTorch, TensorFlow use different backends.
+     -b. einsum() behavior and performance can vary.
+    -c. Solution:
+        Use einops for cross-framework consistency.
+        """
+        import einops
+        """
+
+5. Summary: Why Use einsum()?
+   |Feature	| Description
+   |Compact	| Expresses complex operations concisely
+   |Flexible	| Works with any tensor dimensionality
+   |Powerful	| Covers dot products, transpositions, batch ops
+   |Optimizable	| Use einsum_path() for efficiency
+   |Interoperable	| Works across NumPy, PyTorch, TensorFlow
+   |Great for Transformers	| Efficient implementation of attention and linear layers
+
