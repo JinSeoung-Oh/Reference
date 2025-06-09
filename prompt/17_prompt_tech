@@ -1,0 +1,195 @@
+### https://levelup.gitconnected.com/testing-17-prompt-engineering-techniques-on-1b-parameter-llm-f3f9e5348929
+
+1. Zero-Shot Prompting
+   -a. Definition: A method where the LLM is asked to perform a task without providing any examples.
+   -b. Mechanism:
+       -1. Relies entirely on the LLM's pretrained knowledge.
+       -2. The prompt contains only a task description or question.
+   -c. Applications:
+       -1. Factual Q&A (e.g., “What’s the capital of France?”)
+       -2. Simple summarization
+       -3. Brainstorming
+   -d. Example:
+       prompt = "What is photosynthesis?"
+   -e. Optimization Tip
+       Even in zero-shot, clarifying the audience or style (e.g., "Explain to a 5-year-old") improves results significantly.
+
+2. Few-Shot Prompting
+   -a. Definition: Includes several input-output examples to guide the LLM’s generation format and reasoning.
+   -b. Mechanism:
+       -1. Uses in-context learning.
+       -2. The LLM infers the pattern from few examples ("shots").
+       -3. One-Shot is a special case with a single example.
+   -c. Applications:
+       -1. Classification tasks (e.g., sentiment analysis)
+       -2. Simple data extraction
+       -3. Code generation
+   -d. Structure:
+       [
+           {"role": "user", "content": "Classify: 'Great movie!'"},
+           {"role": "assistant", "content": "Positive"},
+           ...
+           {"role": "user", "content": "Classify: 'It was okay, not great.'"}
+       ]
+       # Output: "Neutral"
+    -e. Benefit: Few-shot examples reduce ambiguity and force the model to mimic output format precisely.
+
+3. Role Prompting
+   -a. Definition: Assigning a specific role or persona to the LLM (e.g., “You are a travel guide”).
+   -b. Mechanism:
+       -1. Specified in the system or user prompt.
+       -2. Influences tone, vocabulary, and response framing.
+   -c. Applications:
+       -1. Teaching, storytelling, entertainment
+       -2. Simulating expert advice or behavior
+   -d. Example:
+       system_prompt = "You are Professor Astra, a quirky astronomer..."
+
+4. Style Prompting
+   -a. Definition: Specifies the desired writing style or tone without necessarily assigning a persona.
+   -b. Mechanism:
+       -1. Alters output formatting and tone.
+       -2. Can involve constraints like haiku, formal tone, etc.
+   -c. Applications:
+       -1. Poetic or structured writing
+       -2. Brand voice alignment
+       -3. Educational adaptations
+   -d. Example:
+       prompt = "Write a description of a sunset as a haiku."
+
+5. Emotion Prompting
+   -a. Definition: Instructs the LLM to express a particular emotion (e.g., excitement, sadness).
+   -b. Mechanism:
+       -1. Emotional tone is embedded in the prompt.
+       -2. Works well for personalization or persuasive writing.
+   -c. Applications:
+       -1. Emotional storytelling
+       -2. Empathetic communication (e.g., thank-you notes)
+
+6. Contextual Prompting
+   -a. Definition: Supplying rich background information to guide model responses.
+   -b. Mechanism:
+       -1. Embeds relevant context in the prompt.
+       -2. Prevents generic outputs.
+   -c. Applications:
+       -1. Personalized suggestions
+       -2. Data-driven decisions
+       -3. Multi-turn conversations
+   -d. Example:
+       context = "- Recipient: sister, age 30\n- Interests: fantasy, tea\n..."
+
+7. Chain-of-Thought (CoT) Prompting
+   -a. Definition: Instructs the model to reason step-by-step before producing an answer.
+   -b. Mechanism:
+       -1. Can be Zero-Shot CoT (“Let’s think step by step”) or Few-Shot CoT (examples with reasoning paths).
+       -2. Boosts logical accuracy for complex queries.
+   -c. Applications:
+       -1. Math word problems
+       -2. Multi-hop QA
+       -3. Commonsense reasoning
+   -d. Example:
+       Prompt: "Roger has 5 tennis balls... Let's think step by step."
+       # Output includes intermediate reasoning steps
+
+8. System Prompting
+   -a. Definition: A persistent instruction at the beginning of the conversation that guides LLM behavior.
+   -b. Mechanism:
+       -1. Given in the system role message.
+       -2. Effective for enforcing rules, tone, or task definitions across multiple turns.
+   -c. Applications:
+       -1. Summary generation
+       -2. Role and tone consistency
+       -3. Complex instruction adherence
+
+9. Explicit Instruction Prompting
+   -a. Definition: Highly specific prompts detailing what to do, how long, what to avoid, and what structure to follow.
+   -b. Mechanism:
+       -1. Reduces ambiguity.
+       -2. Useful for small models or rigid tasks.
+   -c. Applications:
+       -1. Controlled text generation
+       -2. Formal writing constraints
+       -3. Structural formatting
+
+10. Output Priming
+    -a. Definition: Starts the response for the LLM to continue in a desired format (e.g., bullet points, code snippets).
+    -b. Mechanism:
+        -1. End prompt with structured lead-in (e.g., “-” for list).
+        -2. Particularly useful for completion-style models.
+    -c. Applications:
+        -1. Recipes
+        -2. Code generation
+        -3. Checklists
+
+11. Rephrase and Respond (RaR)
+    -a. Definition: LLM first restates or interprets the user’s prompt before answering.
+    -b. Mechanism:
+        -1. Confirms understanding.
+        -2. Reduces risk in ambiguous or complex queries.
+    -c. Applications:
+        -1. Creative storytelling
+        -2. Complex instructions
+        -3. Educational explanations
+
+12. Step-Back Prompting
+    -a. Definition: Guides the LLM to consider broader definitions or principles before answering a narrow question.
+    -b. Mechanism:
+        -1. First explain general concepts → then apply to specific case.
+    -c. Applications:
+        -1. Definitions (e.g., “Is tomato a fruit?”)
+        -2. Scientific or philosophical reasoning
+        -3. Avoiding oversimplification
+
+13. Self-Critique & Refinement
+    -a. Definition: A multi-step process where the LLM generates → critiques → revises its own output.
+    -b. Mechanism:
+        -1. Initial output
+        -2. Self-evaluation (clarity, accuracy, creativity, etc.)
+        -3. Refined output based on critique
+    -c. Applications:
+        -1. Writing (e.g., slogans, poems)
+        -2. Code generation
+        -3. Iterative improvement
+
+14. Goal Decomposition Prompting
+    -a. Definition: Breaking down a high-level task into structured sub-tasks in the prompt.
+    -b. Mechanism:
+        -1. Explicit list of required sections
+        -2. Helps LLM stay organized and focused
+    -c. Applications:
+        -1. Travel planning
+        -2. Report writing
+        -3. Creative generation
+
+15. Meta-Prompting
+    -a. Definition: Prompting the LLM to help you write better prompts.
+    -b. Mechanism:
+        -1. Uses the model’s own knowledge of prompt structure
+        -2. Useful for teaching prompt engineering
+    -c. Applications:
+        -1. Creating structured, effective prompts
+        -2. Designing evaluation prompts
+        -3. Educating others
+
+16. ReAct (Reason + Act)
+    -a. Definition: Combines reasoning with simulated actions (e.g., tool usage, information lookup) for multi-hop tasks.
+    -b. Mechanism:
+        -1. Uses a cycle of:
+            -1) Thought: What to do
+            -2) Action: What to query or simulate
+            -3) Observation: What was found
+        -2. Ends with the final answer after steps
+    -c. Applications:
+        -1. Fact checking
+        -2. Multi-step reasoning
+        -3. Tool-augmented dialogue
+
+17. Thread-of-Thought (ThoT)
+    -a. Definition: Maintains logical coherence and narrative thread across long, multi-step outputs.
+    -b. Mechanism:
+        -1. Use structural guidance
+        -2. Enforce transitions and logical flow
+    -c. Applications:
+        -1. Long-form writing (essays, chapters)
+        -2. Multi-step explanations (e.g., how a bill becomes law)
+        -3. Debate or legal reasoning
