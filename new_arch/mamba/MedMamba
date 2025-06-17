@@ -1,0 +1,92 @@
+### From https://ai.gopubby.com/medmamba-explained-the-first-vision-mamba-for-generalized-medical-image-classification-is-3aee20a0751a
+
+* Purpose of MedMamba
+  -a. Optimize Medical Image Classification
+      -1. Convolutional Neural Networks (CNNs) excel at capturing local spatial features but struggle with long-range dependencies.
+      -2. Vision Transformers (ViTs) capture global context but incur quadratic computational cost in self-attention.
+      -3. MedMamba was designed to combine both strengths—local feature extraction and long-range dependency modeling—while keeping 
+          computational complexity linear, making it practical for resource-constrained clinical settings (e.g., hospital servers or edge devices).
+
+1. Background & Motivation
+   -a. CNN Limitations: fixed receptive fields hinder modeling of global context.
+   -b. ViT Limitations: self-attention scales quadratically with input size, prohibitive for high-resolution medical images.
+   -c. Hybrid Needs: accurate medical classification demands both local detail and global context. 
+                     Previous CNN–ViT hybrids improved accuracy but did not solve quadratic cost.
+   -d. Goal: achieve an optimal trade-off between representational power and compute/resource efficiency.
+
+2. Structured State Space Models (SSMs)
+   -a. State Space Representation
+       -1. Models a system by its possible states (state vectors), like mapping every position in a maze.
+   -b. Continuous-Time Formulation
+       -1. Governed by a linear ODE:
+           ℎ˙(𝑡)=𝐴ℎ(𝑡)+𝐵𝑥(𝑡), 𝑦(𝑡)=𝐶 ℎ(𝑡)+𝐷𝑥(𝑡)
+           -1) 𝐴: state transition matrix
+           -2) 𝐵: input projection
+           -3) 𝐶: output projection
+           -4) 𝐷: direct input→output feedthrough (often omitted)
+   -c. Discretization
+       -1. Zero-Order Hold (ZOH) converts discrete input sequences into piecewise-constant continuous signals via a step size Δ, 
+           and samples output back at the same Δ.
+   -d. RNN & CNN Equivalents
+       -1. Expanding the ODE solution yields a recurrent update (RNN-style inference, linear in sequence length).
+       -2. By algebraic reorganization, the same operations become convolutions (CNN-style parallel training).
+       -3. This hybrid is known as the Linear State Space Layer (LSSL).
+
+3. HiPPO, S4 & S6
+   -a. HiPPO (High-Order Polynomial Projector Operators) ensures long-range information is retained.
+   -b. S4: a “structured” SSM integrating HiPPO for efficient, long-sequence modeling.
+   -c. S6: augments S4 with a hardware-aware algorithm for optimized runtime.
+
+4. Mamba Block
+   -a. Builds on S6’s selective-scan SSM to extend from 1D sequences (NLP) to vision, forming the core of MedMamba.
+
+5. 2D-Selective-Scan (SS2D)
+   -a. Direction-Sensitive Issue
+       -1. Vision requires 2D plane traversals, unlike 1D scans used in NLP S6.
+   -b. Cross-Scan Module (CSM)
+       -1. Performs four directional scans on each feature-map channel—
+           -1) Top-Left → Bottom-Right
+           -2) Bottom-Right → Top-Left
+           -3) Top-Right → Bottom-Left
+           -4) Bottom-Left → Top-Right
+       -2. Scan Expanding: transforms a 𝐻×𝑊×𝐶 map into 4×𝐶 sequences of length 𝐻⁣×𝑊
+       -3. S6 Processing: each 1D sequence is fed in parallel through the same S6 block.
+       -4. Scan Merging: recombines the four processed sequences into a single 𝐻×𝑊×𝐶 map, preserving directional context.
+       -5. Benefit: achieves a global receptive field with only linear complexity, avoiding the quadratic cost of attention.
+
+6. SS-Conv-SSM Block
+   -a. Two Branches
+       -1. Conv-Branch
+           -1) Depthwise + pointwise convolutions extract local features.
+           -2) Uses Batch Normalization (BN).
+       -2. SSM-Branch
+           -1) SS2D (CSM+S6) captures long-range dependencies.
+           -2) Uses Layer Normalization (LN).
+   -b. Channel Split & Shuffle
+       -1. Input 𝑋 split into 𝑋_1(Conv) and 𝑋_2(SSM) via 𝑓(𝑋)
+       -2. After separate processing, 𝑓^(−1)(⋅) concatenates outputs; 𝑔(⋅) shuffles channels to mix branch information.
+   -c. Residual Connection
+       -1. Adds original 𝑋 to final output for stability and gradient flow.
+
+7. MedMamba End-to-End Architecture
+   -a. Patch Embedding (Patch-E)
+       -1. Splits a 224×224×3 image into non-overlapping 4×4 patches via stride-4 convolution → 56×56×𝐶
+       -2. Channels: Tiny/Small 𝐶=96, Base 𝐶=128
+   -b. Hierarchical SS-Conv-SSM Stages
+       -1. Four stages with repeated SS-Conv-SSM blocks:
+           -1) Tiny: (2, 2, 4, 2)
+           -2) Small: (2, 2, 8, 2)
+           -3) Base: (2, 2, 12, 2)
+       -2. Later stages have more blocks at lower resolution to capture complex features.
+   -c. Patch Merging (Patch-M)
+       -1. Combines each 2×2 group of patches into one → halves spatial size (H/2×W/2), concatenates channels (4C → linear projection to 2C).
+   -d. Classifier
+       -1. Global average pooling reduces final 7×7×𝐶 map to 1×1×𝐶
+       -2. Linear layer + softmax for class prediction.
+
+8. Key Innovations Recap
+   -a. Hybrid Local–Global Modeling: CNN-based parallel training + SSM/RNN-based linear inference.
+   -b. SS2D with CSM: true global receptive field on 2D images at linear cost.
+   -c. Flexible Model Sizes: Tiny, Small, Base variants cater to different resource/accuracy needs.
+   MedMamba thus delivers state-of-the-art accuracy in medical image classification while remaining computationally efficient and 
+   scalable to practical clinical environments.
