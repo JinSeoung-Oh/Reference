@@ -1,0 +1,75 @@
+### From https://arxiv.org/pdf/2505.13988
+### From https://huggingface.co/datasets/lime-nlp/Synthetic_Unanswerable_Math
+
+1. Introduction & Hallucination Tax
+   -a. Reinforcement finetuning (RFT) is widely used to sharpen LLM reasoning but carries an underexplored side effect: 
+        it erodes refusal behavior, causing models to confidently hallucinate answers to questions they cannot solve. 
+        Under standard RFT, refusal rates plummet by over 80%, dramatically increasing the model’s propensity to answer unanswerable queries. 
+        This degradation of epistemic humility is what the authors term the “hallucination tax.”
+
+2. Why RFT Induces a Hallucination Tax
+   -a. Reward Misalignment
+       -1. RFT optimizes a reward model built on human preferences, where correct, confident answers are heavily reinforced, but abstentions 
+           (“I don’t know”) are rare or even penalized. The model thus learns that “any answer” is preferable to refusal.
+   -b. Overconfident Defaults
+       -1. LLMs inherently favor fluent, determinate outputs. Without explicit training to recognize unanswerable inputs, 
+           RFT further amplifies the bias to “always answer,” since that path yields higher reward.
+
+3. SUM: Synthetic Unanswerable Math
+   To both measure and mitigate this hallucination tax, the authors introduce SUM—a high-quality dataset of multistep math problems
+   that appear solvable but are intrinsically unanswerable due to missing, ambiguous, or contradictory information.
+
+   -a. Purposes of SUM
+       -1. Quantify the Hallucination Tax: Precisely measure how RFT degrades refusal behavior by comparing refusal rates before
+           and after fine-tuning.
+       -2. Train Uncertainty Recognition: Provide the model with clear examples where abstention is the correct response.
+   -b. Five Unanswerability Criteria
+       Each transformed problem adheres to one of these:
+       -1. Key Information Deletion: Omit a necessary condition (e.g., drop a side length).
+       -2. Ambiguous Information: Replace precise values with vague ranges or negations.
+       -3. Unrealistic Conditions: Introduce logically impossible premises (e.g., “25:15 o’clock”).
+       -4. Unrelated Objects: Mention entities absent from the original context.
+       -5. Question Deletion: Remove the question prompt entirely.
+
+4. Data Generation & Quality
+   -a. Base Dataset: DeepScaleR (40,307 problems from AIME, AMC, Omni-MATH, Still).
+   -b. Transformation Model: o3-mini is prompted—with criterion definitions and few-shot examples—to either:
+       -1. Select the most fitting unanswerability criterion,
+       -2. Modify the problem accordingly, or
+       -3. Refuse if no nontrivial, plausible change is possible.
+   -c. Abstention Instruction: Every variant ends with “If you don’t know the answer, reply with 𝐼 𝑑𝑜𝑛’𝑡 𝑘𝑛𝑜𝑤.,” explicitly teaching refusal.
+   -d. Model Comparison: o3-mini vs. gpt-4o under identical prompts.
+       -1. Human Review: Two experts labeled 300 samples (Cohen’s κ = 0.519).
+       -2. Results: o3-mini achieved 86.93% valid unanswerable variants; gpt-4o only 66.78%.
+       -3. Decision: o3-mini selected to generate the final SUM training set.
+
+5. Why o3-mini and 10% SUM Injection?
+   -a. Model Selection: o3-mini’s high-quality transformations (≈87%) ensured challenging, 
+                        nontrivial unanswerable examples without obvious artifacts.
+   -b. Injection Ratio:
+       -1. Too Little SUM (<10%) fails to shift the risk/reward balance—refusal behavior doesn’t improve.
+       -2. Too Much SUM (e.g., 50%) harms accuracy on legitimately solvable questions.
+       -3. 10% SUM hit the empirical sweet spot: it restores refusal rates while maintaining overall performance.
+
+6. How Inference-Time Reasoning Helps
+   -a. Compute Leverage: The added prompt “If you don’t know… reply with ‘I don’t know’” explicitly empowers the model 
+                         at runtime to pause and refuse rather than guess.
+   -b. Knowledge-Boundary Learning: Training on SUM teaches the model to detect insufficient “evidence chains,” 
+                                    so at inference it more readily triggers the refusal path instead of hallucinating.
+
+7. Key Experimental Findings
+   -a. Standard RFT reduces refusal rates by over 80%, escalating hallucination.
+   -b. RFT + 10% SUM dramatically restores appropriate refusal behavior, with minimal drop in accuracy on solvable tasks.
+   -c. The approach also improves generalization to out-of-domain math problems and factual QA by instilling epistemic humility.
+
+8. Discussion & Future Directions
+   -a. Reward Function Redesign: Encourage positive reinforcement of “I don’t know” to align models with epistemic uncertainty.
+   -b. Curriculum Learning: Gradually introduce unanswerable data to balance reasoning vs. trust.
+   -c. Adaptive Reward Shaping: Dynamically tune incentives for refusal vs. correctness during training.
+   -d. Alignment Strategy Studies: Investigate how different instruction-tuning and prior alignment affect hallucination and abstention.
+
+9. Conclusion
+   The “hallucination tax” is an unintended consequence of RFT’s incentive structure—models become overconfident and lose the ability to refuse.
+   SUM offers a simple yet powerful remedy: injecting just 10% unanswerable, 
+   high-quality examples into RFT both measures and mitigates this tax, 
+   enabling LLMs to reason about their own uncertainty while preserving accuracy on legitimate tasks.
