@@ -1,0 +1,56 @@
+### From https://arxiv.org/pdf/2505.17561
+
+1. Motivation & Problem Statement
+   -a. Video diffusion sensitivity: In text-to-video diffusion, the initial noise seed profoundly affects output quality, 
+                                    temporal coherence, and prompt alignment—even with the same prompt.
+   -b. Limitations of prior methods: Existing noise-prior approaches (inter-frame smoothing, frequency filtering, partial sampling) 
+                                     rely on hand-designed signals and require multiple full diffusion runs to evaluate candidates. 
+                                     They overlook internal model cues that indicate which seeds the model “prefers.”
+
+2. ANSE: Model-Aware Noise Selection
+   ANSE is a principled, inference-time framework that selects high-quality noise seeds by measuring attention-based uncertainty 
+   within the model itself, rather than imposing external priors.
+
+3. BANSA: Bayesian Active Noise Selection via Attention
+   -a. Core idea: Treat attention maps as stochastic predictions, then quantify their uncertainty and consistency—analogous to BALD 
+                  in classification but applied to generative attention.
+   -b. Attention entropy: For each candidate seed 𝑧, prompt 𝑐, and timestep 𝑡, extract K stochastic attention maps 
+                          𝐴^(1),…,𝐴^(𝐾)
+   -c. BANSA score:
+       BANSA(𝑧,𝑐,𝑡)=1/𝐾 ∑_𝑘 𝐻(𝐴^(𝑘))−𝐻(1/𝐾 ∑_𝑘 𝐴^(𝑘)),
+       where 𝐻(⋅) is the average row-wise Shannon entropy.
+   -d. Interpretation:
+       -1. First term: average uncertainty per sample.
+       -2. Second term: entropy of the mean map (lower if samples agree).
+       -3. Low BANSA ⇒ attention maps are both confident (low entropy) and consistent (low disagreement), which correlates with high-quality, 
+                        coherent video generation.
+   -e. Selection rule:
+       𝑧∗=arg min_(𝑧∈𝑍) BANSA(𝑧,𝑐,𝑡)
+
+4. Efficient Approximation via Bernoulli-Masked Attention
+   -a. Challenge: Computing BANSA naively requires 𝐾 full forward passes per seed.
+   -b. Solution: Inject stochasticity directly into one pass by applying a random Bernoulli mask 𝑚 to the attention scores:
+       𝐴^(𝑘)=Softmax(𝑄𝐾^⊤ ⊙ 𝑚^(𝑘)),
+       then compute the same entropy-based BANSA-E surrogate using these 𝐾 masked samples.
+   -c. Benefit: Multiple “stochastic” attention maps from a single forward pass—drastically reducing compute while still capturing uncertainty.
+
+5. Layer-Wise Truncation for Speed
+   -a. Observation: Not all attention layers contribute equally to the uncertainty signal.
+   -b. Strategy: Compute cumulative BANSA-E up to layer 𝑑, and choose the smallest 𝑑∗ for which the Pearson correlation with the full-layer
+                 BANSA-E is above a threshold (e.g., 𝜏=0.7).
+       -1. On CogVideoX-2B, correlation saturates by layer 14; on CogVideoX-5B, by layer 19.
+   -c. Result: Evaluate only the first 𝑑∗ layers’ BANSA-E—further slashing compute with negligible quality loss.
+
+6. Overall ANSE Pipeline
+   -a. Sample a pool of noise seeds 𝑍
+   -b. For each 𝑧∈𝑍, compute approximate BANSA-E using Bernoulli-masked attention on layers ≤𝑑∗
+   -c. Select the seed 𝑧∗ with the lowest BANSA-E score.
+   -d. Generate the video by running the diffusion sampler from 𝑧∗
+   This adds only an 8% (2B) or 13% (5B) inference-time overhead yet yields notable gains in visual fidelity and temporal consistency.
+
+7. Key Contributions
+   -a. ANSE: the first active, model-aware noise-selection framework for text-to-video diffusion.
+   -b. BANSA: a novel acquisition function measuring attention-map uncertainty under stochastic perturbations.
+   -c. Practical deployment: Bernoulli-masked approximation + layer truncation enable fast, 
+                             inference-time selection without retraining or external priors.
+
