@@ -1,0 +1,106 @@
+### From https://medium.com/data-science-collective/a-visual-understanding-of-positional-encoding-in-transformers-3585d1c409d9
+
+1. Motivation: Why Inject Position into Transformers
+   -a. Transformers process tokens in parallel via self-attention, so they have no built-in sense of word order.
+   -b. RNNs, by contrast, process sequentially—naturally capturing order but suffering from vanishing gradients on long sequences and slow training.
+   -c. Solution: create a fixed, parameter-free positional encoding (PE) that, when added to each token embedding,
+                 gives the model explicit position information without losing parallelism.
+
+2. Where Positional Encoding Lives
+   -a. Tokenization: split text into words/subwords.
+   -b. Embedding: map each token to a 𝑑_(model) -dimensional vector 𝑥_𝑖
+   -c. Compute a matching-dimension PE vector 𝑃𝐸(𝑖) only from the token’s index 𝑖
+   -d. Add them:
+       𝑥^~_𝑖 = 𝑥_𝑖 + 𝑃𝐸(𝑖)
+   -e. Feed the result into the encoder/decoder stacks, so every layer sees content +\ position.
+
+3. Formula for Sine/Cosine Positional Encoding
+   -a. Let the model dimension 𝑑_(model) be even.
+   -b. For position 𝑝𝑜𝑠∈{0,1,…} and element index 𝑗∈{0,…,𝑑_(model)−1}, let 𝑖=⌊𝑗/2⌋
+       Then:
+       𝑃𝐸_(𝑝𝑜𝑠, 2𝑖) = sin(𝑝𝑜𝑠 / 10000^(2𝑖/𝑑_(model))),
+       𝑃𝐸_(𝑝𝑜𝑠, 2_(𝑖+1)) = cos(𝑝𝑜𝑠 / 10000^(2𝑖/𝑑_(model)))
+   -c. You obtain a max_len×𝑑_(model) matrix whose 𝑝𝑜𝑠th row is 𝑃𝐸(𝑝𝑜𝑠)
+
+4. Why Sine & Cosine? The Mechanical-Counter Analogy
+   -a. Periodic functions repeat at fixed intervals—like odometer wheels on old gas pumps (each wheel 0–9 resets, carrying over to the next), 
+       or clock needles spinning at different rates.
+   -b. Each (sin,cos) pair is a point on the unit circle at angle
+       𝜃=𝑝𝑜𝑠/10000^(2𝑖/𝑑)
+   -c. Low-frequency components (𝑖 large) cycle slowly—encoding coarse position; high-frequency (𝑖 small) cycle rapidly—capturing fine offsets.
+   -d. This mimics a multi-rate counting mechanism: every dimension “ticks” at its own pace.
+
+5. Unit-Circle Geometry
+   -a. On the unit circle, a point with angle 𝜃 has coordinates (cos⁡𝜃,sin𝜃)
+   -b. In PE, each dimension-pair (𝑗=2𝑖,2𝑖+1) is exactly one such point at 𝜃=𝑝𝑜𝑠/10000^(2𝑖/𝑑)
+   -c. Plotting these as little circle charts shows how each dimension’s “needle” rotates as 𝑝𝑜𝑠 increases.
+
+6. Generating PE in Python
+   6.1 Listing 1: Core Function      
+       #################################################################################
+       import numpy as np
+
+       def positional_encoding(d_model, max_len):
+           # pos: shape (max_len,1) with values 0…max_len−1
+           pos = np.arange(max_len)[:, None]
+           # i: indices 0,2,4,… for even dims
+           i   = np.arange(0, d_model, 2)
+           # inverse frequency term
+           w   = 1 / (10000 ** (2*i / d_model))
+
+           pe = np.zeros((max_len, d_model))
+           pe[:, 0::2] = np.sin(pos * w)  # apply sine at even indices
+           pe[:, 1::2] = np.cos(pos * w)  # apply cosine at odd indices
+           return pe
+       ###################################################################################
+   6.2 Listing 2: Quick Numeric Example
+       #################################################################################
+       pe = positional_encoding(6, 5)
+       np.round(pe, 4)
+       # array([
+       #  [ 0.     ,  1.     ,  0.     ,  1.     ,  0.     ,  1.     ],
+       #  [ 0.8415 ,  0.5403 ,  0.0022 ,  1.     ,  0.     ,  1.     ],
+       #  [ 0.9093 , -0.4161 ,  0.0043 ,  1.     , … ],
+       #  … ])
+       #################################################################################
+
+7. Visualizing on Grids
+   -a. Setup: max_len=7, d_model=20 → 7 rows × 10 circles.
+   -b. Each subplot draws a unit circle and one dot at (cos⁡,sin⁡) for that dimension-pair and token position.
+   -c. Observation: left columns (small 𝑖) rotate quickly; right columns slowly.
+
+8. Key Mathematical Properties
+   8.1 Constant Vector Norm
+       Using sin^2 + cos^2 = 1, one shows
+       ∥𝑃𝐸_(𝑝𝑜𝑠)∥2 = np.root(∑(𝑖=0 to 𝑖=𝑑/2−1) (sin^2+cos^2) = np.root(𝑑_model / 2)),
+       independent of 𝑝𝑜𝑠
+
+   8.2 Translation-Invariant Dot-Product
+       Define two positions 𝑝 and 𝑝+𝑘. Their dot product is
+       ⟨𝑃𝐸_𝑝, 𝑃𝐸_(𝑝+𝑘)⟩=∑(𝑖=0 to 𝑖=𝑑/2−1) cos(𝑘 / 10000^(2𝑖/𝑑))
+       which depends only on offset 𝑘, not on absolute position 𝑝
+       -a. This implies a linear “rotation” matrix 𝑀_𝑘(independent of 𝑝) exists so that
+           𝑃𝐸_(𝑝+𝑘)=𝑀_𝑘 𝑃𝐸_𝑝
+
+9. 2-D Visual Confirmation
+   9.1 d_model=2 Example (Listing 4 & Fig 9)
+       -a. For d_model=2, max_len=12, each PE is one point on one unit circle.
+       -b. Plot all 12 rays from the origin—angles increase uniformly mod 2𝜋
+       -c. ** verifies** all pairs separated by the same 𝑘 share identical angular offset.
+   9.2 Heatmap of Dot-Products (Listing 5 & Fig 11–12)
+       #####################################################################
+       pe   = positional_encoding(64, 20)
+       dist = pe @ pe.T        # shape (20×20)
+       plt.imshow(dist, cmap='jet')
+       #####################################################################
+       -a. Result: constant-color diagonals corresponding to offset 𝑘
+       -b. with small 𝑑, similarity vs. 𝑘 oscillates (wrap-around periodicity).
+       -c. with large 𝑑, similarity decays nearly monotonically as 𝑘 grows.
+
+10. Takeaways & Implications
+    -a. Injects absolute order into parallel self-attention via fixed sinusoids.
+    -b. Enables relative queries—model sees the same offset pattern wherever it occurs.
+    -c. Parameter-free: no learned PE weights required.
+    -d. Geometrically transparent: unit-circle visuals and heatmaps make the mechanism clear.
+    -e. Rotational structure (𝑃𝐸_(𝑝+𝑘)=𝑀_𝑘 𝑃𝐸_𝑝) ensures consistent “next token” or “±k tokens away” attention everywhere.
+
