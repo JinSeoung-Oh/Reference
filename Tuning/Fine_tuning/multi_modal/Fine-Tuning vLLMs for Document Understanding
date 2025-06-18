@@ -1,0 +1,93 @@
+### From https://pub.towardsai.net/fine-tuning-vllms-for-document-understanding-5ad43022b34e
+
+1. Overview & Context
+   -a. Objective: Demonstrate how to fine-tune a vision-language model (Qwen 2.5 VL 7B) to extract handwritten text from small table-cell images.
+   -b. Use Case: Digitizing a Norwegian phenology archive—handwritten tree-line observations—into machine-readable form for climate research.
+   -c. Deliverables:
+       -1. Fully annotated dataset (~82 000 images).
+       -2. Fine-tuned VLM with >99% accuracy on test splits.
+       -3. Geospatial plots of extracted tree lines (using Uber H3).
+   -d. Resources: Code on GitHub; data on HuggingFace; extracted results in Parquet & Excel.
+
+2. Motivation & Why VLMs Over OCR
+   -a. Traditional OCR limits: Engines like Tesseract or EasyOCR struggle with:
+       -1. Faint strokes (missed or misread digits).
+       -2. Noise artefacts (dotted backgrounds from preprocessing).
+       -3. Cell borders confused for characters.
+       -4. Handwriting variability, especially “1” vs. “7” ambiguity.
+   -b. VLM advantages:
+       -1. Superior OCR performance, having been pre-trained on mixed vision+text corpora that include OCR tasks.
+       -2. Instructionability: You can tell Qwen exactly what to expect (digit lengths, allowed symbols) and how to resolve edge cases 
+                               (e.g. “7 always has a middle stroke”).
+   -c. Illustration: Side-by-side comparison shows EasyOCR missing faint “2”s and mistaking borders for “1”s, 
+                     whereas a fine-tuned Qwen model reads correctly.
+
+3. The Phenology Dataset
+   -a. Scale & Format: ~82 000 cropped cell images, each roughly 81–93 px wide by 48–57 px high.
+   -b. Content: Handwritten numbers (1–3 digits), occasional letters (‘e’, ‘s’, ‘k’), percent signs, or blanks.
+   -c. Initial Inspection:
+       -1. “1” and “7” often look alike.
+       -2. Some entries are very faint.
+       -3. Dots or scanning artefacts present.
+       -4. Parentheses “( )” vs. square brackets “[ ]” confusion.
+       -5. Cell borders can be misinterpreted as digits.
+   -d. Insight: Manual review revealed consistent handwriting conventions (e.g. 7s always have a horizontal bar), informing prompt design.
+
+4. Annotation & Rapid Iterative Fine-Tuning
+   A three-step loop to build labels quickly and improve the model incrementally:
+   -a. Predict (~200–500 images) with the base Qwen 2.5 VL model.
+   -b. Review & Correct:
+       -1. Jupyter interface displaying 5 images + their current labels side by side.
+       -2. Editor adjusts incorrect labels (e.g. bracket ↔ parenthesis fixes).
+   -c. Retrain on the enlarged, corrected set using the Unsloth fine-tuning notebook.
+
+   Repeat these iterations until validation accuracy plateaus (~<1% gains per cycle). This bootstrapping exploits
+   the strong base performance (~90–95% accuracy) to focus human effort on the remaining errors.
+
+5. Supervised Fine-Tuning (SFT) Technical Details
+   -a. LoRA Tuning: Low-rank adapters applied to all model layers (vision transformer + vision-language adapter + decoder).
+   -b. Hyperparameters:
+       -1. Learning rate: very low (e.g. 1e-5) to “nudge” rather than overhaul.
+       -2. LoRA rank: small (e.g. rank=4–8) to limit parameter updates.
+       -3. Batch size: tuned for GPU memory (A100 80 GB).
+       -4. Epochs: enough to converge (<10).
+   -c. Data Balancing:
+       -1. Blank cells comprise ~70% of raw data; withheld to 30% to avoid wasted capacity.
+   -d. Label Quality Check:
+       -1. Even 0.5% mislabeled samples can degrade accuracy.
+       -2. Manual spot-checks and error analysis (e.g. parentheses mislabeled as brackets) are critical.
+
+   # Base model load (4-bit off for full precision)
+   model, tokenizer = FastVisionModel.from_pretrained(
+       "unsloth/Qwen2.5-VL-7B-Instruct",
+       load_in_4bit=False,
+       use_gradient_checkpointing="unsloth",
+   )
+
+6. System Prompt & Instruction Design
+   Crafted to guide Qwen’s extraction logic:
+
+   SYSTEM_PROMPT:
+   You are an expert at reading handwritten table entries...
+   - Return only the raw text string.
+   - Valid outputs: 1–3 digit numbers, optionally in ( ), [ ], letters e/s/k, % or “unknown”.
+   - Seven always has a horizontal mid-stroke; absence → “1”.
+   - Ignore cell borders and outside content.
+   - No markdown or explanation, only the text.
+
+   This explicit rubric lets the model leverage context (e.g. expected character set) and disambiguate similar glyphs.
+
+7. Post-Processing & Visualization
+   -a. Data export: Final text table stored as Parquet/Excel with accompanying geo-coordinates.
+   -b. Mapping: Using Uber H3, tree-line heights are hex-binned and colored:
+       -1. Cool colors near coasts/north (low tree line).
+       -2. Warm colors inland/south (higher tree line).
+   -c. Impact: Provides a spatially detailed view of phenological patterns in Norway, directly enabling downstream climate analyses.
+
+8. Conclusion
+   -a. Pipeline: Manual data inspection → instruction-rich prompting → rapid annotate-fine-tune loop → high-accuracy VLM.
+   -b. Achievements:
+       -1. Near-100% extraction accuracy on challenging handwritten cells.
+       -2. A reproducible recipe for fine-tuning VLMs on domain-specific OCR tasks.
+   -c. Broader significance: Demonstrates how modern VLMs can replace legacy OCR in scientific digitization projects,
+                             unlocking new frontiers in climate and historical data analysis.
