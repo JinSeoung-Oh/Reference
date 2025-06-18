@@ -1,0 +1,78 @@
+### From https://medium.com/@vipra_singh/ai-agents-agentic-memory-part-9-abb3fdbe486c
+### Have to check given link for code
+
+1. Introduction
+   1.1 The Illusion of Memory
+       -a. Most current LLM-based agents appear to “remember” via huge context windows or crafty prompts—but they’re actually stateless.
+       -b. True memory requires a persistent, evolving internal state, not just slurping in more tokens.
+   1.2 What Is “Memory” for an AI Agent?
+       -a. State: What’s happening right now.
+       -b. Persistence: Carrying knowledge across sessions.
+       -c. Selection: Choosing which bits to store.
+       -d. These pillars give agents continuity over days/weeks of interaction.
+   1.3 Memory vs. Context Windows vs. RAG
+       -a. Context windows only help within a single session; they’re costly and still stateless.
+       -b. RAG (Retrieval-Augmented Generation) grounds answers in documents at call-time—but forgets everything afterward.
+       -c. Memory stores user preferences, past decisions, failures—so the agent actually learns and adapts.
+
+2. Types of Memory
+   -a. Short-Term (Working) Memory
+       -1. Conversation history, temporary variables, attention context.
+   -b. Long-Term Memory, subdivided into:
+       -1. Procedural Memory: “How to do things” (code templates, business logic).
+       -2. Episodic Memory: User-specific past interactions (like a “photo album” of events).
+       -3. Semantic Memory: Facts about the world (persistent data, e.g. “Alice’s role,” “Paris is France’s capital”).
+
+3. Managing Memory
+   -a. Short-Term
+       -1. Trim or summarize when context exceeds the LLM’s window.
+   -b. Long-Term
+       -1. Store to a database or vector index; retrieve via keyword or semantic search.
+
+4. Writing Memories
+   -a. On the Hot Path: Upsert immediately (e.g. ChatGPT’s save_memory), but adds latency.
+   -b. In the Background: Batch or async, decoupled from the main user flow.
+
+5. Adding Short-Term Memory
+   -a. Demonstrated with LangGraph
+       -1. In-Memory Saver or MongoDBSaver keeps a thread’s message history.
+       -2. Example:
+           from langgraph.checkpoint.memory import InMemorySaver
+           graph = builder.compile(checkpointer=InMemorySaver())
+       -3. You can view, list, or delete thread checkpoints at will.
+
+6. Adding Long-Term Memory
+   -a. Use a store alongside the checkpointer (e.g. InMemoryStore, PostgresStore).
+   -b. On each turn, the agent can:
+       -1. Search (store.search) for relevant memories to build its prompt.
+       -2. Put (store.put) new facts when prompted (“Remember my name is Bob”).
+   -c. Semantic search can be enabled via embeddings to find similar memories.
+
+7. Building a Memory-Enhanced Email Assistant
+   7.1 State Definition
+       -a. A typed dict holds:
+           -1. email_input
+           -2. messages (conversation so far)
+           -3. triage_result
+   7.2 Triage with Episodic Memory
+       -a. Load few-shot examples from memory to guide classification (ignore/notify/respond).
+   7.3 Tools & Semantic Memory
+       -a. Real-world actions as @tools (e.g. write_email, check_calendar_availability).
+       -b. Memory-management tools (create_manage_memory_tool, create_search_memory_tool) let the agent store and recall semantic facts 
+           in the middle of reasoning.
+   7.4 Response Agent with Procedural Memory
+       -a. The agent pulls its system prompt out of procedural memory, so you can update its “policy” on the fly.
+   7.5 Wiring the Workflow
+       -a. Use LangGraph’s StateGraph:
+       -b. Triage node (episodic + procedural)
+       -c. Conditional edge → Response Agent node (semantic + procedural) or END
+   7.6 Demonstration & Gradual Learning
+       -a. Phase 1: Basic agent (episodic only)
+       -b. Phase 2: Advanced agent (episodic + initial procedural)
+       -c. Phase 3: Add a new example (“API docs issue” → “respond”) + human feedback
+       -d. Phase 4: Optimize prompts via create_multi_prompt_optimizer → store improved prompts in procedural memory
+       -e. Phase 5: Rerun—agent now consistently prioritizes API-doc emails and crafts more specific replies
+
+8. Conclusion
+   -a. Memory (short- and long-term, across procedural/episodic/semantic types) is the key to truly intelligent, adaptive agents.
+   -b. Agents built this way not only answer better—they learn from past interactions, improve over time, and develop genuine continuity.
