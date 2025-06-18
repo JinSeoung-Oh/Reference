@@ -1,0 +1,83 @@
+### From https://medium.com/codex/building-a-radar-simulator-a-practical-guide-to-doppler-motion-and-2d-cfar-detection-17508fdf627b
+### https://github.com/moorissa/radar-target-detector
+
+1. Motivation: Why Radar Matters
+   -a. Long-Range & All-Weather Performance
+       -1. Outperforms LiDAR and cameras beyond ~200 m and in darkness, fog, rain, or GPS-denied settings.
+   -b. Direct Velocity Measurement via Doppler shift—crucial for distinguishing moving objects (cars, pedestrians) from static infrastructure.
+   -c. Safety-Critical Features like Adaptive Cruise Control (ACC) and emergency braking rely on robust radar sensing.   
+   -d. Limitations: Poor at fine shape resolution and object classification when cluttered—hence the need for sensor fusion.
+
+2. Radar vs. Other Sensors & Fusion
+   Capability	| Radar	| LiDAR	| Camera
+   Range	| 200 m+	| ~100 m	| Depends on lighting
+   Velocity	| Direct (Doppler)	| Indirect (∆position/t)	| Indirect (optical flow)
+   Weather Robustness	| Excellent	| Moderate (rain/fog scatters)	| Poor in low light/fog
+   Shape/Classification	| Low resolution	| High resolution	| High semantic detail
+
+   Sensor Fusion combines these strengths into a resilient perception stack.
+
+3. Radar System Basics
+   -a. Main Blocks:
+       -1. Waveform generator (FMCW chirp)
+       -2. Antenna (Tx/Rx)
+       -3. Receiver & DSP
+   -b. Measured Quantities:
+       -1. Range via beat-frequency (∆f) of linear chirp
+           range = 𝑐Δ𝑓 / 2 sweep_slope
+       -2. Velocity via Doppler frequency shift
+           velocity = 𝜆Δ𝑓_(Doppler) / 2
+   -c. Automotive Use: Bosch long-range (narrow FOV, up to 250 m) and short-range (wide FOV) modules; 
+                       advanced units even output classified targets for L4/L5 autonomy.
+
+4. Range-Doppler Processing Fundamentals
+   -a. 1D FFT (Range FFT) converts the beat signal into a range profile.
+   -b. 2D FFT across fast-time (range) and slow-time (pulse index) yields a Range-Doppler Map (RDM): distance vs. relative speed.
+   -c. Key Insight: Peaks in the RDM correspond to moving targets at specific ranges and velocities.
+
+5. MATLAB Simulation Pipeline
+   An end-to-end FMCW radar simulator breaks down into:
+   -a. System Requirements & Waveform Design
+       max_range       = 200;      % meters
+       range_res       = 1;        % meter
+       c               = 3e8;      % m/s
+       fc              = 77e9;     % Hz
+       B_sweep         = c/(2*range_res);
+       T_chirp         = 5.5*2*max_range/c;
+       slope           = B_sweep/T_chirp;
+
+   -b. Target Definition
+       target_pos      = 110;      % meters
+       target_speed    = -20;      % m/s (negative = approaching)
+   
+   -c. Signal Generation & Moving-Target Simulation
+       for i = 1:length(t)
+           r_t(i)   = target_pos + target_speed*t(i);
+           td(i)    = 2*r_t(i)/c;
+           Tx(i)    = cos(2*pi*(fc*t(i) + 0.5*slope*t(i)^2));
+           Rx(i)    = cos(2*pi*(fc*(t(i)-td(i)) + 0.5*slope*(t(i)-td(i))^2));
+           Mix(i)   = Tx(i).*Rx(i);  % beat signal
+       end
+
+   -d. Range FFT
+       Mix2D      = reshape(Mix,[Nr,Nd]);
+       sig_fft1   = abs(fft(Mix2D,Nr)./Nr);
+       singleSide = sig_fft1(1:Nr/2,:);
+       plot(mean(singleSide,2));
+   
+   -e. Range-Doppler Map via 2D FFT
+       sig_fft2 = fft2(Mix2D,Nr,Nd);
+       RDM      = fftshift(abs(sig_fft2(1:Nr/2,:)));
+       surf(doppler_axis, range_axis, 10*log10(RDM));
+   
+   -f. 2D CFAR Detection
+       -1. Parameters: Training cells (Tr, Td), Guard cells (Gr, Gd), offset SNR.
+       -2. Sliding Window: For each CUT, average noise in surrounding training cells (excluding guards), set threshold = mean + offset, then compare CUT.
+       -3. Output: Binary mask of detections on the RDM.
+
+6. Evaluation & Insights
+   -a. Range Profile: 1D FFT shows a clear peak near 110 m (±10 m margin) corresponding to the moving target.
+   -b. RDM & CFAR: The 2D map correctly isolates the target’s range and velocity cell, filtering out background noise.
+   -c. Compute-vs-Practicality: Entire simulation runs in MATLAB with no hardware, yet mirrors real radar processing, 
+                                making it ideal for learning and prototyping before deployment.
+
