@@ -1,0 +1,127 @@
+### From https://medium.com/@techsachin/kv-cache-compression-with-inter-layer-attention-similarity-for-efficient-long-context-llm-inference-a96920a6fdd2
+
+1. Problem Statement & Limitations of Existing Approaches
+   Long-context inference in Large Language Models (LLMs) is becoming critical, especially as sequence lengths reach tens of thousands of tokens. 
+   Traditional methods for improving inference efficiency include:
+   -a. Window-based attention: attending only to a fixed-length recent token window
+   -b. Token-selection methods: selectively retaining tokens based on estimated importance
+
+   Limitation:
+   These methods reduce memory and computation but at the cost of discarding tokens that may become important in future generations, 
+   especially under autoregressive decoding.
+
+2. Core Hypothesis and Objectives
+   -a. Hypothesis:
+       -1. Distant tokens are less important than proximal ones (recent and early tokens).
+       -2. Instead of removing them, it's better to allocate fewer resources to them.
+   -b. Objectives:
+       -1. Analyze where important tokens are distributed in long contexts.
+       -2. Design a mechanism that optimizes memory and compute for less important tokens without discarding them.
+
+3. Key Empirical Observations
+   -a. Observation 1: Proximal tokens are more critical for next-token prediction
+       -1. Experimental result: using only the most recent 256 tokens yields identical predictions to dense attention in ~80% of the cases.
+       -2. Implies: tokens farther away have diminishing importance in autoregressive decoding.
+   -b. Observation 2: Inter-layer attention scores exhibit high similarity
+       -1. In models like LLaMA3-8B-32K, attention scores across successive layers—especially for distant tokens—are nearly redundant.
+       -2. Enables inter-layer sharing of attention maps, particularly for tokens with lower influence.
+
+4. Proposed Method: POD (Proximal tokens Over Distant tokens)
+   -a. Overview:
+       POD reduces compute and memory requirements for distant tokens during inference without evicting them, 
+       by sharing attention scores across layers for those tokens.
+
+   4.1 Stage I: Offline Inter-Layer Attention Sharing Exploration
+       -a. Goal: Identify layer blocks where attention scores can be shared for distant tokens.
+       -b. Steps:
+           1. Attention Score Extraction:
+              For a model with:
+              -1. L layers
+              -2. H attention heads
+              Given N input sequences 𝑠_𝑖=(𝑥_1,...,𝑥_𝑛), compute the attention scores 𝑆^𝑖_(ℓ,ℎ)∈𝑅^(𝑞×𝑛) for the last q tokens in each sample 
+              (1 ≤ q ≤ n) at layer ℓ, head ℎ
+           2. Attention Similarity Metric:
+              For each pair of layers (ℓ_𝑎,ℓ_𝑏), compute similarity as the average Jensen-Shannon divergence between corresponding rows:
+              sim_ℎ(ℓ_𝑎,ℓ_𝑏)=1−(1/𝑁_𝑞)∑_(𝑖=1 to 𝑖=𝑁)∑_(𝑗=1 to 𝑗=𝑞) JS(𝑆^(𝑖,𝑗)_(ℓ_𝑎,ℎ),𝑆^(𝑖,𝑗)_(ℓ_b,ℎ))
+              -1. Result: similarity ∈ [0, 1]
+           3. Layer Grouping into Blocks:
+              Use a bottom-up greedy algorithm:
+              -1. Start from lower layers.
+              -2. Merge consecutive layers where similarity ≥ δ, a tunable threshold.
+              Each block contains consecutive layers whose attention scores will be shared during inference for distant tokens.
+
+   4.2 Stage II: Lightweight Training Adaptation
+       -a. Purpose: Adapt the pre-trained LLM to utilize shared attention for distant tokens.
+       -b. Steps:
+           1. Token Grouping:
+              -1. Divide context into:
+                  -1) Proximal tokens: recent + early tokens (to handle attention sink)
+                  -2) Distant tokens: the rest
+          2. Attention Score Reuse:
+             For each attention head and layer ℓ:
+             Let:
+             -1. 𝑄_ℓ,𝐾_ℓ,𝑉_ℓ∈𝑅^(𝑛×𝑑) be the query, key, and value matrices at layer ℓ.
+             -2. Layer ℓ belongs to block 𝐵_ℓ=[ℓ_𝑎,ℓ_𝑏]
+             Then for a token 𝑥_𝑖, the distant-token attention output uses shared keys/values from the lowest layer in the block:
+             Att_distant(𝑥_𝑖)=Softmax(𝑄_(ℓ,𝑖)𝐾^⊤_(ℓ_𝑎))𝑉_(ℓ_𝑎)
+             -1. The proximal attention is computed normally.
+          3. Gated Aggregation:
+             Final attention output is:
+             Att_(final)(𝑥_𝑖)=𝑔_(ℓ,𝑖)⋅Att_proximal(𝑥_𝑖)+(1−𝑔_(ℓ,𝑖))⋅Att_distant(𝑥_𝑖)
+             -1. 𝑔_(ℓ,𝑖)∈[0,1]: dynamically determined per token
+             -2. The gating is parameter-free (non-learned)
+
+   4.3 Stage III: Efficient Inference
+       a) KV Cache Memory Optimization
+          -1. Only the lowest layer of a block stores KV for distant tokens.
+          -2. Upper layers share the scores and do not store additional KV pairs.
+          -3. Results in 35% memory reduction in typical configurations.
+       b) Compute Optimization 
+          -1. At inference time, evaluate 𝑔_(ℓ,𝑖)
+          -2. If 𝑔_(ℓ,𝑖)≥𝜏(hyperparameter), skip computing distant attention at that layer
+          -3. This allows conditional skipping of unnecessary computation
+
+5. Experimental Evaluation
+   5.1 Functional Correctness
+       -a. Needle-in-a-Haystack Task
+           -1. Existing methods (e.g., StreamingLLM, H2O) fail when the relevant token lies outside the attention window.
+           -2. POD maintains correctness, retrieves all relevant tokens, and matches dense attention behavior.
+  5.2 Benchmark Performance
+      -a. Long Context Tasks (e.g., Book QA, Code Completion)
+          -1. POD outperforms token-eviction and layer-sharing baselines (e.g., CLA)
+          -2. With limited post-training (1–5% of data), POD matches full model performance
+          -3. Compatible with token selection methods for further KV cache savings
+  5.3 Efficiency Results
+      -a. Memory Footprint
+          -1. On sequences up to 32K tokens, POD:
+              -1) Increases max batch size by 30%
+              -2) Matches the 35% KV cache reduction predicted theoretically
+      -b. Compute Saving via τ Threshold
+          -1. As τ decreases:
+              -1) More distant attention computations are skipped
+              -2) Greater speed-up, but with potential performance degradation
+          -2. At τ = 0.7:
+              -1) 25% compute reduction
+              -2) <5% drop in benchmark scores
+   5.4 Robustness & Scaling
+       -a. Long Context Generalization (InfiniteBench)
+           -1. POD maintains high performance as context length scales
+           -2. Token selection methods degrade noticeably at 64K+ tokens
+       -b. Hyperparameter Sensitivity
+           -1. Increasing proximal token count → consistent accuracy gains
+           -2. Increasing cache compression → mild trade-off
+           -3. Optimal config: 35% KV cache, 256–512 proximal tokens
+
+6. Conclusion
+   -a. POD introduces a resource allocation paradigm:
+       -1. Retain all tokens
+       -2. Reuse computation for distant ones instead of discarding
+   -b. Backed by two empirical observations:
+       -1. Proximal tokens are more important
+       -2. Attention maps across layers are redundant for distant tokens
+   -c. Achieves:
+       -1. 35% KV memory savings
+       -2. 25% compute reduction
+       -3. No major drop in generation accuracy
+   -d. Easily combinable with other efficiency methods like token selection
+
