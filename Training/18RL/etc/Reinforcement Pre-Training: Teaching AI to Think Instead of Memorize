@@ -1,0 +1,108 @@
+### From https://pub.towardsai.net/reinforcement-pre-training-teaching-ai-to-think-instead-of-memorize-b464c4bbd873
+
+1. The Memorization Problem
+   -a. Next-token training drives LMs to pick up statistical patterns, not concepts.
+   -b. E.g. “the capital of France is …” → model parrots “Paris” without understanding geography.
+   -c. Existing RL fixes:
+       -1. RLHF (human-labeled preferences)—tiny fraction of data, high annotation cost.
+       -2. RLVR (verifiable rewards)—needs handcrafted reward datasets per domain.
+   -d. Scaling wall: neither can harness web-scale corpora the way pure next-token pretraining can.
+
+2. Reinforcement Pre-training (RPT): The Big Idea
+   -a. Reinterpret every next-token guess as a tiny reasoning task.
+   -b. Have the model “think” (generate a Chain-of-Thought, CoT) before each next-token prediction.
+   -c. Reward = 1 if the final predicted token exactly matches the corpus ground-truth; 0 otherwise.
+   -d. Learn by RL (e.g. PPO)—reinforce reasoning paths that lead to correct tokens.
+
+   Why this is elegant:
+   - Verifiable rewards: ground truth already lives in your text.
+   - Unlimited scale: every token in every document is a training signal.
+   - Hack-resistant: rewards are objective, binary, exact-match signals.
+
+3. RPT Training Loop
+   -a. Take context up to position t in a document.
+   -b. Sample G reasoning trajectories: each is a CoT (multiple tokens) + a next-token guess.
+   -c. Compute reward per trajectory: 1 if guess = true token at t+1, else 0.
+   -d. Update policy via on-policy RL (e.g. PPO), nudging the model toward explanations that yield correct tokens.
+   -e. Token-level filtering:
+       -1. Score top-16 token entropy with a proxy.
+       -2. Train only on high-entropy (hard) positions—maximizes reasoning value sent to RL.
+
+4. “Think, Then Guess” vs. Direct Guess
+   -a. Standard LM:
+       -1. “Electric force grows with charge” → directly predict “size.”
+   -b. RPT-trained:
+       -1. “Let me analyze: this references Coulomb’s law—force ∝ charge.”
+       -2. “‘Grows’ means positive relationship; possible continuations: ‘size,’ ‘density,’ ‘separation’…”
+       -3. “’Size’ matches both grammar and physics context.”
+       -4. Predict: “size.”
+   -c. Net effect: superficial pattern-matching → genuine, context-grounded chain-of-thought.
+
+5. Math Benchmark: OmniMATH 
+   -a. Base: Distilled Qwen-14 B, fine-tuned with RPT
+   -b. Comparator: R1-Distill-Qwen-32 B (2× parameters)
+   -c. Result :
+       -1. RPT-14 B matches or beats the 32 B model’s next-token accuracy across all three difficulty splits.
+       -2. Typical gains: +5–10 pts absolute over standard-pretrained 14 B.
+
+6. Clean Scaling Laws (Figure 5)
+   -a. X-axis: Training compute (FLOP).
+   -b. Y-axis: Next-token accuracy.
+   -c. Finding: RPT accuracy scales as a power-law (R² > 0.99).
+   -d. Implication: Additional compute yields predictable, sustainable gains—unlike many brittle “finetuning” methods.
+
+7. Better Downstream Fine-Tuning
+   -a. Setup: Reinforcement-finetune (RFT) both RPT- and standard-pretrained models on a new task.
+   -b. Outcome: RPT checkpoints start with higher zero-shot performance and end with higher final accuracy.
+
+8. Zero-Shot Transfer to General Tasks (Table 3)
+   -a. Tasks: assorted non-math benchmarks (factual QA, reasoning).
+   -b. Result: RPT-14 B outperforms a naïvely scaled 32 B model, despite only seeing math during pretraining.
+   -c. Takeaway: reasoning skills generalize beyond their training domain.
+
+9. Internal Reasoning Patterns
+   -a. Compared: R1-Distill-Qwen-14 B “math problem solver” vs. RPT-14 B on same contexts.
+   -b. Metrics (counts per token):
+       -1. Hypothesis steps: +161.8%
+       -2. Deduction steps: +26.2%
+       -3. “Mechanical” breakdown (rote calculation steps): significantly ↓
+   -c. Conclusion: RPT fosters more exploratory, high-level reasoning rather than brute-force step-chaining.
+
+10. Concrete CoT Example (Table 4)
+    -a. Context: “Electric force grows with charge”
+        RPT’s full chain:
+        -1. “This suggests Coulomb’s law…”
+        -2. “’Grows’ → positive correlation. Options: size, density, separation…”
+        -3. “’Size’ preserves parallelism and refers to magnitude.”
+        -4. Predict “size.”
+    -b. Contrast: a normal LM simply “knows” from statistics that “size” is common after “grows with charge.”
+
+11. Industry & Economic Impact
+    -a. Compute savings: 14 B RPT ≃ 32 B standard → > 50% cost cut in training & inference.
+    -b. Democratization: smaller outfits can train reasoning-enhanced models on commodity hardware.
+    -c. New apps: real-time edge reasoning, domain-specific expert systems, on-device AI.
+
+12. Practical Recipe & Trade-offs
+    -a. Hyperparameters:
+        -1. LR = 1 × 10⁻⁶, Temp = 0.8, Batch = 256 problems, G = 8 reasoning samples, max seq = 8 k tokens, no KL penalty, 
+            1 k steps + dynamic sampling after 500 steps.
+    -b. Token-filtering: concentrate RL on top-16 entropy tokens only.
+    -c. Inference: 2–5× slower per token (must generate CoT), but far more accurate.
+    -d. When to use: safety-critical, high-value decisions, complex reasoning; fall back to standard LMs for trivial tasks or ultra-low latency.
+
+13. Limitations & Future Directions
+    -a. Current scope:
+        -1. Experiments only on 14 B models, math corpus.
+        -2. Requires starting from a “reasoning-ready” base model.
+    -b. Open avenues:
+        -1. Scale RPT to 100 B+ with diverse web data.
+        -2. Develop adaptive triggers (only invoke CoT when needed).
+        -3. Combine RPT with retrieval/RAG for hybrid reasoning + knowledge.
+        -4. Formulate scaling laws for RPT across model sizes, data domains.
+
+14. Key Practitioner Takeaways
+    -a. Every token = a reasoning challenge with ground-truth feedback.
+    -b. Smaller can beat bigger: smarter training > brute-force scaling.
+    -c. Predictable scaling: invest compute with confidence in returns.
+    -d. Transferability: math-trained reasoning lifts general tasks.
+    | Bottom line: RPT shifts our core question from “How big can we build?” to “How well can we teach models to think?”
