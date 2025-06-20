@@ -1,0 +1,123 @@
+### From https://arxiv.org/pdf/2506.01844
+### From https://huggingface.co/lerobot/smolvla_base
+
+1. Overview
+   -a. System composition:
+       -1. Pretrained compact vision-language model (VLM)
+       -2. An action expert network trained via flow matching
+   -b. Experimental pipeline:
+       -1. Pretraining on broadly-collected, community datasets using imitation learning
+       -2. Evaluation in both real-world (robot arms) and simulated environments
+   -c. Inference architecture: utilizes an asynchronous execution stack to separate perception/prediction from action execution, 
+                               achieving rapid and responsive control.
+
+1.1 Model architecture
+    -a. Components
+        -1. Vision-Language Model (VLM):
+            -1) Backbone: SmolVLM‑2, featuring a SigLIP visual encoder and SmolLM‑2 text decoder
+            -2) Inputs: multiple RGB images, sensorimotor state, and language instruction
+            -3) Visual tokens reduced via pixel-shuffle, limiting to 64 tokens/frame
+            -4) The state (e.g., joint readings) mapped via linear projection to token embedding compatible with VLM’s token space
+            -5) Language tokens processed by existing SmolLM‑2 tokenizer
+            -6) All tokens concatenated and run through decoder to extract conditioning features
+       -2. State, action, feature projectors:
+           -1) Linear projections:
+               - Sensorimotor states → VLM token dimension
+               - VLM output features → action expert hidden size
+               - Action expert output → environment-specific action space format
+       -3. Action Expert 𝑣_𝜃:
+           -1) Structured as a conditional Flow Matching Transformer
+           -2) Takes VLM features and optionally earlier actions to predict a chunk of future actions 𝐴_𝑡=(𝑎_𝑡,…,𝑎_(𝑡+𝑛))
+   -b. Visual token reduction
+       -1. SmolVLM-2 performance enhanced by tiling in training, but SmolVLA omits tiling at inference time
+       -2. Uses a pixel shuffle downsampling, producing 64 visual tokens per frame, balancing expressivity and efficiency
+   -c. Layer skipping for efficiency
+       -1. Architectural simplification: only use the first N = L/2 layers of the VLM for feature extraction
+       -2. The action expert also relies only on these early layers
+       -3. This trick significantly reduces computation and latency with minimal performance cost,
+           as verified empirically and supported by prior literature
+   -d. Flow matching action expert
+       -1. Architecture & Inputs:
+           -1) Transformer with alternating CA/SA layers
+           -2) Inputs: noisy action chunk plus VLM features
+      -2. Objective:
+           𝐿_𝜏(𝜃)=𝐸_(𝑝(𝐴_𝑡∣𝑜_𝑡),𝑞(𝐴^𝜏_𝑡∣𝐴_𝑡))∥𝑣_𝜃(𝐴^𝜏_𝑡,𝑜_𝑡)−(𝜖−𝐴_𝑡)∥^2
+           where:
+           -1) 𝐴^𝜏_𝑡=𝜏𝐴_𝑡+(1−𝜏)𝜖, 𝜖∼𝑁(0,𝐼)
+           -2) 𝜏 sampled from Beta distribution
+           -3) 𝑣_𝜃 learns the vector field pointing from noisy to clean action
+      -3. Efficiency adjustment:
+          -1) Hidden dimension set to 0.75 × VLM’s hidden size to save parameters and runtime
+  -e. Interleaved cross-attention + causal self-attention
+      -1. Action expert’s blocks alternate:
+          -1) Cross-Attention (CA): action tokens attend to VLM features
+          -2) Self-Attention (SA): temporal consistency among action tokens, with causality enforced by masking
+      -2. This interleaved structure ensures:
+          -1) Smooth, coherent action chunks
+          -2) Better alignment with visual context
+          -3) Empirical improvements in real robot trajectories vs CA- or SA-only designs
+
+1.2 Pretraining data collected by the community
+    -a. Data source and curation
+        -1. Over 481 community-contributed robotics datasets sourced from HuggingFace
+        -2. Coverage includes diverse robot arms, viewpoints, environmental conditions
+        -3. Filter applied based on:
+            -1) Robot embodiment type
+            -2) Number of episodes
+            -3) Frame coverage per action segment
+            -4) Overall data quality
+   -b. Task annotation
+       -1. Many datasets originally have missing, vague, or inconsistent instructions
+       -2. A vision-language model (Qwen2.5-VL-3B-Instruct) auto-generates concise task descriptions
+       -3. For each dataset:
+           -1) Sample representative frames
+           -2) Provide original text + sampled images to VLM
+           -3) Prompt produces clear action-oriented descriptions like “pick up red block with gripper”
+   -c. Camera viewpoint normalization
+       -1. Original datasets inconsistent on camera naming/placement
+       -2. Manual mapping:
+           -1) Primary camera standardized to OBS_IMAGE_1 (top view)
+           -2) Secondary to OBS_IMAGE_2 (wrist view)
+           -3) Tertiary to OBS_IMAGE_3 (side view)
+       -3. If extra views exist, maintain order but drop after third
+
+1.3 Asynchronous inference
+    -a. Motivation
+        -1. Single-chunk (n actions) policies can cause robotic inaction while waiting for new inference
+        -2. Expected inference latency 𝐸[ℓ_𝑆] and environment timestep Δ𝑡 determine responsiveness needs
+    -b. Async algorithm steps
+        -1. RobotClient plays actions from current chunk 𝐴_𝑡 while monitoring its remaining length
+        -2. If remaining actions ∣𝐴_𝑡∣<𝑔⋅𝑛, capture new observation 𝑜_(𝑡+𝑘) and trigger async inference
+        -3. Use filtering to drop near-duplicate observations
+        -4. PolicyServer returns new chunk 𝐴~_𝑡
+        -5. Merge overlapping chunks via a concatenation function 𝑓(𝐴_𝑡,𝐴^~_𝑡)
+        -6. Continue execution without idle time
+    -c. Analytical insight
+        -1. No idle on device if:
+            𝑔 ≥ 𝐸[ℓ_𝑆] / 𝑛⋅Δ𝑡
+        -2. Filtering adds noise, but ensures fewer redundant calls and smoother queue management
+
+2.1 Robots
+    -a. Real and simulated setups:
+        -1. SO-100 / SO-101 robotic arms: 6-DOF low-cost manipulators
+        -2. Franka Emika Panda: Precision 7-DOF torque-controlled robot (LIBERO)
+        -3. Swayer arm: 4-DOF manipulator used in Meta‑World environments
+        These represent varied morphologies and serve to test real-world transferability of SmolVLA.
+
+3.1 Baselines
+    -a. π₀: 3.3B VLA model with Flow Matching; Levin-architecture; trained on 10k hours of robotic data
+    -b. ACT: 80M CVAE-based model with ResNet encoder, regression objective
+
+4. Discussion
+   -a. Summary of contributions
+       -1. Compact, efficient VLA (~450M params) suited for consumer-grade hardware and low-cost robots
+       -2. Asynchronous inference design that enhances real-time control
+       -3. Empirical evidence supporting each architectural and algorithmic decision
+       -4. Fully open-sourced: models, code, data, and robot hardware
+   -b. Limitations & opportunities
+       -1. Data currently from mainly a single robot platform; need broader embodiment coverage
+       -2. Dataset scale (~23k trajectories) still smaller than industrial benchmarks (~1M)
+       -3. VLM is generic OCR-focused; robotics-specific pretraining could help
+       -4. Doesn’t yet support long-horizon or hierarchical planning tasks
+       -5. Integration of reinforcement learning is not explored, but could boost performance on more complex tasks
+
