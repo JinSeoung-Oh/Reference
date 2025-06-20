@@ -1,0 +1,108 @@
+### From https://github.com/FlagOpen/RoboBrain?tab=readme-ov-file
+
+1. ShareRobot Dataset
+   1.1. Overview
+        ShareRobot is a large-scale, fine-grained dataset specifically designed to enhance robotic manipulation through better task planning, 
+        affordance perception, and trajectory prediction. Its main features:
+        -a. Fine-Grained Annotation: Each video is frame-aligned with low-level planning instructions. 
+                                     Unlike Open X-Embodiment, ShareRobot avoids high-level abstraction and enables per-frame decision-making.
+        -b. Multi-Dimensional Labels:
+            -1) Task Planning: Low-level instructions for each frame.
+            -2) Affordance Perception: Where the robot can grasp or interact.
+            -3) Trajectory Prediction: Paths for end-effector movement.
+        -c. High-Quality Data: 51,403 validated instances, filtered by:
+            -1) High resolution
+            -2) Descriptive accuracy
+            -3) Clear trajectory visibility
+            -4) Successful task execution
+        -d. Large Scale: Over 1,027,990 QA pairs, making it the largest dataset for these manipulation subtasks.
+        -e. Rich Diversity:
+            -1) 102 scenes
+            -2) 12 robotic embodiments
+            -3) 107 atomic task types
+        -f. Scalability: The data generation pipeline supports growth as new robots and environments are added.
+
+   1.2. Data Selection
+        Starting with the Open X-Embodiment dataset, 51,403 high-quality videos were selected using strict criteria:
+        -a. Resolution Threshold: Removed any video under 128 pixels.
+        -b. Description Filtering: Removed vague or missing captions.
+        -c. Success Criteria: Only successful manipulations kept.
+        -d. Minimum Frame Count: Less than 30 frames → discarded.
+        -e. Object Visibility: No occluded target or end-effector.
+        -f. Trajectory Clarity: Vague motion → discarded.
+
+   1.3. Data Labeling
+        -a. Planning Labels:
+            -1. Extract 30 key frames from each demo.
+            -2. Gemini decomposes these frames into low-level instructions.
+            -3. 3 human annotators validate and refine these.
+            -4. 5 templates × 10 RoboVQA question types → used to generate 2 QAs per question type → total of 1,027,990 QA pairs.
+        -b. Affordance Labels:
+            -1. 6,522 filtered images manually annotated with bounding boxes:
+                -a. Format: {lx, ly, rx, ry} for top-left and bottom-right.
+            -2. All annotations reviewed and refined manually.
+        -c. Trajectory Labels:
+            -1. 6,870 images labeled with at least 3 trajectory waypoints:
+                -a. Format: {xi, yi} for each 2D coordinate
+            -2. Also manually verified for alignment.
+
+   1.4.  Data Statistics
+         -a. Source: 23 Open X-Embodiment datasets
+         -b. Scenes: 102 diverse locations (e.g., kitchens, labs)
+         -c. Robot Bodies: 12 embodiments
+         -d. Actions: 132 atomic types
+             -1. Top 5: pick, move, reach, lift, place
+         -e. Data Splits:
+             -1. Planning: 1M train / 2,050 test QA pairs
+             -2. Affordance: 6,000 train / 522 test images
+             -3. Trajectory: 6,000 train / 870 test images
+
+2. RoboBrain Model
+   -a. Goal
+       To enable a multi-modal LLM (MLLM) that:
+       -1. Understands abstract human instructions
+       -2. Predicts object affordance regions
+       -3. Predicts manipulation trajectories
+       -4. Executes concrete robotic actions from abstract reasoning
+
+   2.1. Model Architecture
+        -a. Core Components:
+            -1. Foundational Model (Planning): Built on LLaVA with:
+                -1) Vision Encoder (ViT): SigLIP
+                -2) Projector: 2-layer MLP
+                -3) LLM: Qwen2.5-7B-Instruct
+            -2. A-LoRA: For Affordance Bounding Box Prediction
+            -3. T-LoRA: For 2D Trajectory Waypoint Prediction
+        -b. Pipeline:
+            -1. Visual Input (Xv) → Vision Encoder → Feature (Zv)
+            -2. Zv → Projector → Visual tokens (Hv)
+            -3. Hv + Text Input (Xt) → LLM → Response
+        -c. Affordance Formalism:
+            -1. Object Oi = {Ai⁰, Ai¹, ..., Aiⁿ}
+            -2. Ai = {lx, ly, rx, ry}
+        -d. Trajectory Formalism:
+            -1. Trajectory = Pt:N = {(xi, yi)} for t ≤ i ≤ N
+   2.2. Training
+        -a. Phase 1: General OneVision (OV) Training
+            Objective: Build a strong multimodal foundation for robotic capabilities.
+            -1. Stage 1:
+                -1) LCS-558K image-text pairs
+                -2) Train Projector for visual-semantic alignment
+            -2. Stage 1.5:
+                -1) 4M high-quality image-text samples
+                -2) Full-model training for better generalization
+            -2. Stage 2:
+                -1) 3.2M images + 1.6M videos (LLaVA-OneVision)
+                -2) Improve high-res image/video instruction following
+        -b. Phase 2: Robotic Training
+            -1. Stage 3:
+                -1) 1.3M robotic samples from:
+                    - RoboVQA-800K
+                    - ScanView, MMScan, 3RScan, ScanQA, SQA3D
+                    - ShareRobot-200K
+                -2) Target: Abstract-to-concrete manipulation planning
+                -3) Use 1.7M Phase 1 data for mixed training to avoid catastrophic forgetting
+            -2. Stage 4:
+                -1) Train affordance and trajectory modules
+                -2) Use ShareRobot + open-source data [58, 65]
+                -3) Inject LoRA modules for lightweight finetuning
