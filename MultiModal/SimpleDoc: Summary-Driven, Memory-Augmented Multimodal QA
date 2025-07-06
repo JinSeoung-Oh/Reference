@@ -1,0 +1,78 @@
+### From https://medium.com/ai-exploration-journey/simpledoc-summary-driven-memory-augmented-multimodal-qa-ai-innovations-and-insights-52-f2e14da07d23
+
+1. DocVQA: Overview and Challenges
+   Document Visual Question Answering (DocVQA) aims to answer questions from complex, multimodal documents — such as reports, manuals, and handbooks — that include:
+   -a. Text
+   -b. Tables
+   -c. Images
+
+2. Key Challenges in DocVQA:
+   -a. Multi-page reasoning — locating and reasoning over content spread across many pages.
+   -b. Cross-page references — connecting details that are dispersed across different parts of the document.
+   -c. Multimodal content fusion — interpreting and synthesizing diverse data types (text, tables, images).
+
+3. SimpleDoc: A Minimalist Retrieval-Augmented Reasoning Framework
+   SimpleDoc presents a lightweight alternative to complex multi-agent architectures for DocVQA. 
+   It uses a two-stage retrieval + reasoning pipeline, focusing on efficiency and practical deployment.
+
+4. Two-Stage Workflow in SimpleDoc
+   -a. Stage 1: Offline Preprocessing
+       -1. Each document page is processed in advance.
+       -2. For every page:
+           - Visual embeddings are extracted.
+           - A page-level summary is generated using an LLM.
+   -b. Stage 2: Online Retrieval & Reasoning
+       -1. When a user asks a question:
+           - Retrieval step:
+             -1) Pages are ranked using a combination of embedding similarity and summary re-ranking.
+             -2) Top candidate pages are selected.
+           - Answer generation:
+             -1) A memory-augmented VLM agent examines retrieved content.
+             -2) If it finds enough info, it generates an answer.
+             -3) If not, it refines the query and triggers another retrieval round.
+
+5. Illustration: Example Reasoning Loop
+   -a. Initial retrieval fetches Pages 6, 13, 14 — covering experimental setup and metrics, but missing alignment scores.
+   -b. The agent detects the gap and refines its query.
+   -c. Second retrieval brings Page 7 with Table 3, which has the alignment scores.
+   -d. Final answer: temperature 0.1 yields the best score (85.9).
+
+6. Design Philosophy and Strategic Insights
+   -a. Strengths
+       -1. Dual-path retrieval: Uses both semantic embeddings and LLM-generated summaries for robust filtering.
+       -2. Page-level granularity: Naturally aligns with document structure (PDFs, slides).
+       -3. Iterative reasoning: Mimics human search behavior — starts broad, then zooms in.
+       -4. Memory mechanism: Accumulates context from multiple reasoning steps.
+
+7. Limitations & Trade-offs
+   -a. Page granularity ≠ always optimal:
+       -1. Long or dense pages (e.g., with multiple charts/tables) can overwhelm the agent.
+       -2. Signals the need for multi-scale retrieval, combining page-level and patch-level information.
+   -b. Iterative retrieval is fragile:
+       -1. If initial query is flawed, the refinement process may compound errors.
+       -2. The agent may drift away from relevant context in open-ended or multi-hop questions.
+   -c. Memory accumulation is naive:
+       -1. Simple append-only strategy (no pruning, no weighting).
+       -2. Risks memory bloat, redundancy, and semantic interference over time.
+       -3. Could degrade response quality on longer queries.
+
+8. Broader Implications
+   -a. Multimodal RAG systems must rethink atomic units of retrieval:
+       -1. Traditional chunk-based (textual) RAG doesn't generalize well to rich visual docs.
+       -2. Page-based units work most of the time, but flexibility is key.
+       -3. Future direction: Combine multi-scale retrieval + reasoning-aware memory management.
+   -b. SimpleDoc’s philosophy: Optimize for deployability, not novelty — a pragmatic and functional design for real-world use cases.
+
+9. Conclusion
+   SimpleDoc shows that you don’t need elaborate architectures to make progress on DocVQA. 
+   A carefully designed two-stage system using offline summaries, embedding + semantic filtering, 
+   and a simple reasoning loop can already handle complex documents to a reasonable extent.
+   However, to move beyond the current limits of page-centric reasoning, future systems must:
+   -a. Handle non-uniform visual density
+   -b. Support fine-grained content fusion
+   -c. Improve query reformulation
+   -d. Implement smarter memory prioritization
+   This evolution is crucial for scaling RAG systems to multi-modal enterprise data — where tables, figures, and layout complexity are the norm,
+   not the exception.
+
+
