@@ -1,0 +1,87 @@
+### From https://medium.com/aiguys/rag-3-0-with-multi-modal-reasoning-models-397f32eea752
+
+1. Agentic AI, RAG, and the Limits of Modern Vision-Language Systems
+   -a. Context: Agentic AI & the New Frontier
+       -1. With the rise of Agentic AI — LLM-based systems capable of reasoning, acting, and using tools 
+           — there's growing interest in using agents to enhance Retrieval-Augmented Generation (RAG).
+       -2 The goal: build scalable, truthful, multimodal RAG systems over enterprise-level data, potentially enabled by protocols 
+                    like Model Context Protocol (MCP).
+
+2. What is RAG?
+   -a. RAG (Retrieval-Augmented Generation) injects external knowledge into LLMs at inference time.
+   -b. It’s a non-permanent alternative to fine-tuning, which is expensive, irreversible, and affects the entire model’s weight space.
+   -c. RAG pipeline basics:
+       -1. Split documents into chunks.
+       -2. Generate embeddings.
+       -3. Store in a vector database.
+       -4. Retrieve top-k similar chunks at query time.
+       -5. Feed them to the LLM.
+
+3. Why RAG Fails in Real-World Applications
+   -a. Despite its simplicity, RAG systems often fail at scale due to:
+       -1. Arbitrary document chunking that splits coherent concepts.
+       -2. Diminishing retrieval precision as corpus grows:
+           - Embedding similarity scores become indistinguishable → key chunks missed.
+       -3. Vocabulary mismatch between user queries and documents.
+       -4. Loss of hierarchical structure, which is crucial in enterprise data.
+   -b. Other Hard Challenges:
+       -1. Table continuity across pages.
+       -2. Image and graph understanding.
+       -3. Complex PDF structures.
+       -4. Inter-document references → circular loops.
+       -5. Knowledge updates (delete/modify) are non-trivial.
+       -6. No clear fallback if retrieval fails (null return).
+       -7. Retrieval gets slower with more knowledge.
+       -8. LLM context window constraints remain a bottleneck.
+
+4. In-Context Learning (ICL) in Vision-Language Models (VLMs)
+   -1. ICL allows LLMs to learn from a few examples without retraining.
+   -2. The vision community hoped VLMs (e.g., LLaVA) would show MM-ICL (Multimodal ICL) capabilities.
+
+   -a. MM-ICL Setup
+       -1. Show a VLM: image + question → answer.
+       -2. Then provide several image-QA pairs as examples.
+       -3. Test on a new image-question.
+   -b. Testing ICL Generalization
+       -1. In-Distribution (ID): Examples from same dataset (e.g., TextVQA → TextVQA).
+       -2. Out-of-Distribution (OOD): Examples from a different dataset (e.g., TextVQA → OK-VQA).
+   -c. Key Observation:
+       -1. As the number of shots increases (4 → 32), the gap between ID and OOD performance grows.
+       -2. VLMs don’t learn reasoning — they merely mimic output formats.
+       -3. MM-ICL performance plateaus or degrades in the OOD setting.
+
+5. Proposed Fix: MM-ICL with Reasoning
+   -a. Idea: enrich each example with a rationale, not just the answer.
+       -1. Old Format (Standard MM-ICL):
+           """ Image
+               Q: What color is the car?
+               A: Red
+           """
+       -2. New Format (MM-ICL + Reasoning):
+           """Image
+               Q: What color is the car?
+               Rationale: 1. Locate the car. 2. Observe its color. 3. It's red.
+               A: Red
+           """
+           The hope: models will learn methodology, not just the pattern.
+
+6. Experimental Results: No Significant Improvement
+   -a. Even with gold rationales (human-written, not model-generated), performance barely improves.
+   -b. Even with retriever agents that intelligently select examples → performance drops compared to random selection.
+   -c. Conclusion: MM-ICL with reasoning does not yield robust generalization or improved accuracy — even in ideal settings.
+
+7. Broader Takeaways: What We Learned About RAG
+   -a. Current RAG approaches are limited to text; real-world enterprise data includes:
+       -1. Tables
+       -2. Graphs
+       -3. Complex layouts
+       -4. Images
+   -b. RAG must evolve beyond “document retrieval” to become multimodal and structured-data-aware.
+   -c. Without solving vision reasoning, layout understanding, and hierarchical referencing, RAG will continue to break in practice.
+
+8. Conclusion
+   -a. Despite the hype, VLMs are not true multimodal in-context learners.
+   -b. They are sophisticated zero-shot mimics — good at following instructions, poor at learning from examples.
+   -c. Standard approaches (even enhanced with reasoning and retrieval) fail to scale to the complexity of real-world multimodal tasks.
+   -d. For future RAG systems, it’s not enough to build better retrievers or use better examples 
+       — we need fundamentally better multimodal reasoning architectures, especially for enterprise applications.
