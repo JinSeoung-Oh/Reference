@@ -1,0 +1,128 @@
+### From https://artgor.medium.com/paper-review-v-jepa-2-self-supervised-video-models-enable-understanding-prediction-and-planning-28410d8a1c6b
+
+V-JEPA 2: A Scalable Self-Supervised Video Pretraining Framework
+
+1. Overview
+   -a. V-JEPA 2 is a self-supervised video model trained on 22 million videos (1M+ hours) from the internet and a small set of robot videos.
+   -b. It achieves state-of-the-art performance in:
+       -1. Motion understanding (e.g., 77.3% on Something-Something v2)
+       -2. Action anticipation (e.g., 39.7 Recall@5 on Epic-Kitchens-100)
+       -3. Video question answering (VidQA) when aligned with an LLM
+   -c. After minimal finetuning (62 hours of robot data), V-JEPA 2-AC performs zero-shot robotic planning using only image goals 
+       — no task-specific rewards or demonstrations are needed.
+
+2. Core Architecture of V-JEPA 2
+   -a. Masked Prediction Objective
+       -1. Learns by predicting masked video patch representations using context.
+       -2. Uses a Vision Transformer (ViT) encoder with:
+           - 3D rotary positional embeddings
+           - A separate predictor to estimate masked patches
+       -3. Trained using L1 loss between predicted and target embeddings.
+       -4. Applies stop-gradient and EMA to avoid representation collapse.
+   -b. Scaling Strategy
+       -1. Trains longer (252k iterations), at higher resolution (up to 384×384).
+       -2. Scales to 1B parameters (ViT-g).
+       -3. Benchmarked using frozen encoder + small probes on 6 classification tasks:
+           - Motion (gesture/movement)
+           - Appearance (object/scene)
+
+3. V-JEPA 2-AC: Action-Conditioned World Model for Robotics
+   -a. Goal
+       -1. Extend V-JEPA 2 into a planning model for robotics using:
+           - A frozen visual encoder
+           - A new action-conditioned predictor
+   -b. Training Data & Setup
+       -1. Uses the Droid dataset: 62 hours of robot arm videos with:
+           - 7D end-effector state (position, orientation, gripper)
+           - Frame-by-frame RGB at 256×256 resolution, 4 FPS
+       -2. Defines actions as delta in end-effector state.
+   -c. Model Architecture
+       -1. V-JEPA 2 encoder produces per-frame latent maps (16×16×1408).
+       -2. These are combined with action + proprioception tokens.
+       -3. A 300M parameter transformer predictor (24 layers, 16 heads) autoregressively models future states.
+       -4. Uses:
+           - 3D rotary positional encoding (video patches)
+           - Temporal rotary encoding (action/state tokens)
+           - Block-causal attention for temporal modeling
+   -d. Training Losses
+       -1. Teacher forcing loss for next-frame prediction
+       -2. Rollout loss for long-term consistency
+       -3. Trains without rewards, success indicators, or task labels — entirely from video and control data.
+
+4. Planning with V-JEPA 2-AC
+   -a. Planning Mechanism
+       -1. Planning uses a goal-conditioned energy minimization approach.
+       -2. At each step:
+           - Predicts future states given candidate actions
+           - Measures distance (L1 loss) to goal image representation
+           - Uses the Cross-Entropy Method (CEM) to optimize action sequence
+           - Executes the first action in a receding horizon loop
+
+5. Evaluation: Zero-Shot Robotic Control
+   -a. Tasks
+       -1. Single-goal reaching: Move end-effector to target location
+           - <4cm error achieved consistently
+       -2. Pick-and-place: Grasp, transport, and release various objects
+           - Tasks require sequencing multiple sub-goals
+           - Handles object-specific variations like cup rims or box widths
+   -b. Performance
+       -1. Outperforms Cosmos (diffusion-based action model) in:
+           - Success rate
+           - Planning time (16s vs. 4 minutes per action)
+
+6. Limitations
+   -a. Camera Sensitivity:
+       -1. No calibration leads to ambiguity when base is off-camera
+       -2. Manual setup required to stabilize results
+   -b. Long-horizon Planning Challenges:
+       -1. Accumulated autoregressive error
+       -2. Exponential action search space growth
+   -c. Goal Specification:
+       -1. Uses goal images only
+       -2. Natural language goals (e.g., “put the cup on the table”) are not yet supported, but planned for future work
+
+7. Understanding: Probe-Based Evaluation of Representations
+   -a. Motion Understanding
+       -1. Frozen encoder + 4-layer attentive probe
+       -2. Best average performance on 6 motion datasets
+           - Something-Something v2: 75.3% (vs. 69.7% InternVideo)
+           - PECoreG: 55.4%
+   -b. Appearance Understanding
+       -1. Performs competitively:
+           - ImageNet top-1: 84.6% (4.6% over V-JEPA 1)
+
+8. Prediction: Action Anticipation Benchmark
+   -a. Setup
+       -1. Uses Epic-Kitchens-100 for next-action prediction (1s before action)
+       -2. Combines future frame embeddings → attentive probe → verb/noun classifier
+       -3. Uses focal loss
+   -b. Performance
+       -1. Improves with model scale and resolution:
+           - ViT-L (300M): 32.7 recall@5
+           - ViT-g (1B): 38.0
+           - ViT-g384: 39.7 (state-of-the-art)
+              +12.1 over PlausiVL (8B)
+   -c. Limitations
+       -1. Performance drops on long anticipation windows
+       -2. Trained on a fixed kitchen domain
+       -3. May miss verb/noun predictions in complex cases
+
+9. Multimodal Video QA with V-JEPA 2 + LLM
+   -a. First video encoder used in VidQA without language-pretraining
+   -b. Alignment to LLM done with non-tokenized early fusion
+   -c. Trained on up to 88.5M video+text pairs
+   -d. Competitive or SOTA results on VidQA benchmarks with just 18M training samples
+   -e. Performance further improves with:
+       -1. Larger encoder
+       -2. Higher resolution
+       -3. More alignment data
+
+10. Conclusion: Generalizable World Model
+    -a. V-JEPA 2 + V-JEPA 2-AC show that:
+        -1. Large-scale video pretraining can yield strong visual representations
+        -2. Minimal robot interaction data can enable generalizable, zero-shot physical planning
+    -b. The approach bridges representation learning, planning, and embodied robotics.
+    -c. Points toward a foundation world model for perception + control.
+    -d. Future directions include language alignment for task specification and more robust long-horizon planning.
+
+
