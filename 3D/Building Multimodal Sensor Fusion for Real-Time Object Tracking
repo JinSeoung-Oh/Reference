@@ -1,0 +1,92 @@
+### From https://medium.com/codex/building-multimodal-sensor-fusion-for-real-time-object-tracking-5962468c3a70
+
+1. Foundational Premise
+   -a. A quote by Rudolf E. Kalman asserts that scientific concepts must be precisely defined 
+       — there are no "fuzzy concepts" in science. Scientific progress requires formal, non-fuzzy formulation of ideas.
+   -b. This sets the tone for the rigorous application of mathematics in sensor fusion, especially in safety-critical fields like autonomous driving.
+
+2. Perception in Autonomous Vehicles
+   -a. The success of autonomous driving depends heavily on accurate environmental perception.
+   -b. Through a decade of experience at Tesla, Cruise, and NASA, the author emphasizes how perception forms the foundation for safe navigation.
+
+3. Sensor Modalities and Their Roles
+   -a. Autonomous vehicles rely on multiple sensors to perceive their environment. Each sensor has unique strengths and limitations:
+       -1. Radar
+           - Located in bumpers, it directly measures velocity via the Doppler effect.
+           - Excellent for detecting motion quickly, blind spot detection, and functioning under adverse weather.
+           - Limitation: Low spatial resolution leads to false positives (e.g., reflective cans mistaken as large obstacles).
+       -2. LiDAR
+           - Uses infrared laser pulses to create high-resolution 3D point clouds.
+           - Crucial for object detection and localization.
+           - Limitations: Can’t measure velocity directly, affected by dirt/weather, and is physically bulky.
+       -3. Camera (not elaborated)
+           - Typically provides visual textures and depth (via stereo), but is less reliable in poor visibility conditions.
+
+4. The Necessity of Sensor Fusion
+   -a. No single sensor can reliably perceive the full driving environment.
+   -b. Fusion of radar and LiDAR compensates for each other's limitations.
+   -c. This need leads to the use of the Unscented Kalman Filter (UKF).
+
+5. Why the UKF over Other Kalman Filters?
+   -a. Standard/Extended Kalman Filters (KF/EKF) assume linear models, unsuitable for complex vehicle dynamics and nonlinear sensor data.
+   -b. UKF handles nonlinear systems using sigma points rather than linear approximations.
+       -1. Sigma points are propagated through nonlinear functions, preserving the distribution of the state estimate more accurately.
+   -c. UKF Benefits in Autonomous Systems:
+       -1. Combines radar (polar: range, angle, velocity) and LiDAR (cartesian: x, y) effectively.
+       -2. Achieves faster convergence and more accurate object tracking under nonlinear conditions.
+
+6. Tutorial Implementation Overview
+   -a. Simulated environment with 3 traffic cars and 1 ego vehicle.
+   -b. Each car is tracked with its own UKF instance, updated in real-time.
+   -c. LiDAR points visualized as red spheres, radar as purple lines, predicted paths as green spheres.
+
+7. Sensor Simulation and Customization
+   -a. Parameters in highway.h allow tuning:
+       -1. trackCars: which cars to track with UKF.
+       -2. visualize_lidar/radar/pcd: toggle visualization.
+       -3. projectedTime/projectedSteps: how far ahead to predict object motion.
+
+8. UKF Workflow and Core Functions
+   -a. ProcessMeasurement()
+       -1. Manages incoming radar/LiDAR data.
+       -2. First measurement initializes state vector (x_) and covariance (P_).
+       -3. All subsequent measurements follow:
+           - Prediction using motion model (no sensor input).
+           - Update with actual sensor data (LiDAR or radar specific).
+   -b. Prediction()
+       -1. Handles nonlinear motion (curved trajectories).
+       -2. Uses:
+           - Augmented state vector (n_aug_ = 7) for including process noise.
+           - Sigma points (15 total) to simulate possible motion outcomes.
+           - Predicts future x_ and P_ with weights applied to each sigma point.
+   -c. UpdateLidar() / UpdateRadar()
+       -1. Converts sigma points to measurement space.
+       -2. Computes:
+           - Predicted measurement mean z_
+           - Measurement covariance S
+           - Cross-correlation Tc
+           - Kalman gain K
+       -3. Updates x_ and P_ accordingly.
+       -4. Radar measurements involve more complex polar-to-cartesian transformations.
+
+9. Evaluation Using RMSE
+   -a. Root Mean Square Error calculated for: [x, y, vx, vy]
+   -b. Target RMSE thresholds: [0.30, 0.16, 0.95, 0.70]
+   -c. Measures both:
+       -1. Position accuracy: essential for lane keeping, obstacle avoidance.
+       -2. Velocity accuracy: critical for predicting motion, braking, planning.
+
+10. Final Observations and Real-World Relevance
+    -a. Demonstrates UKF's capability in real-time multi-object tracking under nonlinear dynamics.
+    -b. Sensor fusion proves crucial:
+        -1. LiDAR gives precise object shapes.
+        -2. Radar gives robust motion info, especially in poor visibility.
+    -c. Modular code allows parameter tuning and adaptation to other scenarios.
+    -d. The simulation goes beyond academic theory — it mimics real-world driving challenges (lane changes, interactions, etc.).
+    -e. UKF bridges the gap between theory and practical autonomy by producing stable, accurate, and resilient perception.
+
+11. Conclusion
+    -a. UKF offers a mathematically robust, computationally efficient framework for fusing sensor data in autonomous vehicles.
+    -b. Through intelligent combination of radar and LiDAR data, it handles real-world complexities like noise, nonlinear motion, and multi-object tracking.
+
+
