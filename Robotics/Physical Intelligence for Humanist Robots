@@ -1,0 +1,67 @@
+### From https://medium.com/@black_51980/physical-intelligence-for-humanist-robots-08b26aacf8f3
+
+1. Premise: Data and Scale Win
+   -a. Success in language, vision, and audio AI came from Internet-scale data
+   -b. Robotics lacks such scale
+   -c. Physics simulation is helpful per task, but doesn’t scale across tasks
+   -d. The real key: video of humans acting in the world — semantically rich and physically grounded
+
+2. Human Understanding Machine (Meshcapade)
+   -a. Converts 2D video into compact 3D human motion representations
+   -b. Motion encoded via time-varying joint angles
+   -c. Used to control humanoid avatars in 3D engines like Unreal
+   -d. Enables direct training of robot motor systems
+
+3. Humanist Robotics: Philosophy and Practice
+   -a. “Humanist” = student of human behavior
+   -b. Robots must learn not just tricks but master the mundane
+   -c. Core principles:
+       -1. Motor System: Flexible and robust, must prevent unrecoverable states
+       -2. Human Mimicry: Extract and imitate 3D human motion from video
+       -3. Contact: Understand and replicate how humans interact with the world
+       -4. Human Understanding: See humans, anticipate actions, respect social dynamics
+
+4. Limit of Physics: Conventions Matter More
+   -a. Shaking hands, playing sports: more about convention than physics
+   -b. Robots must learn norms, timing, and culture, not just kinematics
+   -c. Misaligned humanoid behavior creates Uncanny Valley
+   -d. Real challenge: context-appropriate physicality, not physics alone
+
+5. MoCapade3.0: Turning Video into 3D Training Data
+   -a. Markerless motion capture of 3D human pose from any video
+   -b. Captures motion in 3D world coordinates
+   -c. Semantic actions extracted using video foundation models
+
+6. Skill Bank: Universal Human Motion Repository
+   -a. Learn a latent model of human action once, deploy to any robot
+   -b. Compress human motion into latent codes
+   -c. Base motor systems have their own latent codes
+   -d. Use Latent Code as Bridge (LCB) to map between them
+
+7. PRIMAL: Few-Shot Motor Learning
+   -a. Fine-tune control networks on small amounts of video
+   -b. Efficiently train task-specific skills atop a general motor base
+
+8. Real-Time 3D Tracking and Teleoperation
+   -a. 3D motion capture enables:
+       -1. Live robot control
+       -2. Gesture/emotion recognition
+       -3. Collision avoidance and hand-offs
+   -b. Democratizes robot training: anyone with a camera can teach a robot
+
+9. Beyond Physical to Behavioral Intelligence
+   -a. Physical behavior ≠ human behavior
+   -b. Robots must understand intent, emotion, context
+   -c. Must learn not just what we do but why and when we do it
+
+10. ChatHuman: Generative Behavior Engine
+    -a. RAG system combining:
+        -1. 26 behavior analysis tools
+        -2. Large vision-language model
+    -b. Bridges 3D capture → interpretation → generation
+    -c. Enables humanoids to reason, plan, and act in contextually human ways
+
+Conclusion: By mining the world’s video data and converting it into 3D behavioral knowledge, 
+            we are entering the age of humanist robotics — where machines not only move like us, but understand us.
+
+Conclusion: By mining the world’s video data and converting it into 3D behavioral knowledge, we are entering the age of humanist robotics — where machines not only move like us, but understand us.
