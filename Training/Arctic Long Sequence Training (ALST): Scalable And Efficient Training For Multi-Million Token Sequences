@@ -1,0 +1,48 @@
+### From https://medium.com/@snowflake_ai_research/arctic-long-sequence-training-alst-scalable-and-efficient-training-for-multi-million-token-cf22a94498b8
+
+1. Background & Problem
+   -a. Real-world LLM tasks (e.g., document analysis, RAG, conversations) often require very long contexts—hundreds of thousands to millions of tokens.
+   -b. However, most models are trained on short text (2K–32K tokens), making it difficult to generalize across long contexts.
+   -c. Training on long context is essential for long-context reasoning.
+   -d. Although models like LLaMA 3.x or Qwen 2.5 32B support 128K–10M tokens, fine-tuning at these lengths is blocked by GPU memory limitations.
+
+2. Arctic Long Sequence Training (ALST)
+   -a. A modular open-source method set from Meta that enables LLaMA-8B training on sequences up to 15 million tokens.
+   -b. Fully compatible with Hugging Face Transformers and DeepSpeed; no modeling code changes required.
+   -c. Achieved: 500K tokens on single H100, 3.7M on single node, 15M on 4 nodes—up to 469x gain over HF pipelines.
+
+3. Challenges of Long-Sequence Training
+   -a. Memory Bottlenecks
+       -1. Activation memory grows linearly; attention memory grows quadratically with sequence length.
+       -2. For LLaMA-3.1–8B, 512K tokens require over 400 GB, beyond any GPU's capacity.
+   -b. Short-sequence bias in frameworks
+       -1. Hugging Face is tuned for 2K–32K, with no built-in large memory strategies.
+   -c. PyTorch inefficiencies
+       -1. Fragmentation, poor reuse, checkpointing issues.
+   -d. Rigid distribution methods
+       -1. Methods like Ring Attention only support specific attentions and require code refactor, failing on formats like MoBA or block-sparse.
+
+4. How ALST Works
+   -a. Sequence Parallelism
+       -1. Based on Ulysses SP.
+       -2. Splits input sequences across multiple GPUs.
+       -3. At attention computation step, switches to head parallelism, distributes key/value projections, then switches back to sequence parallelism.
+   -b. Sequence Tiling
+       -1. Splits long sequences into smaller tiles processed sequentially.
+       -2. Applies to layers like MLPs, embeddings, logits.
+       -3. TiledCompute automates this for per-token operations.
+   -c. PyTorch Runtime Optimizations
+       -1. Activation checkpoint offloading to CPU.
+       -2. Efficient memory allocator (expandable segments).
+       -3. Avoids all_reduce_object in favor of all_reduce.
+       -4. Uses 1D position IDs over large 4D attention masks.
+       -5. PyTorch 2.8.0.dev used; 2.7.1 is sufficient.
+
+5. Optimization Benchmark
+   -a. Feature ablation across 8 H100 GPUs with LLaMA-8B.
+   -b. Each added technique extends max sequence length from 32K to 3.7M.
+   -c. TFLOPS remains strong → high training efficiency.
+
+6. Training Correctness
+   -a. Compared ALST vs Hugging Face baseline at 32K tokens.
+   -b. Nearly identical loss curves → validates ALST changes memory/computation without harming learning.
