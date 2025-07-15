@@ -1,0 +1,54 @@
+### From https://pub.towardsai.net/mastering-hyperparameter-tuning-in-machine-learning-252ce466b472
+### Have to check given link to see code
+
+0. Key Concept
+   Hyperparameter tuning involves optimizing model configuration settings that are not learned during training 
+   (e.g., learning rate, number of layers). Effective tuning improves model accuracy, generalization, and efficiency.
+
+1. Methods Compared
+   -a. Manual Search
+       -1. Human-driven, intuitive testing of hyperparameter combinations
+       -2. Best for: Initial exploration, small search spaces
+       -3. Limitations: Time-consuming, poor generalization, low repeatability
+   -b. Grid Search
+       -1. Exhaustively tests all combinations in a defined hyperparameter grid
+       -2. Best for: Small search spaces, reproducibility
+       -3. Limitations: Exponential cost with more parameters (curse of dimensionality)
+   -c. Random Search
+       -1. Randomly samples combinations from the defined search space
+       -2. Best for: Large search spaces, efficient use of compute budget
+       -3. Strength: Better chance to find good hyperparameters than Grid Search with same budget
+   -d. Bayesian Optimization
+       -1. Uses a probabilistic surrogate model (e.g., Gaussian Process) to guide search
+       -2. Best for: Expensive models (e.g., deep learning), limited evaluation budgets
+       -3. Strength: Sample-efficient
+       -4. Limitation: High per-evaluation overhead
+   -e. Metaheuristic Algorithms (e.g., Genetic Algorithm)
+       -1. Nature-inspired algorithms that evolve solutions across generations
+       -2. Best for: Complex, non-convex search spaces
+       -3. Strength: Escapes local optima, broad exploration
+       -4. Limitation: Performance varies due to stochasticity
+
+2. Experiments
+   -a. CNN Image Regression (Complex Model)
+       -1. Random Search had the best generalization and time efficiency (1.90% MAE)
+       -2. Bayesian Optimization had strong accuracy (2.41%) but slowest runtime
+       -3. Genetic Algorithm was fastest (3.65s/eval) but less stable across trials
+   -b. Kernel SVM on Tabular Data (Simple Model)
+       -1. Bayesian Optimization gave the best accuracy (1.39% MAE)
+       -2. Genetic Algorithm was fastest with good results (1.50% MAE)
+       -3. Manual Search had worst generalization (4.97% error)
+
+3. Overall Insights
+   -a. Use Manual Search for quick initial tuning
+   -b. Use Grid Search when exhaustive and reproducible search is required
+   -c. Use Random Search for large search spaces with limited compute
+   -d. Use Bayesian Optimization for expensive models and sample efficiency
+   -e. Use Metaheuristic Algorithms for complex, rugged search spaces
+
+4. Strategy Suggestion
+   -a. Start with a few manual runs
+   -b. Use random or genetic search to narrow down space
+   -c. Refine with grid or Bayesian optimization
+   Tip: For real-world tasks, hybrid strategies and multiple trials are often the most effective.
+
