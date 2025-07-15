@@ -1,0 +1,72 @@
+### From https://medium.com/data-science-in-your-pocket/context-engineering-vs-prompt-engineering-379e9622e19d
+
+0. Precise Definition of Context Engineering
+   Context Engineering is the practice of architecting the entire cognitive environment in which a large language model (LLM) operates. 
+   This includes what the model sees (documents, memory, history), how it sees it (structured vs. unstructured), 
+   and when it sees it (dynamic injection, static memory, retrieval, etc.). 
+   It governs the token flow, system prompts, tool outputs, and memory slots, ensuring that the model behaves consistently, accurately, and contextually over time.
+
+1. Overview
+   -a. Prompt Engineering focuses on crafting clever instructions to guide one-off model responses.
+   -b. Context Engineering designs the full information environment to ensure scalable, repeatable, and meaningful interaction.
+
+2. Core Differences
+   Item	 | Prompt Engineering	| Context Engineering
+   Definition	| Crafting effective input prompts	| Designing the full context window and information environment
+   Focus	| What to say to the model	| What the model knows, when, and how it processes inputs
+   Elements	| Instructional text	| Memory, retrieval, tool outputs, summaries, system prompts
+   Mechanism	| One-shot guidance	| Structured token orchestration over sessions
+
+3. Purpose 
+   -a. Prompt Engineering: Extract specific outputs quickly
+   -b. Context Engineering: Enable long-term, reliable model performance across varying conditions
+
+4. Use Cases
+   Prompt Engineering	| Context Engineering
+   -----------------------------------------
+   Tweet generation	| Memory-enabled agents
+   One-liner summaries	| Hallucination-free support bots
+   Demo responses	| RAG-driven QA systems
+   Code snippets	| Long-running conversational agents
+  
+5. Relationship
+   -a. Prompt Engineering is a subset of Context Engineering.
+   -b. Prompt = What to say, Context = What the model knows when you say it
+   -c. Think of Prompt Engineering as scriptwriting, and Context Engineering as directing the entire scene
+
+6. Consequences of Failure
+   -a. Bad Prompt Engineering:
+       -1. Wrong tone
+       -2. Model misinterprets instructions
+       -3. Time lost tweaking words
+   -b. Bad Context Engineering:
+       -1. Model forgets purpose
+       -2. Prompt lost in irrelevant tokens
+       -3. System-wide failure in memory, tool chaining, and accuracy
+
+7. How Context Engineering Supports Prompting 
+   -a. Protects important prompts from token overflow
+   -b. Structures inputs using tools like memory and retrieval
+   -c. Scales reliably across users and sessions
+   -d. Optimizes inputs within token, latency, and cost constraints
+
+8. Comparison Table
+   Factor	| Prompt Engineering | Context Engineering
+   Mindset	| Instruction crafting	| System architecture for LLM cognition
+   Scope | 	One-shot input-output	| Full session and system memory
+   Repeatability	| Manual and inconsistent	| Consistent and reusable
+   Scalability |	Breaks under user load	| Designed for scale
+   Precision |	Word-level tuning	| Macro-level context control
+   Debugging	| Trial and error	 | Token-level context flow inspection
+   Tools Needed |	Just a prompt box |	Memory systems, RAG, APIs, chaining
+   Failure Risk	| Bad  output	| Full system confusion
+   Longevity	| Short tasks	| Complex, long-lived agents
+   Skill Type	| Copywriting	| Software/system engineering
+
+9. Final Takeaway
+   -a. Prompt Engineering is the fast, flexible way to guide models — best for short tasks.
+   -b. Context Engineering is the rigorous foundation for reliable, scalable LLM-based systems.
+   -c. For production-grade AI agents or tools, Context Engineering must take priority.
+
+
+
