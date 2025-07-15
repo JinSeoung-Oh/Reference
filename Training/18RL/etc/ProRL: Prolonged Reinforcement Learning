@@ -1,0 +1,70 @@
+### From https://artgor.medium.com/paper-review-prorl-prolonged-reinforcement-learning-expands-reasoning-boundaries-in-large-10693a70ac55
+
+1. Overview: Objective & Core Concept
+   -a. Goal: Improve the reasoning capability of LLMs
+   -b. Problem: Base models, even with extensive sampling, fail to discover novel reasoning strategies
+   -c. ProRL Solution:
+       -1. KL divergence regularization
+       -2. Reference policy resetting
+       -3. Diverse, verifiable task distribution
+   ➡ Enables the model to discover and occupy new regions in the reasoning solution space
+
+2. Technical Components
+   2.1 DAPO-Inspired Techniques
+       -a. Entropy Collapse Issue:
+           - Early RL training causes output distribution to narrow, harming exploration
+           - Temperature tuning alone insufficient
+      -b. Solutions:
+          -1. Decoupled clipping: boosts unlikely token probabilities via separate upper/lower bounds
+          -2. Dynamic sampling: focuses on intermediate difficulty prompts to retain informative reward signals
+  2.2 KL Regularization & Policy Resetting
+      -a. KL Regularization: Stabilizes learning by limiting divergence from the reference policy
+      -b. Issue: KL term grows too dominant over time
+      -c. Fix:
+          -1. Periodically reset reference policy to recent online version
+          -2. Reinitialize optimizer → allows training to resume steadily
+
+3. Experiment: Nemotron-Research-Reasoning-Qwen-1.5B
+   -a. Base Model: DeepSeek-R1-Distill-Qwen-1.5B
+   -b. Tasks: 136k problems in math, coding, STEM, logic puzzles, instructions
+   -c. Enhancements:
+       -1. Stable reward design
+       -2. Improved GRPO algorithms
+   -d. Results:
+       -1. +15.7% in math
+       -2. +54.8% in logic puzzles
+       -3. Outperforms even domain-specialized models
+   -e. Compute: 16,000 GPU hours on 4×8×H100 (80GB) nodes
+
+4. Analysis: Does ProRL Induce New Reasoning Patterns?
+   -a. Dependence on base performance:
+       -1. Low base performance → high RL gain in accuracy & diversity
+       -2. Strong base performance → limited or negative gain (model overfits known strategies)
+
+5. Learning Pattern Types
+   -a. Tasks like math:
+       -1. pass@1 ↑
+       -2. pass@128 ↓ (overconfidence, reduced exploration)
+   -b. Mid-difficulty tasks:
+       -1. Early gains plateau
+   -c. Complex domains (e.g., code):
+       -1. Sustained improvements through continued training and broader exploration
+
+6. Generalization Beyond Training
+   -a. Reasoning Gym - boxnet:
+       -1. Base model: total failure
+       -2. ProRL model: succeeds → proves ability to generalize to unseen structures
+   -b. graph_color task:
+       -1. All models decline with graph size
+       -2. ProRL consistently best across sizes
+
+7. Final Takeaways
+   -a. ProRL improves pass@1 and pass@16 reliably
+   -b. Contrary to prior concerns, it avoids pass@k degradation
+   -c. Key Contributions:
+       -1. Unlocks novel reasoning strategies
+       -2. Generalizes to unseen, complex tasks
+       -3. RL time correlates with deeper exploration and long-term policy improvement
+
+
+
