@@ -1,0 +1,267 @@
+### From https://medium.com/data-science-collective/build-3d-scene-graphs-for-spatial-ai-llms-from-point-cloud-python-tutorial-c5676caef801
+"""
+1. Problem Framing
+   The hardest part of spatial AI is not algorithm design but making 3D data interpretable and queryable 
+   for both humans and machines. 
+   Raw point clouds (colored coordinate clouds) are not sufficient for spatial reasoning, 
+   as they lack object-level semantics and relationships.
+
+2. Core Proposal: Scene Graph + LLM for Spatial Reasoning
+   -a. Transform 3D point clouds into semantic scene graphs:
+       -1. Recognize objects, assign meaningful labels, extract spatial relationships.
+   -b. Connect these graphs to LLMs (e.g., GPT) to answer spatial queries such as:
+       -1. “Which chairs are set up for conversation?”
+       -2. “Which areas block wheelchair access?”
+
+3. Full Pipeline Overview
+   -a. Semantic Point Cloud Preparation
+       -1. Assign semantic_label to each point via:
+           - Manual, automatic, or hybrid annotation
+       -2. Validate geometry and label quality.
+   -b. Object Instancing via DBSCAN
+       -1. Separate individual instances of objects with same label.
+       -2. Each object stores centroid, bounds, point count, etc.
+   -c. Object Feature Computation
+       -1. Compute volume, surface area, compactness, height, point density.
+       -2. Surface area estimation uses Convex Hull.
+   -d. Spatial Relationship Detection
+       -1. Classify relationships: above, below, inside, contains, adjacent, near.
+       -2. Use bounding box overlap and centroid proximity.
+   -e. Scene Graph Construction (NetworkX)
+       -1. Directed graph: nodes = objects, edges = spatial relations.
+       -2. Nodes store semantic and geometric attributes.
+   -f. Scene Graph Analytics
+       -1. Compute number of nodes, edges, relationship types, connected components.
+       -2. Analyze semantic distributions and structural connectivity.
+   -g. Pattern Recognition via Subgraph Matching
+       -1. Define reusable patterns (e.g., meeting room) as subgraphs.
+       -2. Use DiGraphMatcher with semantic tolerance to detect pattern occurrences.
+   -h. Export to OpenUSD
+       -1. Convert scene graph to hierarchical USD format.
+       -2. Objects become prims with attributes, relationships saved as metadata.
+   -i. LLM Integration
+       -1. Convert graph into structured natural language prompt.
+       -2. LLMs reason over object positions and spatial relationships to answer queries.
+
+4. Technical Stack Summary
+   |Component	| Library / Framework	| Role
+   |Clustering	| DBSCAN (scikit-learn)	| Object instance separation
+   |Graph	| NetworkX	| Scene graph construction and reasoning
+   |Visualization	| Open3D, matplotlib	| 3D and 2D visualization
+   |Geometry	| scipy.spatial.ConvexHull	| Surface area estimation
+   |Export	| OpenUSD (Pixar, NVIDIA)	| Standardized 3D scene encoding
+   |Reasoning	| GPT, Mistral, DeepSeek	| Spatial Q&A over structured graph
+"""
+## Step 1: Semantic Point Cloud 로딩
+def load_semantic_point_cloud(file_path, column_name = 'semantic_label'):
+    """Load semantic point cloud data from ASCII formats."""
+        
+    df = pd.read_csv(file_path, delimiter=';')
+    class_names = ['ceiling', 'floor', 'wall', 'chair', 'furniture', 'table']
+    
+    label_map = {float(i): class_names[i] for i in range(len(class_names))}
+    df[column_name] = df[column_name].map(label_map)
+    
+    return df.sample(n=150000, random_state=1)  # 샘플링은 선택 사항
+
+## Step 2: Semantic Point Cloud 시각화
+def visualize_semantic_pointcloud(df, point_size = 2.0):
+    """Open3D를 이용한 semantic point cloud 시각화"""
+    points = df[['x', 'y', 'z']].values
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points)
+
+    unique_labels = df['semantic_label'].unique()
+    color_map = {label: plt.cm.tab10(i / len(unique_labels))[:3] 
+                 for i, label in enumerate(unique_labels)}
+    colors = np.array([color_map[label] for label in df['semantic_label']])
+    pcd.colors = o3d.utility.Vector3dVector(colors)
+
+    vis = o3d.visualization.Visualizer()
+    vis.create_window(window_name="Semantic Point Cloud", width=1200, height=800)
+    vis.add_geometry(pcd)
+    vis.get_render_option().point_size = point_size
+
+    vis.run()
+    vis.destroy_window()
+
+## Step 3: 객체 인스턴싱 (DBSCAN 클러스터링)
+def extract_semantic_objects(df: pd.DataFrame, eps: float = 0.5, min_samples: int = 10) -> dict:
+    """Semantic label 기준 DBSCAN 클러스터링으로 객체 분리"""
+    objects = {}
+    
+    for label in df['semantic_label'].unique():
+        label_points = df[df['semantic_label'] == label]
+        if len(label_points) < min_samples:
+            continue
+
+        coords = label_points[['x', 'y', 'z']].values
+        clustering = DBSCAN(eps=eps, min_samples=min_samples).fit(coords)
+
+        label_points_copy = label_points.copy()
+        label_points_copy['cluster'] = clustering.labels_
+
+        for cluster_id in np.unique(clustering.labels_):
+            if cluster_id == -1:  # Noise
+                continue
+
+            cluster_points = label_points_copy[label_points_copy['cluster'] == cluster_id]
+            object_key = f"{label}_{cluster_id}"
+            objects[object_key] = {
+                'points': cluster_points,
+                'centroid': cluster_points[['x', 'y', 'z']].mean().values,
+                'bounds': {
+                    'min': cluster_points[['x', 'y', 'z']].min().values,
+                    'max': cluster_points[['x', 'y', 'z']].max().values
+                },
+                'semantic_label': label,
+                'point_count': len(cluster_points)
+            }
+    return objects
+
+## Step 4: 객체 특징 추출 (기하 및 통계)
+def estimate_surface_area(points):
+    from scipy.spatial import ConvexHull
+    try:
+        hull = ConvexHull(points)
+        return hull.area
+    except:
+        return 0.0
+
+def compute_object_features(objects):
+    """객체의 부피, 표면적, 콤팩트도, 높이 등을 계산"""
+    features = {}
+    for obj_name, obj_data in objects.items():
+        points = obj_data['points'][['x', 'y', 'z']].values
+        volume = np.prod(obj_data['bounds']['max'] - obj_data['bounds']['min'])
+        surface_area = estimate_surface_area(points)
+        compactness = (surface_area ** 3) / (36 * np.pi * volume ** 2) if volume > 0 else 0
+        features[obj_name] = {
+            'volume': volume,
+            'surface_area': surface_area,
+            'compactness': compactness,
+            'height': obj_data['bounds']['max'][2] - obj_data['bounds']['min'][2],
+            'semantic_label': obj_data['semantic_label'],
+            'centroid': obj_data['centroid'],
+            'point_density': obj_data['point_count'] / volume if volume > 0 else 0
+        }
+    return features
+
+## Step 5: 공간 관계 추출 (Topological Analysis)
+def is_contained(bounds1, bounds2):
+    return (np.all(bounds1['min'] >= bounds2['min']) and np.all(bounds1['max'] <= bounds2['max']))
+
+def are_adjacent(bounds1, bounds2, tolerance=0.1):
+    for axis in range(3):  # x, y, z
+        if (abs(bounds1['max'][axis] - bounds2['min'][axis]) < tolerance or
+            abs(bounds2['max'][axis] - bounds1['min'][axis]) < tolerance):
+            return True
+    return False
+
+def determine_relationship_type(obj1, obj2, threshold):
+    centroid1 = obj1['centroid']
+    centroid2 = obj2['centroid']
+    distance = np.linalg.norm(centroid1 - centroid2)
+    if distance > threshold:
+        return None
+
+    z_diff = centroid1[2] - centroid2[2]
+    if abs(z_diff) > 0.5:
+        return 'above' if z_diff > 0 else 'below'
+
+    if is_contained(obj1['bounds'], obj2['bounds']):
+        return 'inside'
+    elif is_contained(obj2['bounds'], obj1['bounds']):
+        return 'contains'
+    if are_adjacent(obj1['bounds'], obj2['bounds'], tolerance=0.3):
+        return 'adjacent'
+    return 'near'
+
+def compute_spatial_relationships(objects, distance_threshold=2.0):
+    relationships = []
+    object_names = list(objects.keys())
+    for i, obj1 in enumerate(object_names):
+        for j, obj2 in enumerate(object_names[i+1:], i+1):
+            rel_type = determine_relationship_type(objects[obj1], objects[obj2], distance_threshold)
+            if rel_type:
+                relationships.append((obj1, obj2, rel_type))
+    return relationships
+
+## Step 6: Scene Graph 구축
+def build_scene_graph(objects, relationships, features):
+    G = nx.DiGraph()
+    for obj_name, obj_data in objects.items():
+        obj_features = features.get(obj_name, {}).copy()
+        obj_features.pop('semantic_label', None)
+        G.add_node(obj_name,
+                   semantic_label=obj_data['semantic_label'],
+                   centroid=obj_data['centroid'].tolist(),
+                   point_count=obj_data['point_count'],
+                   **obj_features)
+    for obj1, obj2, rel_type in relationships:
+        G.add_edge(obj1, obj2, relationship=rel_type)
+    return G
+
+## Step 7: Scene Graph 분석
+def analyze_scene_graph(G):
+    analysis = {
+        'node_count': G.number_of_nodes(),
+        'edge_count': G.number_of_edges(),
+        'semantic_distribution': {},
+        'relationship_types': {},
+        'connected_components': nx.number_weakly_connected_components(G),
+        'avg_degree': sum(dict(G.degree()).values()) / G.number_of_nodes() if G.number_of_nodes() > 0 else 0
+    }
+
+    for node, data in G.nodes(data=True):
+        label = data.get('semantic_label', 'unknown')
+        analysis['semantic_distribution'][label] = analysis['semantic_distribution'].get(label, 0) + 1
+
+    for _, _, data in G.edges(data=True):
+        rel = data.get('relationship', 'unknown')
+        analysis['relationship_types'][rel] = analysis['relationship_types'].get(rel, 0) + 1
+    return analysis
+
+## Step 8: OpenUSD로 Scene Graph 내보내기 - create_usd_object, add_relationships_to_stage (Custom def)
+def create_usd_stage(scene_graph: nx.DiGraph, output_path: str) -> bool:
+    if not USD_AVAILABLE:
+        print("USD not available.")
+        return False
+
+    stage = Usd.Stage.CreateNew(output_path)
+    root_prim = stage.DefinePrim('/Scene', 'Xform')
+    stage.SetDefaultPrim(root_prim)
+    geom_scope = UsdGeom.Scope.Define(stage, '/Scene/Geometry')
+
+    for node, data in scene_graph.nodes(data=True):
+        create_usd_object(stage, node, data)
+
+    add_relationships_to_stage(stage, scene_graph)
+    stage.Save()
+    return True
+
+## Step 9: LLM 연결을 위한 Scene Graph → Prompt 변환
+def scene_graph_to_llm_prompt(scene_graph):
+    prompt = ""
+    for node, data in scene_graph.nodes(data=True):
+        label = data.get('semantic_label', 'unknown')
+        centroid = data.get('centroid', [0,0,0])
+        prompt += f"Object {node} is a {label} at position {centroid}.\n"
+    for u, v, data in scene_graph.edges(data=True):
+        rel = data.get('relationship', 'unknown')
+        prompt += f"{u} is {rel} {v}.\n"
+    return prompt
+
+def query_scene_with_llm(scene_graph: nx.DiGraph, user_question: str, llm_client=None) -> str:
+    scene_context = scene_graph_to_llm_prompt(scene_graph)
+    full_prompt = f"""{scene_context}
+
+USER QUESTION: {user_question}
+Please provide a detailed answer based on the spatial relationships and object positions in the scene."""
+    
+    if llm_client:
+        return llm_client.call_as_llm(full_prompt)
+    else:
+        print("[!] No LLM client provided.")
+        return ""
+
