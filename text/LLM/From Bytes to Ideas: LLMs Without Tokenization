@@ -1,0 +1,47 @@
+### From https://pub.towardsai.net/from-bytes-to-ideas-llms-without-tokenization-34821bce7148
+### https://www.arxiv.org/pdf/2506.14761
+
+1. What Makes AU-Net Different
+   -a. Unlike traditional models that rely on fixed token dictionaries (e.g., BPE), 
+       AU-Net eliminates the dictionary entirely and instead starts with raw byte-level input.
+   -b. It learns meaningful groupings of characters automatically without pre-defined tokens.
+
+2. The Three-Stage Structure of AU-Net (Figure 1)
+   Example: Processing "CAT SAT ON THE MAT"
+   -a. Stage 1: Character-level → "C A T S A T O N T H E M A T"
+   -b. Stage 2: Word-level → "CAT SAT ON THE MAT"
+   -c. Stage 3: Phrase-level → "SAT ON THE MAT"
+   -d. This follows a U-shaped architecture:
+       -1. Information flows downward to become increasingly abstract,
+       -2. Then flows upward with enriched, detailed understanding.
+   -e. Analogy: Humans read similarly —
+       -1. Decode unfamiliar words by letters,
+       -2. Grasp context at phrase or sentence level.
+
+3. Core Mechanism: Pooling and Upsampling (Figure 2)
+   -a. Pooling
+       -1. Functions as a smart filter that pools information at natural boundaries (e.g., spaces, punctuation).
+       -2. Unlike arbitrary tokenization, pooling is aligned with real language units.
+   -b. Multi-Linear Upsampling
+       -1. During text generation, high-level understanding is broadcast back to lower levels.
+       -2. Each compressed representation is transformed differently for each position it fills.
+       -3. Analogy: A conductor giving specific instructions to different orchestra sections.
+
+4. Splitting Function (Stage Rules)
+   -a. AU-Net uses a rule-based splitting function:
+       -1. Stage 2: Pools at word boundaries (spaces, punctuation)
+       -2. Stage 3: Pools every two words or at sentence ends
+       -3. Stage 4: Pools every four words or at sentence ends
+   -b. This method is highly effective for Latin script languages.
+
+5. Computational Efficiency and FLOPs
+   -a. FLOPs are used to compare AU-Net fairly to other models.
+   -b. Byte-level stages are compute-heavy, but deeper stages are more compressed, thus cheaper to process.
+
+6. Training Formulas:
+   -a. Batch size: BSZ = 0.66 × C^0.321
+   -b. Learning rate: LR = 6.6 × C^-0.176
+       -1. (C = compute scale)
+
+
+
