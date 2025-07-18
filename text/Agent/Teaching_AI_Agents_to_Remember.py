@@ -8,7 +8,7 @@
     "api_version": "2024-06-01"
 }]
 
-!pip install pyautogen
+!pip install ag2
 
 business_info = """
 # This manufacturing plant manufactures the following vehicle parts:

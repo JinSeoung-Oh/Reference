@@ -1,6 +1,6 @@
 # From https://gathnex.medium.com/connect-your-llm-to-the-internet-with-microsoft-autogen-3bc4c655e7c0
 
-!pip install -q pyautogen~=0.1.0 docker openai 
+!pip install -q ag2~=0.1.0 docker openai 
 
 import autogen
 #Follow the same format for model and api arguments.
