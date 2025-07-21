@@ -1,0 +1,110 @@
+### From https://ai.plainenglish.io/dimension-importance-estimation-dime-in-dense-retrieval-an-in-depth-technical-overview-36fe9011eddd
+
+DIME is a lightweight yet powerful technique to improve dense retrieval by pruning irrelevant dimensions from query embeddings on a per-query basis.
+By masking out dimensions that do not align with the query’s intent, DIME boosts the signal-to-noise ratio (SNR) 
+in similarity computations without requiring model retraining or index rebuilding.
+
+1. Motivation
+   -a. Dense embeddings, while semantically rich, often include hundreds or thousands of dimensions—
+       many of which may not be relevant to a given query.
+   -b. These irrelevant dimensions can act as noise, inflating similarity scores for unrelated documents.
+
+2. Two Core Variants
+   -a. PRF-DIME: Uses the top-k initially retrieved documents to compute a centroid vector and scores each query dimension 
+                 by the product qj * cj. The highest scoring l dimensions are retained, and the rest are masked.
+   -b. LLM-DIME: Prompts a large language model to generate an ideal answer to the query. The generated response is 
+                 embedded and compared to the query embedding. This method is especially effective in zero-shot or domain mismatch settings.
+
+3. Theoretical Framework
+   -a. Document embeddings are modeled as d⁽ⁱ⁾ = α⁽ⁱ⁾s + ε⁽ⁱ⁾, where s is the shared signal and ε is independent noise.
+   -b. The centroid of top-k documents approximates the signal, and qj * cj identifies which query dimensions align with it.
+   -c. Retaining only high-scoring dimensions filters out noise and improves ranking precision.
+
+4. Enhanced Mechanisms
+   -a. Softmax-Weighted Centroid (SWC): Improves centroid estimation by weighting documents via softmax over relevance scores, 
+                                        enhancing signal clarity.
+   -b. Reranking-Only Inference: Instead of re-indexing, the top-k documents are simply re-scored using the filtered query vector, 
+                                 leading to major latency and cost savings.
+
+5. Empirical Validation
+   -a. Tested across MS MARCO, TREC DL, BEIR, Robust04: consistently improves nDCG@10
+   -b. Works across diverse models: BGE, E5, TAS-B, Contriever, and Matryoshka embeddings
+   -c. LLM-DIME shows best performance in low-recall and zero-shot scenarios; open-source models (Qwen-32B, DeepSeek, Llama-3)
+       achieve near GPT-4 effectiveness
+   -d. Keeping ~50% of dimensions is typically optimal; aggressive pruning reduces accuracy, over-retention dilutes benefit
+"""
+import numpy as np
+from datasets import load_dataset
+from sentence_transformers import SentenceTransformer
+from tabulate import tabulate
+
+# Config
+N_QUERIES = 50
+TOP_K = 5
+KEEP_FRAC = 0.4
+TAU = 0.7
+
+# Load data and model
+dataset = load_dataset("ms_marco", "v2.1")
+val = dataset["validation"]
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Softmax helper
+def softmax(x, tau=1.0):
+    x = (x / tau) - np.max(x)
+    return np.exp(x) / np.exp(x).sum()
+
+# Search loop
+found = 0
+for i in range(N_QUERIES):
+    query = val[i]["query"]
+    answers = val[i]["answers"]
+    passages = val[i]["passages"]["passage_text"]
+    is_selected = val[i]["passages"]["is_selected"]
+
+    positives = [p for p, sel in zip(passages, is_selected) if sel == 1]
+    negatives = [p for p, sel in zip(passages, is_selected) if sel == 0]
+    if not positives or len(negatives) < (TOP_K - 1): continue
+
+    candidates = [positives[0]] + negatives[:TOP_K - 1]
+    labels = ["✔️"] + [""] * (TOP_K - 1)
+    gold_idx = 0
+
+    cand_vecs = model.encode(candidates, convert_to_numpy=True)
+    q_vec = model.encode(query, convert_to_numpy=True)
+
+    scores = cand_vecs @ q_vec
+    ranked_idx = np.argsort(-scores)
+    base_rank = list(ranked_idx).index(gold_idx) + 1
+
+    top_idx = ranked_idx[:TOP_K]
+    top_vecs = cand_vecs[top_idx]
+    top_scores = scores[top_idx]
+
+    weights = softmax(top_scores, TAU)
+    centroid = np.average(top_vecs, axis=0, weights=weights)
+
+    importance = q_vec * centroid
+    keep_count = int(len(importance) * KEEP_FRAC)
+    keep_dims = np.argsort(importance)[-keep_count:]
+
+    mask = np.zeros_like(importance)
+    mask[keep_dims] = 1
+    q_dime = q_vec * mask
+
+    dime_scores = cand_vecs @ q_dime
+    dime_ranked_idx = np.argsort(-dime_scores)
+    dime_rank = list(dime_ranked_idx).index(gold_idx) + 1
+
+    if dime_rank < base_rank:
+        print("=" * 100)
+        print(f"Query: {query}")
+        print(f"Gold passage baseline rank: {base_rank}")
+        print(f"Gold passage DIME rank: {dime_rank}")
+        print("Did DIME improve ranking? YES\n")
+        found += 1
+        break
+
+if found == 0:
+    print(f"No DIME improvement in {N_QUERIES} queries. Try increasing N_QUERIES or adjusting KEEP_FRAC.")
+"""
