@@ -1,0 +1,46 @@
+### From https://levelup.gitconnected.com/diversity-guided-mlp-reduction-for-efficient-large-vision-transformers-459d8f4685b8
+### https://arxiv.org/abs/2506.11120
+
+Summary: Diversity-Guided MLP Reduction (DGMR) for Efficient Vision Transformers
+1. Motivation
+   Transformer models, especially in vision tasks, scale well in performance as their size increases. 
+   However, this comes at a high cost in computation and memory. 
+   Vision Transformers (ViTs) are particularly parameter-heavy due to the MLP (multilayer perceptron) blocks, 
+   which can account for over 80% of total parameters (e.g., 81.1% in EVA-CLIP-E).
+
+2. DGMR: A New Approach
+   To address this, the authors introduce DGMR (Diversity-Guided MLP Reduction), a critic-free, efficient compression technique for large ViTs.
+   The method uses:
+   -a. Gram-Schmidt-like pruning to select principal neurons in the MLP hidden layer.
+   -b. A diversity-preserving strategy to avoid redundancy.
+   -c. No gradient computation or iterative fine-tuning required during pruning.
+   -d. Knowledge distillation for performance recovery.
+
+3. Method Overview
+   DGMR operates in two stages:
+   -a. Pruning Stage:
+       -1. Removes redundant neurons from the MLP hidden layers.
+       -2. Selects neurons based on their ℓ2-norm and orthogonal uniqueness via a Gram-Schmidt-like process.
+       -3. Keeps only the most informative and diverse neurons.
+   -b. Distillation Stage:
+       -1. The original large model acts as a teacher.
+       -2. The pruned student model mimics the teacher via knowledge distillation.
+       -3. Structural compatibility is preserved (output shape unchanged), enabling effective transfer.
+
+4. Key Advantages
+   -a. Up to 71.5% reduction in parameters and FLOPs.
+   -b. Minimal or no loss in performance.
+   -c. No need for labeled data: recovery is done using only 0.06% of the LAION-2B dataset (unlabeled).
+   -d. Fast throughput: Up to 3× inference speed-up.
+
+5. Conclusion and Future Work
+   DGMR is a practical and efficient solution for compressing large-scale vision transformers:
+   -a. Removes redundancy in MLPs with minimal performance drop.
+   -b. Achieves high compression without gradient-based pruning or re-training.
+   -c. Compatible with token pruning and other acceleration methods.
+
+6. Future directions:
+   -a. Extend DGMR to compress attention modules.
+   -b. Apply to multi-modal transformers (language, audio, video).
+   -c. Explore hierarchical pruning for even larger models.
+
