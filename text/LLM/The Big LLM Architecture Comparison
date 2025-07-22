@@ -1,0 +1,105 @@
+### From https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+
+1. Framing the Question: “Same Foundations, Minor Polishes?”
+   -a. Historical Span: It’s been seven years since the original GPT. Despite advances from GPT‑2 (2019) through DeepSeek‑V3 and Llama 4 (2024–2025),
+                        core transformer blocks remain structurally similar.
+   -b. Minor Refinements
+       -1. Positional embeddings: absolute → RoPE (rotary)
+       -2. Activation: GELU → SwiGLU
+       -3. Attention: full MHA → Grouped‑Query Attention (GQA) or other variants
+   -c. Motivation: Rather than focusing on benchmarks or training recipes, the article surveys pure architectural innovations 
+                   that shape modern text‑only LLMs.
+
+2. DeepSeek V3 / R1 (Dec 2024 / Jan 2025)
+   DeepSeek V3 underpins the reasoning‑focused DeepSeek R1. Two standout architectural advances improve both compute efficiency and modeling power:
+   2.1 Multi‑Head Latent Attention (MLA)
+       -a. Problem with MHA: Each head has its own K/V projections → high memory for KV‑cache.
+       -b. GQA Recap: Groups heads to share K/V, reducing parameter count and memory with minimal performance loss.
+       -c. MLA Innovation:
+           -1. Compression: At inference, K/V tensors are projected down to a low‑dim latent space for storage in KV‑cache.
+           -2. Decompression: Before attention, they’re projected back to full dimension.
+           -3. Benefit: Further KV‑cache memory reduction beyond GQA, with ablations showing MLA even slightly outperforms standard MHA.
+   2.2 Mixture‑of‑Experts (MoE)
+       -a. Standard Transformer FFN: A single dense feed‑forward block per layer → large parameter footprint.
+       -b. MoE Module: Replaces each FFN with an ensemble of expert FFNs. A lightweight router dynamically activates only a few experts per token.
+           -1. DeepSeek‑V3 Specs:
+               -1) 256 experts per MoE layer
+               -2) 61 total transformer layers (MoE in all but first three)
+               -3) 671 B total parameters, yet only 37 B “active” per token (9 experts: 1 shared + 8 router‑selected)
+           -2. Shared Expert: Always‑on expert improves stability by capturing common patterns, letting specialized experts focus on rarer phenomena.
+
+3. OLMo 2 (Jan 2025)
+   Developed by AI2, OLMo 2 prioritizes transparency. Key architectural notes:
+   3.1 Normalization Placement
+       -a. LayerNorm → RMSNorm everywhere for lighter parameterization.
+       -b. Post‑Norm Revival: Contrary to the widespread Pre‑Norm design (norm before attention/FFN), 
+                              OLMo 2 uses RMSNorm after each sub‑module—but still inside the residual path.
+           -1. Effect: Empirically stabilizes training (though confounded with QK‑Norm in published plots).
+   3.2 QK‑Norm
+       -a. Inside Attention: Applies a small RMSNorm to query and key vectors before rotary embeddings (RoPE).
+       -b. Role: Further smooths gradients and improves stability, as supported by 2023 vision transformer scaling work.
+
+4. Google Gemma 3 (Mar 2025)
+   Gemma 3 refines Gemma 2’s focus on mid‑sized (27 B) models and multilingual support. Two highlights:
+   4.1 Sliding Window Attention
+       -a. Global → Local: Each token attends only to a fixed neighborhood (e.g., ±512 tokens) rather than the entire sequence.
+       -b. Gemma 3 vs Gemma 2:
+           -1. Gemma 2: 1:1 ratio of global to local layers, window 4 K
+           -2. Gemma 3: 1 global per 5 local, window reduced to 1 K
+       -c. Impact: ~50–60 % KV‑cache memory savings with negligible effect on perplexity.
+   4.2 Hybrid RMSNorm Placement
+       -a. Dual‑Norm: Applies RMSNorm both pre‑ and post‑ grouped‑query attention and FFN.
+       -b. Rationale: Captures benefits of Pre‑Norm’s gradient flow and Post‑Norm’s stability, at minimal cost.
+   4.3 Gemma 3n (Small‑Device Variant)
+       -a. Per‑Layer Embedding (PLE): Streams modality‑specific embeddings from CPU/SSD on demand, keeping only core parameters in GPU.
+       -b. MatFormer (Matryoshka Transformer): Single large model is “sliced” into smaller independently usable sub‑models at inference, 
+                                               each trained to operate stand‑alone.
+
+5. Mistral Small 3.1 (Mar 2025)
+   -a. Size & Performance: 24 B parameters, outperforms Gemma 3 27 B on most benchmarks, with lower latency.
+   -b. Compute Savings: Likely due to optimized tokenizer, smaller KV‑cache, reduced layer count, 
+                        and avoidance of sliding windows—enabling FlashAttention.
+
+6. Llama 4 Maverick (2025)
+   Meta’s flagship 400 B model, echoing DeepSeek‑V3 in many respects but with its own twists:
+   -a. MoE Design:
+       -1. Fewer, larger experts (e.g., 2 active with 8 192‑dim each) vs DeepSeek’s 9 smaller experts.
+       -2. Alternates dense and MoE layers (DeepSeek applies MoE in every block except first three).
+   -b. Attention: Uses GQA rather than MLA.
+   -c. Active Parameter Footprint: ~17 B vs DeepSeek’s 37 B, trading off inference cost against total capacity.
+
+7. Qwen3 Series (2025)
+   -a. Dense Variants (0.6 B → 32 B):
+       -1. Qwen3 0.6 B is a remarkably compact, deep (more layers) model with strong local performance, often replacing Llama 3 1 B 
+           for on‑device or educational use.
+   -b. MoE Variants (30 B‑A3 B, 235 B‑A22 B):
+       -1. Mirrors DeepSeek’s sparse design but omits a shared expert in Qwen3.
+       -2. Offers both dense and MoE options to balance ease of fine‑tuning vs inference efficiency.
+       -3. Qwen3 235 B‑A22 B vs DeepSeek V3: similar MoE/MLA structure, but Qwen3 uses purely GQA.
+
+8. SmolLM 3 (2025)
+   -a. Sweet Spot: 3 B parameters, sits between Qwen3 1.7 B and 4 B.
+   -b. NoPE (No Positional Embeddings):
+       -1. Omits explicit embeddings (absolute or rotary), relying solely on causal mask for order.
+       -2. Demonstrates improved length generalization in smaller‑scale studies.
+   -c. Usage: Applied NoPE only in every 4th layer to mitigate potential scaling issues.
+
+9. Kimi 2 (2025)
+   -a. Scale Record: ~1 trillion parameters—the largest open‑weight LLM at publication.
+   -b. Architecture: Built on DeepSeek‑V3’s MoE+MLA foundation but with more experts and fewer MLA heads.
+   -c. Optimizer: First production‑scale use of the Muon optimizer (orthogonalized, operator‑norm‑controlled updates), 
+                  yielding exceptionally stable and well‑decaying training loss.
+   -d. Open Release: Shared publicly before DeepSeek R2, cementing it as the most powerful open model of its generation.
+
+10. Key Takeaways
+    -a. Transformer Core Endures: Across seven years, the transformer encoder block persists, with most innovation in peripheral modules
+                                  (attention variants, normalization strategies, and sparsity).
+    -b. Efficiency via Sparsity & Locality: MoE and sliding‑window/local attention steadily gain adoption to reduce per‑token compute 
+                                            without sacrificing capacity.
+    -c. Stability through Normalization: Varied RMSNorm placements and QK‑Norm tweaks help training large, deep models more reliably.
+    -d. Data‑ and Compute‑Efficient Flavors: Distillation (DeiT), NoPE (SmolLM3), and PLE/MatFormer (Gemma 3n) demonstrate creative approaches 
+                                             to content‑efficient training and on‑device inference.
+    -e. Emerging Optimizers: The rise of Muon in Kimi 2 signals growing interest in geometry‑aware, operator‑norm‑controlled optimization.
+
+    These architectural refinements—not merely benchmark scores—are shaping the next generation of scalable, efficient, and robust LLMs.
+
