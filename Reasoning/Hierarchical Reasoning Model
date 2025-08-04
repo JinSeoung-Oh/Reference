@@ -1,0 +1,87 @@
+### From https://arxiv.org/pdf/2506.21734
+
+Hierarchical Reasoning Model (HRM)
+
+1. Overview & Biological Inspiration
+   HRM is a novel model inspired by three core computational principles observed in the human brain:
+   -a. Hierarchical Processing
+       -1. The brain processes information in a hierarchy, from low-level sensory/motor signals to high-level abstract representations.
+       -2. Higher levels integrate over longer time spans, while lower levels handle fast, granular processing.
+   -b. Temporal Separation
+       -1. Different layers operate at different intrinsic timescales (e.g., slow theta waves at 4–8 Hz vs. fast gamma at 30–100 Hz).
+       -2. This enables stable long-term planning at high levels and fast reactive updates at low levels.
+   -c. Recurrent Connectivity
+       -1. The brain contains strong feedback loops for iterative refinement.
+       -2. It avoids the biologically implausible BPTT (Backpropagation Through Time) by relying on local, temporal learning rules.
+
+2. Components of HRM
+   -a. Input Network fI(x; θI) → projects input x into working representation x̃
+   -b. Low-Level Module (L-module) fL → updates state every step (T times per cycle)
+   -c. High-Level Module (H-module) fH → updates state once per cycle
+   -d. Output Network fO(zH; θO) → generates the final prediction ŷ
+   Each forward pass unfolds across N high-level cycles, each containing T low-level steps.
+   The L-module performs iterative sub-computations, and the H-module integrates them to adjust high-level strategy.
+
+3. Hierarchical Convergence
+   -a. Standard RNNs converge too quickly, stalling further computation once the hidden state stabilizes.
+   -b. HRM avoids premature convergence by orchestrating nested convergence cycles:
+       -1. L-module converges locally within each cycle.
+       -2. After T steps, H-module updates its state using the final state of L, resets the L-module with a new global context.
+   This design enables distinct, stable nested computations, effectively extending the reasoning depth to N×T steps.
+   PCA and forward residual analyses show that HRM maintains higher activity over time than standard RNNs.
+
+4. 1-Step Gradient Approximation
+   -a. BPTT is memory-intensive and biologically implausible.
+   -b. HRM approximates gradients by computing a single-step gradient at convergence points, skipping the full unrolling:
+       -1. Requires only O(1) memory
+       -2. Easily implementable in frameworks like PyTorch
+       -3. Theoretically backed by Deep Equilibrium Models (DEQ) using the Implicit Function Theorem
+   By assuming that the Jacobian inverse ≈ Identity (I), HRM approximates the gradient paths efficiently without computing full sequences.
+
+5. Deep Supervision
+   -a. Inspired by how brain rhythms regulate learning, HRM applies supervision at each segment (NT steps).
+   -b. Each forward segment:
+       -1. Computes the next state zₘ, prediction ŷₘ
+       -2. Computes loss Lₘ
+       -3. Updates parameters
+   -c. The previous state zₘ₋₁ is detached before passing to the next segment → prevents backpropagation across segments
+   This provides frequent feedback to the H-module and stabilizes training—often outperforming complex Jacobian-based methods.
+
+6. Adaptive Computation Time (ACT)
+   -a. The brain alternates between fast intuition ("System 1") and deliberate reasoning ("System 2").
+   -b. HRM incorporates Q-learning-based ACT to decide when to stop computing:
+       -1. A Q-head predicts Q̂_halt, Q̂_continue based on zH
+       -2. The model halts if Q̂_halt > Q̂_continue and a minimum number of segments Mmin has been reached
+       -3. Rewards: halt gives binary correctness, continue gives 0
+   -c. Benefits:
+       -1. Dynamically adapts compute based on task complexity
+       -2. Saves computation with minimal loss in accuracy
+       -3. Allows inference-time scaling by increasing Mmax (maximum segments) without retraining
+
+7. Model Architecture & Training
+   -a. Sequence-to-sequence structure:
+       -1. Inputs and outputs are token sequences (x₁,…,xₗ), (y₁,…,yₗ′)
+       -2. Input embedding fI, output head with softmax or stablemax
+   -b. Modules (fL, fH) are encoder-only Transformer blocks:
+       -1. Modern LLM enhancements: RoPE, GLU, RMSNorm, no bias in linear layers
+       -2. Initialization: truncated LeCun Normal
+       -3. Optimizer: Adam-atan2 (scale-invariant AdamW variant)
+   -c. Post-Norm architecture is used across HRM and baselines, improving stability and convergence.
+
+8. Empirical Performance & Scalability
+   (a) ACT uses fewer steps while maintaining compute flexibility
+   (b) Accuracy matches or exceeds fixed-compute models
+   (c) Models trained with lower Mmax generalize to higher Mmax during inference
+
+9. Summary
+   HRM offers a biologically-inspired, computationally efficient architecture for deep reasoning.
+   Its strengths include:
+
+   Strategy	 | Purpose	| HRM Technique
+   Hierarchical Processing	| Deep, stable nested computation	| H-module guides L-module in cycles
+   1-Step Gradient	| BPTT-free training	| Fixed-point backprop, DEQ-based math
+   Deep Supervision	| Frequent feedback + regularization	| NT-segment training with state detach
+   Adaptive Computation	| Dynamic compute depth	| Q-learning halt strategy
+   Inference-Time Scaling	| Better reasoning at test time	| No retraining needed
+
+
