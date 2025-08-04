@@ -1,0 +1,70 @@
+### From https://www.marktechpost.com/2025/07/22/context-engineering-for-ai-agents-key-lessons-from-manus/?amp
+
+1. Design Around the KV-Cache
+   -a. Core Concept
+       The Key-Value (KV) cache is critical for optimizing agent performance — directly impacting speed and cost. 
+       Agent inputs tend to grow longer than their outputs as they accumulate history. 
+       Without KV-cache reuse, computation costs and latency can multiply dramatically.
+   -b. Manus Strategy
+       -1. Stable Prompt Prefixes: Even a single-token variation (like timestamps) in the system prompt can invalidate the KV-cache. 
+                                   Keep prefixes static.
+       -2. Append-Only Context: Avoid rewriting past actions or observations. Maintain deterministic serialization (e.g., fixed key order in JSON).
+       -3. Explicit Cache Breakpoints: Some frameworks require manual insertion of cache split points 
+                                       — ideally placed right after the system prompt.
+    ➡In LangGraph: Keep all state and message history strictly append-only, and ensure the prompt prefix structure is always fixed and reusable.
+
+2. Mask Instead of Remove
+   -a. Problem
+       -1. As agents gain more tools, disabling them by removing their definitions can break the cache and confuse the model 
+           — especially if previous context refers to now-missing tools.
+   -b. Solution
+       -1. Logit Masking Instead of Removal: Don’t delete tool entries. Instead, apply masking on token outputs (logits) to prevent choosing invalid tools.
+       -2. Use a Context-Aware State Machine to dynamically control what the model is allowed to select at inference time without altering the context.
+   ➡In LangGraph: Don’t delete tools from memory — instead, track allowed tools via a tool_mask field in the state and apply constraints
+                   only during decoding.
+
+3. Use the File System as External Context
+   -a. Problem
+       Even with 128K+ token windows, real-world tasks (e.g., web pages or PDFs) can exceed limits, degrade performance, and raise costs. 
+       Irreversible compression risks losing critical information.
+   -b. Solution
+       -1. Use File System as Permanent Context: Train agents to write to and read from files, externalizing memory into persistent, 
+                                                 structured storage.
+       -2. Ensure that all compression strategies are lossless — e.g., keep the URL or reference even if you drop raw content.
+   ➡In LangGraph: Use long-term memory not just for embeddings, but also for file references that allow agents to recover data later as needed.
+
+4. Manipulate Attention with Recitation
+   -a. Problem
+       In long multi-step workflows, agents can lose track of their goals or forget earlier instructions.
+   -b. Solution
+       -1. Have agents update a todo.md or similar plan file after each step. The updated plan is appended to context.
+       -2. This recitation biases attention toward global objectives without architectural changes, reducing “lost-in-the-middle” issues.
+   ➡In LangGraph: Add a node that updates the plan each step and appends it to the context state for every turn.
+
+5. Keep the Mistakes
+   -a. Instinct
+       It’s tempting to clean up or erase errors and failed attempts from the agent’s context to maintain cleanliness.
+   -b. Manus Insight
+       -1. Leave mistakes in: Agents learn implicitly by seeing their past errors. This updates their internal beliefs and reduces repeated failure.
+       -2. Mistake retention improves recovery behavior — a key metric for assessing true agency.
+   ➡In LangGraph: Don’t discard failed observations or error messages. Append them to state as-is to support self-correction.
+
+6. Don’t Let Few-Shot Prompting Trap You
+   -a. Problem
+       While few-shot examples work well for single LLM calls, they often backfire in agents by leading to rigid mimicry and
+       suboptimal repetitive behavior.
+   -b. Solution
+       -1. Introduce Controlled Diversity: Slight variations in serialization, phrasing, or formatting help prevent behavioral “ruts.”
+       -2. This randomness helps shift the model’s attention and reduces overfitting to past actions.
+   ➡In LangGraph: Add variability to how actions are serialized, or rotate template formats within context to avoid overly consistent repetition.
+
+7. Summary: Key Context Engineering Principles from Manus
+   Principle	| Strategy
+   KV-Cache Optimization| Stable prompt prefixes, append-only context, explicit cache breakpoints
+   Tool Management	| Logit masking instead of dynamic removal
+   External Context via Files	| File system as memory, lossless compression strategies
+   Goal Attention via Recitation	| Append-to-context plans that steer attention
+   Keep Errors in Context	| Mistakes inform belief updates and enable error recovery
+   Avoid Few-Shot Repetition	| Controlled diversity in prompt phrasing or action formatting
+
+
