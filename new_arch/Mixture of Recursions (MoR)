@@ -1,0 +1,97 @@
+### From https://medium.com/data-science-in-your-pocket/googles-mixture-of-recursions-end-of-transformers-b8de0fe9c83b
+
+1. Structural Limitations of Transformer Architecture
+   Since its introduction in 2017, the Transformer has powered most LLMs, but it now shows several structural inefficiencies:
+   -a. Uniform Computation for All Tokens
+       Every input token, regardless of importance or complexity, passes through the entire stack of layers. This results in:
+       -1) Wasted computation for simple tokens.
+       -2) Insufficient depth of processing for complex tokens.
+   -b. Excessive Parameter Count
+       Each layer in the Transformer has its own unique weights, drastically increasing model size, memory usage, 
+       and compute cost during both training and inference.
+   -c. Inefficient Inference
+       Tokens are not allowed to exit early; they must pass through all layers. Even if some tokens are already well-processed, 
+       the system continues processing them — leading to slower decoding.
+   -d. KV Cache Bottleneck
+       Self-Attention layers generate Key-Value (KV) pairs that are stored for every token at every layer, 
+       resulting in exponential GPU memory consumption.
+   -e. Lack of Iterative Refinement
+       Transformers perform a single forward pass with no mechanism for recursive reasoning or internal refinement of token representations.
+   -f. Fixed Computational Budget
+       All inputs are processed with the same amount of computation, regardless of complexity or relevance. There is no dynamic compute allocation.
+   -g. Lack of Test-Time Adaptability
+       Standard Transformers cannot dynamically adjust the depth of computation during inference without architectural redesign or retraining.
+
+2. What Is a Recursive Transformer?
+   A Recursive Transformer reuses the same block of layers multiple times instead of stacking many unique ones:
+   -a. Traditional Transformer: 24 unique layers in sequence.
+   -b. Recursive Transformer: Same block (e.g., Block A) repeated N times.
+   -c. Advantages:
+       -1) Weight tying: dramatically reduces parameter count.
+       -2) Improved memory and compute efficiency.
+       -3) When trained properly, performance can match or surpass standard Transformers.
+
+3. What Is Mixture-of-Recursions (MoR)?
+   -a. Definition
+       MoR extends Recursive Transformers by assigning each token its own recursion depth, based on how much "thinking" or processing it requires.
+   -b. Key Components:
+       -1) Shared Layer Blocks: The same block is applied recursively.
+       -2) Router: A small neural network determines the number of recursions each token undergoes, during both training and inference.
+       -3) Dynamic Recursion Loops: Complex tokens are processed multiple times, simple tokens exit early.
+       -4) Selective KV Caching: Only active tokens (still being processed) are cached — optimizing memory usage.
+
+4. Detailed Routing Mechanism
+   MoR enables learned, token-specific dynamic control over recursion. Two modes of routing are used:
+   -a. Expert-Choice Routing
+       -1) Acts like a gate at each recursion step.
+       -2) Based on the token’s current state, decides whether to continue or exit.
+       -3) Decision is made at every step — more flexible.
+       -4) Drawback: Can leak future information (violates causality), so an auxiliary loss is used to mitigate this.
+   -b. Token-Choice Routing
+       -1) Each token selects its recursion depth once at the start.
+       -2) No dynamic decision-making mid-run.
+       -3) Advantage: Simpler and deterministic.
+       -4) Drawback: Less adaptive → performance penalty possible.
+
+5. KV Cache Optimization
+   In standard Transformers, KV caches are stored for all tokens at all layers, consuming massive memory. MoR provides two optimizations:
+   -a. Recursion-Wise Caching
+       -1) Only cache KV pairs for tokens that are still active.
+       -2) Tokens that have exited recursion stop generating KV entries — saves significant memory.
+   -b. Recursive KV Sharing
+       -1) Cache is generated during the first recursion and reused across subsequent loops.
+       -2) Trade-off: Slight reduction in accuracy but enormous memory savings — useful for low-resource settings.
+
+6. Benchmark Results
+   -a. A 118M parameter MoR model outperforms a 315M vanilla Transformer in few-shot accuracy.
+   -b. Both were trained under the same FLOP budget (16.5e18), but MoR used 25% less memory.
+   -c. Inference time improved by up to 2.06×, depending on token-wise recursion depth.
+
+7. Limitations of MoR
+   -a. Token-choice routing is rigid: Cannot adjust recursion dynamically during processing.
+   -b. Expert-choice + KV sharing: Memory efficiency comes at the cost of accuracy.
+   -c. Routing policy is frozen post-training: Recursion depth behavior cannot be easily changed afterward.
+   -d. Minimal gain on small models (≤135M): Benefits are less visible for tiny LLMs.
+   -e. Requires engineering effort: MoR is not plug-and-play; it requires custom implementation beyond common libraries like HuggingFace.
+
+8. MoR vs MoE (Mixture-of-Experts)
+   Aspect	| MoE	| MoR
+   Scaling Type	| Width (different experts per token)	| Depth (different recursion per token)
+   Mechanism	| Route tokens to different experts	| Route tokens to different depths
+   Analogy	| Choosing from multiple dishes	| Cooking difficult ingredients longer
+
+9. Intuitive Analogy
+   Imagine building a Lego castle:
+   -a. Simple parts snap together quickly.
+   -b. Complex sections require retrying and refining.
+   MoR is like a smart assistant that looks at each Lego piece and says:
+   “This is easy, once is enough” or “This is tricky, let’s work on it again.”
+   This leads to faster and smarter construction by allocating effort where needed.
+
+10. Conclusion
+    Mixture-of-Recursions (MoR) is a structurally innovative architecture that addresses critical inefficiencies in Transformers.
+    By using parameter sharing, dynamic per-token recursion, and selective caching, MoR offers equivalent or better performance 
+    with fewer parameters, less memory usage, and faster inference.
+    MoR is especially promising for scaling LLMs to smaller devices, enabling high performance with limited compute resources 
+    — a likely stepping stone for the next wave of LLM architectures.
+
