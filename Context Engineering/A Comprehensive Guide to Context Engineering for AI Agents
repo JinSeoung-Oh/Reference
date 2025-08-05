@@ -1,0 +1,112 @@
+### From https://medium.com/@tam.tamanna18/a-comprehensive-guide-to-context-engineering-for-ai-agents-80c86e075fc1
+
+1. What is Context Engineering?
+   Context engineering is the process of designing and managing the information provided to AI agents 
+   — specifically large language models (LLMs) 
+   — to help them make decisions, reason, and act effectively.
+   Unlike prompt engineering (which focuses on crafting a single prompt), context engineering involves a systems-level orchestration 
+   of various components: instructions, conversation history, external tools, memories, and retrieved data.
+
+   Andrej Karpathy calls it “the delicate art and science of filling the context window with just the right information for the next step.”
+
+2. Why Context Matters for LLMs
+   LLMs don’t have memory between invocations. They rely entirely on the context window — a fixed-length input buffer (8k–128k tokens) — 
+   to reason and generate output.
+
+   Poorly designed context (irrelevant, missing, unstructured) leads to errors, confusion, or hallucinations. 
+   Context engineering gives the model all the right inputs, at the right time and format, just like giving a chef the correct ingredients 
+   and recipe.
+
+3. Why Context Engineering is Challenging for Agents
+   AI agents, unlike chatbots, manage multi-step tasks involving tools, memory, and external data. Challenges include:
+   -a. Limited context window: You can’t include all relevant data — selection matters.
+   -b. Dynamic task requirements: Each step may need different context.
+   -c. Memory management: Agents don’t retain history by default.
+   -d. Tool complexity: Output must be integrated cleanly into context.
+   -e. Unexpected retrieval: Poor context design can surface irrelevant info.
+   -f. Balancing detail and conciseness: Too much = overload; too little = failure.
+
+4. Types of Context (as used in LangGraph)
+   The agent’s behavior is driven by various contextual inputs, such as:
+   -a. System Instructions: Defines the agent’s high-level behavior.
+   -b. User Prompt: The immediate task or request.
+   -c. Conversation History: Short-term memory within the session (e.g., previous exchanges).
+   -d. Long-Term Memory: Persistent facts like preferences or background knowledge.
+   -e. Retrieved Info: Context fetched dynamically (e.g., via RAG).
+   -f. Tool Definitions & Responses: Interface for calling tools and using their results.
+   -g. Structured Output: Expected format (e.g., JSON) that guides response shaping.
+
+5. Types of Memory
+   Drawing from cognitive science, the agent may use three memory types (as per CoALA framework):
+   -a. Semantic Memory: Structured factual knowledge (e.g., “User prefers formal tone”), often stored in vector DBs.
+   -b. Episodic Memory: Interaction logs (e.g., “Last week user asked for X”), used as few-shot context.
+   -c. Procedural Memory: Task logic or execution rules, embedded in system prompts or agent code.
+
+6. Four Core Context Engineering Strategies
+   -a. Write
+       Store temporary or intermediate info (e.g., scratchpads, plans) outside the context window for later recall.
+       Example: Save a travel itinerary draft for the next step.
+   -b. Select
+       Retrieve only relevant info from memory or knowledge sources using semantic search (e.g., RAG).
+       Example: When asked about Italian food, pull only restaurant-related preferences — not color preferences.
+   -c. Compress
+       Summarize prior context to save token space. LangGraph supports message summarization.
+       Example: Reduce long task discussions to: “Prefers agile, deadline next month.”
+   -d. Isolate
+       Expose only task-relevant tools or data.
+       Example: When sending an email, only show tools like send_email, not search_web.
+
+7. LangGraph as a Framework for Context Engineering
+   LangGraph is a stateful agent orchestration framework from LangChain. It gives developers low-level control over:
+   -a. Context flow across steps
+   -b. Persistent memory (short- and long-term)
+   -c. Tool orchestration
+   -d. Workflow graph structure (nodes/edges)
+   -e. Dynamic state updates per step
+
+   LangGraph supports:
+   -a. State object to hold messages, preferences, summaries
+   -b. StateGraph to define workflow steps
+   -c. Memory integration (LangMem)
+   -d. External tool usage
+   -e. Human-in-the-loop updates
+
+8. Example: Email Drafting Agent
+   An agent that drafts emails based on context:
+   -a. Receives a user query: “Draft an email to Jim.”
+   -b. Fetches memory and tool output: calendar, user preferences
+   -c. Builds context: Combines prompt, memory, and tools
+   -d. Uses LLM to generate: Outputs draft email
+   -e. Stores memory: Adds to episodic memory
+
+   LangGraph code uses:
+   -a. AgentState: Defines state schema
+   -b. check_calendar: Tool function
+   -c. fetch_context_node, llm_node, store_memory_node: Node functions
+   -d. StateGraph: Connects node flow
+
+9. Long-Term Memory via LangMem
+   LangMem can persist:
+   -a. Semantic memory (e.g., tone preferences)
+   -b. Episodic memory (e.g., past interactions)
+   In fetch_context_node, LangMem retrieves memory for the task.
+   In store_memory_node, LangMem stores new facts and interactions.
+
+10. Practical Tips for Effective Context Engineering
+    Here is a set of actionable, core-purpose-driven recommendations:
+    -a. Use RAG for Retrieval:
+        Use embedding-based search and vector databases like Pinecone or Weaviate to retrieve only relevant data, avoiding overload and distraction.
+    -b. Summarize Long Histories:  
+        When conversation history grows, compress it into key facts and decisions to preserve essential meaning while avoiding token overflow. 
+        The goal is to maintain clarity within LLM’s context limits — tool usage like LangGraph utilities is helpful but not the point.
+    -c. Namespace Memories:
+        Organize memory storage using namespaces (e.g., per user or session) to prevent cross-session leakage and enable personalization.
+    -d. Dynamic Tool Selection:
+        Filter tools by relevance using semantic similarity or task-specific rules to reduce confusion and maintain precision.
+    -e. Reflect and Learn: 
+        Use structured reflection or meta-prompts to refine procedural memory and reinforce positive agent behaviors based on user feedback.
+
+11. Conclusion
+    Context engineering is essential to transform LLMs into truly intelligent agents.
+    It determines how agents perceive, remember, and act.
+    LangGraph enables precise context control, bridging the gap between stateless LLMs and memory-rich, goal-driven AI agents.
