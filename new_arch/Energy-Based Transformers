@@ -1,0 +1,43 @@
+### From https://chatgpt.com/c/6895b0c3-ab28-832f-a9e6-af2e214d3f98
+
+1. Background: From Pattern Recognition to Complex Reasoning
+   -a. Modern AI excels at System 1 thinking (fast, intuitive) but struggles with System 2 thinking (slow, analytical, multi-step reasoning).
+   -b. Existing approaches (e.g., RL with verifiable rewards) work well in domains where correctness is easy to check but fail to generalize broadly.
+
+2. Core Concept of EBTs
+   -a. Energy Function:
+       -1. Maps an input–prediction pair (x, y) to a scalar score representing their compatibility or unnormalized probability.
+       -2. Lower energy = better fit between input and prediction.
+       -3. Reasoning = iterative energy minimization starting from a random guess and refining predictions step-by-step.
+   -b. Operation:
+       -1. Does not produce output in a single forward pass.
+       -2. At each step, evaluates energy and updates predictions toward lower-energy states.
+       -3. Mimics human iterative problem-solving and verification.
+
+3. Three Key Capabilities
+   -a. Dynamic Computation Allocation: Devotes more “thinking steps” to harder or uncertain problems.
+   -b. Natural Uncertainty Modeling: Tracks confidence through energy dynamics, especially valuable in continuous domains like vision.
+   -c. Explicit Verification: Energy scores allow self-checking and preference for plausible answers.
+
+4. Advantages Over Existing Methods
+   -a. No handcrafted rewards or extra supervision: System 2 abilities emerge from unsupervised learning objectives.
+   -b. Modality-agnostic: Scales across discrete (text/language) and continuous (images/video) domains.
+   -c. Efficient scaling: Higher training efficiency in data, compute, and model size; improved generalization under high difficulty or OOD conditions.
+
+5. Experimental Findings
+   -a. Allowing more “thinking time” improves downstream language and vision performance.
+   -b. More training-efficient than Transformer baselines.
+   -c. Generalization improves with task difficulty, echoing human reasoning under uncertainty.
+
+6. Significance and Applications
+   -a. Enables adaptive reasoning depth based on problem difficulty.
+   -b. Efficient and robust, suitable for domains where data scaling is limited; applicable in modeling, planning, and decision-making.
+
+7. Limitations and Future Work
+   -a. Limitations:
+       -1. Higher training compute cost
+       -2. Challenges in handling highly multimodal data distributions
+   -b. Future directions:
+       -1. Combine with other neural paradigms
+       -2. Improve optimization strategies
+       -3. Extend to new multimodal and sequential reasoning tasks
