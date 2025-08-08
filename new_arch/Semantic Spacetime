@@ -1,0 +1,55 @@
+### From https://mark-burgess-oslo-mb.medium.com/the-role-of-intent-and-context-knowledge-graphs-with-cognitive-agents-fb45d8dfb34d
+
+1. Background and History
+   -a. Knowledge Representation (KR) has a troubled history; Semantic Web was standardized too early, leading to misuse 
+       by consultants and poor projects.
+   -b. The author began KR research in 2006, rejected RDF/Topic Maps, and developed Semantic Spacetime (SST)—implemented with 
+       plain PostgreSQL in the SSTorytime project.
+
+2. Insights on Knowledge and Learning
+   -a. Delegating knowledge management to machines can erode actual human knowledge: “It ain’t knowledge if you don’t know it yourself.”
+   -b. Automation may discourage learning; simplifying design can impose cognitive burdens.
+   -c. AI risks making tasks too easy, reducing learning intent.
+
+3. Problems in Graph Creation and Industry Mistakes
+   -a. Mind-map sketches are easy; turning them into structured, queryable graphs is bureaucratically heavy.
+   -b. Common KR mistakes:
+       -1. Over-formalization and rule-dependence.
+       -2. Narrow equation of reasoning with logic.
+       -3. Enforcing distinctions through types/ontologies.
+   -c. ML shifted KR toward probabilistic models, but knowledge maps have lagged.
+
+4. SST Approach
+   -a. Uses spacetime attributes (temporal order, containment, properties) to model reasoning without heavy type systems.
+   -b. Keeps natural language alongside structured commentary.
+
+5. Knowledge as Process
+   -a. Knowledge is not static facts but understanding processes—captured through stories, repetition, and distilled notes.
+   -b. Intent and context are central to knowledge retention and recall.
+
+6. Role of Intent and Context
+   -a. Intent: Purposeful focus, motivation to learn; strongly influences memory strength.
+   -b. Context: Background conditions; acts as discriminator and retrieval handle.
+   -c. Both overlap; context selection can be intentional.
+   -d. Strong emotional engagement within a chosen context boosts retention.
+
+7. CFEngine and Context Modeling
+   -a. Used sensor flags (time, OS, temperature) to drive conditional policies without verbose logic.
+   -b. Extensible to general KR by tagging events/scenarios for retrieval.
+
+8. Natural Language and Intent Extraction
+   -a. Hard to reduce natural language to strict logic, but pattern frequency, repetition, and lexical rarity can signal intent.
+   -b. Goldilocks principle: Moderate repetition suggests higher intentionality.
+   -c. SSTorytime’s text2N4L transforms text into graph-compatible notes.
+
+9. Advantages / Limitations
+   -a. Advantages
+       -1. Simpler than ontology-heavy KR; preserves human intent in data.
+       -2. Compatible with natural language, avoiding forced type schemas.
+       -3. Context–intent indexing improves retrieval relevance.
+   -b. Limitations / Problems
+       -1. Context/intent extraction is still complex in large multimodal environments.
+       -2. Pattern-based analysis may lack statistical rigor, requiring theoretical interpretation.
+       -3. Without user intent, collected data lacks meaningful structure.
+
+
