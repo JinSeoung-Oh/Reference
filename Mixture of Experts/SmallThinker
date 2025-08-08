@@ -1,0 +1,47 @@
+### From https://www.marktechpost.com/2025/08/01/meet-smallthinker-a-family-of-efficient-large-language-models-llms-natively-trained-for-local-deployment/?amp
+
+1. Background
+   -a. Most LLMs are cloud-optimized, making private, efficient on-device inference hard.
+   -b. Common edge approach: compress cloud models → major performance loss.
+   -c. SmallThinker (SJTU + Zenergize AI) is designed from the start for local constraints.
+
+2. Model Overview
+   -a. SmallThinker-4B-A0.6B: 4B total, 0.6B active params/token.
+   -b. SmallThinker-21B-A3B: 21B total, 3B active params/token.
+   -c. Targets: high performance, low memory, low compute environments.
+
+3. Architectural Innovations
+   -a. Fine-Grained MoE: High capacity with few experts active per token.
+   -b. ReGLU FFN Sparsity: >60% neuron inactivity within active experts.
+   -c. NoPE–RoPE Hybrid Attention: Alternating global/local attention for long context (32K/16K) + smaller KV cache.
+   -d. Pre-Attention Router + Intelligent Offloading: Predict experts early, prefetch from SSD/flash, LRU hot-expert RAM cache.
+
+4. Training
+   -a. Fresh training (not distilled).
+   -b. Curriculum: general → STEM/math/code.
+   -c. 4B: 2.5T tokens; 21B: 7.2T tokens.
+   -d. Data: curated open-source, synthetic math/code, supervised instructions.
+   -e. Techniques: quality filtering, MGA synthesis, persona prompts.
+
+5. Benchmark Performance
+   -a. 21B-A3B matches or beats peers in MMLU, GPQA, Math-500, HumanEval.
+   -b. 4B-A0.6B strong in reasoning/code vs similar active-size models.
+
+6. Real-Device Performance 
+   -a. Runs in 1 GiB RAM (4B) / 8 GiB RAM (21B) with no severe slowdown.
+   -b. Prefetching/caching → >20 tokens/sec on CPU (21B), vs near-crash for Qwen3-30B-A3B.
+
+7. Sparsity & Specialization Impact
+   -a. Expert usage: 70–80% rarely used; hot experts tied to domains/languages.
+   -b .Neuron sparsity: >60% inactivity within active experts across layers.
+
+8. Limitations & Future
+   -a. Smaller pretraining corpus than frontier cloud models → possible rare-domain weakness.
+   -b. No RLHF → safety/helpfulness gaps possible.
+   -c. English/Chinese/STEM heavy → multilingual quality variance.
+   -d. Plans: expand data, add RLHF, broaden languages.
+
+9. Significance
+   -a. Breaks “shrink cloud model” paradigm → local-first, high-speed, low-memory AI.
+   -b. Enables private, responsive, capable AI on almost any device.
+   -c. Openly available instruct versions for research/dev use.
