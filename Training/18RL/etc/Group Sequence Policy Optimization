@@ -1,0 +1,62 @@
+### From https://artgor.medium.com/paper-review-group-sequence-policy-optimization-543c3526c240
+
+1. Overview
+   -a. GSPO is an RL algorithm for training LLMs, replacing token-level importance weighting and optimization with sequence-level equivalents.
+   -b. Goals:
+       -1. Improve training efficiency and performance.
+       -2. Stabilize MoE training.
+       -3. Potentially simplify RL infrastructure.
+   -c. Successfully used in Qwen3 models.
+
+2. Motivation
+   -a. LLM training (especially with long outputs & MoE) → large rollout batches split into mini-batches → off-policy setting.
+   -b. PPO/GRPO use clipping to mitigate this.
+   -c. GRPO core problem:
+       -1. Misaligned units: rewards are sequence-level, optimization is token-level.
+       -2. Single-sample importance per token → high gradient variance.
+       -3. Can cause irreversible model collapse.
+   -d. Solution: shift to sequence-level importance weighting & optimization.
+
+3. Algorithm
+   -a. Sequence-level Importance Ratio:
+       -1. Computed from full sequence likelihood ratio, normalized by length (variance reduction).
+       -2. Stable measure of deviation from current policy.
+   -b. Clipped Objective:
+       -1. Clips entire sequences instead of tokens.
+       -2. Aligns reward & optimization units.
+       -3. Avoids unstable gradients from heavily off-policy samples.
+   -c. Group Optimization:
+       -1. Sequences grouped, with normalized sequence-level advantage.
+
+4. Experiments
+   -a. Model: Qwen3–30B-A3B-Base cold-start fine-tuning.
+   -b. Benchmarks: AIME’24, LiveCodeBench, CodeForces.
+   -c. Results:
+       -1. No Routing Replay needed (required by GRPO for MoE stability).
+       -2. Longer generations & more compute → consistent GSPO gains.
+       -3. Better efficiency vs GRPO under identical settings.
+       -4. GSPO clips more tokens (due to sequence-level clipping) but still outperforms GRPO → GRPO token-level gradients noisier & less effective.
+
+5. MoE Stability
+   -a. Instability cause:
+       -1. Sparse activation → activated expert set changes significantly post-update (~10% diff in 48-layer Qwen3–30B-A3B-Base).
+       -2. Token-level importance ratios fluctuate → GRPO fails to converge.
+   -b. GRPO workaround: Routing Replay (cache old policy’s expert routes, reuse in new policy’s ratio computation).
+       -1. Downsides: memory/communication overhead, capacity limit.
+   -c. GSPO fix:
+       -1. Sequence-level likelihood unaffected by token-level expert routing changes.
+       -2. Inherently robust → no Routing Replay needed.
+
+6. Advantages
+   -a. Reward–optimization unit alignment.
+   -b. Off-policy sample stability.
+   -c. MoE robustness without extra routing strategies.
+   -d. Sustained gains with longer sequences & more compute.
+   -e. Proven in Qwen3 latest models.
+
+7. Potential Drawbacks
+   -a. Sequence-level clipping can be overly conservative.
+   -b. More frequent clipping vs token-level methods.
+   -c. Integration requires infra changes from token-level setups.
+   -d. Performance may be sensitive to grouping & normalization choices.
+
