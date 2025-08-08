@@ -1,0 +1,61 @@
+### From https://medium.com/@causalwizard/why-im-excited-about-the-hierarchical-reasoning-model-8fc04851ea7e
+
+1. Background
+   -a. Post-ChatGPT AI progress has been largely incremental, dominated by scaled-up Transformers.
+   -b. LLMs achieve remarkable reasoning results but still perform predefined inference, not autonomous thinking.
+   -c. Existing enhancements (CoT, thinking tokens, Agentic AI) are human-engineered decompositions, not self-directed strategies.
+
+2. Structural Limits of LLM Reasoning
+   -a. Fixed compute per token prevents:
+       -1. Extra exploration of alternatives.
+       -2. Revisiting or rewriting prior outputs.
+       -3. Adjusting depth of reasoning dynamically.
+   -b. Depth of thought is bounded by number of layers.
+   -c. Output is locked-in token by token.
+
+3. HRM Core Idea
+   -a. Alternates between High-level (H) and Low-level (L) networks:
+       -1. H sets broad strategy.
+       -2. L elaborates strategy to convergence.
+       -3. H updates strategy based on L’s outcome.
+   -b. Stops when convergence reached.
+   -c. Bounded iterations sufficient for convergence.
+   -d. Adaptive Computation Time (ACT) variant:
+       -1. RL determines required steps per problem.
+       -2. Matches fixed-step performance.
+
+4. Depth Advantage
+   -a. Transformer scaling:
+       -1. Width increase → little/no accuracy gain.
+       -2. Depth increase → improves until saturation.
+   -b. HRM’s iterative H–L updates achieve deeper reasoning within same parameter budget.
+   -c. Demonstrated in Sudoku experiments: HRM surpasses Transformer with same resources.
+
+5. Training & Efficiency
+   -a. No pretraining required, even for ARC-AGI-level tasks.
+   -b. Sample-efficient: ~1,000 examples per task.
+   -c. Local & immediate gradient propagation:
+       -1. Avoids long-range BPTT.
+       -2. Saves memory and reduces synchronization.
+       -3. Biologically plausible.
+
+6. BPTT vs HRM
+   -a. BPTT drawbacks:
+       -1. Requires storing partial derivatives per timestep (huge memory).
+       -2. Needs precise gradient synchronization across distant synapses—unlikely biologically.
+       -3. Poor for delayed loss scenarios.
+   -b. HRM advantages:
+       -1. Learns via local feedback.
+       -2. Lower memory/compute footprint → better scalability.
+       -3. Better suited for temporal/delayed learning.
+
+7. Biological Plausibility
+   -a. ANN neurons simplify complex dendritic trees of biological neurons.
+   -b. Biological neurons resemble shallow (2–3 layer) local networks.
+   -c. Long-range/time-synchronized backprop is implausible in real brains.
+   -d. HRM’s local gradient approach fits biological constraints.
+
+8. Significance
+   -a. Enables self-iterating, convergent reasoning.
+   -b. Delivers strong reasoning with minimal data/resources.
+   -c. Opens path to practical, scalable, biologically-inspired AI for future large models.
