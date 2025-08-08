@@ -1,0 +1,56 @@
+### From https://medium.com/@amehsunday178/value-function-for-optimal-control-and-the-hamilton-jacobi-bellman-pde-in-reinforcement-learning-e8e70c28acf1
+
+1. Introduction and Context
+   -a. Modern Reinforcement Learning (RL) builds on decades of work in optimal control, dynamic programming, calculus of variations, and game theory.
+   -b. Optimal control focuses on optimal decision-making—finding the best control actions to achieve a goal while satisfying constraints.
+   -c. Example: Driving from Florida to New York with minimal fuel usage involves determining optimal steering, acceleration, 
+                and braking while respecting traffic rules and speed limits.
+
+2. States, Controls, and Problem Formulation
+   -a. State vector: Variables describing the system at a given time (e.g., position, velocity, fuel level → 3 variables).
+   -b. Control vector: Inputs that affect the system (e.g., gas and brake pedals → 2 variables).
+   -c. The optimal control problem aims to minimize a cost functional:
+       -1. Running cost L(x(t), u(t)): Accumulated cost over time (e.g., fuel used per instant).
+       -2. Terminal cost Φ(x(T)): Penalty on the final state (applied at final time with no further control input).
+   -d. Analogy: Walking 10 steps—energy is spent at each step (running cost) plus an evaluation at the final position (terminal cost).
+
+3. Continuous-Time Formulation
+   -a. Since control evolves in continuous time, total cost is an integral from t=0 to t=T of the running cost plus the terminal cost.
+   -b. The objective: Find u(t) that minimizes this cost functional, subject to system dynamics:
+       -1. ẋ(t) = f(x(t), u(t)) with initial state x(0) = x₀.
+   -c. Quadratic cost is common:
+       -1. xᵀQx penalizes state deviations.
+       -2. uᵀRu penalizes large control efforts.
+       -3. Qf penalizes the final state at t = T.
+       -4. Q: Positive semidefinite (state weighting), R: Positive definite (control weighting).
+
+4. Value Function and Bellman’s Principle
+   -a. Value function V(x, t): Minimum total cost-to-go from state x at time t, assuming optimal control thereafter.
+   -b. Bellman principle of optimality (continuous-time):
+       -1. Value = running cost over a small Δt + value of next state reached under optimal control.
+       -2. In RL terms: Equivalent to the state value function that accumulates rewards over an episode.
+   -c. In continuous time, this formulation leads to the Hamilton-Jacobi-Bellman (HJB) PDE when expanded via a multivariate Taylor series.
+
+5. Hamilton-Jacobi-Bellman (HJB) PDE
+   -a. HJB PDE defines the global value function across the entire state space.
+   -b. Solving HJB yields V(x, t) for all states and times, enabling direct optimal action selection.
+   -c. Curse of dimensionality: Dimensionality = number of state variables + time.
+       -1. E.g., Car example: 3 state variables → HJB in 4D (including time).
+   -d. Boundary condition: Value function at t = T is set to the terminal cost Φ(x(T)).
+   -e. Solution is propagated backward in time (from T to 0), not forward.
+
+6. Example: Simple Car Dynamics
+   -a. Dynamics: ẋ = x + u, where x is position, u is control (acceleration).
+   -b. Goal: Minimize fuel over 5 seconds.
+   -c. At each backward time step:
+       -1. Hamiltonian = running cost + value of next state.
+       -2. Optimal control = argmin_u of the Hamiltonian.
+       -3. Use central difference for spatial derivatives and Euler time stepping for temporal integration.
+
+7. Key Takeaways
+   -a. Optimal control is mathematically grounded in cost functionals, system dynamics, and Bellman’s principle.
+   -b. Value functions unify optimal control and RL concepts—both seek minimal cumulative cost (or maximal reward).
+   -c. HJB PDE is central but computationally challenging in high dimensions, motivating approximate methods in RL.
+   -d. Backward time propagation from a known terminal cost is essential for solving finite-horizon problems.
+
+
