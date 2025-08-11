@@ -1,0 +1,84 @@
+### https://medium.com/@damianvtran/why-ai-cannot-invent-the-abstraction-problem-7f93642bb8ae
+
+1. Claim & Hypothesis
+   -a. Observation: Following the Bitter Lesson, compute has soared while progress appears decelerating. 
+                    New LLMs make incremental benchmark gains but contribute little beyond training data—the frontier
+                    of human knowledge.
+   -b. Hypothesis: We train on interfaces of communication (text), not the implementation of understanding.
+   -c. Metaphor: Text = map; world = territory. Language is an extreme compression; 
+                 LLMs become superb cartographers but never smell the coffee.
+
+2. Illusion of Semantic Depth
+   -a. Surface fluency ≠ deep understanding. Models mimic exam patterns and textbook styles—interface-level templates.
+   -b. Moravec’s paradox in commonsense puzzles: competence is jagged and local to well-seen patterns.
+   -c. OOD failures: First-principles questions (e.g., electron in a box of light) elicit answers that ignore physics,
+                     because the objective is next-token prediction, not conservation laws.
+
+3. Example: “A new way to reach Mars”
+   -a. Sentences are grammatical and plausible, yet physically absurd.
+       Even when asked for a “physically possible” idea, responses degenerate into reworded analogies—interface 
+       assembly without world-space reasoning.
+
+4. Interfaces without Implementations
+   -a. In SE terms, “Pour the water” is an interface; implementation entails gravity, viscosity, heat transfer,
+       material brittleness.
+   -b. LLMs memorize endpoint wirings but have no physics debugger. Slight distributional shifts 
+       → silent failure in reality.
+
+5. Why Multimodal Isn’t Enough
+   -a. Images/video/audio are still compressed projections (4D→2D/1D). A falling-objects video shows outcomes, 
+       not the Navier–Stokes that govern them.
+   -b. We need representations encoding affordances, constraints, dynamics, not just appearance.
+
+6. Toward a World Model
+   -a. Humans run mental simulations with multimodal graphs (objects, relations, latent properties like
+       mass/charge/elasticity) updated by vision, proprioception, language, math.
+   -b. The challenge is to distill such machinery into learnable representations.
+
+7. Image-model Case (FLUX.1 Kontext Pro)
+   -a. For a “falling apple” prompt, the model follows instructions visually yet fails on gravity direction/future
+       motion.
+   -b. It manipulates the 2D interface, not the world; common-sense-accurate physics would be more useful 
+       than photorealism.
+
+8. Proposed Neurosymbolic Architecture
+   -a. Encoder ingests text/images/haptics/equations → latent scene graph.
+   -b. Decoder queries this graph → language, imagery, robotic actions.
+   -c. Per-scene annotations: (i) Object semantics (cup, water, stove), (ii) Physical properties
+       (density 1000 kg/m³, specific heat 4.18 kJ/kg·K), (iii) Relation dynamics (heat flow; evaporation at 100 °C).
+   -d. Autoregression in latent space (between encoders/decoders); decoded text may also be autoregressive, 
+       modulated by symbolic state.
+   -e. Data at scale: use game engines and differentiable physics to synthesize millions of counterfactual worlds,  
+       learn invariants from first principles, then formalize into language.
+   -f. Non-spatial constraints: include abstract nodes (gauge invariance, entropy, NP-completeness) with typed edges
+       entails / conserves / bounds.
+       Train as constraint satisfaction: predict latent flows while minimizing rule violations, then decode to English.
+
+9. A Judging Loop for Novel, Consistent Generation
+   -a. Treat text as interface; check symbolic consistency first.
+   -b. Three-model system:
+       -1. Initial generator (LLM or neurosymbolic) produces many candidates at high temperature.
+       -2. LLM judge checks seen-before likelihood from vast training memory.
+       -3. Neurosymbolic judge validates consistency in symbolic space.
+   -c. Iterate on harder prompts to fine-tune OOD-consistent generation; potentially align LLM latent space 
+       to the symbolic space, reducing RL policy “cheats.”
+
+10. Fundamental Limitation of Approximation
+    -a. All ML approximates a conceptual data-generating distribution.
+    -b. 2D toy example (red/blue dots): generation far from data needs high temperature → rising inconsistency risk; 
+        the generator can’t tell.
+        The same issue worsens in high dimensions.
+
+11. Challenges
+    -a. Schema unknown for symbolic representations; scaling high-quality labels is complex/expensive. 
+        Simulators are approximations with engine “cheats.”
+    -b. Cost/latency: using LLMs + neurosymbolic judges is slow and costly, though reward for consistent novelty 
+                      may justify it.
+
+12) Final Note—Epistemic Humility
+    -a. Humans access reality only via sensory abstractions, corrected by real-world feedback (burns, bruises).
+    -b. Next-gen AI needs feedback loops and a reasoning space consistent with philosophy, logic, mathematics,
+        and emergent sciences, penalizing impossible predictions with high loss.
+    -c. Text alone is insufficient because it can remain interface-consistent while being world-inconsistent—both 
+        a blessing and a curse.
+
