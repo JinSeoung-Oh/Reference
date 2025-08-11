@@ -1,0 +1,70 @@
+### From https://medium.com/@dashingSat/beyond-prompts-a-guide-to-context-engineering-for-ai-agents-68badba773d5
+
+The paper "A Survey of Context Engineering for Large Language Models" formalizes Context Engineering — the systematic design of information logistics to deliver the right information, in the right format, at the right time, enabling LLMs to reason effectively within finite context length. Prompt engineering is only the starting point.
+
+1. Core Concept
+   -a. Goal: Maximize LLM performance for a task given limited context.
+   -b. Assembly Function (A): Combines context components:
+       -1. c_instr: system instructions
+       -2. c_know: external knowledge (RAG, KGs)
+       -3. c_tools: tool definitions
+       -4. c_mem: persistent info
+       -5. c_state: dynamic user/agent state
+       -6. c_query: immediate user query
+   -c. Function set F: {A, Retrieve, Select, Format, …}
+
+2. Three Pillars (ETL analogy)
+   2.1 Context Retrieval & Generation (Extract)
+       -a. Prompt-Based Generation:
+           -1. Chain-of-Thought: stepwise reasoning, 17.7%→78.7% accuracy improvement
+           -2. Tree-of-Thought: hierarchical multi-path reasoning, 4%→74% success in “24 Game”
+           -3. Graph-of-Thought: graph-based reasoning, 62% quality improvement over ToT
+       -b. External Knowledge Retrieval (RAG): fetches up-to-date info from DB/docs
+           -1. Example: medical assistant querying new drug research
+       -c. KG Integration: retrieve semantically related facts from KGs (e.g., KAPING) and prepend to prompt
+
+2.2 Context Processing (Transform)
+    -a. Long Context Handling:
+        -1. Architectural: Mamba (SSM, linear complexity), LongNet (dilated attention, 1B tokens)
+        -2. Efficiency: FlashAttention-2 (2x speed), Ring Attention (distributed across devices)
+    -b. Contextual Self-Refinement:
+        -1. Example: code assistant generates script, runs it, uses error to revise
+        -2. Self-Refine: LLM as generator, feedback provider, refiner
+        -3. Reflexion: remembers past failures
+    -c. Structured & Multimodal Context:
+        -1. Example: travel agent answers based on image, using MLLM to fuse visual and text tokens
+        -2. Tables/DB verbalized into natural language
+
+2.3 Context Management (Load)
+    -a. Memory Hierarchies:
+        -1. Combine short-term (context window) and long-term (vector DB) memory
+        -2. Example: customer service bot stores summaries post-conversation
+        -3. MemGPT: OS-like paging between main memory and external storage
+    -b. Context Compression:
+        -1. StreamingLLM: retains “attention sink” tokens, 22x speedup
+        -2. H₂O: retains important tokens in KV cache, 29x throughput
+
+3. System Implementations
+   -a. Advanced RAG:
+       -1. Modular RAG, Agentic RAG, Graph-Enhanced RAG
+   -b. Tool-Integrated Reasoning (TIR):
+       -1. Transform LLM into “world interactor” with external tools (calculators, search, code, APIs)
+       -2. ReAct: thought → action → observation loop
+       -3. Toolformer: learns tool use from minimal examples
+   -c. Multi-Agent Systems (MAS):
+       -1. Multiple specialized agents coordinated via MCP, A2A protocols
+       -2. Example: one writes code, one writes tests, one reviews
+
+4. Comprehension vs Generation Gap
+   -a. Finding: LLMs comprehend long/complex contexts well but struggle to generate equally long/complex outputs
+       -1. E.g., can summarize a 50-page report but not write one coherently from scratch
+       -2. Issues: factual consistency, coherence, planning
+   -b. Need: co-evolve architectures (long-range planning) and context engineering (dynamic assembly during generation)
+
+5. Practical Advice
+   -a. Source: RAG, KGs for dynamic and structured data
+   -b. Process: long-context models, self-refinement loops
+   -c. Manage: hierarchical memory
+   -d. Build: combine tools and MAS
+
+
