@@ -1,0 +1,104 @@
+### From https://medium.com/@gedanken.thesis/the-loop-is-back-why-hrm-is-the-most-exciting-ai-architecture-in-years-7b8c4414c0b3
+
+1. ULMFiT and the Rise of BERT — The Dawn of a New Era
+   The author recalls attending Jeremy Howard’s FastAI class, where he taught ULMFiT, developed with Sebastian Ruder. 
+   This method fine-tuned pre-trained language models to achieve state-of-the-art performance and felt like a paradigm 
+   shift in NLP — a sign that something big was coming.
+   Soon after, an even greater upheaval occurred: the BERT paper was released. 
+   While citing ULMFiT on its first page, it introduced two groundbreaking changes 
+   — replacing RNNs with the Transformer architecture and reading text bidirectionally. 
+   Backed by Google’s marketing power, BERT quickly became the centerpiece of NLP.
+
+2. Searching for the Essence of Transformers — The Discovery of QKV
+   Even during the BERT craze, the author wondered: “Why is the Transformer so much better?” 
+   It felt like more than just a performance boost — it seemed like a fundamentally different species of model.
+   The answer came years later in a Stanford lecture by Ashish Vaswani, the inventor of the Transformer. 
+   He explained that QKV-based Softmax Attention is not merely another layer 
+   — it is arguably the most perfect feature detector for sequences ever discovered. 
+   Much like convolutional kernels detect edges and textures in images, QKV can unpack the structure of language, 
+   common sense, and culture embedded in data.
+
+   The core QKV mechanism:
+   -a. Query: Ask a question about the sequence.
+   -b. Key: Each element proposes itself as a candidate answer.
+   -c. Softmax: Select the most relevant candidate.
+   -d. Value: The chosen candidate provides the answer.
+
+   This simple principle allows Gradient Descent to learn highly intricate patterns from vast human text. 
+   While once enamored with the recurrence and gating of RNNs, the author eventually embraced this straightforward, 
+   forward-pass chain.
+
+3. The Emergence of HRM (Hierarchical Reasoning Model)
+   Years later, a small research lab in Singapore introduced the HRM, a model that blends the “spirit of recurrence” 
+   from RNNs with the computational strength of Transformer attention.
+
+   HRM consists of two modules:
+   -a. CEO (H-module): Operates on a slow timescale, responsible for high-level strategic reasoning.
+   -b. Worker (L-module): Operates on a fast timescale, executing detailed low-level reasoning.
+   In each high-level cycle (N), the CEO sets a goal, and within that cycle, the Worker executes multiple fast steps (T).
+   After completing the steps, the Worker submits a report, and the CEO updates the strategy based on this feedback.
+
+4. Two Clocks — Roles of the CEO and Worker
+   The CEO sees the big picture, identifying strategic priorities
+    — e.g., in Sudoku: “The top-right box is nearly full; let’s focus there.”
+   The Worker focuses on detailed execution, following the CEO’s directive to rapidly run logical deductions within 
+   the targeted area — e.g., “If this cell is 7, that one must be 4.”
+   This “slow clock (CEO) + fast clock (Worker)” design prevents the model from clinging to a flawed hypothesis 
+   for too long and enables timely strategic resets.
+
+5. QKV-Driven Thinking — Inside the CEO and Worker
+   Both modules are Transformer blocks employing the QKV mechanism, but at different levels:
+   -a. Worker: Uses QKV for fine-grained, cell-level rule checking — enforcing Sudoku’s row, column, 
+               and box constraints in parallel.
+   -b. CEO: Uses QKV for global state analysis — detecting bottlenecks, strategic opportunities, and contradictions.
+
+6. Learning — One-step Gradient Approximation and the M-loop
+   Traditional BPTT (Backpropagation Through Time) tracks every past step to assign exact blame, 
+   but this demands huge memory and computation. The author likens it to an “audit” that re-examines every email 
+   and decision from Day 1 to the end — theoretically perfect but impractical.
+
+   -a. HRM adopts a one-step gradient approximation:
+       -1. CEO: Only the decision made in the final strategy meeting is updated.
+       -2. Worker: Only the state used to produce the final report is updated.
+       This is efficient but cannot directly fix errors made in the early stages.
+
+   -b. The M-loop (Thinking Sessions)
+       To address this limitation, HRM introduces the M-loop:
+       -1. Each Thinking Session is a full problem-solving attempt; the final state of one session becomes 
+           the initial state for the next.
+       -2. If an error occurs early in the first session, it may remain hidden until it emerges in the initial state 
+           of the second session.
+       -3. Once visible, this error is now part of the “final step” in the current session and can be corrected 
+           via one-step gradient learning.
+       -4. Repeating sessions progressively shifts past mistakes into the present, enabling their correction 
+           without BPTT.
+       -5. This pairing of a short responsibility horizon (one-step gradient) with deep iterative structure (M-loop)
+           allows HRM to maintain both efficiency and deep reasoning capability.
+
+7. Adaptive Computation Time (ACT)
+   ACT enables HRM to adjust its number of Thinking Sessions based on problem difficulty rather than using a fixed count.
+   -a. At the end of each session, the CEO’s internal state (zH) is sent to the Efficiency Expert (the ACT module).
+   -b. The Expert computes two scores:
+   -c. Confidence Score (Q_halt): Confidence that the current answer is correct.
+   -d. Potential Score (Q_continue): Potential improvement if another session is run.
+   -e. Decision rule: If Confidence > Potential, halt; otherwise, continue.
+   -f. Trained via Q-learning: halting on a correct answer yields +1 reward; halting on a wrong answer yields 0.
+   -g. Effect: Easy problems → early stop (Think Fast); hard problems → extended reasoning (Think Slow).
+
+8. Performance and Limitations
+   -a. With just 27M parameters and about 1,000 training examples, HRM outperforms massive LLMs on challenging 
+       reasoning tasks like Maze-Hard and ARC-AGI.
+   -b. Limitations:
+       -1. Slow due to inherently sequential, iterative structure.
+       -2. Task-specific specialization limits generality.
+       -3. Best suited for closed-world problems.
+
+9. HRM + LLM = The Dream Team
+   LLMs provide vast knowledge and fast intuition (System 1), while HRM delivers deep, structured logical reasoning\
+   (System 2).
+   The LLM parses and formats the problem for HRM → HRM runs deep search and produces an optimal solution 
+   → the LLM explains and contextualizes the result.
+   This combination points toward a next-generation AI paradigm that fuses knowledge breadth with rigorous logic.
+
+
+
