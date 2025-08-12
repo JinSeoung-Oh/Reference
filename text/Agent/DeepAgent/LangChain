@@ -1,0 +1,117 @@
+### From https://news.hada.io/topic?id=22373
+
+Traditional LLM-based agents typically follow a “shallow agent” architecture, 
+in which they simply loop and repeatedly call tools. By contrast, Deep Agents are deliberate, 
+structured AI agents capable of deeply handling complex and long-term tasks.
+Recent agents such as Deep Research, Manus, and Claude Code implement “deep agents” that can engage in deeper topic
+exploration and context management.
+The core elements of a deep agent are detailed system prompts, planning tools, sub-agents, and use of a file system.
+
+LangChain has released an open-source package, deepagents, to allow anyone to easily build a deep agent tailored
+to their own vertical (domain).
+It supports custom prompts, tools, and sub-agent configurations, and serves as a general-purpose framework 
+applicable to diverse fields such as research and development.
+
+Limitations of Traditional LLM Agents vs. Features of Deep Agents
+-a. Traditional agents: The LLM loops and calls tools → suitable only for short contexts and short-term, 
+    simple tasks.
+-b. Deep Agents: Can decompose, plan, track, and collaborate on long-term goals and complex tasks.
+
+Four Components of Deep Agents
+-a. Detailed System Prompts
+    Like in prominent cases such as Claude Code, prompts explicitly specify tool usage and behavioral examples.
+    By incorporating complex instructions and few-shot examples, the prompt encourages deeper reasoning 
+    and execution.
+-b. Planning Tools
+    Even without real functionality, incorporating planning tools (e.g., To-Do lists) into the agent’s routine 
+    supports context management and execution consistency.
+    Even a no-op (no operation) tool can still serve to provide contextual scaffolding in the prompt.
+-c. Sub-Agents
+    For each sub-task, the system spawns a dedicated sub-agent; each works independently and later merges results.
+    This parallel, distributed architecture can handle large-scale and complex problems.
+-d. File System
+    Used not only for actual file operations but also as a notebook/context store.
+    Multiple agents and sub-agents can share the file system to collaborate and maintain long-term context.
+
+LangChain’s Deep Agents Framework: deepagents
+-a. Open-source Python package (pip install deepagents) with support for custom prompts, tools, 
+    and sub-agent settings.
+-b. System prompt inspired by Claude Code, but made more general-purpose.
+-c. No-op To-Do list planning tool (same as Claude Code).
+-d. Ability to create and customize sub-agents.
+-e. Virtual file system using LangGraph concepts (based on agent state).
+-f. Provides a sample deep research agent; makes it easy to create vertical-specific agents.
+
+Example Use Cases and Value
+-a. Optimized for long-term, multi-faceted AI tasks such as research, development, code generation, 
+    research analysis, and complex automation.
+-b. Detailed context design and a division-of-labor structure enable deep, high-quality results.
+-c. Anyone can build a “deep agent” suited to their domain—representing the next step in AI utilization.
+
+------------------------------------------------------------------------
+1. Observation on Recent Deep Agents
+   -a. Agents like Claude Code, Manus, and Deep Research excel at executing tasks over long time horizons.
+   -b. Internally, these are still just LLMs looping and calling tools.
+   -c. Naive implementation fails at complex or lengthy tasks.
+   -d. Common patterns identified:
+       -1. Use of a planning tool
+       -2. Use of sub-agents
+       -3. Offloading context to a file system
+       -4. Detailed system prompt design (prompt engineering is still important)
+
+2. Nature of Deep Agents Compared to Traditional Agents
+   -a. Deep agents are not fundamentally different from the agent + tool combination.
+   -b. Key points for effectiveness:
+       -1. High-quality LLM for base knowledge
+       -2. Proper prompts to guide LLM behavior
+       -3. Non-reasoning functions implemented as tools
+       -4. Complex agent+tool flows split into domain-specific sub-agents with focused prompts and limited tools
+   -c. Predicted Evolution
+       -1. The top-level agent may act as a “coordinator,” determining tasks and delegating to sub-agents.
+       -2. Structure can be recursive (e.g., product-level agents branching into frontend/backend agents).
+       -3. Working agents focus on limited context/tools; the top-level agent needs only to know sub-agent 
+           capabilities.
+   -d. Critique of LangChain's Approach
+       -1. Deep agents = planning + agent-tool combination → similar to traditional agents.
+       -2. LangChain is seen as overcomplicating simple concepts and creating new terms for marketing purposes.
+   -e. Marketing Perspective
+       -1. Common tactic: present ordinary ideas theatrically, create proprietary terminology/classifications, 
+                          market them.
+       -2. Next step: SEO saturation using popular keywords like “deep” and “agent.”
+   -f. Industry Trend Shift
+       -1. MCP server development losing traction.
+       -2. Building agents like Gemini or Claude Code is now trending:
+           -1) Low barrier to entry
+           -2) Practical utility
+           -3) No deep AI expertise required
+           -4) Easy promotion
+       -3. Comparable to “cursor for X” approach, enabling rapid productization.
+       -4. Many coding agents expected, but novelty is limited; quickly built clones likely to lose value fast.
+   -g. Examples and References
+       -1. Open-source project: https://github.com/revskill10/openagent-cli
+       -2. Claude Code reverse-engineering repo: https://github.com/ghuntley/claude-code-source-code-deobfuscation
+       -3. Rust-based general-purpose agent CLI/library: https://github.com/fdietze/alors
+   -h. Early Implementations of To-Do List Feature
+       -1. Jetbrains’ Junie: high-quality to-do list, slow/deliberate behavior.
+       -2. Cursor: frequently overwrote files unnecessarily; Claude fell in between.
+   -i. Different Tool Implementations
+       -1. Cursor: dedicated to-do list UI, guides agent to use it.
+       -2. Amazon’s Kiro: manages tasks and specs in tasks.md.
+       -3. Tool choice depends on user needs.
+   -j. Hidden Critical Element
+       -1. The real innovation: managing tool calls from parsing to execution.
+       -2. Context separation via sub-agents is the true innovation point; the rest is essentially LangGraph react agent.
+   -k. No-Op To-Do List Tool Details
+       -1. Questions remain about how the no-op to-do list tool works.
+       -2. Example: Sketch agent implementation — https://github.com/boldsoftware/sketch/blob/main/claudetool/todo.go
+       -3. Encouraging use is easy; most effort goes into UI visibility.
+       -4. Essentially a prompt to create a to-do list.
+       -5. Simple prompt ideas can have significant impact:
+           -1) Prevents chain-of-thought breakdown after a few turns
+           -2) Supports nested to-dos (A.2.i…) that are still easy for LLMs to process
+       -6. Internal management example: https://github.com/graphistry/louie-py/blob/main/ai/prompts/PLAN.md
+       -7. Only the occurrence of a tool call is stored in context; the actual to-do list data is not retrieved later.
+
+
+
+
