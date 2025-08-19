@@ -54,3 +54,24 @@ _df = pd.DataFrame({
 
 # Show full text without truncation
 pd.set_option('display.max_colwidth', None)
+
+results = []
+for prompt in prompts:
+    response = client.chat.completions.create(
+        model=f"router-mf-{threshold}",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    message = response.choices[0].message["content"]
+    model_used = response.model  # RouteLLM returns the model actually used
+
+    results.append({
+        "Prompt": prompt,
+        "Model Used": model_used,
+        "Output": message
+    })
+
+pd.set_option("display.max_columns", None)
+pd.set_option("display.max_rows", None)
+pd.set_option("display.max_colwidth", None)
+df = pd.DataFrame(results)
+df
