@@ -1,0 +1,105 @@
+### From https://www.arxiv.org/pdf/2507.16075
+
+1. Background and Motivation
+   Recent advances in LLMs have fueled the rise of Deep Research (DR) agents, which can generate novel ideas, 
+   gather information via search tools, conduct analyses or experiments, and draft research reports. 
+   However, most existing DR agents rely on test-time scaling methods such as Chain-of-Thought, best-of-n sampling,
+   Monte Carlo Tree Search, Debate, and Self-refinement loops. 
+   These agents often combine algorithms and tools without grounding in the cognitive writing process of 
+   human researchers, lacking a principled draft–search–feedback mechanism. 
+   This limitation motivates the need for a more cohesive framework that systematically mirrors or surpasses human research capabilities.
+
+2. Human Writing and Diffusion Analogy
+   Cognitive studies show that human writing is not linear. Instead:
+   -a. Writers first form a high-level plan,
+   -b. Draft an initial report,
+   -c. Engage in multiple rounds of revision,
+   -d. And often search for external sources to refine and strengthen arguments.
+   This recursive cycle strongly resembles retrieval-augmented diffusion sampling: the draft represents a noisy state, 
+                                                                                   while iterative denoising with retrieval progressively refines it into a coherent final text.
+
+3. Test-Time Diffusion Deep Researcher (TTD-DR)
+   Building on this analogy, the proposed Test-Time Diffusion Deep Researcher (TTD-DR) models the research report generation process
+   as a diffusion process. Unlike vanilla diffusion, which is often ineffective for complex tasks, 
+   TTD-DR introduces two synergistic mechanisms:
+   -a. Report-level Denoising with Retrieval: A noisy draft is iteratively revised with external search results, 
+                                              progressively improving accuracy and comprehensiveness.
+   -b. Component-wise Self-Evolution: Each component in the workflow (plan, questions, answers, final report) undergoes 
+                                      its own optimization cycle to enhance quality, reduce information loss, and provide richer context for report diffusion.
+
+4. Backbone Deep Research Agent (Stage 1–3)
+   The backbone provides the global workflow for research report generation.
+   -a. Stage 1. Research Plan Generation
+       -1. Input: User query.
+       -2. Output: A structured research plan.
+       -3. Mechanism:
+           -1) A planner LLM agent analyzes the query and produces a scaffold of key topics and areas required for the final report.
+           -2) This plan acts as a guiding scaffold for subsequent search and synthesis.
+       -4. Significance: Establishes the strategic foundation for the entire process.
+   -b. Stage 2. Iterative Search and Synthesis
+       -1. Stage 2a. Search Question Generation: Generates search queries based on the research plan, user query, and prior Q&A context.
+       -2. Stage 2b. Answer Searching: Conducts external searches (e.g., Google), retrieves documents, and synthesizes concise answers.
+       -3. Loop: (2a → 2b) is repeated until the research plan is sufficiently covered or iteration limits are reached.
+       -4. Significance: Ensures knowledge is acquired in a progressive, cumulative manner instead of one-off retrieval.
+   -c. Stage 3. Final Report Generation
+       -1. Input: The plan (Stage 1) and the accumulated Q&A results (Stage 2).
+       -2. Output: A comprehensive, coherent final research report.
+       -3. Mechanism: The LLM synthesizes all structured inputs into a cohesive narrative.
+       -4. Significance: Provides the integrated, polished outcome of the entire workflow.
+
+5. Component-wise Self-Evolution (Internal Optimization Stages)
+   Each stage output (plan, queries, answers, report) undergoes self-evolutionary optimization, ensuring quality improvement 
+   beyond the backbone workflow.
+   -a. Initial States
+       -1. Multiple candidate outputs are generated using different parameters (e.g., temperature, top-k) to diversify the search space.
+   -b. Environmental Feedback
+       -1. Candidates are evaluated by an LLM-as-a-Judge.
+       -2. Metrics such as Helpfulness and Comprehensiveness are used, along with textual critiques.
+   -c. Revision Step
+       -1. Candidates are iteratively revised based on the feedback, with a feedback–revision loop enhancing quality.
+   -d. Cross-over
+       -1. Multiple revised candidates are merged into a single high-quality output, combining the strengths of each path and minimizing
+           information loss.
+   -e. Significance: While the backbone defines the global flow, self-evolution ensures each stage maintains robustness, diversity, 
+                     and contextual richness.
+
+6. Report-level Denoising with Retrieval
+   This mechanism treats the initial draft as a noisy state and progressively denoises it using retrieval-augmented feedback. 
+   The draft and search loop form a mutually reinforcing feedback cycle, guiding research direction dynamically.
+
+   Algorithm 1. Denoising with Retrieval
+   ----------------------------------------------------------------------------------------------------------
+   Input: q, M, P, R0, Q, A   ⊲ query, all agents, plan, initial noisy draft, history
+
+   for t ∈ {1, …, N} do     ⊲ N: max revision steps
+       Qt = MQ(q, P, Rt-1, Q, A)     ⊲ Stage 2a: generate next search question
+       Qt → Q
+       At = MA(Qt)                   ⊲ Stage 2b: retrieve external information
+       At → A
+       Rt = MR(q, Rt-1, Q, A)        ⊲ denoise draft (remove imprecision/incompleteness)
+       if exit_loop then
+           break
+       end if
+   end for
+   ----------------------------------------------------------------------------------------------------------
+   -a. Principle: The evolving draft guides the next search query, while retrieved answers refine the draft.
+   -b. Result: A continuously denoised report that maintains coherence and direction until the final stage produces the polished output.
+
+7. Contributions and Results
+   -a. Framework: Proposes TTD-DR, a novel test-time diffusion framework enabling iterative draft–revision cycles with timely 
+                  information integration.
+   -b. Accessibility: Uses only widely available search tools, avoiding reliance on proprietary multimodal or browsing utilities.
+   -c. Evaluation: Establishes rigorous methodologies with comprehensive metrics and expert judges.
+   -d. Performance: Demonstrates superior results over leading DR agents in tasks requiring long, detailed reports or multi-hop reasoning.
+   -e. Ablation Studies: Validate the distinct contributions of Self-Evolution and Denoising with Retrieval mechanisms.
+
+8. Conclusion
+   TTD-DR is the first DR framework to explicitly model the human-like plan–draft–search–revision process through a diffusion-based 
+   paradigm.
+
+   -a. Backbone Stages (1–3) ensure global coherence (planning → iterative search → final synthesis).
+   -b. Self-Evolution Stages (Initial–Feedback–Revision–Cross-over) optimize each component individually.
+   -c. Denoising with Retrieval tightly couples drafts and search in a continuous loop, maintaining coherence throughout.
+
+   Together, this dual-stage structure enables TTD-DR to overcome the linear or parallel limitations of prior DR agents and function
+   as a high-quality research companion across diverse domains (finance, biomedical, technology, entertainment).
