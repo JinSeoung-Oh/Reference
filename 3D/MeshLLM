@@ -1,0 +1,70 @@
+### From https://huggingface.co/papers/2508.01242
+
+1. Overview
+   The section introduces a framework for adapting 3D mesh data to LLMs through text serialization, a new concept termed Primitive-Mesh,
+   and the design of supervised fine-tuning (SFT) tasks that train LLMs for mesh understanding and generation.
+
+2. Preliminaries: Text-Serialized Mesh
+   To make mesh data compatible with LLMs, a textual representation is required. Following the OBJ format, 
+   a mesh M = (V, F) consists of:
+   -a. Vertices V = {vi}Nv: Each vertex vi ∈ R³ corresponds to a 3D coordinate (xi, yi, zi).
+   -b. Faces F = {fj}Nf: Each face is a triangle defined by three vertex indices.
+
+   The mesh is serialized into a text sequence through:
+   -a. Quantization: Vertex coordinates are discretized into integers [0, 64]. Since symbols like ‘v’, ‘f’, and digits already exist in LLM vocabularies, no tokenizer modification is needed.
+   -b. Sorting: Vertices sorted by z–y–x ascending order, faces sorted by smallest vertex index (as in PolyGen).
+   -c. Textual unfolding: Mesh is flattened into text as [Vertex List] ∥ [Face List], with sequence concatenation.
+
+   This allows LLMs to process meshes as plain text but faces challenges: sequence length, weak structural expressiveness, and training difficulty on long inputs.
+
+3. Primitive-Mesh
+   To mitigate these issues, meshes are decomposed into smaller, localized units called Primitive-Mesh:
+   M = {M1, M2, …, MN}
+   -a. Motivation:
+       -1. Shorter local sequences are easier for LLMs to process.
+       -2. Localized structures retain 3D spatial cues, improving perception of geometry.
+       -3. Decomposition generates many more training samples, improving scalability.
+   -b. Construction Strategies:
+       -1. KNN-based partitioning:
+           -1) Densely sample point clouds, apply Farthest Point Sampling (FPS) and KNN clustering to segment mesh into local regions.
+           -2) Produces 1.5M+ training samples, efficient and generalizable, but semantically incoherent.
+       -2. Semantic-based segmentation: 
+           -1) Use 3DSAMPart on a filtered subset to segment meshes into meaningful parts (e.g., head, hands, legs for humanoids).
+           -2) Produces 100k+ high-quality Primitive-Mesh samples.
+           -3) Provides strong semantic boundaries for enhancing high-level understanding.
+
+4. Training Task Design
+   To train LLMs effectively on mesh data, four supervised tasks are introduced:
+   -a. Vertex-Face Prediction
+       -1. Objective: maxθ P(F | V, θ)
+       -2. Given vertices, predict face connectivity.
+       -3. Learns topological relationships between vertices.
+   -b. Mesh Assembly
+       -1. Objective: maxθ P(M | {Mi}, θ)
+       -2. Given Primitive-Mesh units, reconstruct the full mesh.
+       -3. Captures geometric relationships between local components and restores global 3D structure.
+   -c. Mesh Understanding
+       -1. Objective: maxθ P(T | M, θ)
+       -2. Given mesh, generate textual description T.
+       -3. Trains LLMs to comprehend and verbalize high-level semantics.
+   -d. Mesh Generation
+       -1. Objective: maxθ P(M | T, θ)
+       -2. Given text description, generate plausible mesh.
+       -3. Teaches text-to-mesh generation ability.
+   -e. Training Workflow:
+       -1. Tasks are progressive, not isolated.
+       -2. Start with vertex-face prediction and mesh assembly (structural learning).
+       -3. Then proceed to mesh understanding and mesh generation (semantic-level learning).
+
+5. Supervised Fine-Tuning (SFT) Data Curation
+   -a. SFT is used for alignment.
+   -b. High-quality input–output pairs are constructed for all four tasks.
+   -c. Standard language modeling objectives are applied to fine-tune LLMs.
+   -d. This adaptation allows LLMs to perform specialized 3D mesh tasks while leveraging their text-based foundations.
+
+6. Key Takeaways
+   -a. Text-serialized Mesh: Converts meshes into purely textual sequences using quantization, sorting, and flattening.
+   -b. Primitive-Mesh: Localized mesh decomposition that addresses token limits, structural loss, and training inefficiency.
+   -c. Training Tasks: Four complementary supervised tasks designed to progressively instill structural, geometric, and semantic understanding.
+   -d. SFT: Curates aligned datasets for fine-tuning LLMs, adapting them to mesh-specific reasoning and generation.
+
