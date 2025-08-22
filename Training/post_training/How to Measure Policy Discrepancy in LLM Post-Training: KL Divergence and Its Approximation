@@ -1,0 +1,47 @@
+### From https://ai.gopubby.com/how-to-measure-policy-discrepancy-in-llm-post-training-kl-divergence-and-its-approximation-cf3bc262753e
+
+1. Background
+   -a. GRPO (Group Relative Policy Optimization) has gained attention since the release of DeepSeek-R1 in early 2025.
+   -b. The math-heavy formulation can be intimidating, but its essence is straightforward:
+       -1. Introduce a KL divergence penalty so that the policy updates smoothly and conservatively, rather than taking abrupt leaps.
+
+2. Entropy and Cross-Entropy
+   -a. Entropy: Measures the “uncertainty” or “surprise” in a distribution.
+       -1. Example: same dish every day = low entropy (predictable); new dishes every day = high entropy (surprising).
+   -b. Cross-Entropy: Measures the difference between a true distribution p(x) and a predicted distribution q(x).
+       -1. When p = q exactly, cross-entropy = 0.
+       -2. Widely used as a loss function in machine learning.
+
+3. KL Divergence: Definition and Role in GRPO
+   -a. KL Divergence = Cross-Entropy(p,q) – Entropy(p).
+   -b. Quantifies how much q(x) diverges from p(x).
+   -c. In GRPO:
+       -1. p(x) = current policy πθ(a|s)
+       -2. q(x) = reference policy πref(a|s)
+   -d. Adding KL as a penalty ensures that the updated policy does not drift too far from the reference model,
+       maintaining stability and efficiency in fine-tuning.
+
+4. Computational Challenge and Schulman’s Approximation (k² Approximation)
+   -a. Direct KL computation is costly since p(x) changes after each update → requires constant resampling.
+   -b. John Schulman (OpenAI co-founder, 2020) proposed a low-bias, low-variance estimator known as the k² approximation.
+
+   Core Idea:
+   -a. When p and q are close (small deviation ε),
+       -1. KL ≈ 0.5 * Pearson Chi-Square Divergence.
+   -b. Mathematically:
+       -1. KL ≈ 0.5 * E_q[(p/q – 1)²]
+   -c. This means that for small deviations, KL and other f-divergences become equivalent up to the second-order expansion.
+
+5. Example with Bernoulli Distribution
+   -a. Using a Bernoulli distribution (success probability p, failure 1–p), we can compare:
+       -1. True KL(p||q)
+       -2. k² approximation (0.5 * Pearson chi-square divergence).
+   -b. Results show that the approximation closely tracks the true KL, making it both accurate and computationally efficient.
+   -c. Provided code example visualizes how KL and k² align across different p values.
+
+6. Summary
+   -a. In post-training of LLMs, the goal is stable, incremental policy updates rather than drastic changes.
+   -b. GRPO achieves this via the KL penalty.
+   -c. KL can be understood progressively: entropy → cross-entropy → KL divergence.
+   -d. Schulman’s k² approximation simplifies computation while preserving accuracy.
+   -e. Overall, GRPO ensures both stability and learning efficiency for fine-tuning reasoning in large language models.
