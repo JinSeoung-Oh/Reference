@@ -1,0 +1,41 @@
+### From https://news.hada.io/topic?id=22573
+
+1. LL3M Overview
+   LL3M is an innovative framework where multiple Large Language Model (LLM) agents automatically generate Python code to create 
+   and edit 3D assets in Blender.
+   By following user text instructions, LL3M enables both creative and precise shape generation, 
+   as well as complex geometric manipulations expressed directly in code.
+   Unlike conventional 3D modeling tools, it offers unconstrained asset creation and fine-grained interaction.
+   The generated Blender code is clear, with high parameter transparency, allowing users or agents to easily modify 
+   and iteratively improve it.
+   LL3M demonstrates wide-ranging capabilities in 3D asset handling, including consistent stylization, material editing, 
+   and hierarchical structuring.
+
+2. Pipeline Overview
+   The pipeline consists of three key stages:
+   -a. Initial Generation: Creates basic forms while LL3M automatically detects and corrects logically inappropriate structures or 
+       overly simple geometry.
+   -b. Automated Refinement: Applies more sophisticated modifications, capturing complex forms and relationships.
+   -c. User Feedback Integration: Incorporates additional user edits, enabling interactive and iterative 3D asset creation.
+   Each stage leverages the division of roles among agents, ensuring iterative, progressive improvement.
+
+3. Gallery & Capabilities
+   -a. Diverse Shape Generation: Examples include windmills, pianos, and drum sets, realized through code with detailed arrangements.
+   -b. Consistent Style Application: A single directive like “steampunk” can be applied across different meshes (e.g., hats) 
+                                     to produce varied yet stylistically coherent results.
+   -c. Material Editing: For instance, defining a separate shader node for a blade section allows localized material changes.
+
+4. Code Interpretability
+   -a. The generated code contains structured logic, clear variable names, and comments, making it easy to understand and modify.
+   -b. Example: users can directly adjust keyboard patterns or key width variables.
+   -c. Blender nodes and parameters are exposed transparently, enabling intuitive adjustment of visual properties such as 
+       colors and patterns.
+
+5. Reusability & Generality
+   -a. Core code patterns (loops, modifiers, node setups) are reused across different shapes.
+   -b. This modularity allows versatile and easily editable code generation across varied prompts.
+
+6. Scene Composition & Hierarchy
+   -a. LL3M can generate multiple objects and automatically arrange them through instancing and parenting.
+   -b. Example: when creating a lamp, parent-child relationships are encoded so transformations propagate hierarchically.
+   -c. Each part receives a meaningful semantic name, enabling efficient management within Blender’s scene graph.
