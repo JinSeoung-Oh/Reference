@@ -1,0 +1,128 @@
+### From https://scontent-ssn1-1.xx.fbcdn.net/v/t39.2365-6/531524719_1692810264763997_2330122477414087224_n.pdf?_nc_cat=103&ccb=1-7&_nc_sid=3c67a6&_nc_ohc=8hfozYrFftoQ7kNvwERElL4&_nc_oc=AdnUscXT-QUlA-2bPniVEu-UocdpB62U_4cGU2QueqwY2EkQOtfirebHfvSNijvdv-g&_nc_zt=14&_nc_ht=scontent-ssn1-1.xx&_nc_gid=YK81afsud_LgVAswbTbqog&oh=00_AfVZvh7oXlYEHDmc34zwHidJAseoIr_gxh40Pm35uuUqxQ&oe=68A9DE68
+
+1. Overview
+   DINOv3 is a next-generation self-supervised learning (SSL) model designed to deliver robust, scalable, and versatile 
+   visual representations. 
+   Inspired by LLM scaling laws, it scales both model size (up to 7B params) and data scale (17B+ images) to achieve breakthroughs 
+   in generalization and dense/local feature quality. 
+   Unlike supervised or task-specific training, DINOv3 learns task-agnostic, high-quality features, 
+   making it a foundation for a wide range of vision applications.
+
+2. Data Preparation (Sec. 3.1)
+   2.1 Large-Scale Data Collection
+       -a. Source: 17B Instagram images (public posts, already moderated).
+       -b. Built into three dataset components:
+           -1. Balanced clustering subset (LVD-1689M)
+               -1) Embeddings from DINOv2 + 5-level hierarchical k-means clustering (200M → 25k clusters).
+               -2) Balanced sampling ensures coverage of diverse visual concepts.
+               -3) Result: 1.689B curated images.
+           -2. Retrieval-based subset
+               -1) Retrieval using similarity to seed datasets.
+               -2) Ensures coverage of concepts relevant to downstream tasks.
+           -3. Public datasets
+               -1) ImageNet1k, ImageNet22k, Mapillary Street-level Sequences.
+               -2) Optimizes performance on standard benchmarks.
+   2.2 Data Sampling Strategy
+       -a. Training batches alternate between:
+           -1. Homogeneous batches (10%): only ImageNet1k → provide “high-quality anchors.”
+           -2. Heterogeneous batches (90%): mixture of all other datasets.
+       -b. Inspired by findings that homogeneous small-set batches stabilize training.
+   2.3 Data Ablation
+       -a. Compared performance of models trained on:
+           -1. Clustering-only
+           -2. Retrieval-only
+           -3. Raw dataset
+           -4. Full curated pipeline
+       -b. Result: No single method dominates; combined curation = best results overall.
+
+3. Large-Scale Self-Supervised Training (Sec. 3.2)
+   3.1 Learning Objectives
+       -a. Combines global + local SSL objectives:
+           -1. LDINO (image-level discrimination).
+           -2. LiBOT (patch-level latent reconstruction).
+           -3. LKoleo (uniform feature distribution regularizer, applied in mini-batches).
+       -b. Uses Sinkhorn-Knopp normalization (from SwAV) instead of centering.
+       -c. Specialized heads on top of backbone compute objectives separately.
+       -d. LayerNorm applied per crop type (local/global) for stability.
+       -e. Final pretraining loss:
+           Lpre = LDINO + LiBOT + 0.1 × LKoleo
+   3.2 Model Architecture
+       -a. Scaled to 7B parameters (vs. 1.1B in DINOv2).
+       -b. Uses Rotary Positional Embeddings (RoPE) with box jittering:
+           -1. Base coordinates in [−1,1] box.
+           -2. Random scaling factor s ∈ [0.5,2] ensures robustness to resolution/scale changes.
+   3.3 Optimization
+       -a. Constant LR, weight decay, EMA momentum (no scheduling).
+       -b. Benefits:
+           -1. Training can continue indefinitely while performance improves.
+           -2. Fewer hyperparameters → easier tuning.
+       -c. Warmup for LR and teacher temperature.
+       -d. AdamW, batch size = 4096 images, distributed across 256 GPUs.
+       -e. Multi-crop strategy: 2 global (256px) + 8 local (112px) crops.
+       -f. Sequence length = 3.7M tokens per batch.
+
+4. Gram Anchoring for Dense Features (Sec. 4)
+   4.1 Problem: Patch-Level Consistency Loss
+       -a. Extended training improves global classification but hurts dense tasks (segmentation, depth).
+       -b. After ~200k iters, segmentation mIoU declines, due to patch similarity collapse.
+       -c. CLS token increasingly dominates patch outputs, reducing locality.
+   4.2 Gram Anchoring Objective
+       -a. Uses Gram matrix (pairwise dot products between patch features) to regularize patch consistency.
+       -b. Defines loss:
+           LGram = || XS·XSᵀ − XG·XGᵀ ||²F
+           -1. XS: student patch features.
+           -2. XG: Gram teacher (early model iteration).
+       -c. Key design:
+           -1. Operates on feature structure, not raw features → preserves flexibility.
+           -2. Gram teacher updated every 10k iterations (EMA teacher).
+       -d. Refinement loss:
+           LRef = wD LDINO + LiBOT + wK LKoleo + wGram LGram
+       -e. Effect:
+           -1. Stabilizes iBOT objective.
+           -2. Immediate improvement in dense tasks (ADE20k +2 mIoU).
+   4.3 High-Resolution Features for Gram Teacher
+       -a. Higher input resolution → better local feature consistency.
+       -b. Procedure:
+           -1. Input images at 512px into Gram teacher.
+           -2. Downsample feature maps 2× → smooth, coherent patch-level features.
+       -c. Use these as Gram teacher (XG) in LGram.
+       -e. Benefits:
+           -1. Preserves patch consistency.
+           -2. +2 mIoU ADE20k over standard LRef.
+       -f. Ablation: early Gram teachers (100k–200k iters) best; late (1M) harmful.
+
+5. Post-Training (Sec. 5)
+   5.1 Resolution Scaling
+       -a. Trained at 256px, but downstream needs higher (512+).
+       -b. Adaptation: mixed-resolution training (512–768 global, 112–336 local).
+       -c. 10k iterations with Gram anchoring.
+       -d. Result:
+           -1. Stable performance across varying resolutions.
+           -2. Local features improve with resolution (segmentation, tracking).
+           -3. Generalizes to >4k resolution inputs.
+   5.2 Model Distillation
+       -a. ViT-7B teacher → ViT-S/B/L/H+ students.
+       -b. Direct teacher guidance (no EMA).
+       -c. Uses original SSL objectives (no Gram anchoring needed).
+       -d. Parallel multi-student distillation:
+           -1. Teacher inference shared across all GPUs.
+           -2. Students trained in parallel → faster distillation.
+       -e. Produces family of practical models for various compute budgets.
+   5.3 Text Alignment
+       -a. Goal: zero-shot multimodal alignment.
+       -b. Method:
+           -1. Freeze vision encoder, train text encoder with LiT contrastive objective.
+           -2. Add two transformer layers on vision side for flexibility.
+           -3. Concatenate mean-pooled patch embeddings + CLS token before contrastive loss.
+       -c. Benefits:
+           -1. Aligns both global + local features to text.
+           -2. Improves dense task performance (e.g., segmentation).
+           -3. Reuses curated multimodal datasets from prior work.
+
+6. Key Contributions
+   -a. Scaling SSL: 17B images + 7B model unlock LLM-like emergent properties for vision.
+   -b. Data pipeline: hierarchical clustering + retrieval + curated datasets.
+   -c. Novel objectives: Gram anchoring ensures patch-level consistency for dense tasks.
+   -d. High-resolution adaptation: enables inference up to 4k resolution.
+   -e. Distillation: produces efficient ViT family, lowering inference cost.
+   -f. Text alignment: adds zero-shot multimodal capability.
