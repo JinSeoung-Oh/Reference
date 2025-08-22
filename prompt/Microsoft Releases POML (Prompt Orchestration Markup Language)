@@ -1,0 +1,51 @@
+### From https://www.marktechpost.com/2025/08/13/microsoft-releases-poml-prompt-orchestration-markup-language/
+
+Prompt Orchestration Markup Language (POML), released by Microsoft, is an HTML/XML-inspired markup language designed for structured, 
+modular, and reusable prompt engineering for LLMs. 
+It addresses the shortcomings of unstructured text prompts (“prompt spaghetti”) and provides scalability, maintainability, 
+and extensibility for advanced AI applications.
+
+1. Core Concepts
+   -a. Structured Prompt Definition: Semantic elements like <role>, <task>, <example> organize logical sections of prompts 
+                                     → making them more readable and reusable.
+   -b. Comprehensive Data Integration: Supports <document>, <table>, <img> and more to embed external text, tables, 
+                                       and images directly within prompts.
+   -c. Separated Styling Layer: Similar to CSS, <stylesheet> blocks or inline attributes separate output formatting from prompt logic, 
+                                enabling A/B testing and reducing fragility.
+   -e. Built-in Templating Engine: Includes variables ({{username}}), loops, conditionals, and <let> definitions 
+                                   → dynamic and scalable prompt generation.
+   -f. Developer Tooling Ecosystem:
+       -1. VS Code extension with syntax highlighting, auto-completion, live preview.
+       -2. Node.js and Python SDKs for seamless integration with OpenAI, Azure, etc.
+
+2. Example Code (Prompt with Image)
+<poml>
+  <role>You are a patient teacher explaining concepts to a 10-year-old.</role>
+  <task>Explain the concept of photosynthesis using the provided image.</task>
+  <img src="photosynthesis_diagram.png" alt="Diagram of photosynthesis"/>
+  <output-format>
+    Start with "Hey there, future scientist!" and keep the explanation under 100 words.
+  </output-format>
+</poml>
+
+--> Demonstrates integration of visual context with explicit output constraints.
+
+3. Technical Philosophy
+   -a. Mirrors the View Layer in MVC architecture: markup defines presentation only, keeping business logic separate.
+   -b. Facilitates prompt refactoring, experimentation, workflow consistency, and automated testing.
+
+4. Installation & Getting Started
+   -a. Open-source (MIT License), available on GitHub.
+   -b. Installable VS Code extension.
+   -c. Node.js (npm install pomljs) and Python (pip install poml) SDKs.
+
+5. Conclusion
+   POML establishes itself as a promising standard for LLM prompt engineering, offering:
+   -a. Modular syntax,
+   -b. Robust data handling,
+   -c. Decoupled formatting,
+   -d. Dynamic templating,
+   -e. Strong integration ecosystem.
+  It enables developers to streamline prompt design, debugging, and reuse across complex workflows. 
+  Particularly useful for multi-agent orchestration, debugging intricate prompt logic, and deploying reusable AI modules in production.
+
