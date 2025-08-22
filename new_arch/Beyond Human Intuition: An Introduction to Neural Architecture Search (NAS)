@@ -1,0 +1,256 @@
+### From https://levelup.gitconnected.com/beyond-human-intuition-an-introduction-to-neural-architecture-search-nas-8f53825b216e
+
+1. Introduction
+   -a. Deep learning has transformed fields such as vision, NLP, and drug discovery, but neural network design still relies heavily
+       on human experts.
+   -b. Neural Architecture Search (NAS) automates this design by treating it as an optimization problem.
+
+2. What is NAS?
+   -a. NAS = Automated architect for neural networks.
+   -b. Instead of manually designing layers, NAS algorithms explore thousands of candidate networks.
+   -c. General framework:
+       -1. Define search space.
+       -2. Choose search strategy.
+       -3. Evaluate architectures.
+   -d. Acceleration techniques:
+       -1. Train on subsets, use prediction models, or apply weight sharing (supernet approach).
+
+3. Goal
+   -a. Find architecture α* that minimizes validation loss (L_val).
+   -b. Formulated as a bi-level optimization problem:
+       -1. Inner loop = model training.
+       -2. Outer loop = architecture search.
+
+4. Real-World Applications
+   -a. Computer Vision – object detection, small object specialization.
+   -b. NLP – rare word handling.
+   -c. Medical Imaging – anomaly-sensitive loss functions.
+
+5. Search Strategies
+   1. Reinforcement Learning (RL)
+      -a. Agent chooses architectures sequentially, receives reward based on performance.
+      -b. Best for: complex search space, multi-objective optimization.
+   2. Evolutionary Algorithms (EA)
+      -a. Mimic natural selection with mutation/crossover of architectures.
+      -b. Best for: large search space, parallel evaluations, Pareto optimization.
+   3. Gradient-Based Methods
+      -a. Represent architecture in a continuous space, optimized with gradient descent.
+      -b. Example: DARTS.
+      -c. Best for: small search space, fast search, single-objective optimization.
+
+6. Simulation Experiment
+   -a. Search conducted on RNN architectures with varying layers, activations, optimizers, and hyperparameters.
+   -b. Compared three strategies: RL, EA, Gradient-based.
+
+7. Conclusion
+   -a. EA proved most effective in this setup.
+   -b. RL was decent but unstable.
+   -c. Gradient-based struggled here, though efficient in other contexts.
+   -d. NAS remains powerful but challenged by high computational costs and task-specific optimization.
+   -e. Research continues toward efficient NAS for broader real-world use.
+
+------------------------------------------------------------------------------
+# ---------------------------
+# Search Space Setup
+# ---------------------------
+import torch.nn as nn
+import torch.optim as optim
+
+search_space = {
+    'num_hidden_layers': [1, 2, 3, 4, 5],
+    'hidden_layer_size': [32, 64, 128, 256, 512],
+    'activation_function': ['ReLU', 'LeakyReLU', 'Tanh'],
+    'learning_rate': [0.1, 0.01, 0.001, 0.0001],
+    'optimizer': ['Adam', 'SGD', 'RMSprop'],
+    'dropout_rate': [0.0, 0.2, 0.4, 0.6]
+}
+
+activation_map = {
+    'ReLU': nn.ReLU,
+    'LeakyReLU': nn.LeakyReLU,
+    'Tanh': nn.Tanh
+}
+
+optimizer_map = {
+    'Adam': optim.Adam,
+    'SGD': optim.SGD,
+    'RMSprop': optim.RMSprop
+}
+
+# ---------------------------
+# Evaluation Function
+# ---------------------------
+import torch
+
+def evaluate_architecture(architecture, X_train, y_train, X_val, y_val, num_epochs=50):
+    model = build_model(architecture)  # assume build_model implemented
+    criterion = nn.MSELoss()
+    optimizer_class = optimizer_map[architecture['optimizer']]
+    optimizer = optimizer_class(model.parameters(), lr=architecture['learning_rate'])
+    
+    model.train()
+    for _ in range(num_epochs):
+        optimizer.zero_grad()
+        outputs = model(X_train)
+        loss = criterion(outputs, y_train)
+        loss.backward()
+        optimizer.step()
+    
+    model.eval()
+    with torch.no_grad():
+        val_outputs = model(X_val)
+        val_loss = criterion(val_outputs, y_val)
+    
+    return val_loss.item()
+
+# ---------------------------
+# Reinforcement Learning (RL)
+# ---------------------------
+class ArchitectureController(nn.Module):
+    def __init__(self, search_space):
+        super().__init__()
+        self.search_space = search_space
+        self.keys = list(search_space.keys())
+        self.vocab_size = [len(search_space[key]) for key in self.keys]
+        self.num_actions = len(self.keys)
+        self.rnn = nn.RNN(input_size=1, hidden_size=64, num_layers=1)
+        self.policy_heads = nn.ModuleList([nn.Linear(64, vs) for vs in self.vocab_size])
+
+    def forward(self, input, hidden):
+        output, hidden = self.rnn(input, hidden)
+        logits = [head(output.squeeze(0)) for head in self.policy_heads]
+        return logits, hidden
+
+def run_rl_search(search_space, X_train, y_train, X_val, y_val, num_epochs=10, num_episodes=5):
+    controller = ArchitectureController(search_space)
+    controller_optimizer = optim.Adam(controller.parameters(), lr=0.01)
+    best_loss = float('inf')
+    best_architecture = None
+    
+    for episode in range(num_episodes):
+        controller_optimizer.zero_grad()
+        hidden = torch.zeros(1, 1, 64)
+        log_probs = []
+        architecture = {}
+        
+        for i, key in enumerate(controller.keys):
+            logits, hidden = controller(torch.zeros(1, 1, 1), hidden)
+            dist = torch.distributions.Categorical(logits=logits[i])
+            action_index = dist.sample()
+            architecture[key] = search_space[key][action_index.item()]
+            log_probs.append(dist.log_prob(action_index))
+        
+        val_loss = evaluate_architecture(architecture, X_train, y_train, X_val, y_val, num_epochs)
+        reward = -val_loss
+        policy_loss = torch.sum(torch.stack(log_probs) * -reward)
+        policy_loss.backward()
+        controller_optimizer.step()
+        
+        if val_loss < best_loss:
+            best_loss = val_loss
+            best_architecture = architecture
+    
+    return best_architecture, best_loss
+
+# ---------------------------
+# Evolutionary Algorithms (EA)
+# ---------------------------
+import random
+from copy import deepcopy
+
+def run_evolutionary_search(X, y, search_space, population_size=10, num_generations=5):
+    best_loss = float('inf')
+    best_architecture = None
+    
+    split_idx = int(len(X) * 0.8)
+    X_train, X_val = X[:split_idx], X[split_idx:]
+    y_train, y_val = y[:split_idx], y[split_idx:]
+    
+    population = [{key: random.choice(search_space[key]) for key in search_space} for _ in range(population_size)]
+    
+    for _ in range(num_generations):
+        fitness = []
+        for arch in population:
+            loss = evaluate_architecture(arch, X_train, y_train, X_val, y_val, num_epochs=10)
+            fitness.append((loss, arch))
+            if loss < best_loss:
+                best_loss = loss
+                best_architecture = arch
+        
+        fitness.sort(key=lambda x: x[0])
+        elites = [arch for loss, arch in fitness[:population_size // 2]]
+        new_population = elites[:]
+        
+        while len(new_population) < population_size:
+            parent1, parent2 = random.sample(elites, 2)
+            child = {k: random.choice([parent1[k], parent2[k]]) for k in parent1}
+            mutation_key = random.choice(list(search_space.keys()))
+            child[mutation_key] = random.choice(search_space[mutation_key])
+            new_population.append(child)
+        
+        population = new_population
+    
+    return best_architecture, best_loss
+
+# ---------------------------
+# Gradient-Based Methods
+# ---------------------------
+class Cell(nn.Module):
+    def __init__(self, in_features, out_features, ops):
+        super().__init__()
+        self.ops = nn.ModuleList([nn.Sequential(nn.Linear(in_features, out_features), op()) for op in ops])
+    def forward(self, x, weights):
+        return sum(w * op(x) for w, op in zip(weights, self.ops))
+
+class Model(nn.Module):
+    def __init__(self, search_space):
+        super().__init__()
+        self.ops_list = [activation_map[name] for name in search_space['activation_function']]
+        self.num_ops = len(self.ops_list)
+        self.num_hidden_layers = max(search_space['num_hidden_layers'])
+        self.hidden_layer_size = search_space['hidden_layer_size'][0]
+        self.alphas = nn.Parameter(torch.randn(self.num_hidden_layers, self.num_ops, requires_grad=True))
+        self.layers = nn.ModuleList([nn.Linear(1, self.hidden_layer_size)])
+        for _ in range(self.num_hidden_layers - 1):
+            self.layers.append(Cell(self.hidden_layer_size, self.hidden_layer_size, self.ops_list))
+        self.output_layer = nn.Linear(self.hidden_layer_size, 1)
+
+    def forward(self, x):
+        arch_weights = nn.functional.softmax(self.alphas, dim=-1)
+        out = x
+        for i, layer in enumerate(self.layers):
+            out = layer(out, arch_weights[i-1]) if isinstance(layer, Cell) else layer(out)
+        return self.output_layer(out)
+
+    def discretize(self):
+        best_ops = [self.ops_list[i].__name__ for i in self.alphas.argmax(dim=-1)]
+        return {
+            'num_hidden_layers': self.num_hidden_layers,
+            'hidden_layer_size': self.hidden_layer_size,
+            'learning_rate': 0.001,
+            'optimizer': 'Adam',
+            'dropout_rate': 0.0,
+            'activation_function': best_ops[0]
+        }
+
+def run_gradient_based_search(search_space, X_train, y_train, X_val, y_val, num_epochs=50):
+    model = Model(search_space)
+    criterion = nn.MSELoss()
+    optimizer_alpha = optim.Adam([model.alphas], lr=0.001)
+    weight_params = [p for p in model.parameters() if p.requires_grad and p is not model.alphas]
+    optimizer_w = optim.Adam(weight_params, lr=0.01)
+    
+    for _ in range(num_epochs):
+        optimizer_w.zero_grad()
+        loss_w = criterion(model(X_train), y_train)
+        loss_w.backward()
+        optimizer_w.step()
+        
+        optimizer_alpha.zero_grad()
+        loss_alpha = criterion(model(X_val), y_val)
+        loss_alpha.backward()
+        optimizer_alpha.step()
+    
+    best_arch = model.discretize()
+    final_loss = evaluate_architecture(best_arch, X_train, y_train, X_val, y_val, num_epochs)
+    return best_arch, final_loss
