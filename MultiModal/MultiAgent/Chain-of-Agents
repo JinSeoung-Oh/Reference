@@ -1,0 +1,84 @@
+### From https://arxiv.org/pdf/2508.13167
+
+1. Chain-of-Agents Paradigm
+   The Chain-of-Agents (CoA) framework is designed to solve complex queries by dynamically orchestrating specialized agents within 
+   a unified model (Mθ).
+
+   1.1 Agent Types
+       CoA organizes reasoning into two categories of agents:
+       -a. Role-playing Agents (high-level reasoning & coordination)
+           -1. Thinking Agent: Core orchestrator; activates other agents and ensures coherence of the reasoning state.
+           -2. Plan Agent: Decomposes input query q into structured subtasks ⟨ϕsearch, ϕcrawl, …⟩.
+           -3. Reflection Agent: Performs self-critique, inconsistency resolution, and knowledge fusion.
+           -4. Verification Agent: Validates correctness and logical integrity of outputs.
+       -b. Tool Agents (domain-specific execution)
+           -1. Search Agent: Forms optimized search queries.
+           -2. Crawl Agent: Extracts and parses information from multiple sources.
+           -3. Code Generate Agent: Produces and executes code snippets in sandboxed environments.
+   1.2 Orchestration Mechanism
+       -a. At each step, the Thinking Agent decides which role ϕt to activate:
+           St = fθ(St−1, ϕt−1, ot−1), ϕt ∼ P(ϕ | St)
+       -b. State St maintains persistent reasoning memory across the trajectory.
+       -c. Unlike Tool-Integrated Reasoning (TIR), which has rigid pipelines, CoA enables adaptive, 
+           dynamic orchestration inside one inference process.
+   1.3 Advantages
+       -a. Preserves contextual continuity across agents.
+       -b. Reduces token overhead compared to multi-agent frameworks (no excessive inter-agent communication).
+       -c. Enables direct optimization of agent collaboration via SFT + RL, unlike static LLM backbones in traditional frameworks.
+       -d. Demonstrated to combine benefits of multi-agent systems and ReAct-style reasoning.
+
+2. Agentic Supervised Fine-Tuning (SFT)
+   2.1 Training Data Generation
+       CoA training leverages agent-level knowledge distillation from expert multi-agent systems (e.g., OAgents).
+       -a. Extracted trajectories:
+           τ = {(St, ϕt, ot)}Tt=1
+           -1. St: reasoning state
+           -2. ϕt: activated agent
+           -3. ot: observation/output
+       -b. Captures agent activation order, decisions, and outputs → transformed into CoA-style datasets.
+       -c. This extends sequence-level knowledge distillation to the multi-agent orchestration domain.
+   2.2 Progressive Quality Filtering
+       To ensure non-trivial, high-quality samples, a four-stage filtering process is applied:
+       -a. Complexity filtering – exclude trajectories with <5 agent-tool hops.
+       -b. Quality filtering – remove dirty data (incorrect answers, redundant tool calls, failed test cases).
+       -c. Reflection enrichment – prioritize samples with self-reflection / refinement; drop non-reflective math/code trajectories.
+       -d. Error-correction upsampling – prioritize cases where agents recover from low-credibility answers through re-reasoning.
+   2.3 Dataset Characteristics
+       -a. Multi-tool coordination required in all samples.
+       -b. Reasoning chains span 5–20 hops (vs. 2–3 in benchmarks).
+       -c. Enriched with reflection and iterative error correction.
+   2.4 Training Objective
+       -a. Data formatted into structured chain-of-thought trajectories with:
+           -1. CoT rationales (Ccot), tool actions (αm), observations (Ot), reflections (Ft).
+       -b. SFT loss:
+           -1. LSFT = − Σt∉O log πθ(τt | τ)
+
+3. Agentic Reinforcement Learning (RL)
+   3.1 Data Sampling
+       Because data quality is heterogeneous, CoA employs selective filtering:
+       -a. Web Agent:
+           -1. Compute solvability rate rq via parametric LLM (Qwen-2.5-72B).
+           -2. Exclude queries with rq > 0.3 (trivial or contaminated).
+           -3. Sample remaining challenging queries → RL dataset QRL.
+       -b. Code Agent:
+           -1. Fine-tuned AFM-7B generates 8 answers per query.
+           -2. If all correct → query too easy → discarded.
+       This ensures RL focuses on challenging, tool-dependent tasks.
+   3.2 Reward Function Design
+       -a. Web Agent Reward:
+           -1. Use LLM-as-Judge to assess correctness.
+           -2. Reward: Rweb(τ) = 1 if correct, 0 otherwise.
+           -3. Simple binary feedback avoids reward hacking and ensures robustness.
+       -b. Code Agent Reward:
+           -1. Requires both semantic correctness and format adherence.
+           -2. Reward: Rcode(τ) = scoreanswer × scoreformat
+               -1) scoreanswer = 1 if test cases (or math verify) pass.
+               -2) scoreformat = 1 if output follows required code block format.
+
+4. Key Takeaways
+   -a. Chain-of-Agents (CoA) models dynamic orchestration of reasoning agents inside a unified model.
+   -b. SFT stage distills expert multi-agent trajectories, with progressive filtering to emphasize complex, reflective, 
+       error-correcting reasoning.
+   -c. RL stage refines agentic policies with carefully sampled non-trivial tasks and binary correctness-driven rewards.
+   -d. Compared to prior paradigms, CoA balances adaptivity, efficiency, and trainability, enabling robust, 
+       tool-integrated reasoning within a single model.
