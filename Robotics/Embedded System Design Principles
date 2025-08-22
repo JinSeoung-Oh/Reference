@@ -1,0 +1,99 @@
+### From https://levelup.gitconnected.com/embedded-system-design-principles-30dcc1d546ed
+
+1. Philosophy of Embedded Engineering
+   -a. Engineering as compromise: Embedded systems are optimized for specific tasks under strict constraints
+                                  (power, memory, I/O, size, timing).
+   -b. Constraints dominate design: You will never have “enough” of anything; every choice impacts feasibility.
+   -c. Analogy: Writing embedded firmware is like writing a letter where you must check if the mailbox still exists after every word.
+
+2. System Requirements & Documentation
+   -a. Start with a clear statement of purpose and objectives.
+   -b. Define constraints: processing power, memory, power consumption, bandwidth.
+   -c. Case Study – Drone for STEM Education:
+       -1. Needed to be safe indoors, 3D-printable, modular, open-source, and Arduino-compatible.
+       -2. Started with minimal components (airframe, ESC, battery, controller, etc.), allowing modular extensions later.
+   -d. Functional Specifications:
+       -1. In commercial work, large functional spec documents exist but often underused.
+       -2. Practical design relies on tables, schedules, schematics, and evolving documentation.
+       -3. Pin Mapping Tables: prevent pin conflicts and enforce discipline.
+       -4. Weight Budgeting (e.g., drone design):
+           -1) Weight determines lift → motors/propellers → ESCs → batteries.
+           -2) Hover typically designed for 50% thrust margin.
+           -3) Aerodynamic drag and tilt reduce effective lift significantly.
+       -5. Iterative design: rarely perfect first time, but templates/experience reduce mistakes.
+
+3. Memory and Data Management
+   -a. Data type selection: Prevent overflow/underflow.
+       -1. Case Study – Ariane 5 Rocket (1996):
+           -1) Integer overflow from storing 64-bit float in 16-bit int.
+           -2) Assumed flight profile similar to Ariane 4.
+           -3) Caused IRS crash, chain reaction, rocket self-destruct.
+   -b. Memory allocation:
+       -1. Static preferred in real-time systems (avoids fragmentation).
+       -2. Case Study – RP2040 (Raspberry Pi Pico):
+           -1) Dual stacks (2 KB each) → stack overflow silently overwrote unused memory regions.
+           -2) TensorFlow Lite Micro convolution test exceeded stack size → race conditions and erratic failures.
+       -3. Buffer overflows: Must enforce bounds checking and use memory protection units.
+       -4. Memory leaks: Use analyzers and profiling tools for detection.
+
+4. Real-Time Performance & Timing Constraints
+   -a. Worst-case execution analysis: Essential in safety-critical systems.
+   -b. Firmware architecture spectrum:
+       -1. Bare-metal: minimal latency, direct hardware access.
+       -2. RTOS: task scheduling, priority for critical functions.
+       -3. Frameworks (Arduino, Pico SDK): middleware abstraction, can mix approaches.
+   -c. Programming practices:
+       -1. Avoid blocking delays; prefer event-driven or interrupt-driven design.
+       -2. Interrupt Service Routines (ISRs): must be short, efficient, defer heavy processing.
+       -3. Watchdog timers: auto-reset system if unresponsive (critical for satellites, probes).
+
+5. Error Handling & Recovery
+   -a. Principle: Fail gracefully, not catastrophically.
+   -b. Mechanisms:
+       -1. Graceful degradation: Drone GPS loss → fallback navigation; radio loss → return-to-home.
+       -2. Error logging: Persistent logs act like “black boxes.”
+       -3. Self-tests & diagnostics: Automotive ECUs and industrial systems check sensors/actuators at startup.
+
+6. AI in Embedded Systems
+   -a. Constraints amplified: Models must be optimized (quantization, pruning).
+   -b. Applications: Robotics, autonomous driving, predictive maintenance.
+   -c. Challenges:
+       -1. Unseen objects, ethical decisions (occupant vs bystander safety).
+       -2. Model drift → predictions degrade over time.
+       -3. Vulnerability to adversarial attacks.
+   -d. Reliability measures: Confidence scoring, fallback systems, rule-engine cross-checks.
+
+7. Security and Reliability
+   -a. Security must be built-in from the start.
+   -b. Examples of vulnerabilities:
+       -1. Casino fish tank IoT hack (unsecured firmware updates).
+       -2. Open debug interfaces (JTAG/UART) → root access.
+   -c. Best practices:
+       -1. Secure protocols, encrypted firmware, secure boot, disable debug in production.
+       -2. Code signing & authentication standard in automotive/aerospace.
+
+8. Testing and Validation
+   -a. Why critical: Bugs in production = recalls, safety hazards.
+   -b. Levels of testing:
+       -1. Unit & integration tests.
+       -2. Stress testing under extreme conditions.
+       -3. Hardware-in-the-loop (simulate turbulence, faults, etc.).
+   -c. Concurrency pitfalls: Race conditions, deadlocks → require scheduling analysis.
+   -d. Regression testing: CI/CD pipelines with automated tests.
+   -e. Legacy code risks: Must be retested under new system constraints (Ariane 5 lesson).
+   -f. Fault tolerance & redundancy: Multiple failovers in automotive braking, aerospace.
+   -g. Environmental resilience: Devices must survive vibration, heat, EMI, centrifugal force, etc.
+
+9. Deployment and Maintenance
+   -a. OTA updates: Now standard (e.g., Tesla).
+       -1. Must be cryptographically signed.
+       -2. Require rollback mechanisms to avoid bricking.
+   -b. Documentation: Critical for debugging, compliance, long-term maintenance.
+   -c. Telemetry: Remote analytics for predictive maintenance (wind farms, smart meters, city infrastructure).
+
+10. Conclusion
+    -a. Embedded design is trade-offs under constraints.
+    -b. Best learning comes from hands-on iteration and failure.
+    -c. Inspiration: Curiosity Rover (2012) – designed for 2 years, still operating after a decade thanks to robust engineering, 
+                     fault tolerance, and clever adaptation.
+
