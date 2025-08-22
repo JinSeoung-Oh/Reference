@@ -1,0 +1,63 @@
+### From https://arxiv.org/pdf/2507.19457
+
+1. Problem Definition: Compound AI Systems
+   -a. Compound AI System: A modular system composed of multiple LLM calls and external tool invocations, orchestrated 
+                           through arbitrary control flow (C).
+       -1. Examples: Agents, multi-agent systems, ReAct, Archon, etc.
+   -b. Formalization: Φ = (M, C, X, Y)
+       -1. M = {M1 … M|M|}: collection of LLM modules
+       -2. C = control flow (ordering, conditional execution, tool integration)
+       -3. X, Y = global input/output schemas
+   -c. Each module Mi = (πi, θi, Xi, Yi):
+       -1. πi: system prompt (instructions, few-shot examples)
+       -2. θi: model weights
+       -3. Xi, Yi: input/output schemas
+   Thus, the optimization problem reduces to learning module prompts (ΠΦ) and weights (ΘΦ) that maximize performance under 
+   an evaluation metric µ.
+
+2. Real-World Optimization Constraints
+   -a. In practice, rollouts—running Φ and evaluating with µ—are very expensive (computationally, financially, or in terms of time).
+   -b. The optimizer is constrained to a rollout budget B.
+   -c. The core challenge: extract maximal learning signal from each rollout to adapt complex compound AI systems effectively under
+       data or budget constraints.
+
+3. GEPA (Genetic-Pareto) Optimization Algorithm
+   GEPA integrates three core principles:
+   -a. Genetic Prompt Evolution
+       -1. Maintains a candidate pool P.
+       -2. New candidates are created via mutation/crossover of parent candidates.
+       -3. If performance improves, the candidate is added to P and its ancestry is recorded.
+       -4. The process continues until the rollout budget is exhausted, at which point the best candidate is selected
+           based on a validation set (Dpareto).
+   -b. Reflective Prompt Mutation
+       -1. Execution traces (intermediate reasoning steps and outcomes) provide diagnostic signals.
+       -2. An LLM uses these traces to reflectively identify weaknesses in a module’s prompt and propose updates.
+       -3. GEPA applies these reflective updates at the module level, creating new candidates.
+       -4. When the evaluation metric µ itself produces rich traces (e.g., code execution logs, math verification),  
+           these are extended into a feedback function µf for even finer module-level reflection.
+   -c. Pareto-Based Candidate Selection
+       -1. Simply selecting the best-performing candidate risks local optima.
+       -2. Instead, GEPA builds a Pareto frontier: candidates that achieve the best score for at least one task instance.
+       -3. Strictly dominated candidates are pruned.
+       -4. GEPA stochastically samples from the remaining candidates, weighting those with more “winning” task performances higher.
+       -5. This balances exploration vs. exploitation, avoiding local stagnation while efficiently using the budget.
+
+4. Flow of the GEPA Algorithm
+   -a. Initialize with the base system as the first candidate.
+   -b. Iteratively:
+       -1. Select a candidate using Pareto strategy.
+       -2. Choose a target module; run minibatch rollouts and gather feedback.
+       -3. Apply reflective prompt mutation to generate a new candidate.
+       -4. If performance improves, add it to the pool, track ancestry, and evaluate on validation set Dpareto.
+   -c. After the rollout budget is consumed, return the candidate with the best aggregate score on Dpareto.
+
+5. Significance
+   -a. GEPA optimizes compound AI systems by evolving prompts and modules genetically.
+   -b. By combining Reflection + Pareto Selection, it enables:
+       -1. Targeted module-level improvements
+       -2. Explicit credit assignment for errors/successes
+       -3. Diversity of exploration while maintaining progress
+   -c. Particularly valuable in low-data, low-budget scenarios, where efficiency is critical.
+
+In summary: GEPA is a reflective evolutionary optimizer that combines genetic evolution, natural language reflection,
+            and Pareto-based selection to adapt compound AI systems effectively under strict rollout budgets.
