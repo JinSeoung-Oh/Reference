@@ -1,0 +1,50 @@
+### From https://www.marktechpost.com/2025/08/15/r-zero-a-fully-autonomous-ai-framework-that-generates-its-own-training-data-from-scratch/?amp
+
+1. Limitations of Current Approaches
+   -a. Most reasoning improvements in LLMs depend on human-curated datasets, which are costly, time-consuming, 
+       and bounded by human knowledge.
+   -b. Even “label-free” methods that rely on LLM outputs for supervision still depend on existing pools of problems.
+   -c. This reliance restricts scalability and prevents open-ended reasoning beyond human-designed tasks.
+
+2. R-Zero’s Core Idea: Challenger–Solver Co-Evolution
+   -a. Challenger
+       -1. A reinforcement-learning-trained generator of reasoning tasks.
+       -2. Produces problems at the Solver’s frontier (around 50% accuracy).
+       -3. Reward signal: highest when Solver is maximally uncertain, making such tasks most informative.
+   -b. Solver
+       -1. Learns to solve Challenger’s tasks.
+       -2. Generates multiple answers → pseudo-label determined by majority vote.
+       -3. Filters out tasks that are too easy or too hard → uses only informative samples.
+   -c. Iterative Loop
+       -1. Challenger and Solver alternate in improvement cycles.
+       -2. The curriculum self-generates and adapts dynamically.
+
+3. Key Technical Innovations
+   -a. GRPO (Group Relative Policy Optimization)
+       -1. Normalizes rewards relative to a group of responses per question.
+       -2. Removes need for a separate value function → more efficient.
+   -b. Uncertainty-Driven Curriculum
+       -1. Challenger is rewarded for creating tasks where Solver accuracy ≈ 50%.
+       -2. This point is theoretically optimal for maximizing learning efficiency.
+   -c. Data Quality Management
+       -1. Repetition penalty: prevents generating similar tasks.
+       -2. Format checks: filters out malformed tasks.
+       -3. Consistency filtering: excludes tasks where Solver is overly consistent (too easy) or too scattered (ill-posed).
+
+4. Empirical Results
+   -a. Mathematical Reasoning (7 Benchmarks)
+       -1. AMC, Minerva, MATH-500, GSM8K, Olympiad-Bench, AIME, etc.
+       -2. Example: Qwen3-8B-Base → 49.18 → 54.69 after three iterations.
+       -3. Clear, consistent improvements across scales and architectures.
+   -b. General Reasoning (MMLU-Pro, SuperGPQA, BBEH)
+       -1. Qwen3-8B-Base → 34.49 → 38.73 average.
+       -2. Demonstrates transfer effects beyond math, boosting broader reasoning skills.
+
+5. Significance & Conclusion
+   -a. Zero-data paradigm: models evolve without human labels or pre-collected tasks.
+   -b. Provides scalable, autonomous, and adaptive curricula, pushing toward self-sufficient reasoning LLMs.
+   -c. Combines efficiency (GRPO), robustness (uncertainty-driven filtering), and cross-domain generalization.
+   -d. Open-source, enabling researchers and practitioners to experiment and extend.
+
+In short: R-Zero represents a new milestone—a self-contained framework where LLMs generate their own problems, 
+          solve them, and continuously improve reasoning to move closer to superhuman performance.
