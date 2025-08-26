@@ -1,0 +1,66 @@
+### From https://towardsdatascience.com/smarter-model-tuning-an-ai-agent-with-langgraph-streamlit-that-boosts-ml-performance/
+
+1. LangGraph Experience and Framework Introduction
+   -a. LangChain, as one of the earliest frameworks for LLM integration, became the go-to option for building production-level agents.
+   -b. LangGraph, considered LangChain’s “younger sibling,” uses a graph notation (nodes and edges) to structure applications. 
+       This makes them highly customizable and robust.
+   -c. While the notation feels strange at first, through hands-on implementation and debugging, the architecture becomes 
+       more intuitive and enjoyable.
+
+2. Project Overview
+   -a. Goal: Build a multi-step ML model tuning agent.
+       -1. Input: Model type (classification/regression) + evaluation metrics (accuracy, RMSE, confusion matrix, ROC, etc.).
+       -2. Output: Using Google Gemini 2.0 Flash, the agent reads inputs, evaluates the metrics, and returns actionable suggestions for performance improvement.
+   -b. Project folder structure:
+       ml-model-tuning/
+       ├── langgraph_agent/
+       │   ├── graph.py  # LangGraph logic
+       │   ├── nodes.py  # LLMs and tools
+       ├── main.py       # Streamlit interface
+       ├── requirements.txt
+
+3. Dataset
+   -a. Uses the Tips dataset from Seaborn (BSD-3 license).
+   -b. Contains both numerical and categorical features, making it suitable for both regression and classification models.
+
+4. Node Design
+   -a. LangGraph nodes are Python functions representing either tools or LLM instances.
+   -b. get_model_type: Captures user input to determine if the model is regression or classification.
+   -c. llm_node_regression / llm_node_classification:
+       -1. Use Google Gemini 2.5 Flash.
+       -2. Each system prompt is optimized for regression or classification contexts.
+       -3. Summarize and evaluate user-provided metrics, returning concise, actionable tuning suggestions.
+
+5. Graph Construction
+   -a. graph.py defines a StateGraph to manage state. State variables include messages, model_type, metrics_to_tune, and final_answer.
+   -b. Nodes and conditional edges:
+       -1. Entry point: get_model_type
+       -2. Depending on the model type, the flow moves to classification or regression.
+       -3. Each LLM node connects to END.
+   -c. build_graph() compiles the workflow into a runnable graph.
+
+6. User Interface
+   -a. Built with Streamlit for rapid prototyping and deployment.
+   -b. Sidebar: Input for Google Gemini API Key + Clear button.
+   -c. Main page:
+       -1. Instructions for use
+       -2. Text area for entering model metrics
+       -3. Graph execution and response display
+
+7. Regression Model Experiment
+   -a. Baseline: Linear Regression.
+   -b. Metrics: R² = 0.44, RMSE = 0.84.
+   -c. Agent Suggestions:
+       -1. Add polynomial or interaction terms (to capture nonlinearities).
+       -2. Try nonlinear models (Random Forest, Gradient Boosting, SVR).
+       -3. Handle outliers and apply transformations (e.g., log transform).
+       -4. Check feature statistical significance (e.g., p-values).
+   -d. Tuning Results:
+       -1. Random Forest baseline decreased performance (R² = 0.25).
+       -2. Linear Regression with outlier handling and log transforms improved substantially (R² = 0.55, RMSE = 0.23).
+
+8. Classification Model Experiment
+   -a. Task: Predict whether a restaurant customer is a smoker.
+   -b. Baseline Metrics: Score = 0.69, RMSE = 0.55.
+   -c. Agent Suggestions Applied: class_weight='balanced' and BayesSearchCV.
+   -d. Tuned Metrics: Score = 0.71, RMSE = 0.52.
