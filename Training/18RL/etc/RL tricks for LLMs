@@ -1,0 +1,81 @@
+### From https://generativeai.pub/rl-tricks-for-llms-f9cb6d6c36e5
+
+1. Research Background
+   -a. Reinforcement Learning (RL) shows strong potential in mathematical, coding, and logical tasks,
+       helping LLMs surpass the ceiling of SFT.
+   -b. However, numerous RL4LLM “tricks” proposed in literature have produced divergent or even contradictory conclusions
+       due to the absence of unified evaluation standards, inconsistent initializations, and experimental setups.
+   -c. This study systematically examines these techniques within a unified framework (ROLL) using diverse datasets and models.
+
+2. Basic Algorithms and Paradigms
+   -a. PPO (Proximal Policy Optimization): The most widely used RL algorithm. 
+       It applies policy gradient optimization with clipping to ensure stability and efficiency. 
+       A challenge remains in training a stable value network (critic).
+   -b. Critic-free Paradigm: Avoids a critic model by constructing advantages directly from sampled rewards.
+       -1. GRPO: Computes advantages via group-level reward normalization, comparing multiple responses to the same prompt. 
+                 It is simple and stable.
+       -2. DAPO: Extends GRPO by adding techniques such as Decoupled Clip (separating upper and lower bounds), 
+                 Token-level Loss Aggregation, and Dynamic Sampling/Filtering.
+   -c. GRPO and DAPO represent contrasting approaches: GRPO emphasizes simplicity and efficiency, 
+                                                       while DAPO integrates multiple tricks for enhanced performance.
+
+3. Systematic Classification (RL4LLM Tricks)
+   -a. Normalization Strategies: Standardizing rewards/advantages to stabilize gradients.
+   -b. Clipping Strategies: Using PPO clipping to balance exploration and exploitation.
+   -c. Loss Aggregation Granularity: Aggregating losses at token-level vs. sequence-level.
+   -d. Filtering Strategies: Filtering samples by rules such as sequence length or complexity.
+
+4. Experimental Setup
+   -a. Models: Qwen3–4B and Qwen3–8B, including both pretrained base models and aligned instruction models.
+   -b. Datasets: Mathematical reasoning datasets at three difficulty levels (easy, medium, hard).
+   -c. Evaluation: Reasoning ability measured across six open mathematical datasets.
+
+5. Key Experimental Results
+   (1) Normalization
+       -a. Group-level vs. Batch-level:
+           -1. Group-level normalization is robust to imbalanced reward distributions.
+           -2. Batch-level normalization is highly sensitive to reward scale; outliers can dominate results and collapse performance.
+       -b. Use of Standard Deviation:
+           -1. On simple tasks, low variance leads to gradient explosion if standard deviation is used as denominator. 
+               Removing it improves stability and performance.
+           -2. On harder tasks with more dispersed rewards, its presence or absence has little effect.
+       -c. Mixed Strategy: Combining group-level mean with batch-level standard deviation yields the best robustness and performance.
+   (2) Clipping Strategy
+       -a. PPO clipping stabilizes training but may suppress exploration, causing entropy collapse.
+       -b. Clip-Higher (raising the upper clipping bound):
+           -1. Effective for aligned models, expanding exploration space and improving performance.
+           -2. Ineffective or harmful for base models, where unstable policies can be disrupted.
+       -c. Linguistic Effects:
+           -1. With low ε: logical connectors (“therefore,” “if,” “but”) are suppressed, oversimplifying reasoning flow.
+           -2. With high ε: suppression shifts to high-frequency function words (“is,” “the,” commas), 
+                            preserving structure while enhancing diversity and creativity.
+   (3) Loss Aggregation
+       -a. Sequence-level: Averages sequence losses, diluting token contributions (length bias).
+       -b. Token-level: Weighs all tokens equally, avoiding length bias.
+       -c. Results:
+           -1. Base models → Token-level aggregation is superior, enabling learning from long reasoning chains.
+           -2. Aligned models → Sequence-level aggregation is better, preserving fluency and structural integrity.
+   (4) Overlong Filtering
+       -a. Long outputs truncated at maximum length create mislabeled noise.
+       -b. Filtering these improves accuracy for short/medium tasks but limits performance on tasks requiring long reasoning.
+       -c. Analysis shows many overlong outputs are degenerate repetitions (failure to produce EOS). 
+           Filtering them indirectly teaches models to terminate properly.
+
+6. Lite PPO (Proposed Method)
+   -a. A simple combination of two validated components:
+       -1. Robust advantage normalization (group-level mean + batch-level std).
+       -2. Token-level loss aggregation.
+   -b. Implemented in a critic-free PPO setup.
+   -c. Results: Outperforms GRPO and DAPO consistently across model scales and dataset complexities. 
+                Lite PPO is particularly stable and efficient for small models and variable datasets, 
+                where other methods collapse after peaking.
+
+7. Concluding Insights
+   -a. Model-specific suitability:
+       -1. Aligned models → better with high clipping bounds and sequence-level aggregation.
+       -2. Base models → require token-level aggregation and robust normalization.
+   -b. Simplicity vs. Complexity: A well-designed simple approach (Lite PPO) can surpass more complex algorithms with redundant 
+                                  or conflicting tricks.
+   -c. Mechanistic insights: Linguistic and numerical analysis clarifies failure modes of normalization and semantic effects of clipping.
+
+   -d. Reproducibility: Results are reliable due to unified framework and controlled variables.
