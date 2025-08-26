@@ -1,0 +1,78 @@
+### From https://arxiv.org/pdf/2502.02834
+
+1 Metric-based Task Representation
+  -a. Goal: To ensure that task latents accurately capture differences among tasks so that Virtual Tasks (VTs) reflect 
+            true task characteristics.
+  -b. Key Tool – Bisimulation Metric:
+      -1. Originally defined in MDPs to measure similarity between two states using rewards and transitions (Ferns et al., 2011).
+      -2. Adapted here for tasks sharing the same state and action spaces.
+      -3. Definition:
+          d(Ti, Tj) = E(s,a)∼D [ |RTi(s,a) – RTj(s,a)| + ηW₂(PTi(·|s,a), PTj(·|s,a)) ]
+          -1) D: replay buffer
+          -2) R: reward function, P: transition dynamics
+          -3) W₂: 2-Wasserstein distance
+          -4) η: distance coefficient
+  -c. Characteristics: d=0 when two contexts perfectly match, and grows with greater differences.
+  -d. Learning Process:
+      -1. Task encoder qψ(z|cT) trained so that latent z preserves bisimulation distance.
+      -2. Since R and P are unknown, a task decoder pϕ(s,a,z)=(Rϕ, Pϕ) approximates dynamics via reconstruction loss.
+  -e. Extending PEARL:
+      -1. πexp for exploration (on-policy contexts), πRL for off-policy RL.
+      -2. Issue: on-policy latent zon unstable due to limited contexts.
+      -3. Solution – On-off latent structure:
+          -1) Off-policy zoff used for stable training of bisimulation distance.
+          -2) On-policy zon simply aligned with zoff, yielding more robust task representations.
+  -f. Final Loss Lbisim includes:
+      -1. Bisimulation loss: match zoff distances to metric d
+      -2. Reconstruction loss: decoder reconstructs rewards and transitions
+      -3. On-off latent loss: align zon with zoff
+
+2. Task-Preserving Sample Generation
+   -a. Problem: Existing VT generation methods (e.g., dropout regularization) produce virtual contexts cˆ whose latents zˆ 
+                differ significantly from zα, failing to preserve task information.
+   -b. Solution: Introduce a task-preserving loss to minimize the difference between zα and zˆα, ensuring generated contexts 
+                 retain latent information.
+   -c. Further Issue: The task decoder may still fail to fully capture real contexts, causing instability.
+   -d. Additional Solution – WGAN:
+       -1. Generator: task decoder pϕ(·,zα)
+       -2. Discriminator: fζ distinguishes real vs. generated contexts
+       -3. Goal: reduce distribution gap so virtual contexts resemble real ones.
+   -e. Final Loss Lgen consists of:
+       -1. WGAN generator loss
+       -2. Task-preserving loss (align zˆα with zα)
+
+3. Task-Aware Virtual Training (TAVT)
+   -a. Integration Idea: Combine metric-based representation learning with task-preserving sample generation.
+       -1. VTs capture task characteristics while producing samples close to real ones.
+   -b. Total Loss: Ltotal(ψ,ϕ) = Lbisim + Lgen
+   -c. Training:
+       -1. RL policy πRL trained using SAC.
+       -2. Training tasks: π(·|s, zion)
+       -3. Virtual tasks: π(·|s, zαon)
+   -e. Exploration Policy:
+       -1. PEARL uses π(·|s, z˜) with z˜ ∼ N(0,I).
+       -2. Proposed: πexp = π(·|s, zαon), leveraging VT latents.
+       -3. By varying interpolation coefficient α, exploration covers both training tasks and VTs, 
+           broadening trajectories to include OOD tasks and enhancing generalization.
+
+4. State Regularization Method
+   -a. Problem: Errors in predicted next states in virtual contexts cause Q-function overestimation bias.
+   -b. Solution: State regularization mixes predicted and real next states:
+       -1. sˆ′reg = εreg sˆ′ + (1–εreg) s′
+   -c. Effect: At εreg=0.1, Q-function loss and estimation bias are significantly reduced.
+   -d. Conclusion: State regularization improves OOD performance (e.g., in Walker-Mass-OOD).
+
+5. Limitations
+   -a. Several hyperparameters require tuning, though ablation studies suggest the method is not highly sensitive.
+   -b. Assumes parametric task distributions (e.g., changes in velocity/mass).
+   -c. Does not handle non-parametric distributions (e.g., ML10/ML45 in MetaWorld, where task semantics differ).
+   -d. Possible remedy: combine with recent task decomposition methods.
+
+6. Conclusion
+   -a. Existing meta-RL methods often fail on OOD tasks, especially with varying state transitions.
+   -b. TAVT addresses this by combining:
+       -1. Metric-based latent learning (bisimulation)
+       -2. Task-preserving sample generation (WGAN + loss)
+       -3. State regularization
+   -c. Outcome: Task latents are better aligned and stabilized, and generalization to OOD tasks is significantly improved.
+
