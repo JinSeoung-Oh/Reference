@@ -1,0 +1,43 @@
+### From https://www.marktechpost.com/2025/08/19/memp-a-task-agnostic-framework-that-elevates-procedural-memory-to-a-core-optimization-target-in-llm-based-agent/?amp
+
+1. Capabilities and Limitations of Current LLM Agents
+   Large language model (LLM) agents have advanced to the point of handling complex tasks such as web research, report generation, 
+   data analysis, and multi-step software workflows. 
+   However, they struggle with procedural memory — the form of memory that allows agents (or humans) to internalize, 
+   automate, and reuse routines for recurring tasks. Today, procedural memory in agents is often rigid, manually designed, 
+   or locked inside model weights, making it fragile. 
+   Unexpected changes like network failures or UI updates frequently force a full restart. 
+   Unlike humans, who learn by reusing past experiences as routines, current LLM agents lack systematic ways to build, refine, 
+   and reuse procedural skills.
+
+2. Limitations of Existing Memory Approaches
+   Current systems use methods such as vector embeddings, semantic search, and hierarchical structures to store and retrieve short-term, 
+   episodic, and long-term memory. 
+   However, strategies for constructing, updating, and reusing procedural memory remain underdeveloped. 
+   Even with reinforcement learning, imitation, or replay, agents face inefficiency, poor generalization, and catastrophic forgetting.
+
+3. Introduction of Memp Framework
+   Researchers from Zhejiang University and Alibaba Group propose Memp, a framework that equips agents with lifelong, 
+   adaptable procedural memory. Memp converts past trajectories into:
+   -a. fine-grained step-level instructions, and
+   -b. higher-level abstract scripts.
+       It systematically addresses memory construction, retrieval, and updating.
+
+4.Dynamic Memory Management in Memp
+  Unlike static approaches, Memp continuously refines knowledge through addition, validation, reflection, and discarding. 
+  This ensures that agents maintain relevant and efficient procedural knowledge, 
+  reducing wasted exploration and keeping knowledge up-to-date.
+
+5. Experimental Validation (ALFWorld, TravelPlanner)
+   -a. Storing and reusing trajectories improved accuracy, shortened exploration time, and optimized token usage.
+   -b. Semantic similarity–based retrieval further enhanced relevant memory access.
+   -c. Dynamic update mechanisms allowed error correction, pruning outdated knowledge, and refining skills over time.
+   -d. Crucially, procedural memory built by stronger models successfully transferred to weaker models, yielding significant performance gains.
+   -e. However, scaling retrieval beyond an optimal threshold caused context overload, reducing effectiveness.
+
+6. Conclusion and Significance
+   Memp is a task-agnostic procedural memory framework that treats memory as central to optimizing LLM agents. 
+   By systematically managing memory construction, retrieval, and updating, it enables agents to distill, refine, 
+   and reuse past experiences, leading to greater efficiency and accuracy in long-horizon tasks such as TravelPlanner and ALFWorld. 
+   Unlike static or manually engineered approaches, Memp evolves dynamically, ensuring adaptability and continual improvement. 
+   Looking ahead, richer retrieval strategies and self-assessment mechanisms can further enhance real-world robustness and adaptability.
