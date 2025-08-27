@@ -1,0 +1,56 @@
+### From https://mark-burgess-oslo-mb.medium.com/why-semantic-spacetime-sst-is-the-answer-to-rescue-property-graphs-2c004fe705b2
+
+1. Confusion in Knowledge Representation
+   -a. The first mistake: confusing data/information with knowledge.
+   -b. The second mistake: equating reasoning with logic.
+   -c. The final mistake: misunderstanding the role of graphs in knowledge representation.
+   -d. With the rise of AI, knowledge graphs are fashionable again, but just as in the 1990s when they were introduced, 
+       they are still imagined poorly.
+   -e. While everything can be reduced to nodes and links, treating all nodes/links equally causes problems. 
+       Multi-scale thinking is required.
+
+2. Trivial Graphs and the Limits of Reasoning
+   -a. Star-shaped “ownership/property” graphs only allow trivial queries like “who owns X?”
+   -b. These graphs are essentially database lookups, not tools for inference or knowledge discovery.
+   -c. What we truly need are graphs as maps of journeys that can guide us toward destinations we find meaningful or “satisfactory.”
+
+3. Knowledge is Multi-Scalar
+   -a. Archival/filing models (telephone directories, random DBs) only provide names/keys without relationships.
+   -b. Molecular graphs connect isolated records but cannot support relationship-based reasoning.
+   -c. True knowledge exploration (e.g., navigating Wikipedia) comes from following links and discovering new stories.
+   -d. Thus, interesting graphs are those that represent journeys or paths of reasoning.
+
+4. The Nature of Graphs and the Problem of Transitivity
+   -a. The purpose of a graph is to let data serve as its own map, where links act as local indices of causal relationships.
+   -b. However, most relationships are not transitive:
+       -1. Example: “same color” is transitive (A=B, B=C → A=C).
+       -2. Example: “adjacent to” is not necessarily transitive.
+   -c. The main issue: an obsession with property graphs, which are not transitive and thus poor for inference.
+   -d. Therefore, property-focused graphs are fundamentally limited in reasoning capability.
+
+5. Semantic Spacetime (SST) Approach
+   -a. SST is a simple model to represent knowledge and processes in spacetime structures.
+   -b. Instead of forcing graphs into vector embeddings, SST builds directly from natural language notes, 
+       gradually formalized into navigable graphs.
+   -c. Emphasizes relationships like order, distance, and containment rather than property ownership.
+   -d. Analogy: like a city map — direction and distance are enough, no need to record every detail.
+
+6. Four Fundamental Relationships in SST
+   -a. Order: A is before/after B (events)
+   -b. Containment: A is inside/outside B (space/things)
+   -c. Property: A is a property/aspect of B (ideas)
+   -d. Similarity: A is similar to B (shortcut statements about distance)
+       -1. Node types: Events, Things, Concepts.
+       -2. Order and containment (1,2) are transitive; property and similarity (3,4) are not.
+       -3. This shows why focusing only on property graphs makes reasoning so difficult.
+
+7. Principles of SST Usage
+   -a. Event-centric modeling: focus on events rather than just naming entities.
+   -b. Restrict link types: only the four fundamental relations, which makes inference straightforward.
+   -c. Chapters and Contexts: knowledge is divided into regions/chapters; intent matters more than names.
+   -d. Simple inference: the regularity of link types ensures predictable reasoning and easier exploration.
+
+8. Critique and Conclusion
+   -a. Computer scientists/engineers have prioritized convenience over innovation, resulting in unimaginative knowledge representations.
+   -b. Chatbots marketed as “AI” are likened to instant microwave meals—easy but shallow, distracting us from asking deeper questions.
+   -c. SST offers an open, user-driven method to construct knowledge, overcoming the limitations of conventional approaches.
