@@ -1,0 +1,83 @@
+### From https://blog.gopenai.com/unstructured-text-into-interactive-knowledge-graphs-with-large-language-models-2c191f95ec5a
+
+1. Introduction
+   Long documents, such as history books or research papers, often contain countless facts and concepts, 
+   making it difficult to see the key points at a glance. This is where a knowledge graph becomes useful. 
+   A knowledge graph is like a visual map: nodes represent people, places, or concepts, and edges show their relationships.
+
+   Example: “Thomas Edison → invented → light bulb”
+
+   In the past, building such graphs required heavy coding and manual effort, but now LLMs (Large Language Models) can automate 
+   this process. 
+   This article explains how to transform unstructured text into a knowledge graph using the open-source tool AI-Knowledge-Graph.
+
+2. How It Works
+   The workflow is like a production line:
+   Input Text → Chunking → Extraction → Standardization → Inference → Visualization
+
+   (1) Text Chunking
+       Since LLMs have limited context windows, texts are split into chunks of about 200–500 words, with overlaps (e.g., 50 words) 
+       to maintain continuity.
+   (2) Fact Extraction
+       The LLM extracts triples from each chunk:
+       -a. Format: {subject, predicate, object}
+       -b. Example: “Eli Whitney invented the cotton gin” → {subject: eli whitney, predicate: invented, object: cotton gin}
+   (3) Entity Standardization
+       Different name variations are unified. Example: “AI”, “Artificial Intelligence” → “artificial intelligence”.
+   (4) Relationship Inference
+       Adds missing links not explicitly stated in the text:
+       -a. Rule-based inference: Logical rules (e.g., transitivity: A enables B, B drives C → A influences C)
+       -b. LLM-assisted inference: Uses the LLM’s reasoning to propose new, plausible links.
+   (5) Visualization
+       The final triples are rendered into an interactive HTML graph, allowing zooming and exploration.
+
+3. Importance of Inference
+   Without inference, graphs remain sparse and fragmented. With inference enabled, hidden relationships emerge, 
+   creating richer structures.
+   -a. Rule-based Example:
+       -1. Input: “Electrification enables manufacturing automation.”
+       -2. Input: “Manufacturing automation drives economic growth.”
+       -3. Inferred: “Electrification influences economic growth.”
+   -b. LLM-based Example:
+       -1. Input: “Industrial Revolution introduced factories.”
+       -2. Input: “AI powers automation.”
+       -3. Inferred: “Industrial Revolution leads to AI.”
+   Inferred triples are flagged with inferred: true and visualized with dashed lines.
+
+4. Prompt Design
+   The core of AI-Knowledge-Graph lies in four well-structured LLM prompts:
+   -a. Extraction System Prompt – assigns the LLM the role of structured fact extractor.
+   -b. Extraction User Prompt – provides explicit rules for chunk-level triple extraction.
+   -c. Standardization Prompt – unifies different mentions of the same entity.
+   -d. Inference Prompt – proposes new relationships between disconnected subgraphs.
+   Users can customize prompts (in prompts.py) for more descriptive predicates, creative inference, or simpler entity resolution.
+
+5. Installation & Execution
+   -a. Install Python 3.11+
+   -b. Clone repository: https://github.com/robert-mcdermott/ai-knowledge-graph
+   -c. Install packages: pip install -r requirements.txt
+   -d. Set up an LLM (e.g., Ollama + Gemma2)
+   -e. Edit config.toml (model name, chunk size, inference toggle, etc.)
+
+   Run:
+   python generate-graph.py input.txt output.html
+
+   → Produces an HTML graph ready to open in a browser.
+
+6. Applications
+   -a. Research Summaries: Extracts facts across papers → builds a connected overview (e.g., “solar power → reduces → carbon emissions”).
+   -b. Literary Analysis: Maps characters and themes in novels (e.g., “Elizabeth Bennet → loves → Mr. Darcy”).
+   -c. RAG (Retrieval-Augmented Generation): Creates structured graphs from enterprise docs to enhance AI assistants.
+   -d. Education: Turns history/science texts into causal graphs (e.g., “Industrial Revolution → led to → urbanization”).
+
+7. Limitations
+   -a. LLM Hallucinations: May fabricate triples (solution: use strict_mode=true).
+   -b. Complex Texts: Legal/technical documents may yield incomplete triples.
+   -c. Scalability: Very large documents are slow due to chunking + multiple API calls.
+   -d. Language Dependence: Works best on English; other languages need preprocessing or prompt adjustment.
+
+8. Alternatives & Comparisons
+   -a. Neo4j: Industrial-scale graph DB with Cypher queries, but steep learning curve.
+   -b. LangChain: Developer-oriented, highly flexible but requires more coding.
+   -c. SpaCy + custom scripts: Precise but fully manual, requiring programming skills.
+   AI-Knowledge-Graph’s strength is its simplicity and ability to run locally with minimal setup.
