@@ -1,0 +1,58 @@
+### From https://medium.com/ai-exploration-journey/pma-adaptive-and-parallel-documents-understanding-in-multi-agent-systems-ai-innovations-and-38c02142a4eb
+
+1. Problems with Traditional Multi-Agent LLMs
+   Most multi-agent LLM systems follow a rigid setup: fixed roles and sequential task execution. 
+   While this works for simple, predictable jobs, it quickly fails in real-world scenarios — when goals are ambiguous, 
+   new information arrives mid-process, or agent performance varies.
+   This leads to redundant work, error chains, and loss of contextual alignment.
+
+   What’s needed instead is not a fixed pipeline but a framework that can dynamically reassign roles in real time, 
+   let agents validate and challenge each other, and collaborate in parallel — just like a professional team.
+
+2. PMA (Parallelism Meets Adaptiveness) Architecture
+   The PMA architecture combines parallelism and adaptiveness to restructure agent collaboration.
+
+   -a. Components:
+       -1. Orchestrator: Breaks down tasks, maps dependencies, and either calls specialist agents or launches parallel competitions.
+       -2. Role Agents: Domain experts (e.g., extracting risk disclosures, summarizing MD&A, identifying off-balance sheet items, handling compliance Q&A).
+       -3. Shared Memory: Stores intermediate outputs and metadata to avoid duplication and maintain consistency.
+       -4. Evaluator: Scores each candidate result using evaluation function E(o) and selects the best.
+       -5. Feedback Bus: Monitors inconsistencies and routes rework requests back to the appropriate agent.
+   -b. Analogy:
+       -1. Orchestrator = Project Manager
+       -2. Role Agents = Domain Experts
+       -3. Shared Memory = Team Wiki
+       -4. Evaluator = Quality Control
+       -5. Feedback Bus = Real-Time Problem Solver
+
+3. Three Collaboration Engines
+   PMA achieves adaptive collaboration through competitive parallelism, dynamic routing, and two-way feedback.
+   -a. Parallel Competition – Many Sprints, One Winner
+       -1. If confidence drops below threshold (θ), multiple agents tackle the same subtask in parallel.
+       -2. The evaluator scores outputs (factuality, coherence, regulatory alignment). The top-scoring result moves forward; others are stored for audit/rollback.
+       -3. Example: For liquidity risk analysis, one agent checks macroeconomic context, another checks restructuring. The winning output cites ratios and footnotes accurately.
+   -b. Dynamic Routing – Passing the Baton Mid-Task
+       -1. Tasks are reassigned based on confidence, complexity, or workload.
+       -2. Example: A summarization agent encounters a dense legal clause → immediately routes it to the compliance agent.
+   -c. Two-Way Feedback – Fix As You Go
+       -1. Downstream agents flag precise errors and send them upstream for targeted fixes.
+       -2. Example: A QA agent spots a mismatch in debt disclosures vs balance sheet → sends it back for correction, instead of redoing the entire process.
+
+4. Real-World Case: SEC 10-K Analysis
+   -a. Task: From U.S. SEC 10-K filings, extract risk factors, summarize annual performance, and answer compliance questions.
+   -b. Tested setups:
+       -1. Static Baseline: Fixed roles, no adaptiveness.
+       -2. Adaptive: Dynamic routing + two-way feedback.
+       -3. Full PMA: Adaptive + parallel competition.
+   -c. Results:
+       -1. Static → missed key disclosures.
+       -2. Adaptive → found partial statements.
+       -3. Full PMA → accurately identified a $150M receivables securitization, contextualized, and produced an audit-ready insight.
+
+5. Key Insights
+   PMA extends ensemble learning from the model layer to the system architecture level.
+   By adding competitive evaluation, it offsets single-model uncertainty with deterministic system design.
+
+   But there’s a limit:
+       The Evaluator sets the performance ceiling. 
+       PMA shifts complexity into the harder challenge of designing a fair, all-knowing AI referee.
