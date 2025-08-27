@@ -1,0 +1,63 @@
+### From https://medium.com/@harshit.sinha0910/llm-inference-optimization-f720e71f5da0
+
+1. The Core Problem: Inference Latency in LLMs
+   Large Language Models (LLMs) such as GPT-4, Llama-3, or Vicuna face a fundamental latency bottleneck during inference.
+   -a. Auto-regressive decoding: Each token requires a full forward pass through the entire model,
+                                 where parameters must be transferred repeatedly from high-bandwidth memory (HBM) to GPU caches.
+   -b. Memory-bound issue: Despite powerful GPUs, arithmetic units remain idle because inference is limited by data transfer bandwidth,
+                           not computation.
+   -c. Traditional optimizations like quantization or pruning reduce memory footprint but fail to address sequential decoding.
+   This makes real-time applications — chatbots, coding assistants, content generation — slow and costly.
+
+2. Breakthrough Technique #1 — Speculative Decoding (vLLM)
+   Speculative decoding accelerates inference by predicting multiple tokens ahead with a fast “draft” mechanism and verifying 
+   them in a single pass with the main model.
+   -a. Key Mechanisms:
+       -1. Draft Model Speculation: A smaller LLM (e.g., OPT-125M) proposes several tokens (e.g., 5+). 
+                                    If the larger model (e.g., OPT-6.7B) agrees, all tokens are accepted at once.
+       -2. N-gram Matching: For repetitive prompts (like code), speculation can be done with string pattern matching, 
+                            avoiding the need for a separate draft model.
+       -3. MLP Speculators & EAGLE: Lightweight predictors or auxiliary models (e.g., EAGLE for LLaMA-3) generate speculative tokens 
+                                    with minimal overhead.
+   -b. Performance & Guarantees:
+       -1. Up to 40–50% latency reduction in single-batch inference.
+       -2. Lossless output quality, theoretically equivalent to greedy decoding (minor floating-point variations possible).
+       -3. Limitations: Not fully optimized for all sampling configurations; integration with pipeline parallelism still under development.
+   -c. vLLM advantage: It makes speculative decoding production-ready, exposing an OpenAI-compatible API for easy deployment.
+
+3. Breakthrough Technique #2 — Medusa (Parallel Decoding Heads)
+   Medusa, proposed by Cai et al. (2024), eliminates the draft model and instead augments the main LLM with lightweight parallel 
+   decoding heads.
+   -a. Key Mechanisms:
+       -1. Medusa Heads: 3–5 shallow layers predict future tokens (token 2…K+1) in parallel while the base head predicts the next token.
+       -2. Training:
+            -1) Medusa-1: Freeze backbone, fine-tune only heads (fast, ~5 hours on A100).
+            -2) Medusa-2: Jointly fine-tune backbone + heads with differential learning rates for higher accuracy.
+       -3. Tree-based Attention: Combines candidate tokens into a tree, processed in parallel with custom masks.
+       -4. Acceptance Schemes:
+           -1) Rejection sampling ensures exact distribution match.
+           -2) Typical acceptance (using thresholds) accelerates further while preserving quality.
+   -b. Performance & Benefits:
+       -1. Speedups: 2.2× (Medusa-1) to 2.8× (Medusa-2) on Vicuna and Zephyr models.
+       -2. Latency reduction: Equivalent to 55–64% faster decoding (e.g., from 37 tokens/s → 107 tokens/s on Vicuna-7B).
+       -3. Quality maintained or improved, using self-distillation where training data is scarce.
+       -4. Hardware optimization: Shifts workloads from memory-bound to compute-bound, aligning better with GPU roofline models.
+       -5. Integration: Easier than speculative decoding since no draft model is needed. Supports quantization for lightweight fine-tuning.
+
+4. Comparison of the Two Approaches
+   -a. Speculative Decoding (vLLM):
+       -1. Flexible, modular (different draft models, n-grams, or EAGLE predictors).
+       -2. Excellent plug-and-play solution for production systems.
+   -b. Medusa:
+       -1. Seamless augmentation of a single LLM.
+       -2. Larger speedups possible through multi-head parallelism.
+       -3. More effort required for fine-tuning but eliminates the need for draft models.
+   Both approaches preserve model accuracy through rejection sampling or acceptance schemes, 
+   ensuring reliability in real-world applications.
+
+5. Future Outlook
+   -a. These techniques cut inference latency by 40%+ without degrading quality.
+   -b. Developers should start with vLLM for quick integration; adopt Medusa when fine-tuning custom models.
+   -c. As hardware improves (e.g., faster HBM), these optimizations will compound, further democratizing LLM deployment for real-time
+       and resource-constrained settings.
+
