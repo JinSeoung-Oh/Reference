@@ -1,0 +1,45 @@
+### From https://medium.com/better-ml/relu-vs-gelu-d322422f5147
+
+1. ReLU (Rectified Linear Unit)
+   -a. Definition:
+       f(x) = max(0, x)
+       Outputs the input directly if it is positive; otherwise, outputs 0.
+   -b. Advantages
+       -1. Computational efficiency: Extremely fast and simple to compute.
+       -2. Mitigates vanishing gradient problem: Gradient is always 1 for positive inputs, enabling deep networks to train effectively.
+       -3. Promotes sparsity: Negative inputs yield 0 → some neurons remain inactive,
+                              which can improve efficiency and sometimes generalization by reducing co-adaptation.
+   -c. Disadvantages
+       -1. Dying ReLU problem: Neurons can become inactive if their inputs remain negative, producing only zeros and halting learning.
+       -2. Non-differentiable at zero: A theoretical discontinuity, though not a practical issue in implementations.
+       -3. Non-zero-centered output: Outputs are strictly non-negative, which can slow down optimization.
+
+2. GeLU (Gaussian Error Linear Unit)
+   -a. Definition:
+       f(x) = x·Φ(x),
+       where Φ(x) is the cumulative distribution function (CDF) of the standard normal distribution.
+   -b. Behavior:
+       Unlike ReLU’s hard gating at zero, GeLU applies a probabilistic scaling to inputs:
+       -1. Inputs near zero are attenuated but not strictly zeroed out.
+       -2. Negative inputs still produce small negative outputs, adding representational flexibility.
+   -c. Advantages
+       -1. Smooth and differentiable everywhere: Enables more stable training compared to ReLU’s discontinuity at zero.
+       -2. Avoids Dying ReLU problem: Negative inputs retain small gradients, reducing the risk of inactive neurons.
+   -d. Disadvantages
+       -1. More computationally expensive: Involves Gaussian-related calculations, though optimized library implementations mitigate this.
+       -2. Less sparsity: Unlike ReLU, it doesn’t zero out as many activations, potentially reducing efficiency.
+
+3. ReLU vs. GeLU
+   -a. GeLU strengths
+       -1. Smooth activation → more stable gradients and optimization.
+       -2. Allows small negative outputs → captures more nuanced, non-linear relationships.
+       -3. Widely adopted in Transformer-based architectures (e.g., BERT, GPT) and large-scale recommendation systems.
+   -b. ReLU strengths
+       -1. Extremely simple and fast → strong choice for large-scale recommender systems where efficiency matters.
+       -2. Still serves as a common baseline across many architectures.
+
+4. Conclusion
+   -a. GeLU: Preferred in LLMs, Transformers, and advanced recommender systems for its representational power and training stability.
+   -b. ReLU: Preferred when simplicity and computational efficiency are the top priority.
+   Ultimately, the best choice is empirical: practitioners should test both functions on validation sets to evaluate impacts on accuracy,
+   training stability, and inference efficiency.
