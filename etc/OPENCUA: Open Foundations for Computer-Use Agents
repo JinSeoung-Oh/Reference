@@ -1,0 +1,104 @@
+#### From https://arxiv.org/pdf/2508.09123
+
+1. AGENTNET Collection
+   1.1 Goal and Concept
+       -a. Objective: Build a realistic, large-scale, cross-platform dataset for training desktop-based Computer-Use Agents (CUAs).
+       -b. Problem with existing GUI datasets: mostly limited to narrow applications and simplified scenarios; only “gold trajectories” 
+                                               included → lack of error recovery capability.
+       -c. Solution: Record natural user behavior with minimal constraints, even including mistakes, so the model can learn adaptation 
+                     and recovery in real environments.
+   1.2 Action Space Definition
+       -a. Human actions abstracted into PyAutoGUI-style functions + termination actions.
+       -b. Examples:
+           -1. click(x,y,button), doubleClick(x,y,button), dragTo(x,y), scroll(dx,dy), write(text), hotkey(k1,k2), press(key).
+           -2. terminate("success"/"failure") for explicit task completion status.
+       -c. Philosophy: A minimal, OS-agnostic set of actions that generalizes across platforms.
+   1.3 AGENTNET TOOL
+       -a. Problem: Existing tools required technical annotators, lacked cross-platform support.
+       -b. Development: User-friendly annotation tool that runs on annotators’ PCs and records naturally:
+           -1. Screen videos (OBS Studio).
+           -2. Mouse/keyboard signals (DuckTrack, OpenAdapt).
+           -3. Accessibility trees (AxTree, OSWorld pipeline).
+       -c. Annotators demonstrate tasks, then review/edit trajectories and submit along with a natural language task instruction.
+       -d. Key difference: Not all steps need to be “perfect.” Minor errors are allowed and even leveraged as training signals 
+                           (see Section 3.1 reflective reasoning).
+   1.4 Annotation Pipeline
+       -a. Goals: diversity + complexity.
+       -b. Annotators given ~200 apps/websites (productivity, professional tools, web services).
+       -c. Task requirements:
+           -1. At least 15 steps; tasks <5 steps rejected.
+       -d. Workforce: mix of crowdsourcing and annotation vendors.
+       -e. Privacy: multi-layer protection (Appendix C.3.2).
+       -f. Dataset split: Windows/macOS vs Ubuntu, no overlap with OSWorld tasks (prevent leakage).
+       -g. Quality labeling: trajectories rated as rejected / ok / good / excellent (based on clarity, diversity, complexity).
+   1.5 Compact Trajectory Construction
+       -a. Problem: Raw data = dense low-level signals (thousands of events per task).
+       -b. Solution:
+           -1. Action Reduction:
+               -1) Mouse moves kept only as start/end before click/drag.
+               -2) Scrolls merged by direction with accumulated counts.
+               -3) Key presses merged into text strings.
+               -4) CTRL+C etc. abstracted into hotkey actions.
+               -5) Multi-step gestures (drag, double-click) collapsed.
+           -2. State-Action Matching:
+               -1) Extract representative keyframe just before each action.
+               -2) Prevent future leakage (avoid frames where mouse already sits over a button).
+               -3) After final action, append terminal frame + termination action.
+   1.6 Dataset Statistics
+       -a. 22,625 tasks total.
+           -1. Windows: 12K, macOS: 5K, Ubuntu: 5K.
+       -b. Average 18.6 steps per trajectory.
+       -c. Resolution range: 720p → 4K.
+       -d. Covers 140+ applications, 190+ websites.
+       -e. Features: multi-app workflows, professional tools, uncommon features.
+       -f. Contribution: First realistic, complex, diverse, multimodal desktop trajectory-level dataset.
+
+2. Training Computer-Use Agent Model
+   2.1 Structured CoT Reasoning
+       -a. Problem: Direct fine-tuning on 27K trajectories → poor success (4.4% on OSWorld).
+       -b. Solution: Hierarchical Chain-of-Thought (CoT) reasoning aligned with human perception → thought → action.
+           -1. L3 (Observation): salient elements in screen/text.
+           -2. L2 (Thought): reflective reasoning (state transitions, recall, correction, planning).
+           -3. L1 (Action): concise executable step.
+       -c. Reflection Augmentation:
+           -1. Leverage mistakes as correction signals.
+           -2. Reflector: checks each step, labels errors or redundancies → exclude if wrong, else explain changes.
+           -3. Generator: creates structured CoT using full context (history, screenshots, goals, code).
+           -4. Summarizer: refines vague goals, scores trajectories (alignment/efficiency/difficulty).
+           -5. Extra: mouse coordinate markers and zoomed patches for grounding.
+       -d. Result: Agents can self-diagnose errors and adjust plans, improving coherence and robustness.
+   2.2 Context Encoding & Test-Time Reasoning
+       -a. Textual History: dialogue-style inner monologue.
+           -1. L1(Action) stored → token-efficient, supports long windows.
+           -2. Includes memory components to compensate for shallow early steps.
+       -b. Visual History: screenshot sequences.
+           -1. Default: 3 screenshots → optimal performance/efficiency balance.
+       -c. Inference: While training uses mixed L1/L2/L3, inference adopts L2 CoT for richer reasoning 
+                      → significantly boosts Pass@n success.
+   2.3 Training Data Mixtures
+       -a. CoT mixture: combine L1 + L2 + L3 for complementary reasoning.
+       -b. Domain mixture:
+           -1. Grounding: ShowUI, UGround, 189K AXTree bbox samples.
+           -2. Planning/reasoning: multi-OS demos, task-instruction augmented data.
+           -3. General SFT: instruction-following, math reasoning, OCR, vision QA.
+           -4. → Enables both GUI grounding and higher-level reasoning.
+   2.4 Training Strategies
+       -a. Stage 2 only (resource-limited):
+           -1. 70% CUA data (planning:grounding = 4:1), 30% general SFT.
+           -2. Fine-tuned Qwen2-VL, Kimi-VL-A3B → strong CUA gains.
+       -b. Stage 1 + Stage 2 (more resources):
+           -1. Stage 1: grounding-focused (tutorial-style, state-transition captions, general V+L).
+           -2. Stage 2: planning-focused (45% planning, 20% grounding, rest general).
+           -3. Result: OPENCUA-32B, major gains on grounding & planning benchmarks.
+       -c. Joint Training (general-purpose VLM):
+           -1. Mix: 20% planning, 20% grounding, 60% general.
+           -2. Base: Qwen2.5-VL-7B, trained on 200B tokens.
+           -3. Result: OPENCUA-7B achieves state-of-the-art at 7B scale.
+
+3. Final Summary
+   -a. Dataset: AGENTNET (22K+) → realistic, complex, multimodal.
+   -b. Reasoning: L3→L2→L1 reflective CoT → error identification, correction, and planning.
+   -c. Context: textual inner monologue + screenshot history; L2 CoT at inference.
+   -d. Training: CoT + grounding + general SFT mixtures; Stage-based or joint strategies.
+   -e. Result: OPENCUA delivers strong GUI grounding, complex reasoning, and multi-domain adaptability 
+               → advancing general-purpose computer-use agents.
