@@ -1,0 +1,185 @@
+### From https://arxiv.org/pdf/2508.11737
+
+0) Overview of Components
+   -a. Multimodal Input: Text + multiple images + video (as frame sequences).
+   -b. Textual Tokenizer / Textual Embedding Table: Converts text into tokens and embeddings.
+   -c. Native-Resolution ViT (Visual Tokenizer; VT): Processes images/frames at native resolution, 
+       splitting them into patches and extracting features.
+   -d. Visual Head (Linear + Softmax): Projects each patch feature into a probability distribution over a discrete vocabulary 
+       of “visual words.”
+   -e. Visual Embedding Table (VET): Embedding vectors for each visual word.
+   -f. Embedding Process: Probability distribution (weights) × Embedding table → weighted sum, producing the final visual token embedding.
+   -g. Qwen3 LLM Decoder: Takes textual + visual embeddings as a unified sequence for cross-modal reasoning and generation.
+
+1) Input Preparation (Multimodal Input)
+   -a. Text prompt: e.g., “Could you describe …”.
+   -b. Images: Multiple images with varying resolutions (Image 1, 2, 3).
+   -c. Video: Multiple sampled frames (e.g., 10-second segment).
+   Point: Images/videos are processed at their native resolution. Videos are treated as sequences of frames, 
+          passed through the same pipeline as images.
+
+2) Textual Path
+   -a. Textual Tokenizer converts text into a sequence of tokens.
+       Example: ["Could", "you", "describe", …]
+   -b. Textual Embedding Table maps each token into an embedding vector.
+       Result: Textual embedding sequence.
+
+3) Visual Path – Patch Feature Extraction
+   -a. Native-Resolution ViT (VT) splits images/frames into patches and extracts visual features from each.
+   -b. Result: Patch-level visual representations r1, r2, r3, … (shown as “Visual Representations” in the figure).
+   Point: Since it’s Native-Resolution, even if different inputs have varying patch counts, 
+          the ViT extracts features without losing resolution.
+
+4) Visual Path – Visual Word Probabilities (Visual Head)
+   -a. Each patch representation r_i passes through the Visual Head (Linear + Softmax).
+   -b. Output: A probability distribution over the “visual words” vocabulary (v1, v2, v3, …).
+   
+   Example:
+     r_i → Softmax → p_i = [0.2, 0.1, 0.6, 0.1, …]
+     
+   The table at the bottom right of the figure (v1, v2, v3 … with probabilities) corresponds to this step.
+   
+   -c. Interpretation: Each patch is expressed as a probabilistic distribution over “which visual word it resembles.” → i.e., a probabilistic visual token.
+
+5) Visual Path – Embedding Table & Weighted Sum (VET + Embedding Process)
+   -a. Visual Embedding Table (VET) stores embeddings for each visual word.
+       Example: e1, e2, e3, … (purple blocks in the figure).
+   -b. In the Embedding Process, the probability distribution p_i weights these embeddings to compute their expected value.
+       Formula: v_i = Σ_k p_i[k] · e_k
+   In the figure, this corresponds to the ⨉ (weighted multiplication) producing “V1” as the final visual token embedding.
+   
+   -c. Point:
+       -1. Ensures visual embeddings have the same format (dimension) as textual embeddings → easy to merge into one sequence.
+       -2. Probabilistic representation makes them smoother and more robust.
+
+6) Sequence Assembly (Text + Visual Tokens)
+   -a. The textual embedding sequence is concatenated with the visual embedding tokens (v1, v2, v3, …).
+   -b. Figure (top): “Textual Embedding … Visual Embedding …” shows them combined into a single sequence.
+   -c. For multiple inputs: Image 1’s tokens, Image 2’s tokens, …, then Video 1’s frame tokens form ordered segments.
+   -d. Special tokens (e.g., <image_1>, <frame_3>) may be inserted to mark boundaries (conceptually shown in the figure).
+   Point: Text and visual embeddings are treated as identical tokens within a single Transformer sequence.
+
+7) Cross-modal Reasoning in LLM Decoder (Qwen3 LLM Decoder)
+   -a. The combined multimodal sequence enters the Qwen3 LLM Decoder.
+   -b. Through self-attention, text and vision tokens interact to produce outputs.
+   -c. Tasks: Q&A, explanation, summarization, etc.
+   -d. Example: Generates “The first image is a …” as natural language output.
+   Point: No extra cross-attention modules needed. The multimodal sequence is processed uniformly → simple yet powerful.
+
+8) Video Processing Special Case (Video as Frames)
+   -a. For video, each frame undergoes the same steps (3~5).
+   -b. Frame embeddings are concatenated in temporal order.
+   -c. Optionally, frames may be sampled/pooling used to reduce token count.
+   -d. Figure: shows Video 1 entering as a batch of frames.
+
+9) Why This Design? (Summary of Advantages)
+   -a. Structural Alignment: VET produces visual embeddings in the same format as text embeddings → seamless integration.
+   -b. Probabilistic Tokenization: Smooth, robust representation (avoids hard codebook assignments).
+   -c. Resolution-friendly: Native-Resolution ViT preserves original detail → especially strong on high-res documents/charts.
+   -d. Simple Integration: Multimodal tokens combined into one sequence → efficient and easy to train.
+
+10) Mini Pseudocode (Conceptual)
+    # Text
+    T_tokens = textual_tokenizer(text)
+    T_embeds = textual_embedding_table[T_tokens]  # (L_t, d)
+
+    # Images/frames
+    V_embeds_all = []
+    for image_or_frame in media:              # images + video frames
+        r = ViT_native_resolution(image_or_frame)  # (num_patches, d_v)
+        p = softmax(W @ r.T)                  # (K, num_patches)  # Visual Head
+        v = (VET.T @ p).T                     # (num_patches, d)  # Σ_k p_k * e_k
+        V_embeds_all.append(v)
+
+    # Sequence assembly
+    X = concat([T_embeds] + V_embeds_all)     # (L_t + Σ patches, d)
+
+    # LLM decoding
+    y = qwen3_decoder.generate(X)             # "The first image is ..."
+
+11) End-to-End Flow (One-liner Summary)
+    -a. Input: Text + Images + Video
+    -b. Text Path: Tokenize → Embed
+    -c. Visual Path: ViT features → Visual word probs → Weighted embedding
+    -d. Merge: Combine text + visual embeddings into a unified sequence
+    -e. Output: Qwen3 LLM Decoder generates natural language grounded in multimodal understanding
+
+==================================================================================================
+
+1. Architectural Improvements
+   -a. Visual Tokenizer (VT): Transformer-based component that extracts features from image patches. 
+                              Through the Visual Head, it projects each patch’s features into a probability distribution over
+                              a vocabulary of “visual words,” producing probabilistic visual tokens.
+   -b. Visual Embedding Table (VET): Analogous to the textual embedding table in LLMs. It stores a dedicated embedding 
+                                     for each visual word. 
+                                     The final visual embedding is computed as the weighted sum of embeddings according to 
+                                     the probability distribution from the VT, thereby alleviating structural mismatches between modalities.
+   -c. LLM: A pretrained open-source large language model combines textual and visual embeddings to perform cross-modal understanding 
+            and generate outputs.
+   -d. Native Resolution Processing: Previous models split images into fixed-size sub-images, which often disrupted global structure 
+                                     and fine-grained detail. Ovis2.5 adopts NaViT (Native-Resolution ViT), 
+                                     enabling direct processing at the original resolution. 
+                                     Rotary Position Embedding (RoPE) is applied in every ViT block,
+                                     enhancing spatial awareness and proving highly effective for high-resolution content 
+                                     uch as charts and tables. NaViT is initialized with weights from siglip2-so400m-patch16-5121.
+   -e. Upgraded LLM: The backbone has been replaced from Qwen2.5 to Qwen3, leveraging superior deep reasoning abilities to enhance 
+                     multimodal performance.
+
+2. Training Pipeline
+   Ovis2.5’s training consists of Pre-training (3 phases) and Post-training (2 phases).
+   (A) Pre-training
+       -a. Data Composition: A large-scale multimodal dataset, built from public and in-house sources.
+           -1. OCR Data: Includes documents, charts, posters, and screenshots. An ensemble of MLLMs generates annotations and Q&A pairs,
+                         followed by filtering based on resolution, language, and diversity.
+           -2. Grounding Data: Combines public datasets (e.g., RefCoCo) with an automated pipeline: detection models localize entities, 
+                               and MLLMs generate corresponding Q&A pairs.
+           -3. Reasoning Data: Consists of Chain-of-Thought (CoT) datasets plus reasoning-style data synthesized by MLLMs. 
+                               A cross-verification labeling strategy ensures quality.
+       -b. Training Phases:
+           -1. P1 (VET Pre-training): Trains the Visual Embedding Table (VET) using image–caption pairs. The ViT is mostly frozen, 
+                                      with only the final ViT layer, Visual Head, and VET trained. 
+                                      Input resolution: 448²–896² pixels. RoPE disabled for stability (dynamic interpolation used).
+           -2. P2 (Multimodal Pre-training): Full-parameter training of all modules (VT, VET, LLM). Data includes OCR, captioning, 
+                                             and grounding conversations. 
+                                             Resolution range expanded to 448²–1792² (~200K–3.2M pixels). RoPE activated 
+                                             in every ViT block.
+           -3. P3 (Multimodal Instruction Tuning): Full training continues with enriched inputs: text-only, multi-image, and video. 
+                                                   Covers diverse domains (general QA, multilingual, OCR, charts, STEM, medical). 
+                                                   Introduces Qwen3-compatible “thinking-style” data to teach reflection and 
+                                                   self-correction.
+   (B) Post-training
+       -a. Data:
+           -1. DPO Data: Multimodal preference data covering text-only, single-image, multi-image, and video tasks. 
+                         Includes reasoning-oriented tasks (scored against ground truth using CoT vs. thinking-style) 
+                         and general-purpose tasks (evaluated with MLLM scoring).
+           -2. RLVR Data: Covers mathematics, science QA, and visual QA for logical reasoning. 
+                          Includes synthetic tasks where more information is embedded in images than text. 
+                          Multiple-choice questions are partially converted to fill-in-the-blank to prevent shallow guessing.
+       -b. Training Phases:
+           -1. Post P1 (Multimodal DPO): Full-parameter training of the entire model (vision + LLM). 
+                                         Uses Direct Preference Optimization (DPO) with an auxiliary Negative Log-Likelihood (NLL) 
+                                         objective to stabilize optimization. 
+                                         Candidate responses are generated and preference pairs formed.
+           -2. Post P2 (Multimodal RL): Uses GRPO (Group Relative Policy Optimization) on RLVR data. 
+                                        Vision modules are frozen; only the LLM is updated. This strengthens high-level reasoning 
+                                        while preserving multimodal abilities.
+
+3. Infrastructure Optimizations
+   -a. Challenges:
+       -1. Multimodal data (text, image, video) varies in size → computation imbalance and memory bottlenecks.
+   -b. Solutions:
+       -1. Data Packing: Instead of padding samples of different lengths, shorter samples are packed together into longer sequences. 
+                         This reduces wasted computation, balances GPU load, and accelerates training throughput.
+       -2. Hybrid Parallelism Framework: Based on Megatron, combining Data Parallelism (DP), Tensor Parallelism (TP),
+                                         and Context Parallelism (CP). This significantly reduces memory footprint and improves 
+                                         training efficiency.
+   -c. Result: End-to-end training speed improved by 3–4×.
+
+4. Final Summary
+   -a. Architecture: VT + VET + NaViT + Qwen3 LLM. Probabilistic visual tokenization, native-resolution processing with RoPE, 
+                     powered by a reasoning-strong LLM.
+   -b. Training Pipeline: Pre-training (VET pre-training → multimodal pre-training → instruction tuning), 
+                          Post-training (DPO → reinforcement learning).
+   -c. Data Strategy: Large-scale OCR, grounding, and reasoning data; annotations and reasoning paths generated/verified with MLLMs.
+   -d. Infrastructure: Data Packing + Hybrid Parallelism for efficiency.
+   -e. Effect: Strong high-resolution multimodal understanding, advanced reasoning performance, and broader domain adaptability.
