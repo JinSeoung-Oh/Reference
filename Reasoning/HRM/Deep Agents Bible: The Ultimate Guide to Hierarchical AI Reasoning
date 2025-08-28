@@ -1,0 +1,158 @@
+### From https://medium.com/data-and-beyond/deep-agents-bible-the-ultimate-guide-to-hierarchical-ai-reasoning-a2ae06875279
+
+1. The Problem of Shallow Agents
+   -a. Case: Attempting to analyze robotics learning paths using a ReAct agent (LangChain-based). 
+             Once more tools or longer context windows are introduced, performance collapses.
+   -b. Issues:
+       -1. Endless irrelevant loops,
+       -2. Forgetting prior steps,
+       -3. Producing incomplete summaries.
+   -c. Conclusion: Fine for quick Q&A, but fragile for sustained, complex tasks → the “shallow agent trap.”
+
+2. The Emergence of Deep Agents
+   -a. Definition: Not reactive scripts, but hierarchical orchestrators.
+       -1. Like a CEO delegating subtasks,
+       -2. Maintaining persistence across sessions,
+       -3. Performing adaptive planning.
+   -b. Impact:
+       -1. Handles tasks lasting hours or days,
+       -2. Benchmarks show 25–30% higher success rates,
+       -3. Example: Condensed a week-long robotics paper review into a polished outline with citations 
+                    while remembering PyTorch examples from earlier sessions.
+
+3. Historical Context
+   -a. 1950s–60s: Turing’s question “Can machines think?”, ELIZA chatbot → language interaction begins.
+   -b. 1970s–80s: Expert systems (MYCIN) → symbolic, rule-based, but rigid.
+   -c. 1990s: Agent theory (Wooldridge & Jennings): autonomy, reactivity, proactivity, social ability.
+   -d. 2010s: Deep learning & reinforcement learning → superhuman feats in games and robotics, 
+              but weak in long-term planning and memory.
+   -e. 2022–23: LLMs + ReAct framework → natural language tool use, but performance degraded with scale.
+   -f. 2024 onward: “Hierarchical Reasoning in Multi-Agent LLMs” → the rise of deep agents.
+
+4. Three Core Principles of Deep Agents
+   4.1 Hierarchical Reasoning
+       -a. Shallow agents: Flat, single-loop think–act–observe cycles → limited depth.
+       -b. Deep agents: Multi-layered modules.
+           -1. High-level: abstract planning and long-term goals,
+           -2. Low-level: concrete execution with tools.
+      -c. Benefits:
+          -1. Enables arbitrarily deep reasoning,
+          -2. Handles long-horizon tasks (e.g., robotics learning path design).
+      -d. Theoretical roots:
+          -1. SOAR cognitive architecture (chunking behaviors hierarchically),
+          -2. Active Inference (predict outcomes, minimize error).
+   4.2 Agentic Autonomy
+       -a. Shallow agents: Input–output mapping, reliant on human prompts.
+       -b. Deep agents:
+           -1. Reactivity: adapt to changes,
+           -2. Proactivity: pursue goals independently,
+           -3. Social ability: collaborate with humans or other agents.
+       -c. Implementation:
+           -1. RL-based dynamic policies,
+           -2. Self-adaptive loops.
+       -d. Result: Goes beyond API calls → learns from failures and improves strategy, 
+                   aligned with “belief–desire–intention” (BDI) models.
+   4.3 Persistence and Adaptive Planning
+       -a. Persistence:
+           -1. Shallow: limited to chat history, prone to context loss,
+           -2. Deep: Virtual File System (VFS) to persist across sessions.
+       -b. Adaptive planning:
+           -1. Breaks tasks into subtasks,
+           -2. Re-plans when incomplete,
+           -3. Iterates until stable convergence.
+       -c. Theoretical roots:
+           -1. Hierarchical policies in RL (options in MDPs),
+           -2. Predictive processing frameworks.
+
+5. Shallow vs. Deep Agents
+   Principle	| Shallow Agents (ReAct)	| Deep Agents
+   Hierarchical Reasoning |	Flat loops, fixed depth	| Nested modules, multi-level abstraction
+   Agentic Autonomy	| Reactive, prompt-dependent	| Goal-driven, self-adaptive
+   Persistence	| Chat history only, context loss	| VFS-based memory across sessions
+   Adaptive Planning	| Static decomposition only	| Dynamic task decomposition + re-planning
+
+6. Four Pillars of Deep Agent Architecture
+   6.1 Detailed System Prompts
+       -a. Shallow: General, often drifts off-topic.
+       -b. Deep: Domain-specific, layered with:
+           -1. Few-shot examples,
+           -2. Edge case handling,
+           -3. Task-specific tweaks.
+       -c. Impact: Improves quality 20–30%.
+       -d. Code Example (LangChain PromptTemplate):
+           ===================================================================
+           from langchain.prompts import PromptTemplate
+
+           deep_prompt = PromptTemplate(
+               template="""You are a hierarchical deep agent. {instructions}
+               Few-shot example: Query: Analyze RL in robotics. Response: Step 1: Decompose...
+               Handle edges: If tool fails, log and retry.""",
+               input_variables=["instructions"]
+           )
+           ====================================================================
+   6.2 Planning Tools
+       -a. Core tool: TodoWrite → decomposes tasks, persists them, and re-plans if necessary.
+       -b. Benefit: Fixes shallow agents’ lack of foresight.
+       -c. Code Example:
+           ===================================================================
+           from langchain.tools import Tool
+           from typing import Dict
+
+           def todo_write(task: str, state: Dict) -> str:
+               todos = task.split(';')
+               state['todos'] = todos
+               return f"Planned: {todos}"
+
+           planning_tool = Tool(
+               name="TodoWrite",
+               func=lambda t: todo_write(t, shared_state),
+               description="Break tasks into persistent todos for planning."
+           )
+           ===================================================================
+   6.3 Sub-Agent Architecture
+       -a. Structure: Root agent (orchestrator) delegates to specialized sub-agents.
+       -b. Benefits: Distributes cognitive load, scales modularly.
+       -c. Example Hierarchy:
+           Root Agent (Orchestrator)
+           ├── Sub-Agent 1: Planner (TodoWrite)
+           ├── Sub-Agent 2: Researcher (Search, Browser)
+           └── Sub-Agent 3: Analyzer (Code Executor)
+       -d. Code Example:
+           ===================================================================
+           from langchain.agents import create_react_agent
+           from langchain_openai import OpenAI
+
+           research_llm = OpenAI(temperature=0.3)
+           research_subagent = create_react_agent(
+               llm=research_llm,
+               tools=[planning_tool],
+               prompt=deep_prompt.partial(instructions="Focus on deep research.")
+           )
+           ===================================================================
+   6.4 Virtual File System (VFS)
+       -a. Role: Cross-session persistence, version control, data sharing among sub-agents.
+       -b. Shallow: Relies only on chat history.
+       -c. Deep: Treats “files” as durable artifacts.
+       -d. Code Example:
+           ===================================================================
+           from typing import Dict
+
+           class VirtualFS:
+               def __init__(self):
+                   self.files: Dict[str, str] = {}
+               def write(self, filename: str, content: str):
+                   self.files[filename] = content
+                   return f"Wrote to {filename}"
+               def read(self, filename: str) -> str:
+                   return self.files.get(filename, "File not found")
+           ===================================================================
+7. Conclusion
+   -a. Deep Agents are built on:
+       -1. Three core principles (hierarchical reasoning, agentic autonomy, persistence & adaptive planning),
+       -2. Four architectural pillars (prompts, planning tools, sub-agents, virtual file system).
+   -b. Advantages:
+       -1. Overcome shallow agent weaknesses,
+       -2. Boost task success by 25–30%,
+       -3. Solve context loss and tool overload.
+   -c. Significance: Transition from reactive Q&A agents to persistent, strategic, hierarchical systems.
+
