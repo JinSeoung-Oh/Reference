@@ -1,0 +1,58 @@
+### From https://mark-burgess-oslo-mb.medium.com/designing-nodes-and-arrows-in-knowledge-graphs-with-semantic-spacetime-0992b9cae595
+
+1. Problem Statement
+   -a. Knowledge modeling concerns how we conceptualize knowledge so that it becomes both searchable and accessible.
+   -b. Despite decades of IT progress, existing knowledge graph models remain limited and imprecise, 
+       largely constrained by commercial and habitual factors.
+   -c. A core difficulty is translating human intuitive and free-flowing thoughts into the kind of formal relationships 
+       that computers can process.
+
+2. The Limits of Natural Language
+   -a. Natural language is convenient but inherently ambiguous. A single word can hold multiple meanings 
+       (e.g., “express” as an event vs. a permanent property).
+   -b. Humans rely on context-sharing and inference (“handwaving”), but computers cannot.
+   -c. LLMs generate convincing text, yet the precision of logic and the convenience of natural language 
+       often pull in opposite directions.
+
+3. Semantic Spacetime (SST) Approach
+   -a. SST proposes to anchor meaning in a spacetime process skeleton, then decorate it with natural language for familiarity.
+   -b. Gamma(3,4) representation:
+       -1. Three types of nodes: events, things, concepts.
+       -2. Four types of links:
+           -1) Change/transition (LEADSTO)
+           -2) Containment/composition (CONTAINS)
+           -3) Property expression (EXPRESSES PROPERTY)
+           -4) Similarity/equivalence (NEARTO)
+   -c. This minimal structure can capture universal meaning while reducing linguistic ambiguity.
+
+4. Event-Centered Modeling
+   -a. Conventional knowledge graphs often reduce knowledge to invariant facts, but real-world knowledge is experienced
+       as time-based events and scenes.
+   -b. Example: Alice (from Alice in Wonderland) is not a static entity but a timeline of evolving states across multiple scenes.
+   -c. Organizing knowledge as a timeline of events is more faithful than oversimplified “noun = node, verb = arrow” mappings.
+
+5. The Challenge of Naming
+   -a. Choosing node and edge names is one of the hardest tasks.
+   -b. Short names are intuitive but lose richness. Since storage cost is negligible, descriptive, full-length names are preferable.
+   -c. SST reduces sensitivity to naming choices by relying more on generic spacetime relationships than strict ontological terms.
+
+6. Case Study: Alice in Wonderland
+   -a. By applying SST to literature, one can represent not just static facts but sequences of events, character properties,
+       intentions, and dialogues.
+   -b. Process: break narrative into scenes → link events with causal arrows (then/next) → group them into higher containers 
+       (e.g., chapter, Wonderland).
+   -c. This yields a richer and more intuitive knowledge structure.
+
+7. Significance of SST
+   -a. Separating events from properties clarifies meaning:
+       -1. “Alice expresses discouragement” (active event) vs.
+       -2. “Alice has discouragement as a property” (passive state).
+   -b. Such distinctions avoid common pitfalls of conventional knowledge graphs.
+   -c. SST thus provides a Scene Description Map that aids not just memory but also reasoning.
+
+8. Key Takeaways
+   -a. Knowledge is inherently complex; oversimplification often leads to failure.
+   -b. SST enables process-based, event-centric, spacetime modeling that is both intuitive and comprehensive.
+   -c. Success lies in balancing natural language familiarity with logical precision, and in designing careful naming and
+       relationships within the graph.
+
