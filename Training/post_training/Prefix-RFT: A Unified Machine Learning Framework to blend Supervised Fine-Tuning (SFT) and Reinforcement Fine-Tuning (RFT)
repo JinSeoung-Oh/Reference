@@ -1,0 +1,150 @@
+### From https://www.marktechpost.com/2025/08/23/prefix-rft-a-unified-machine-learning-framework-to-blend-supervised-fine-tuning-sft-and-reinforcement-fine-tuning-rft/?amp
+
+1. Background and Problem
+   -a. Post-training LLMs usually rely on Supervised Fine-Tuning (SFT) or Reinforcement Fine-Tuning (RFT).
+       -1. SFT: Stable, easy to apply, good at teaching instruction-following, but rigid 
+                → poor generalization and limited exploration.
+       -2. RFT: Goal-driven, improves performance via reward optimization, but unstable 
+                → sensitive to starting policies, often collapses without strong demonstrations.
+   -b. Current practice = apply SFT first, then RFT.
+       -1. Works in practice, but interactions between SFT and RFT are poorly understood.
+       -2. Open challenge: how to unify the structure of SFT with the exploration ability of RFT.
+
+2. Proposed Method: Prefix Reinforcement Fine-Tuning (Prefix-RFT)
+   -a. Core idea: Use partial demonstrations (prefixes) to guide RFT.
+       -1. The prefix anchors the model with demonstration tokens, ensuring stability.
+       -2. The model then generates the remainder of the solution → allows exploration.
+   -b. Key innovations:
+       -1. Entropy-based token selection (Dr.GRPO) → updates only top 20% high-entropy prefix tokens.
+       -2. Cosine decay scheduler → gradually reduces prefix length from 95% → 5% across training.
+       -3. Intermediate SFT loss maintenance → preserves imitation ability while enabling exploration.
+   This way, Prefix-RFT balances imitation (SFT) and exploration (RFT) without requiring full demonstrations.
+
+3. Training Setup
+   -a. Datasets: High-quality math reasoning corpora.
+       -1. OpenR1-Math-220K (≈46k filtered math problems).
+       -2. Additional benchmarks: AIME 2024/25, AMC, MATH500, Minerva, OlympiadBench.
+   -b. Models evaluated:
+       -1. Qwen2.5-Math-7B,
+       -2. Qwen2.5-Math-1.5B,
+       -3. LLaMA-3.1-8B.
+
+4. Results
+   -a. Performance: Prefix-RFT outperforms SFT, RFT, ReLIFT, and LUFFY across all benchmarks.
+   -b. Metrics:
+       -1. Best avg@32 and pass@1 scores on difficult math reasoning tasks.
+       -2. Particularly strong on hard problems (Trainhard split).
+   -c. Efficiency:
+       -1. Even with only 1% of training data (≈450 prompts), performance remains robust (avg@32 only drops from 40.8 → 37.6).
+   -d. Output quality:
+       -1. Shorter, more accurate outputs.
+       -2. Balanced between stability and exploration.
+   -e. Ablations:
+       -1. Entropy-based top-20% token updates outperform uniform updates.
+       -2. Cosine decay scheduler stabilizes training better than static prefix strategies.
+
+5. Key Takeaways
+   -a. Unified framework: Prefix-RFT combines the structure of SFT with the exploration power of RFT.
+   -b. Simplicity + effectiveness: No architectural changes needed → easy integration into existing pipelines.
+   -c. Robustness: Works across models, datasets, and varying demonstration quality.
+   -d. Data efficiency: Performs well even with small amounts of data.
+   -e. Practical value: Especially strong for math reasoning and other long-horizon reasoning tasks.
+
+6. Conclusion
+   Prefix-RFT provides a principled, efficient, and robust method for fine-tuning LLMs:
+   -a. Partial prefix demonstrations anchor training,
+   -b. Entropy-based updates + cosine decay enable controlled exploration,
+   -c. Balanced imitation and reward optimization → outperforming SFT, RFT, and prior hybrids.
+   This represents a step toward unifying SFT and RFT into a single framework for post-training LLMs.
+
+===================================================================================================
+
+1. Input and Basic Setup
+   -a. Problem 𝑥: For example, a math problem with evaluable answers.
+   -b. Demonstration 𝑦\*: A high-quality solution or reasoning sequence corresponding to 𝑥
+   -c. Policy 𝜋_𝜃(⋅∣⋅): The current LLM policy with parameters 𝜃. It outputs token-level probability distributions and 
+                       is updated with RFT (Reward Fine-Tuning).
+   The key point of the figure is that Prefix-RFT makes only minimal modifications to the standard RFT loop: 
+       by using only a partial demonstration (prefix), it balances stability from imitation with adaptability from exploration.
+
+2. Two Branches of Sample Generation
+   The diagram shows two rollout branches (blue/red), both used together in each minibatch.
+   2.1. (Upper blue path) Standard RFT Online Rollouts
+        -a. Conditioning: The policy is conditioned only on the problem 𝑥:
+                          𝜋_𝜃(⋅∣𝑥)
+        -b. Sampling: The policy generates multiple full sequences 𝑦1,𝑦2,…
+        -c. These online samples are later used for advantage estimation and policy gradient updates.
+   2.2. (Lower red path) Prefix-RFT Rollouts
+        -a. Prefix Sampling: A prefix 𝑦<𝐿\* of length 𝐿 is sampled from the demonstration 𝑦\*
+            (During training, 𝐿 decays according to a schedule, e.g., cosine decay.)
+        -b. Conditioning: The policy is now conditioned on both problem and prefix:
+                          𝜋_𝜃(⋅∣𝑥,𝑦<𝐿\*)
+        -c. Online Continuation: The model generates the remainder 𝑦 ≥ 𝐿
+        -d. Concatenation:
+            𝑦_𝑛=[𝑦<𝐿\*,𝑦≥𝐿]
+            This combines prefix stability with exploratory continuation.
+        -e. The resulting hybrid sequence 𝑦_𝑛 is mixed with the pure online rollouts for RFT training.
+   Outcome: A single minibatch includes
+            -a. purely online rollouts {𝑦_𝑖}, and
+            -b. prefix-hybrid rollouts 𝑦_𝑛,
+                both contributing to training.
+
+3. Reward and Advantage Estimation
+   In the yellow box: “Advantage Estimation 𝐴^_𝑖” is applied to all rollouts.
+   -a. For each sequence, a reward 𝑅(𝑥,𝑦) is computed (e.g., correctness check, formatting, reward model).
+   -b. A baseline is subtracted to estimate the advantage 𝐴^_𝑖
+   -c. The figure keeps it general as “Policy Gradient,” but implementations use PPO/GRPO-style objectives.
+
+4. Entropy-Based Clipping
+   The arrow labeled “Entropy-based Clipping” means: constrain updates on demonstration tokens using entropy.
+   -a. Mechanism:
+       -1. For each token 𝑡, compute entropy 𝐻_𝑡 of the policy distribution.
+       -2. In the prefix (demonstration) region:
+           -1) Low entropy (high certainty): Strong clipping, preserving confident demo tokens.
+           -2) High entropy (uncertain): Weaker clipping, allowing more update flexibility.
+   -b. Effect:
+       -1. Prevents blindly overwriting reliable demonstration tokens.
+       -2. Still allows the model to adjust in ambiguous areas.
+       -3. Increases training stability while retaining room for exploration.
+
+5. Policy Gradient Update
+   -a. Using 𝐴^𝑖 and token log-probabilities, policy gradients (e.g., PPO/GRPO) update 𝜃 
+   -b. Entropy-based clipping masks apply to demonstration tokens.
+   -c. Thus, both pure online exploration rollouts and prefix-hybrid rollouts jointly push the policy forward.
+
+6. Why This Design Works
+   -a. Minimal modification to RFT:
+       -1. The upper path remains unchanged (pure online).
+       -2. The lower path adds a prefix-guided rollout.
+       -3. Easy to implement with small code changes.
+   -b. Balances imitation and exploration:
+       -1. Prefix anchors learning with meaningful guidance.
+       -2. Continuation allows free exploration.
+       -3. Entropy-clipping ensures the right balance.
+   -c. Progressive autonomy via prefix scheduling:
+       -1. Early training: long prefixes → stronger guidance.
+       -2. Later: shorter prefixes → more model autonomy.
+       -3. Mimics “teacher → scaffold → self-learning.”
+
+7. Step-by-Step Summary
+    -a. Input: (𝑥,𝑦\*)
+    -b. Sample prefix: 𝑦\*<𝐿 (with scheduled decay of 𝐿)
+    -c. Generate rollouts:
+        -1. Online: 𝑦_𝑖∼𝜋_𝜃(⋅∣𝑥)
+        -2. Prefix-hybrid: 𝑦_𝑛=[𝑦\*<𝐿,𝑦≥𝐿]
+    -d. Compute rewards and advantages 𝐴^_𝑖
+    -e. Apply entropy-based clipping on demo tokens.
+    -f. Update policy with policy gradient.
+    -g. Repeat with adjusted prefix length.
+
+8. Practical Notes
+   -a. Data: Only one high-quality demonstration per problem is enough.
+   -b. Stability: Prefix + entropy clipping improves convergence and avoids collapse compared to pure RFT.
+   -c. Robustness: Works even if demo quality/length varies.
+   -d. Integration: Can be plugged into existing RFT pipelines with minimal effort.
+
+9. Final Takeaway
+   Prefix-RFT = “Use a demonstration prefix to guide, then let the model explore the rest.”
+   It combines the stability of imitation with the adaptability of exploration, constrained by entropy-based clipping. 
+   This hybrid strategy yields more stable, effective, and robust fine-tuning than either SFT or RFT alone.
+
