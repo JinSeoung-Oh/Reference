@@ -1,0 +1,124 @@
+### From https://huggingface.co/blog/kernel-builder
+
+1. Overview
+   -a. Problem: Custom CUDA kernels offer performance advantages but are hard to apply in practice due to complex builds, 
+                dependency issues, and deployment challenges.
+   -b. Solution: The kernel-builder library → develop kernels locally, build for multiple architectures, and distribute reproducibly.
+   -c. Goal: Build high-performance, reusable kernels that anyone can load directly from the Hugging Face Hub.
+
+2. Example Kernel: RGB → Grayscale Conversion
+   (1) Project Structure
+   img2gray/
+    ├── build.toml
+    ├── csrc/img2gray.cu
+    ├── flake.nix
+    └── torch-ext/
+        ├── torch_binding.cpp
+        ├── torch_binding.h
+        └── img2gray/__init__.py
+
+   -a. build.toml: build manifest (sources, dependencies).
+   -b. csrc/: CUDA source code.
+   -c. flake.nix: reproducible build environment.
+   -d. torch-ext/: PyTorch bindings + Python wrapper.
+
+   (2) build.toml Example
+       [general]
+       name = "img2gray"
+
+       [torch]
+       src = ["torch-ext/torch_binding.cpp", "torch-ext/torch_binding.h"]
+
+       [kernel.img2gray]
+       backend = "cuda"
+       depends = ["torch"]
+       src = ["csrc/img2gray.cu"]
+
+   (3) flake.nix: reproducibility
+       {
+         description = "Flake for img2gray kernel";
+         inputs = { kernel-builder.url = "github:huggingface/kernel-builder"; };
+         outputs = { self, kernel-builder }: kernel-builder.lib.genFlakeOutputs {
+           path = ./.;
+           rev = self.shortRev or self.dirtyShortRev or self.lastModifiedDate;
+         };
+       }
+
+   (4) CUDA Kernel (csrc/img2gray.cu)
+       __global__ void img2gray_kernel(const uint8_t* input, uint8_t* output, int width, int height) {
+           int x = blockIdx.x * blockDim.x + threadIdx.x;
+           int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+           if (x < width && y < height) {
+               int idx = (y * width + x) * 3;
+               uint8_t r = input[idx], g = input[idx + 1], b = input[idx + 2];
+               uint8_t gray = static_cast<uint8_t>(0.21f*r + 0.72f*g + 0.07f*b);
+               output[y * width + x] = gray;
+           }
+       }
+
+       void img2gray_cuda(torch::Tensor const &input, torch::Tensor &output) {
+           int width = input.size(1), height = input.size(0);
+           dim3 blockSize(16, 16);
+           dim3 gridSize((width + 15)/16, (height + 15)/16);
+           img2gray_kernel<<<gridSize, blockSize>>>(input.data_ptr<uint8_t>(), output.data_ptr<uint8_t>(), width, height);
+       }
+
+   (5) PyTorch Operator Registration (torch_binding.cpp)
+       TORCH_LIBRARY_EXPAND(TORCH_EXTENSION_NAME, ops) {
+         ops.def("img2gray(Tensor input, Tensor! output) -> ()");
+         ops.impl("img2gray", torch::kCUDA, &img2gray_cuda);
+       }
+       REGISTER_EXTENSION(TORCH_EXTENSION_NAME)
+
+   (6) Python Wrapper (torch-ext/img2gray/init.py)
+       import torch
+       from ._ops import ops
+
+       def img2gray(input: torch.Tensor) -> torch.Tensor:
+           h, w, c = input.shape
+           assert c == 3
+           output = torch.empty((h, w), device=input.device, dtype=input.dtype)
+           ops.img2gray(input, output)
+           return output
+
+3. Build & Development Cycle
+   -a. nix develop → sandbox environment with specific Torch/CUDA version.
+   -b. build2cmake generate-torch build.toml → generates CMake, setup.py, etc.
+   -c. pip install -e . → install kernel as a Python package.
+   -d. Test (scripts/sanity.py) → load an RGB image and convert to grayscale.
+
+4. Deployment
+   -a. Push to Hugging Face Hub:
+       hf repo create img2gray
+       git lfs track "*.so"
+       git add build/ csrc/ torch-ext/... flake.nix build.toml
+       git commit -m "feat: Created img2gray kernel"
+       git push origin main
+  -b. Other users can load it directly:
+       from kernels import get_kernel
+       img2gray_lib = get_kernel("username/img2gray")
+
+5. Production Considerations
+   (1) Versioning
+       -a. Git tags → v1.1.2 format recommended.
+       -b. Pinning to versions:
+           get_kernel("drbh/img2gray", revision="v1.1.2")
+   (2) Locking
+       -a. Specify kernel versions in pyproject.toml:
+           [tool.kernels.dependencies]
+           "drbh/img2gray" = ">=0.1.2,<0.2.0"
+       -b. kernels lock . → generates kernels.lock for consistent environments.
+       -c. Use get_locked_kernel() instead of get_kernel().
+   (3) Pre-download
+       -a. kernels download . → prefetch kernels (e.g., for Docker images).
+   (4) Wheel Conversion
+       -a. Convert kernel into Python wheels if needed:
+           kernels to-wheel drbh/img2gray 1.1.2
+
+6. Conclusion
+   -a. kernel-builder supports the full lifecycle: develop → test → distribute → version → lock → deploy.
+   -b. Kernels are registered as first-class PyTorch operators, fully compatible with torch.compile.
+   -c. Hugging Face Hub + semantic versioning + lock system ensures reproducibility and large-scale collaboration.
+   -d. This workflow combines GPU-optimized code with reproducible builds, achieving performance, portability, 
+       and maintainability simultaneously.
