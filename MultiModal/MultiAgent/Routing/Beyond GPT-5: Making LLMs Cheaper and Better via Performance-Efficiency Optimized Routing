@@ -1,0 +1,65 @@
+### From https://arxiv.org/abs/2508.12631
+
+1. Background
+   -a. A central dilemma in LLM advancement: performance vs. efficiency.
+   -b. Key feature of GPT-5: test-time routing
+       -1. Efficient model: low cost/latency, but limited capability.
+       -2. Deep reasoning model: high cost/latency, but stronger capability.
+       -3. Router dynamically assigns each query to one model at inference.
+
+2. Overview of Avengers-Pro
+   -a. Builds upon earlier Avengers work (10 models, ~7B parameters each) which outperformed GPT-4.1/4.5.
+   -b. Avengers-Pro aims to optimize the performance–efficiency trade-off.
+   -c. Core operations (3 steps):
+       -1. Embedding – encode queries with a text embedding model.
+       -2. Clustering – group queries by semantic similarity.
+       -3. Scoring – evaluate models within each cluster based on a weighted performance–efficiency score controlled by α.
+   -d. Inference procedure:
+       -1. Query → embedding → mapped to top-p nearest clusters.
+       -2. For each model, sum its performance–efficiency scores across these clusters.
+       -3. Select the highest-scoring model to generate the response.
+
+3. Model Ensemble
+   -a. Avengers-Pro integrates 8 models from 4 families:
+       -1. GPT-5-chat, GPT-5-medium
+       -2. Claude-4.1-opus, Claude-4-sonnet
+       -3. Gemini-2.5-pro, Gemini-2.5-flash
+       -4. Qwen3-235B-A22B-thinking-2507
+       -5. Qwen3-235B-A22B-2507
+
+4. Experimental Results
+   -a. Benchmarks: GPQA-Diamond, Human’s Last Exam, HealthBench, ARC-AGI, SimpleQA, LiveCodeBench, τ2-bench.
+   -b. Baseline: GPT-5-medium (accuracy: 62.25%, cost: $47.96).
+   -c. Results:
+       -1. Avengers-Pro: accuracy 66.66%, cost $47.13 → +7% accuracy gain at comparable cost.
+       -2. Avengers-Pro: accuracy 62.66%, cost $35.05 → 27% cost reduction at comparable performance.
+       -3. Tuning α:
+           -1) To reach 90% of GPT-5-medium’s performance (comparable to Gemini-2.5-pro), Avengers-Pro reduces cost by 63% relative 
+               to GPT-5-medium and by 81% relative to Gemini-2.5-pro.
+   -d. Pareto Frontier Achieved:
+       -1. For any fixed cost, Avengers-Pro delivers the highest performance.
+       -2. For any fixed performance target, it provides the lowest cost among models at that accuracy level.
+
+5. Routing Mechanism (Performance–Efficiency Trade-off Formula)
+   -a. Dataset D: labeled query–answer pairs.
+   -b. Embedding → k clusters {c1, …, ck}.
+   -c. For each model i ∈ M:
+       -1. Performance profile pᵢ: accuracy across clusters.
+       -2. Efficiency profile qᵢ: cost across clusters.
+   -d. Normalization:
+       -1. p̃ᵢⱼ = (pᵢⱼ − pminⱼ) / (pmaxⱼ − pminⱼ)
+       -2. q̃ᵢⱼ = (qᵢⱼ − qminⱼ) / (qmaxⱼ − qminⱼ)
+   -e. Performance–efficiency score:
+       -1. xᵢⱼ = α p̃ᵢⱼ + (1 − α)(1 − q̃ᵢⱼ)
+       -2. α ∈ [0, 1] controls performance vs. efficiency weight.
+   -f. Inference:
+       -1. Query → assigned to top-p nearest clusters.
+       -2. Each model’s scores summed across clusters.
+       -3. Model with the highest total score selected.
+
+6. Final Summary
+   -a. Avengers-Pro extends GPT-5’s test-time routing idea.
+   -b. Uses embedding–clustering–scoring to dynamically route queries.
+   -c. Ensembles 8 heterogeneous models for balanced performance and efficiency.
+   -d. Outperforms GPT-5-medium in benchmarks, either delivering higher accuracy at similar cost or lower cost at similar accuracy.
+   -e. Achieves the Pareto frontier: always optimal for any fixed cost or performance level.
