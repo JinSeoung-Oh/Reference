@@ -1,0 +1,97 @@
+### From https://arxiv.org/pdf/2508.17068
+
+1. Methodology
+   1.1 A2A Communication MCP Server
+       At the core of Anemoi lies a thread-based MCP server powered by Coral Protocol, serving as the structured communication infrastructure 
+       for multi-agent coordination.
+       Each agent connects via this MCP server, which supports agent discovery, thread management, and message exchange.
+       -a. Thread Definition: A structured conversational channel in which multiple agents can participate; 
+                              optionally, humans or external services may also join.
+       -b. Provided Operations:
+           -1. list_agents: Discover all registered agents in the system
+           -2. create_thread: Create a new conversational context with specified participants
+           -3. add_participant / remove_participant: Dynamically update the set of participants in a thread
+           -4. send_message: Broadcast or directly deliver a message to agents in a thread
+           -5. wait_for_mentions: Receive notifications when an agent is explicitly addressed
+           -6. close_thread: Terminate a conversation and optionally record its outcome
+       This thread-based design ensures contextual compartmentalization, keeping messages within their intended context, avoiding cross-talk, 
+       and supporting targeted queries and delegation between agents.
+
+   1.2 Agent Structure
+       Anemoi is composed of several specialized agents (see Figure 2):
+       -a. Planner Agent: Establishes the initial plan (π0) at task onset, assigns subtasks to workers, and coordinates overall execution.
+       -b. Critique Agent: Continuously evaluates outputs of other agents, raising questions and ensuring the validity of statements and conclusions.
+       -c. Answer-Finding Agent: Compiles validated outputs from other agents into the final response and submits it.
+       -d. Web Agent: Performs web searches, extracts webpage content, simulates browser actions, and retrieves online information.
+       -e. Document Processing Agent: Processes a variety of files, including PDF, DOCX, images, audio, and video.
+       -f. Reasoning & Coding Agent: Specializes in reasoning, coding, and processing Excel files. Operates offline, with no internet access. 
+                                     Python execution occurs only upon explicit instruction after code generation.
+       Among these, the Web, Document Processing, and Reasoning & Coding Agents share the same configuration as those used in OWL, 
+       ensuring fairness in experimental comparison.
+
+       All agents are integrated with the MCP toolkit provided by the A2A server, allowing them to monitor global progress, track task completion,
+       detect bottlenecks, and freely propose new ideas during execution.
+
+   1.3 Communication Pattern
+       Task execution follows a semi-centralized communication workflow orchestrated by the A2A MCP server, 
+       formalized with the following notations:
+       -a. Key Symbols
+           -1. A = {a1, a2, …, an}: Set of all agents
+           -2. W = {w1, w2, …, wn} ⊂ A: Worker agents
+           -3. p, c, f: Planner, Critique, Answer-finding Agents
+           -4. τ: Communication thread created by MCP server
+           -5. P0: Initial participant set
+           -6. πt: Plan at step t
+           -7. ϕ: Task allocation mapping (ϕ: W → T)
+           -8. rw: Result produced by worker w
+           -9. critique(rw): Evaluation outcome {accept, uncertain}
+           -10. o(t+1)i: Contribution of agent ai at time (t+1) (e.g., progress report, critique, alternative proposal, revised plan)
+           -11. R*: Final candidate solution
+           -12. vi(R*): Vote by agent ai (approve/reject)
+           -13. C({vi}): Consensus aggregation
+       -b. Workflow Steps
+           -1. Agent Discovery – Each agent invokes list_agents() to identify all available agents.
+           -2. Thread Initialization – The Planner creates a thread τ, sets initial participants P0, broadcasts initial plan π0, 
+                                       and defines allocation mapping ϕ.
+           -3. Task Execution & Monitoring – Workers perform subtasks ϕ(w) and output rw. The Critique Agent evaluates each result. 
+                                             Other agents may contribute assessments, suggestions, or revised plans, influencing task evolution.
+           -4. Consensus – Once candidate solution R* emerges, participants vote (vi) and consensus C({vi}) is aggregated.
+           -5. Answer Submission – The Answer-Finding Agent compiles and submits the validated solution.
+           All message flows are implemented through MCP primitives such as send_message(τ, m) and wait_for_mentions(τ, ai).
+       -c. Advantages
+           -1. Reduced Planner Dependency – Agents can propose alternatives when progress diverges, instead of relying solely on the planner.
+           -2. Adaptive Plan Refinement – Later subtasks often depend on earlier outputs; the plan is dynamically updated in real time to prevent 
+                                          drift and maintain alignment.
+           -3. Direct Inter-Agent Exchanges – Structured dialogues reduce reliance on prompt concatenation and context injection, 
+                                              lowering redundancy and token overhead.
+
+2 Discussion
+  2.1 Comparative Analysis: 
+      -a. Anemoi vs. OWL
+          -1. Anemoi successfully solved 25 tasks that OWL failed to answer.
+          -2. Conversely, OWL solved 10 tasks that Anemoi could not.
+      -b. Reasons for Anemoi’s additional successes:
+          -1. Collaborative plan refinement (52%)
+          -2. Reduced context redundancy via A2A communication (8%)
+          -3. Stochastic worker behavior (randomness in toolkit use) (40%)
+      -c. Reasons for OWL’s successes:
+          -1. 90% of Anemoi’s failures were due to stochastic worker behavior.
+          -2. 10% were caused by web agent latency—excessive time spent on searches prevented timely responses, 
+              forcing other agents to bypass it and ultimately missing crucial information.
+  2.2 Error Analysis of Anemoi
+      A total of 68 errors remain in Anemoi, categorized as follows:
+      -a. LLM capability limitations (45.6%): Incorrect toolkit selection or misuse.
+      -b. Toolkit limitations (20.6%): Inherent constraints or missing functionalities in tools.
+      -c. Incorrect plans (11.8%): Even after dynamic updates, final plans were wrong.
+      -d. Communication latency (10.3%): Primarily due to the web agent’s slow search responses, which blocked timely participation and led to failed alternative strategies.
+      -e. Benchmark annotation errors (7.4%): Potential mislabeling in datasets.
+      -f. LLM hallucinations (4.4%): Fabricated or non-factual outputs.
+      These errors stem from multiple sources: model limitations, tooling constraints, communication inefficiencies, dataset issues, 
+                                               and inherent model hallucinations.
+
+3. Concluding Insight
+   Anemoi, with its MCP-based semi-centralized multi-agent architecture, demonstrates expanded problem-solving capabilities over OWL by supporting 
+   dynamic plan updates, consensus-driven decisions, and direct agent interactions.  
+   However, persistent challenges remain—particularly LLM limitations, toolkit shortcomings, and communication delays—highlighting areas 
+   for future improvement.
+
