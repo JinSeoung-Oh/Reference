@@ -1,0 +1,90 @@
+### From https://arxiv.org/abs/2507.19457
+
+1. Problem Statement
+   -a. Definition of Compound AI Systems
+       -1. A compound AI system is defined as a modular system composed of one or more LLM invocations, potentially interleaved with external tool calls,
+           orchestrated through arbitrary control flow.
+       -2. This definition subsumes a wide range of real-world systems: agents, multi-agent systems, and scaffolding techniques such as ReAct 
+           (Yao et al., 2023) and Archon (SaadFalcon et al., 2025).
+       -3. Formalization:
+           -1) Φ = (M, C, X, Y)
+           -2) M = ⟨M1, …, M|M|⟩: set of language modules
+           -3) C: control flow logic
+           -4) X, Y: global input/output schemas
+           -5) Each module Mi = (πi, θi, Xi, Yi):
+               - πi: prompt (system instructions and few-shot demonstrations)
+               - θi: model parameters
+               - Xi, Yi: input/output schemas
+       -4. At runtime, C orchestrates sequencing and invocation of modules: passing outputs, invoking conditionally, and using tool APIs.
+   -b. Compound AI System Optimization
+       -1. Learnable parameters:
+           -1) ΠΦ = ⟨π1, …, π|M|⟩ (prompts)
+           -2) ΘΦ = ⟨θ1, …, θ|M|⟩ (weights)
+       -2. For a task instance (x, m):
+           -1) x: input schema X
+           -2) m: evaluator metadata (gold answers, rubrics, code unit tests, etc.)
+           -3) Output: y = Φ(x; ⟨Π, Θ⟩Φ)
+           -4) Quality: µ : Y × M → [0,1] (e.g., exact match, F1, pass rate)
+       -3. Optimization objective:
+           -1) ⟨Π*, Θ*⟩Φ = arg max⟨Π,Θ⟩Φ E(x,m)∼T [ µ(Φ(x;⟨Π,Θ⟩Φ), m ) ]
+           -2) T = task distribution
+   -c. Sample-Efficient Optimization
+       -1. In practice, rollouts (system invocation + evaluation) are costly in computation, money, and time.
+       -2. The optimizer is restricted to at most B rollouts on Dtrain = {(x, m)i}, with full access to µ.
+       -3. Goal: find ⟨Π*, Θ*⟩Φ that maximize held-out performance under the constraint rollouts ≤ B.
+       -4. Core question:
+           “How can we extract the maximum learning signal from each expensive rollout to effectively adapt complex modular systems in 
+            low-data or budget-constrained scenarios?”
+
+2. GEPA: Reflective Prompt Evolution
+   -a. Overview
+       GEPA (Genetic-Pareto) is a sample-efficient optimization algorithm for compound AI systems, grounded in three principles:
+       -1. Genetic Prompt Evolution (3.1) – evolving candidate prompts with mutation and crossover
+       -2. Reflection via Natural Language Feedback (3.2) – using execution/evaluation traces for targeted updates
+       -3. Pareto-Based Candidate Selection (3.3) – leveraging Pareto frontiers to retain diverse winning strategies
+
+       Inputs:
+         -1. Φ: compound system initialized with simple prompts
+         -2. Dtrain: training dataset of task instances (x, m)
+         -3. µ: standard evaluation metric
+         -4. µf: feedback function (evaluation + reflection feedback)
+         -5. B: rollout budget
+   3.1 Genetic Optimization Loop
+        -a. Candidate pool P initialization: begins with the base parameters ⟨Π, Θ⟩Φ as the sole candidate.
+        -b. Iterative optimization loop:
+            -1. Select promising candidate(s)
+            -2. Generate a new candidate (via mutation or crossover)
+            -3. Evaluate on minibatch of tasks
+            -4. If performance improves relative to parents, add to pool P
+        -c. Each candidate inherits learning signals (ancestry) from parents and new rollouts.
+        -d. Process continues until budget B is exhausted, returning the candidate with the best aggregate performance on Dpareto (a validation set).
+   3.2 Reflective Prompt Mutation
+       -a. Execution traces of compound systems expose module behavior and reasoning. Paired with final outcomes (success/failure), 
+           they serve as diagnostic signals.
+       -b. LLMs use these traces for implicit credit assignment, linking outcome responsibility to specific module prompts.
+       -c. GEPA applies this by:
+           -1. Selecting a candidate and updating system parameters
+           -2. Choosing a target module (round-robin to ensure fairness)
+           -3. Running minibatch rollouts and recording outcomes
+           -4. Reflectively analyzing inputs/outputs/reasoning of the module with an LLM → proposing new prompt instructions
+           -5. Creating a new candidate with the updated prompt for the target module
+       -d. Evaluation traces as signals: metrics µ often include intermediate steps (e.g., code evaluation through compilation, execution, profiling). 
+                                         These produce textual traces in addition to scalar rewards.
+       -e. GEPA extends µ into feedback function µf, returning both the score and feedback_text.
+       -f. µf may provide module-level feedback, e.g., multi-hop evaluation with per-hop comments.
+   3.3 Pareto-Based Candidate Selection
+       -a. Candidate selection defines the exploration vs. exploitation balance.
+       -b. Naively picking the best candidate risks local optima: once a dominant strategy emerges, the search stalls.
+       -c. GEPA employs Pareto-based illumination (Mouret & Clune, 2015):
+           -1. Track best score achieved per training instance across all candidates → build Pareto frontier
+           -2. Retain candidates that achieve best scores on at least one task (“winning” strategies)
+           -3. Remove candidates strictly dominated by others (i.e., inferior across all tasks)
+           -4. Stochastically sample from remaining candidates, with higher weight for those excelling on more tasks
+       This approach preserves every useful strategy discovered, prevents premature convergence, and ensures continual improvement within the budget.
+
+4. Concluding Insights
+   -a. Problem Statement: Compound AI systems combine LLM invocations and tool calls with modular orchestration, 
+                          but rollout costs necessitate sample-efficient optimization.
+   -b. GEPA Solution: By combining genetic evolution, reflective feedback, and Pareto selection, GEPA maximizes the learning signal from limited rollouts.
+   -c. GEPA balances exploration and exploitation, avoids local optima, and provides a practical method for improving complex modular AI systems 
+       under budget constraints.
