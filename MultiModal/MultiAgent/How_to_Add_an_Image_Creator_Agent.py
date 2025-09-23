@@ -1,6 +1,6 @@
 ### From https://levelup.gitconnected.com/how-to-add-an-image-creator-agent-to-the-multi-agent-application-faedd684995b
 
-! pip install --upgrade pyautogen==0.2.32 openai==1.36.1 panel==1.4.4
+! pip install --upgrade ag2==0.2.32 openai==1.36.1 panel==1.4.4
 
 import autogen
 from autogen import AssistantAgent, ConversableAgent, UserProxyAgent
