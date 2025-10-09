@@ -1,0 +1,34 @@
+### From https://huggingface.co/papers/2509.15207
+
+1. Big Picture
+   -1. Replace reward maximization (PPO/GRPO)—prone to mode collapse—with distribution matching: 
+       align 𝜋_𝜃 to a reward-weighted target via reverse KL. Use a learnable partition 𝑍_𝜙(𝑥) to turn scalar rewards into a valid distribution.
+
+1.1 From Reward to Distribution
+    -1. Objective: min_𝜃 𝐷_(KL)(𝜋_𝜃∥exp(𝛽𝑟)/𝑍_𝜙) ⇒ 𝜋_𝜃∝exp(𝛽𝑟)
+    -2. Proposition 1: In expected-gradient terms, the KL objective is equivalent to minimizing the Trajectory Balance squared loss
+        [log𝑍_𝜙(𝑥)+log𝜋_𝜃(𝑦∣𝑥)−𝛽𝑟(𝑥,𝑦)]^2
+    -3. Practical upshot (Remark 2): TB is a tractable surrogate—stable squared loss, no need to compute the intractable Z; just learn 𝑍_𝜙
+
+1.2 FlowRL: Making TB work for long CoT
+    -1. Two practical hurdles
+        -1) Exploding gradients: TB is sequence-level; log𝜋_𝜃 sums over tokens → gradient norm scales with length (up to 8k tokens).
+        -2) Sampling mismatch: TB assumes fully on-policy samples, while PPO/GRPO reuse off-policy trajectories from 𝜋_(old)
+   -2. Reward refactoring and normalization
+       -1) Inject reference model prior: exp(𝛽𝑟)⋅𝜋_ref(𝑦∣𝑥)
+       -2) Group-normalize rewards within each sampled group: 𝑟^_𝑖=(𝑟_𝑖−mean(𝑟))/std(𝑟)
+       -3) TB becomes [log𝑍_𝜙+log𝜋_𝜃−𝛽𝑟^−log𝜋_ref]^2
+   -3. Two stabilizers
+       -1) Length normalization (Remark 3): rescale log𝜋_𝜃 and log𝜋_ref by 1/∣𝑦| to balance long/short trajectories and tame gradient growth.
+       -2) Importance sampling with clipping (Remark 4):
+           𝑤=clip(𝜋_𝜃/𝜋_old,1−𝜖,1+𝜖)_detach as a weight in the surrogate; detach prevents excessive policy drift.
+
+2. Final objective: FlowRL 
+   𝐿_FlowRL=𝑤⋅[log𝑍_𝜙(𝑥)+1/|𝑦∣log𝜋_𝜃(𝑦∣𝑥)−𝛽𝑟^(𝑥,𝑦)−1/∣𝑦∣log𝜋_ref(𝑦∣𝑥)]^2,
+   with
+   𝑤=clip(𝜋_𝜃/𝜋_old,1−𝜖,1+𝜖)_detach,
+   𝑟^_𝑖=𝑟_𝑖−mean(𝑟)/std(𝑟)
+
+3. Interpretation: FlowRL keeps the KL↔TB equivalence, while length normalization cures gradient blow-up and IS-clipping resolves off-policy 
+                   euse—so the policy learns to sample diverse, high-reward trajectories in proportion to rewards instead of collapsing onto dominant modes. 
+                   Implementation and analysis details follow in §4/§B.
