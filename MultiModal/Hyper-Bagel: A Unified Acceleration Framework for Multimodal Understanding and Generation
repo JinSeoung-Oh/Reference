@@ -1,0 +1,90 @@
+### From https://arxiv.org/pdf/2509.18824
+
+1. Overview
+   -1. Goal: Strengthen Speculative Decoding on top of the EAGLE-3 paradigm and achieve both a lossless 6-NFE model and a cost-optimal 1-NFE model via Diffusion Distillation.
+   -2. Challenge: In BAGEL, heterogeneous multimodal tokens (text, ViT tokens, clean/noisy latents) are interleaved, making it hard for a small-capacity draft model
+                  to encode target features.
+   -3. Solution: (1) Boost EAGLE-3 by improving the intermediate layer, initialization, and loss, 
+                 and (2) use a distribution-matching distillation pipeline (CFG → TSCD → DMDO → ADP → ReFL) to preserve both controllability and image quality.
+
+2. Speculative Decoding
+   2.1 Target Feature Aggregation with Meta Queries
+       -1. Issue: The EAGLE intermediate layer is essential for next-token prediction, but BAGEL’s interleaving of text/ViT/clean & noisy latents raises difficulty.
+       -2. Improvement: Replace FC-based aggregation with cross-attention. 
+           -1) Learn meta-queries 
+               𝑓_𝑞 ∈ 𝑅^(𝑄×𝐷) and let each token’s target-model multi-layer features 𝑓_𝑖 ∈ 𝑅^(𝐿×𝐷) serve as keys/values.
+               𝑓^𝑖_𝑐 = Flatten(CA(𝑓_𝑞,𝑓_𝑖,𝑓_𝑖)),
+               𝐹_𝑐=[𝑓^0_𝑐;…;𝑓^(𝑆-1)_𝑐] ∈ 𝑅^(𝑆×𝑄𝐷)
+           -2) Pass 𝐹_𝑐 through a Transformer decoder (Dec) with the same architecture as the target model to produce the draft input 𝐹_𝑖𝑛 ∈ 𝑅^(𝑆×𝐷)
+           -3) At this stage, inputs are not concatenated with token embeddings; this decoder is separate from the draft decoders used for iterative decoding.
+           -4) Scale the number of draft decoder layers to 𝑁=2 to increase representation capacity.
+    2.2 Zero-Init Fully Connected Layers with Residuals
+         -1. Intuition: Reusing the last target layers and LM head reduces training difficulty.
+         -2. Ensure strong gradient flow to the two critical FC layers:
+             -1) fc1: dimensionality reduction in the intermediate layer.
+             -2) fc2: fusion after concatenating token embeddings at each iterative decoding step.
+         -3. Concrete steps:
+            -1) Zero-init the final projection layers of both CA and Dec in the intermediate layer.
+             -2) Add skip connections to CA/Dec that inject low/mid/high-level target features (as in EAGLE-3).
+             -3) Zero-init fc1 and fc2.
+        -4. Effect: With zero input at the very start, gradients into fc2 match those of the target model, so fc2 learns to mimic target feature sequences
+                    at the corresponding depth (2nd-last layer if the draft has 1 decoder layer; 
+                    3rd-last if it has 2). fc1 initially receives the three-level features via the skips, identical in semantics to EAGLE-3.
+    2.3 Diminish Forward-KL Supervision (Add Hard-Label CE)
+        -1. Motivation: Forward-KL alone can over-penalize a small draft model tasked with covering all modes of the target distribution.
+        -2. Remedy: Add hard-label cross-entropy from the target’s argmax with 𝜆=0.1:
+            𝐿_total=KL(𝑝_target∥𝑝_draft)+𝜆⋅[−log𝑝^draft_arg max(𝑝_target)]
+        -3. Outcome: Yields better performance than the vanilla Forward-KL used in EAGLE-3.
+
+3. Diffusion Distillation
+   -3.1 Goal and Lineup
+        -1. 6-NFE model: Lossless across generation/editing (both control and quality preserved) via three stages:
+            -1) CFG Distillation
+            -2) TSCD (three-segment consistency distillation with pure adversarial loss)
+            -3) DMDO (ODE-based distribution matching)
+        -2. 1-NFE model: Fine-tune the 6-NFE model in two more stages:
+            -1) ADP (Adversarial Diffusion Pre-training)
+            -2) ReFL (Reward Feedback Learning)
+   -3.2 Stage-1: CFG Distillation
+        -1. Objective: Distill the ability to control instruction adherence and edit consistency into a single forward pass.
+        -2. Implementation:
+            -1) Add two timestep-style encoding layers: text scale (for T2I and editing) and image scale (for editing only).
+            -2) Inject them throughout DiT with the same architecture/locations as the normal timestep pathway (FLUX best practices) to propagate control signals to every layer.
+        -3. Training setup:
+            -1) T2I: randomly sample text scale ∈ [1,5]
+            -2) Editing: additionally sample image scale ∈ [1.0,2.5]
+            -3) Use diffusion timestep shift ≥ 3.0 to improve structural integrity and fidelity.
+   -3.3 Stage-2: Trajectory-Segmented Consistency Distillation (TSCD)
+        -1. After CFG distillation, apply consistency distillation (cf. Hyper-SD) but:
+            -1) No progressive segmentation (8→4→2→1). Use one stage with 3 segments (simplifies and speeds training).
+            -2) Remove MSE, use pure adversarial loss.
+            -3) Use DMDX-style multi-head discriminator with a trainable pre-trained backbone.
+        -2. Intent: Prioritize structural integrity in Stage-2 and leave fidelity improvement for Stage-3.
+   -3.4 Stage-3: Distribution Matching Distillation via ODE (DMDO)
+        -1. Motivation: DMD-style SDE few-step samplers yield over-smoothed images, conflicting with Stage-3’s fidelity goal.
+        -2. Proposal: Keep the original ODE sampler and align ODE trajectories of student and teacher.
+        -3. Alternating optimization:
+            -1) Fake-model update:
+                - Sample noise 𝑥_𝑇, generate the full ODE trajectory (for 6-NFE: 𝑥_𝑇 → 𝑥_5𝑇/6 → ⋯ →𝑥_0)
+	​              - Linearly interpolate between 𝑥_𝑇 and 𝑥_0 to obtain 𝑥_𝑡 for the fake model input.
+                - Set the target to the velocity (𝑥_𝑇−𝑥_0) so the fake model captures the true few-step distribution at each timestep, avoiding DMD’s noise-induced shifts.
+            -2) Few-step generator update:
+                - Reuse the same trajectories to cut cost.
+                - Example: for 𝑡 ∈ (4𝑇/6,3𝑇/6], take 𝑥_4𝑇/6, run the ODE with gradients to predict 𝑥^_0, resample 𝑡′, build 
+                           𝑥^_𝑡' via interpolation with 𝑥_𝑇, and feed it as score inputs to fake/real models.
+                - The loss follows DMD.
+        -4. Result: A lossless 6-NFE model with vivid colors and rich detail, closely matching the teacher.
+   3.5 Stage-4: ADP (Adversarial Diffusion Pre-training) for 1-NFE Structure
+       -1. Due to the capacity drop at 1-NFE, full distribution alignment with the teacher is unrealistic. First align structure with the 6-NFE model.
+       -2. Method: Use rectified-flow adversarial training (from DMDX).
+           -1) 6-NFE samples an ODE trajectory; interpolate 𝑥_𝑇–𝑥_0 to obtain 𝑥_𝑡; feed 𝑥_𝑡 to the 1-NFE generator to predict 𝑥^_0
+           -2) Two discriminators (latent-space and pixel-space) judge 𝑥^_0 as fake; the real is the trajectory endpoint 𝑥_0
+           -3) This perfectly matches the objective (align to 6-NFE), and sampling ODE trajectories from 6-NFE is relatively cheap.
+   3.6 Stage-5: ReFL (Reward Feedback Learning) for 1-NFE Fidelity
+       -1. Improve image fidelity with human feedback as in Hyper-SD.
+       -2. Difference: Use a single, comprehensive VLM-based reward model (no multi-reward setup).
+           -1) This suits BAGEL’s multimodal, semantics-focused nature; VLM scaling is effective (cf. RewardDance).
+       -3. Loss: Same as Hyper-SD’s aesthetic supervision loss with ReLU reward threshold 𝛼_𝑑=6.0
+4. One-Line Core Summary
+   -1. Speculative Decoding boosts draft encoding and stability via meta-query cross-attention, zero-init + residual design, and a Forward-KL + hard-label CE mixture;
+       Diffusion Distillation (CFG → TSCD → DMDO → ADP → ReFL) achieves lossless 6-NFE and cost-optimal 1-NFE simultaneously.
