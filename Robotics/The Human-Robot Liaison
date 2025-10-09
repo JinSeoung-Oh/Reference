@@ -1,0 +1,48 @@
+### From https://medium.com/the-quantastic-journal/the-human-robot-liaison-a-new-neuro-dynamic-model-explains-the-uncanny-valley-effect-96e600f84291
+
+1. Origins and uptake
+   -1. In 1970, Masahiro Mori proposed “bukimi no tani” (uncanny valley): familiarity rises with human-likeness, drops sharply near “almost human but imperfect,” 
+       then rises again once fully human-like. Popularized after the 1978 English rendering and especially after the 2005 English translation, spurring research across HRI,
+       graphics, and bio/social roots.
+   -2. Quantitative accounts include Roger K. Moore’s (2012) Bayesian categorical perception at category boundaries, and Burleigh & Schoenherr’s view 
+       that categorical + frequency-based processing jointly yield the effect (a general information-processing outcome rather than a sui generis phenomenon).
+
+2. Aim of the paper
+   -1. Upgrade Mori’s phenomenological curve to a mechanistic neuro-dynamic model (coupled differential equations) at the level of neuronal populations, 
+       explaining, simulating, and generalizing the dynamics to broader domains (pathogen avoidance, mate choice signals, mortality salience, identity threats, cue discord).
+
+3. Psychoanalytic lineage
+   -1. The “uncanny” is historically tied to Jentsch’s intellectual uncertainty and Freud’s heimlich/unheimlich duality; 
+       Lacan treats the uncanny as a via regia into anxiety where the “real” ruptures symbolic order. The paper reframes this through a Bayesian predictive coding lens
+      (priors vs. mismatching evidence).
+
+4. Mechanistic model
+   -1. State variables: R (human-likeness, slow), H(R) (familiarity), E(R) (eeriness), all normalized to [0,1].
+   -2. Rates: k₁(R) (familiarity growth), k₂(R) (eeriness generation), k₃(R) (eeriness decay); F(R)=H−E defines the uncanny curve.
+   -3. Default (quasi-)Markov assumption; memory and noise can be added via non-Markov or stochastic extensions.
+
+5. Kinetic underpinnings
+   -1. Sigmoid (logistic) dynamics for k₁, k₃: threshold–saturation behavior from neuronal population responses and psychological habituation. 
+                                               Implemented via resource-limited catalyst populations consuming a pool → logistic ODE → sigmoid solutions.
+   -2. Gaussian dynamics for k₂: aggregate of many small conflicting cues (appearance, motion, texture, timing) yields a Gaussian spike around R₀ (near-human locus),
+                                 consistent with neural tuning curves and Bayesian prediction-error surges (free-energy minimization framing).
+
+6. Simulations
+   -1. Initial example: H₀=0, E₀=0. Two cases: moving agent (robot) vs still entity (toy) with parameter tweaks.
+   -2. Findings: The model reproduces the valley (H↑, E peaks, F=H−E dips then recovers). Motion steepens slopes and deepens the valley. 
+                 Cross-plot comparability via scaling α=2. Shapes qualitatively match Mori’s original curve.
+
+7. Design levers, predictions, tests
+   -1. Levers: micro-jitter/phase asynchrony → narrower/higher k₂ (deeper valley); structured pre-exposure → higher k₁, k₃ (shallower valley). 
+               Strategy options: stylize (stay pre-valley), accelerate realism (cross R₀ fast), pre-expose users.
+   -2. Parameter semantics/measurement: k₂ amplitude ≈ prior precision; k₃ ceiling ≈ habituation capacity; estimable via psychophysics + physiology (GSR, pupil, HRV).
+   -3. Testable hypotheses: pre-exposure reduces depth; prototypical priming deepens it; removing a conflicting channel widens σ and lowers k₂ peak; 
+                            motion coherence smooths the negative-slope region.
+
+8. Generalization
+   -1. Same state–kinetic template applies to pathogen/disgust avoidance, identity threat/mortality salience, mate-choice cue discord—by reinterpreting R and tuning k’s.
+
+9. Bottom line
+   -1. The uncanny valley emerges from the competition between sigmoid habituation/affinity (k₁, k₃) and a Gaussian, prediction-error–driven eeriness surge (k₂) 
+       near a Bayesian category boundary.
+   -2. This mechanistic account matches Mori’s curve, explains motion effects, yields actionable controls for design/rollout, and generalizes across “uncanny-class” phenomena.
