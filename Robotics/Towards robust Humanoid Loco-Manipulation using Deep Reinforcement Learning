@@ -1,0 +1,53 @@
+### From https://medium.com/correll-lab/towards-robust-humanoid-loco-manipulation-using-deep-reinforcement-learning-45c8a5a0fcbf
+
+1. Overview
+   Humanoid robots must walk and manipulate objects while maintaining balance — a problem long tackled through Optimal Control (OC) 
+   and model-based methods such as Quadratic Programming (QP) and Model Predictive Control (MPC) (Kajita et al., 2003; Wieber, 2006). 
+   These explicitly model dynamics and optimize trajectories under constraints but are computationally heavy and difficult to generalize.
+
+   In contrast, Reinforcement Learning (RL) — especially Proximal Policy Optimization (PPO) — provides a model-free alternative where robots learn policies 
+   directly from simulated experience. RL has achieved robust locomotion for quadrupeds (Lee et al., 2020) and humanoids (Singh et al., 2024).
+
+   -a. Goal
+       Building on HOMIE (Ben et al., 2025), the study develops a robust locomotion policy for the Unitree H12 humanoid, 
+       capable of walking and squatting while resisting upper-body disturbances.
+
+2. RL-Based Control Framework
+   -a. Policy Objective
+       Learn a policy π(a∣o) mapping observations (proprioceptive states + commands: velocity, angular rate, desired height) to actions (joint targets).
+       These targets are translated into torques by a PD controller, producing locomotion and squatting.
+   -b. Observations
+       Each timestep provides a 456-dimensional vector (six stacked observations).
+       Single observation (76D):
+       -1. Commands (4D): vx, vy, ωz, h
+       -2. Joint positions (27D)
+       -3. Joint velocities (27D)
+       -4. Base angular velocity (3D)
+       -5. Gravity orientation (3D)
+       -6. Previous action (12D)
+   -c. Actions
+       12D output = target joint angles for lower body (hip_yaw, hip_roll, hip_pitch, knee, ankle_pitch, ankle_roll per leg).
+       Final target: θ_target = θ_default + scale × a
+       Torque: τ = Kp(θ_target − θ) + Kd(θ̇_target − θ̇)
+   -d. Reward Design
+       Rewards define learning objectives through dense feedback, comprising four key groups:
+       -1. Command Tracking: follow linear/angular velocity & height commands
+       -2. Stability & Safety: penalize falling, joint limit violations, unsafe dynamics
+       -3. Gait & Posture Quality: encourage smooth, energy-efficient motion
+       -4. Efficiency & Regularization: suppress excessive torque and noise
+  -e. Optimization with PPO
+      The goal is to maximize expected return J(θ). PPO’s clipped surrogate objective ensures stable policy updates.
+      -1. Likelihood Ratio (ρ_t): compares new vs. old policy probabilities.
+      -2. Advantage (A_t): measures relative action quality based on rewards and critic estimates.
+      -3. Critic: uses privileged simulation info (true linear velocity) → input dimension = 79.
+  -f. Upper-Body Pose Curriculum
+      Starts with static upper-body pose. As performance improves, random pose ranges expand. Final policy can balance even with dynamic upper-body motion.
+  -g. Training & Deployment
+      -1. Simulator: Isaac Gym (4096 parallel environments)
+      -2. Domain Randomization: broad exposure to physical variability
+      -3. Validation: Sim2Sim transfer (MuJoCo) for generalization
+      -4. Deployment: Real-world execution on Unitree H12, successfully performing squats (Sim2Real success).
+
+3. Key Takeaway
+   A PPO-based model-free RL policy, trained with domain randomization and pose curriculum, enables robust humanoid loco-manipulation
+   — combining walking, squatting, and dynamic balance under upper-body motion.
