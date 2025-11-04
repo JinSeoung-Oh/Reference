@@ -1,0 +1,61 @@
+### From https://ai.gopubby.com/reinforcement-learning-on-pre-training-data-96291e3c1ef3
+
+1. Motivation
+   Training trillion-parameter LLMs on trillions of tokens is now standard, but this is expensive, high-quality data is hard to assemble, 
+   and we may soon hit a data ceiling. A natural question is: can we get more out of the data we already have? 
+   Tencent’s recent work answers “yes” with RLPT (Reinforcement Learning on Pre-Training data) — an RL method that uses only pre-training data to provide rewards, 
+   with no human annotation.
+
+2. From Next-Token to RL
+   Conventional pre-training uses next-token prediction: given context x<ix_{<i}x<i​, predict xix_ixi​, minimizing log-loss over the dataset. 
+   Post-training methods like RLHF and RLVR improved alignment and reasoning, but: 
+   -a. RLHF needs human preference data,
+   -b. RLVR needs verifiable tasks (math, code), so it doesn’t cover open-ended tasks.
+   So we need an RL objective that doesn’t depend on human labels or strict verifiability.
+
+3. Core Idea of RLPT: Next-Segment Reasoning
+   RLPT builds an RL objective directly from the pre-training corpus by splitting raw text (Wikipedia, arXiv, etc.) 
+   into semantically coherent segments. For each text, we create triples:
+   -a. context s(<i)s(<i)s(<i),
+   -b. target segment s(i)s(i)s(i),
+   -c. following segment s(i+1)s(i+1)s(i+1).
+   This lets the model learn: “given this reasoning/context, what is the next correct reasoning step/sentence?”
+
+4. Two Segment-Level Objectives
+   RLPT alternates between two segment-level tasks:
+   -a. Autoregressive Segment Reasoning (ASR): predict s(i)s(i)s(i) from s(<i)s(<i)s(<i). This is like next-token LM but at segment granularity.
+   -b. Middle Segment Reasoning (MSR): predict s(i)s(i)s(i) from both s(<i)s(<i)s(<i) and s(i+1)s(i+1)s(i+1). 
+                                       This is like masked LM (BERT-style) but again at the segment level.
+
+   Interleaving ASR and MSR trains the model to continue a train of thought and to fill in a missing reasoning step.
+
+5. Reward via a Generative Reward Model
+   The model outputs its predicted segment between special tags <|startofprediction|> and <|endofprediction|>. 
+   A separate LLM, prompted as a generative reward model GrmG_{rm}Grm​, then compares this predicted segment with the ground-truth segment and outputs
+   a binary semantic-consistency reward (1 if semantically similar, otherwise 0).
+   So: no human labels → reward is derived from how well the model recovers the original segment.
+   The final RLPT objective balances ASR and MSR rewards with a hyperparameter λ\lambdaλ.
+
+6. Training Pipeline
+   -a. Start from an instruction-following LLM (cold start via SFT). RLPT is not applied on a totally untrained base model.
+   -b. Train with RLPT using GRPO (policy-gradient style) without KL regularization.
+   -c. Optionally, apply RLVR after RLPT to push math/coding reasoning further.
+
+7. Empirical Findings
+   -a. Models: Llama3 and Qwen3 variants.
+   -b. General-domain tasks: RLPT brings consistent improvements across STEM, law, economics, and health — suggesting it helps the model mine and connect latent knowledge
+                             in pre-training data.
+   -c. Math reasoning (e.g., AIME 24/25): RLPT improves performance; adding RLVR on top yields further gains. Notably, both Pass@1 (exploitation) and Pass@8 (exploration) 
+                                          improve — two goals that usually trade off.
+   -d. Scaling: RLPT follows a power-law scaling with training tokens: more compute → better performance. When RLVR is stacked after RLPT, a similar scaling behavior appears, 
+                                                                       indicating RLPT gives a strong base for later RL.
+
+8. Why It Matters
+   -a. RLPT trains the model to generate and validate intermediate reasoning steps rather than just predict the next token.
+   -b. It unlocks RL for open pre-training data without human reward models or rule-based verifiers. 
+   -c. It is a training-time scaling technique: instead of collecting more expensive data, we learn more structure from existing data.
+   -d. It dovetails nicely with later methods like RLVR.
+
+   In short, RLPT shows we can push LLM reasoning further without touching model weights directly or adding human labels 
+   — just by restructuring and rewarding over the data we already have.
+
