@@ -1,0 +1,69 @@
+### From https://medium.com/the-ml-intuition/tricks-to-fine-tuning-without-model-tweaks-achieving-generalization-through-data-7afdae7e9d05
+
+1. Overview
+   With the rise of pre-trained and API-only foundation models, verifying model effectiveness for a specific use case becomes difficult since the model itself cannot be modified.
+   In such cases, prompt engineering, data-based regularization, and API-level finetuning are key.
+   This article focuses on regularization through data manipulation — adjusting inputs, labels, or prompts to enhance learning and generalization, 
+   even when model parameters are frozen.
+
+2. Core Data Regularization Techniques
+   -a. Beyond data augmentation, there are six main strategies:
+       -1. Data Augmentation
+       -2. Noise Injection
+       -3. Label Smoothing
+       -4. Data Resampling / Reweighting
+       -5. Curriculum Learning
+       -6. Contrastive Sample Generation
+
+3. Data Augmentation and Noise Injection
+   These methods modify the input space to introduce variability, encouraging smoother, noise-robust predictions.
+   -a. Data Augmentation:
+       Adds variation while maintaining label consistency.
+
+       Vision: geometric transforms (flips, rotations, translations).
+
+       NLP/LLMs:
+          Text augmentation — synonym replacement or back-translation
+          e.g., “physician” → “doctor”, “study” → “learn”
+
+          Prompt augmentation — rephrase instructions while preserving intent
+          e.g., “summarize” → “brief overview”, “in under 200 words”
+
+    -b. Noise Injection:
+        Adds random perturbations (Gaussian noise, token dropout/masking).
+        For simulation-generated data, noise should be applied before simulation to ensure consistent outputs.
+
+4. Label Smoothing and Data Resampling
+    These modify the target space to mitigate overconfidence and class imbalance.
+
+    -a. Label Smoothing:
+        Converts one-hot labels into soft labels, redistributing small probabilities to other classes.
+        Example: [1.0, 0.0, 0.0] → [0.95, 0.025, 0.025]
+
+5. Data Resampling/Reweighting:
+   -a. Corrects imbalance by:
+       Undersampling majority classes
+       Oversampling minority classes
+       Reweighting class losses
+
+   This prevents overfitting to dominant classes and encourages balanced learning.
+
+6. Curriculum Learning and Contrastive Sample Generation
+   These control the training trajectory to improve stability and generalization.
+   -a. Curriculum Learning:
+       Orders data from easy to difficult, guiding smooth optimization.
+       Examples:
+            Vision: detect objects → scene recognition
+            Reinforcement Learning: walk → avoid obstacles → kick ball
+
+    -b. Contrastive Sample Generation:
+        Teaches models relationships in the embedding space by distinguishing positives from negatives.
+        Vision: SimCLR, MoCo — augmented versions as positives, others as negatives.
+        NLP: Paraphrases vs unrelated sentences.
+
+7. Conclusion
+   Data regularization is indispensable when model parameters are frozen, emphasizing that generalization depends as much on how data is designed 
+   and presented as on the model itself.
+   Whether through augmentation, noise, label smoothing, reweighting, curriculum, or contrastive learning, 
+   these techniques guide models toward robust and adaptable learning — proving that good data regularization is good teaching.
+
