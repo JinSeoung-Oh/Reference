@@ -1,0 +1,64 @@
+### https://mark-burgess-oslo-mb.medium.com/using-knowledge-graphs-for-inferential-reasoning-8a06e583b4d4
+
+1. Overview
+   This note discusses the path-solving capabilities of knowledge graphs based on the SSTorytime Semantic Spacetime (SS) model.
+   The model enables the discovery of latent semantic connections in large-scale data and employs quantum-inspired reasoning to efficiently link distant nodes. 
+   Potential applications include maze solving, fraud or crime detection, decision support, and process mapping.
+
+2. Graph Walking and Story-Based Reasoning
+   Walking a graph is an act of traversing our model of the world—each “walk” constitutes a story, which in turn represents a form of reasoning.
+   All stories are reasoning processes; logic is merely a specialized subset of reasoning, applicable when sufficient information exists to validate path consistency.
+
+3. Efficiency of Graphs as Maps
+   Maps are efficient precisely because they are incomplete—they highlight key landmarks while omitting irrelevant detail.
+   Neural networks, conversely, overcompensate for completeness by embedding finite data into vast Euclidean spaces, creating overcomplete illusions of information.
+   Graphs, by contrast, are intentional constructs: each node is deliberately added, and links define a localized index of relationships. 
+   However, combining multiple maps into a single graph requires distinguishing the intent behind the search to ensure efficient reasoning.
+
+4. Four Classes of Links
+   All reasoning within SS boils down to one of four causal process types:
+   -a. Causality (A → B) — A leads to B
+   -b. Encapsulation (A ∈ B) — A is part of B
+   -c. Attribute (A expresses B) — A expresses B as a property
+   -d. Similarity (A ≈ B) — A resembles B
+   The first supports explicit logical narratives; the others generate implicit, non-logical inferences that humans intuitively value as meaningful stories.
+
+5. Path Query Strategies
+   (a) Exploratory Search
+       When exploring unknown territories, one starts with a node and expands outward:
+       \from start
+       The system visualizes reachable regions and their natural endpoints, much like navigating a maze. 
+       Intent transforms this exploration from random traversal into purposeful reasoning.
+   (b) Directed Search
+       When both start and target are known:
+       \from start \to target
+       The query reveals all matching targets, alternative paths, and flow analyses—useful for identifying traffic concentrations, redundant routes, or structural bottlenecks.
+
+6. Implicit Inference and Human Interpretation
+   Not all maps are purely causal; many—manuals, procedures, brainstorming networks—encode intentional directions and implicit reasoning.
+   Human cognition often fills in the blanks:
+   “Sally visited Martin three times → They must be having an affair.”
+   Thus, incomplete graphs naturally encourage lateral thinking and inferred causality.
+
+7. Case Study: “Search M for Murder”
+   In SSTorytime’s Cluedo dataset, the victim Ms. Scarlett serves as the central node.
+   Path searches from Scarlett reveal her connections—most notably, a relationship with Martin. Further linking Martin to a gun exposes a plausible causal narrative of the crime.
+   While machines view such links as mere attributes or memberships, humans interpret them as causal stories, highlighting the model’s capacity to reveal hidden relationships.
+
+8. The Pitfall of Shortest Path Thinking
+   Computer science often defaults to shortest path solutions, but brevity does not guarantee correctness.  
+   Effective path solving depends on appropriate boundary conditions, both maximum and minimum path lengths:
+   -a. Maximum length prevents unbounded exploration of exponentially growing graphs.
+   -b. Minimum length avoids trivial self-matching paths (e.g., identical “start” and “target” nodes).
+   Failure to constrain these parameters can produce misleading or degenerate results.
+
+9. Retro-Causality and Quantum-Style Pathfinding
+   Allowing longer paths can introduce mixed-causality—routes containing reversed directional links (retro-causal segments).
+   Such behavior mirrors quantum fluctuations or “digressions” in causal processes.
+   By adopting quantum-style mixed boundary conditions, SSTorytime identifies valid paths that may include backward steps yet still satisfy overall causal
+   goals—analogous to higher-order perturbations in quantum loop expansion.
+
+10. Conclusion
+    The SSTorytime Semantic Spacetime model reframes knowledge-graph navigation as story-based reasoning rather than simple pathfinding.
+    Through intent, causal semantics, and flexible boundary handling, it reveals hidden inferential structures and supports contextual, narrative, 
+    and reasoning-driven graph traversal—a human-like approach to connecting dots within complex knowledge systems.
