@@ -1,0 +1,142 @@
+### From https://levelup.gitconnected.com/how-i-made-unity-mcp-bridging-ai-and-game-development-4abaf4a84310
+
+1. Purpose
+   This article introduces the Unity-MCP project, whose goal is to make the Unity Editor — and even running Unity games 
+   — directly controllable by LLM agents through the Model Context Protocol (MCP). Instead of writing a custom integration for every AI tool, 
+   Unity is exposed as yet another MCP server with a set of well-defined tools and resources.
+
+2. What MCP Is
+   Model Context Protocol (MCP) is an open protocol proposed by Anthropic that standardizes how an AI agent talks to external systems.
+   It:
+   -a. runs on top of JSON-RPC 2.0,
+   -b. defines Tools, Resources, and Prompts,
+   -c. lets an agent read system state and files,
+   -d. invoke operations (tools),
+   -e. and negotiate capabilities (i.e. “what can I do here?”).
+   Unity-MCP simply leverages this: instead of teaching the AI “how to talk to Unity,” we make Unity speak MCP.
+
+3. Why This Is Useful
+   In practice, Unity-MCP enables natural-language-driven Unity workflows, such as:
+   -a. Automating repetitive editor tasks (“Add 10 lights around the player, intensity 2.”)
+   -b. Level design and rapid prototyping (“Make an arena with walls and a glowing floor.”)
+   -c. Scripting and gameplay logic (“Create a script that opens a door when the character steps on the button.”)
+   -d. VFX and shaders (have the AI create or explain particle systems or shaders)
+   -e. Debugging and testing (run Unity Test Runner, analyze results, even fix code)
+   -f. Asset management (rename, organize, generate placeholders)
+   -g. Educational guidance (“Add a Rigidbody and explain each property.”)
+   From the user’s point of view, it feels like collaborating with someone inside the Editor: you describe the intent, the AI calls the right tool chain.
+
+4. Core Idea
+   Think of Unity-MCP as a bridge between natural language and the Unity API surface. It is not limited to “place an object in the scene”. It can:
+   -a. create and apply shaders/materials,
+   -b. generate gameplay scripts and attach them,
+   -c. build entire scenes,
+   -d. manage assets,
+   -e. run tests and return structured feedback.
+   All of these are triggered through standard MCP tool calls.
+
+5. High-Level Architecture
+   The project is split into three main parts:
+   -a. Unity-MCP Server (ASP.NET Core)
+       -1. Speaks MCP with AI/MCP clients over JSON-RPC (STDIO/HTTP).
+       -2. Exposes the list of available tools, resources, and prompts.
+       -3. Talks to Unity via SignalR.
+       -4. Cross-platform, can run standalone or in Docker.
+   -b. Unity-MCP Plugin (Unity package)
+       -1. Connects back to the server over SignalR.
+       -2. Mirrors MCP semantics into the Unity runtime/editor.
+       -3. Uses reflection + attributes: any method decorated with [McpPluginTool(...)] becomes callable from the AI.       
+           [McpPluginTool("my-tool", Title = "It makes my stuff")]
+           public static void MyTool() {
+                   // Unity-side logic
+                   }
+   -c. MCP Client (the AI agent)
+       -1. This is the chat interface where the user talks.
+       -2. Any MCP-capable client (Claude, Claude Desktop, Cursor, VS Code MCP, Copilot-like tools) can be used.
+       -3. The agent inspects available tools and composes calls to achieve the user’s goal.
+
+6. Example Flow
+   -a. User prompt:
+       “Create a red cube with a glowing shader in the center of the scene.”
+   -b. The AI inspects the tools and decides it needs to:
+       -1. create a cube,
+       -2. create/apply a material or shader,
+       -3. set position.
+   -c. It sends a JSON tool call such as:
+       {
+         "name": "GameObject_Create",
+         "arguments": {
+           "name": "GlowingCube",
+           "position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+           "primitiveType": "Cube"
+         }
+       }
+   -d. The Unity-MCP Server receives it, forwards it via SignalR to the Unity-MCP Plugin.
+   -e. The plugin executes the corresponding Unity-side tool (on the main thread), creates the object, applies the shader.
+   -f. The result is sent back:
+       {
+         "result": {
+           "success": true,
+           "objectName": "GlowingCube"
+         }
+       }
+       To the user, this looks like “natural language → Unity action”.
+
+7. Defining Custom Tools
+   Unity-MCP is extensible. A developer can expose Unity functionality to AI simply by annotating C# methods:
+
+   [McpPluginType]
+   public class CreateObjectTool
+   {
+       [McpPluginTool("create_object", "Creates a new GameObject in the current scene")]
+       public string CreateGameObject(string name)
+       {
+           var go = new GameObject(name);
+           return $"[Success] GameObject with instanceId={go.GetInstanceID()} created";
+       }
+   }
+
+   The corresponding MCP request is straightforward:
+   {
+     "name": "create_object",
+     "arguments": {
+       "name": "New GameObject"
+     }
+   }
+   
+   Unity-MCP runs it and returns a success string. This pattern is what allows Unity to be “grown” into a rich AI-callable toolkit.
+
+8. System and Tooling Architecture
+   -a. Client side: AI tools (Claude, Cursor, VS Code MCP) communicate with the Unity-MCP Server via MCP (STDIO/HTTP).
+   -b. Server side: the server exposes tools and relays calls through SignalR (port 8080).
+   -c. Unity side: the Unity plugin receives calls and routes them through components like McpPlugin, RpcRouter, and McpRunner to the actual Unity API, 
+                   making sure they run on the Unity main thread.
+   This gives a clear pipeline:
+
+   AI Client → MCP Server → SignalR → Unity Plugin → Unity API → back to Client
+
+9. Tool System Internals
+   -a. Tools are declared via attributes like McpPluginToolType and McpPluginTool.
+   -b. They are grouped into domains such as:
+       -1. Test Execution
+       -2. Scene Operations
+       -3. Asset Management
+       -4. C# Code Operations
+   -c. Each of these maps onto Unity subsystems:
+       -1. scene tools → Unity Editor API
+       -2. asset tools → AssetDatabase
+       -3. script tools → CompilationPipeline
+   -d. A reflection system plus JSON converters makes Unity types serializable and callable from outside.
+   -e. In effect, annotated C# methods become MCP tools.
+
+10. Key Capabilities
+    -a. Script operations: read/write/compile C# via Roslyn; execute in Unity.
+    -b. Asset management: create and modify assets and materials.
+    -c. Scene manipulation: create GameObjects, add components, change hierarchy.
+    -d. Test integration: run Unity Test Runner remotely and return structured data.
+    -e. Reflection-based Unity access: flexible and extensible.
+    -f. Cross-platform MCP server: works with modern Unity versions.
+
+11. Takeaway
+    Unity-MCP turns Unity into an AI-operable environment. It is not limited to one demo scenario; the architecture is general, tool-based, and incrementally extensible. 
+    As MCP gains adoption in LLM clients, this approach makes it possible to control Unity from almost any AI chat window that “speaks MCP.”
