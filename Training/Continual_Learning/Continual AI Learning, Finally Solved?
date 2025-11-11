@@ -1,0 +1,68 @@
+### From https://medium.com/@ignacio.de.gregorio.noblejas/continual-ai-learning-finally-solved-d8ed74f519af
+
+1. The core problem: continual learning without forgetting
+   Current AI systems are split into training and inference. The model you chat with is a frozen snapshot; it doesn’t update its parameters from your input.
+   The main blocker is catastrophic forgetting: every time you fine-tune on something new (especially with RL),
+   you risk erasing capabilities that aren’t represented in the new data.
+
+   The piece argues that Thinking Machines Labs’ framing of on-policy distillation is a realistic way to get continual learning in practice.
+
+2. Two learning regimes: imitation vs exploration
+   -a. Imitation learning (SFT, supervised finetuning): feed the model lots of examples and make it copy them. Great for pattern acquisition and factual knowledge.
+   -b. Exploration / trial-and-error (RL): the model tries, gets feedback, and improves. Superior for learning skills, styles, search-heavy tasks,
+                                           but has a cold-start problem.
+   Modern frontier models combine both: first imitation (pretraining + SFT), then an RL phase to shape behavior.
+
+3. On-policy vs off-policy
+   -a. Off-policy: the student learns from the teacher’s outputs.
+       -1. SFT copies the teacher’s chosen token (mode-seeking).
+       -2. Logit/distillation copies the teacher’s entire distribution over tokens, which is richer.
+       -3. This is dense and very sample efficient.
+   -b. On-policy: the model learns from its own samples, which are then judged/rewarded.
+       -1. This is what RL does.
+       -2. It’s more aligned with the model’s actual generation behavior but much slower.
+   A useful metaphor: off-policy = putting the student into the teacher’s world (hard, but fast); on-policy = bringing the teacher into the student’s world
+                      (slower, but safer for the student’s existing knowledge).
+
+4. Why plain RL is not the answer
+   -a. RL is sparse: you get a reward only occasionally, so you burn huge GPU hours.
+   -b. RL is narrow: it’s fantastic at pushing a model toward a new behavior, but it often does it at the expense of older behaviors → catastrophic forgetting.
+   -c. Conversely, imitation is dense and great for factual learning, but bad for inducing new behaviors.
+   So neither pure imitation nor pure RL gives you “learn new stuff without losing the old stuff.”
+
+5. The proposal: on-policy distillation
+   The trick is to separate “discovering the skill” from “teaching it stably.”
+   -a. Train a teacher with RL on the new task (e.g. math).
+       -1. This model becomes very good at that task but is over-specialized.
+   -b. Then distill into the base model, but on-policy:
+       -1. You sample from the base model, not from the teacher.
+       -2. The RL-trained teacher densely scores every token or step the base model produces.
+       -3. The student is thus trained to “produce answers the teacher would approve of,” not to “copy the teacher verbatim.”
+       -4. This is sometimes called reverse distillation or on-policy distillation.
+   Why this works:
+   -a. It remains on-policy (the student learns from its own distribution), so it doesn’t yank the model into a completely foreign mode.
+   -b. But it also gets dense supervision (like off-policy), so it learns fast.
+   -c. Most importantly, this procedure recovers the model’s original instruction-following that RL alone would have degraded.
+
+   Empirically (per TML’s plots): on-policy distilled models reach the RL model’s accuracy 7–10× faster and without the instruction-following collapse.
+
+6. How this differs from vanilla distillation and vanilla RL
+   -a. Not vanilla distillation: we don’t generate ideal outputs from the teacher and force the student to match 
+                                 — that would pull the student too far from its current capabilities (“living in the teacher’s world”).
+   -b. Not vanilla RL: we don’t wait for a single final reward; we inject teacher feedback at every prediction → dense rewards, faster learning, less forgetting.
+
+   So it’s literally “best of both worlds”:
+   on-policy behavior alignment + off-policy reward density.
+
+7. Why enterprises should care
+   -a. Enterprises don’t care that a model can solve Olympiad-level puzzles; they care that it closes a support ticket or pushes a Salesforce lead
+       to conversion using their proprietary workflows and data.
+   -b. That requires task-specific training on private data — i.e. some form of RL or reward-driven finetuning.
+   -c. The blockers so far:
+       -1. RL is expensive,
+       -2. RL makes the model forget useful general capabilities.
+   -d. On-policy distillation addresses (2), and, because it’s denser, it helps with (1) too.
+   -e. It also makes the “RLaaS” vision more realistic: companies can train a smaller, open model on-prem, get task excellence, and keep general abilities, 
+       without sending data to a hyperscaler.
+   -f. If this turns into an open-source-led wave, the big labs may not get proportional revenue 
+       — which is why the author is skeptical about ultra-high valuations if enterprise ends up doing this locally.
