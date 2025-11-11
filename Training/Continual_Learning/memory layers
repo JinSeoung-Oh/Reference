@@ -1,0 +1,110 @@
+### From https://chatgpt.com/c/690bf259-9e58-8320-8e23-c025160a00c6
+
+1. The problem
+   We want models that keep learning after deployment without nuking what they already know.
+   Standard finetuning updates a large swath of parameters, so every new edit risks collateral damage to unrelated capabilities.
+   The motivating paper shows exactly this: when learning new TriviaQA facts,
+   -a. full finetuning made NaturalQuestions F1 drop by 89%,
+   -b. LoRA by 71%,
+   -c. sparse memory finetuning by only 11%.
+   Same new knowledge, radically different amount of forgetting → small, targeted edits win.
+
+2. What continual learning is for
+   Continual learning aims to let a model absorb new information over time while preserving previous skills. This enables:
+   -a. up-to-date knowledge (APIs, laws, product catalogs),
+   -b. accumulating personalization,
+   -c. skill buildup from repeated feedback,
+   -d. lower inference cost because less has to be stuffed into the prompt/RAG every time.
+
+3. Catastrophic forgetting and the stability–plasticity trade-off
+   -a. Catastrophic forgetting: sequentially training on a new task pushes the weights away from the optimum for old tasks, so old performance collapses.
+   -b. This happens because SGD optimizes for the current distribution only, with no built-in respect for previous tasks.
+   -c. Continual learning is about balancing:
+       -1. plasticity (can learn new stuff fast) and
+       -2. stability (doesn’t overwrite old stuff).
+   -d. Too much plasticity → forgetfulness; too much stability → can’t adapt.
+
+4. Two broad retention strategies
+   A. Non-parametric (short-term memory)
+      -a. Keep knowledge outside the model and condition on it:
+          -1. in-context examples,
+          -2. retrieval-augmented generation.
+      -b. Scales in capacity, but:
+          -1. raises context length and latency,
+          -2. needs indexing/retrieval infra,
+          -3. doesn’t compress “skills” into parameters.
+   B. Parametric (long-term memory)
+      -a. Put knowledge into the weights:
+          -1. full finetuning + replay: works, but expensive to scale,
+          -2. PEFT (LoRA, adapters): lighter, but limited capacity and awkward task mixing,
+          -3. MoE: high capacity but edits affect large experts,
+          -4. memory layers: millions of tiny addressable slots, with very sparse access → surgical updates.
+      “LoRA adds a few knobs. MoE adds a few big knobs. Memory layers add millions of tiny knobs and turn only a few per token.”
+
+5. Why memory layers and not just LoRA?
+   -a. A memory layer is an internal, learned key–value store.
+   -b. Each input token touches only the slots it actually used.
+   -c. Learning a new fact = updating only those slots.
+   -d. LoRA, in contrast, attaches low-rank deltas to weight matrices that many tokens pass through, so each update influences a broad region of behavior.
+   -e. That’s why, in the reported experiments, memory-only finetuning retained held-out performance far better.
+
+6. Intuition for memory layers
+   -a. Think of a giant, indexed set of note cards.
+   -b. Each token/query pulls the top-k relevant cards.
+   -c. Their values are mixed into the ongoing computation.
+   -d. Even with millions of cards, each token touches, say, k ≈ 32 → very fine-grained control.
+   -e. During learning, only those k slots are updated, so unrelated knowledge stays intact.
+
+7. How it works, mechanically
+   -a. Replace (or augment) a standard FFN with a content-addressable memory.
+   -b. Each memory slot stores a trainable key and value.
+   -c. The current hidden state produces a query 𝑞
+   -e. Compute similarity (dot products) to all keys, select top-k.
+   -f. Softmax-weight their values and blend into the hidden state.
+   -g. On finetuning, only those selected slots are unfrozen and updated.
+   Result: with millions of slots and a tiny k, each token edits only a minuscule fraction of parameters → low interference.
+
+8. Comparison to self-attention
+   -a. Similarities
+       -1. Both do q·k matching and value mixing.
+       -2. Both inject extra information into the representation.
+   -b. Differences
+       -1. Attention pulls K/V from current sequence activations — ephemeral.
+       -2. Memory layers pull K/V from persistent, trainable parameters — durable.
+       -3. Attention cost grows with sequence length; memory layers keep cost bounded via top-k.
+       -4. Memory layers are meant to be edited in place; attention typically isn’t.
+   So, memory layers are like a persistent, content-addressable cache inside the model.
+
+9. MoE analogy
+   You can view each memory slot as a micro-expert:
+   -a. Router: similarity scores pick a few slots (top-k).
+   -b. Expert: slot 𝑖 emits its value vector 𝑉_𝑖
+   -c. Combiner: softmax-weighted sum, then a gate.
+       This is MoE-like conditional compute, but at far finer granularity and much lower bandwidth per token 
+       — exactly what you need for “surgical, low-interference edits.”
+
+10. Targeted edits = sparse memory finetuning
+    Practical recipe:
+    -a. Run a forward pass and log which slots were accessed.
+    -b. Rank slots by specificity (e.g. high use in this batch, low in background).
+    -c. Unfreeze only the top-t slots.
+    -d. Update them (often with plain SGD). Everything else stays frozen.
+
+    This gives:
+    -a. high capacity (millions of slots),
+    -b. low interference (only a few edited per update),
+    -c. and an easy way to accumulate many little facts/skills over time.
+
+11. Why optimizer choice matters
+    -a. AdamW maintains per-parameter moving statistics and weight decay, which is a poor match for sparse, bursty, non-stationary updates:
+        -1. old slots get over-damped,
+        -2. momentum can shift keys across top-k boundaries,
+        -3. weight decay slowly erodes stored content.
+    -b. Plain SGD gives cleaner, predictable updates for just-touched slots, so empirically it forgot less while learning the same new data.
+
+12. Production pattern
+    -a. Pretrain with memory layers so slots self-organize.
+    -b. As new data arrives, update only the relevant slots (e.g. via product-key indexing).
+    -c. Periodically evaluate on old tasks to monitor forgetting.
+    -d. For agents, this is especially attractive: they act for long stretches, get feedback, and see recurring patterns 
+        — memory layers let them retain the winning patterns so tomorrow’s run is cheaper and better.
