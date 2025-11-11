@@ -1,0 +1,93 @@
+### From https://pub.towardsai.net/repairing-audio-artifacts-with-independent-component-analysis-ica-706e1309817f
+
+1. Introduction
+   Repairing audio artifacts is a common and important task in audio engineering, but it is difficult when multiple unwanted sources overlap in time and frequency.
+   Independent Component Analysis (ICA) is well suited for this because it separates mixed signals into statistically independent sources without prior knowledge.
+   The article explains ICA conceptually and shows a practical example of applying FastICA to YouTube audio.
+
+2. What ICA Is
+   ICA is a computational method for blind source separation: it decomposes an observed multichannel signal into a set of statistically independent components (ICs).
+   It is based on the assumptions that:
+   -a. The observed signal is a linear mixture of independent sources,
+   -b. The sources and sensors are stationary during recording,
+   -c. Propagation delays are negligible, and
+   -d. The sources have non-Gaussian distributions.
+   Under these assumptions, ICA can recover the sources from the mixtures alone.
+
+3. Why ICA vs. Traditional Methods
+   -a. Filtering fails when sources overlap spectrally or temporally.
+   -b. PCA only maximizes variance, which is a weak statistical criterion for true independence.
+   -c. Subtraction needs a known noise reference.
+   -d. ICA can separate signals without prior knowledge of the waveform, making it powerful for EEG/MEG artifact removal, the cocktail-party problem, 
+       image feature extraction, and financial factor modeling.
+
+4. Mathematical Formulation
+   4.1 Observed Data
+       -a. Observations are represented as a matrix 𝑥 ∈ 𝑅^(𝑁×𝑇):
+           -1. 𝑁: number of channels/sensors (e.g. 2 for stereo),
+           -2. 𝑇: number of samples (sampling rate × duration).
+       -b. Example: 1-second stereo at 16 kHz → 2×16,000
+       -c. Thus the data is a digitized version of a continuous audio signal.
+   4.2 Unmixing
+       -a. ICA seeks an unmixing matrix 𝑊 ∈ 𝑅^(𝑁×𝑁) such that
+           𝑎=𝑊𝑥
+           where 𝑎 contains the IC activations (each row = one IC, each column = a time sample).
+       -b. Each activation is a weighted sum over channels:
+           𝑎_(𝑖,𝑗)=∑_𝑘 (𝑊_(𝑖,𝑘)𝑥_(𝑘,𝑗))
+   4.3 Back-Projection
+       -a. Since ICA is a decomposition of 𝑁 sources from 𝑁 channels, the original signals can in principle be reconstructed:
+           𝑥=𝑊^(−1)𝑎
+           where 𝑊^(−1) contains the relative weights/polarities for projecting ICs back to sensor space.
+
+5. Computational Objective: Maximizing Independence
+   -a. The goal is to find 𝑊 such that the resulting components are as independent and non-Gaussian as possible.
+   -b. Because ICA assumes non-Gaussian sources, it often maximizes non-Gaussianity using metrics like kurtosis or negentropy.
+   -c. Kurtosis:
+       -1. Gaussian: kurtosis = 0
+       -2. Super-Gaussian: kurtosis > 0
+       -3. Sub-Gaussian: kurtosis < 0
+   -d. ICA algorithms favor components with large ∣kurtosis∣, since they are more clearly non-Gaussian and thus more likely to be independent.
+
+6. ICA Algorithms
+   Different algorithms solve for 𝑊 in different ways:
+   -a. FastICA: fixed-point iteration until convergence,
+   -b. Infomax: stochastic gradient ascent,
+   -c. JADE: joint approximate diagonalization via spectral methods.
+             All share the same objective (find the optimal unmixing matrix) but differ in optimization strategy.
+
+7. Practical Demo: Audio Artifact Removal from YouTube
+   -a. Step 1: Fetching Audio
+       -1. A function using yt-dlp downloads audio from a YouTube URL and converts it to WAV with a specified sample rate and number of channels.
+       -2. The audio is then loaded with librosa as an 𝑁×𝑇 NumPy array, ready for ICA.
+   -b. Step 2: Running FastICA
+       -1. The script loads the audio, ensures stereo (duplicates if mono), and transposes to shape (𝑇,𝑁) because scikit-learn expects samples × features.
+       -2. FastICA is instantiated (n_components=2, max_iter=500) and fitted.
+       -3. The separated sources are written to disk as sep_0.wav, sep_1.wav.
+   -c. Step 3: Execution
+       -1. The main block ties it together:
+           -1) download audio,
+           -2) if successful, run FastICA,
+           -3) save separated ICs.
+
+8. Results and Interpretation
+   -a. Music video case
+       -1. Original stereo signal: 𝑁=2,𝑇=16𝑘
+       -2. Two ICs separated; correlation ≈ 0.7235.
+       -3. Indicates two statistically distinguishable sources.
+   -b. TED speech case
+       -1. Similarly separated, but correlation ≈ 0.9240 (more similar components).
+       -2. This shows that the success of ICA depends on how well the true sources satisfy ICA’s assumptions.
+   -c. Scale Ambiguity & Whitening
+       -1. ICA has scale ambiguity: if 𝑥=𝐴𝑆, then 1/2𝐴 and 2𝑆 produce the same 𝑥
+       -2. Hence recovered ICs do not preserve the original physical amplitude.
+       -3. ICA also performs whitening to unit variance, further normalizing magnitudes.
+       -4. Therefore, absolute peak amplitude is not reliable as a volume measure, but shape and temporal structure are.
+
+9. Limitations and Future Directions
+   -a. ICA works best when the number of observed mixtures ≥ number of sources.
+   -b. With only one channel, ICA is fundamentally limited; more advanced methods are needed:
+       -1. Short-Time ICA,
+       -2. NMF,
+       -3. or modern deep learning approaches (deep clustering, PIT).
+   -c. Going forward, such deep methods are expected to complement or even replace traditional ICA in hard single-channel or highly overlapped audio scenarios.
+
