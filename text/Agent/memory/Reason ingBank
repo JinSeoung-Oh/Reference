@@ -1,0 +1,79 @@
+### From https://arxiv.org/pdf/2509.25140
+
+3. Methodology
+   This section introduces the overall framework, including the problem setup (§3.1), the proposed ReasoningBank (§3.2), 
+   and the Memory-aware Test-Time Scaling (MaTTS, §3.3).
+
+3.1 Problem Formulation
+    -a. Agent Configuration
+        -1. Focus: LLM-based agents.
+        -2. Policy: 𝜋ᴸ(·|M, A), parameterized by backbone LLM L, memory module M, and action space A.
+        -3. The environment follows a sequential decision process with transition function T(𝑠ₜ₊₁ | 𝑠ₜ, 𝑎ₜ).
+        -4. Application domains:
+            -1) Web browsing: A = web navigation actions.
+            -2) Software engineering (SWE): A = bash commands.
+        -5. Memory M = ReasoningBank, initialized empty.
+        -6. Each task yields a trajectory (𝑜₀:ₜ, 𝑎₀:ₜ).
+            -1) Observations 𝑜ₜ come from state 𝑠ₜ — accessibility tree (web) or code snippet (SWE).
+        -7. Action generation: 𝜋ᴸ(𝑜₀:ₜ, 𝑎₀:ₜ; M, A) → 𝑎ₜ₊₁.
+        -8. M provides relevant past experiences as system-level instructions to L.
+    -b. Test-Time Learning
+        -1. Queries Q = {𝑞₁, …, 𝑞ᴺ} arrive sequentially in a streaming manner.
+        -2. Each query must be solved without future access or ground truth labels.
+        -3. The agent learns online using only its own past trajectories and self-verification.
+        -4. Two major challenges:
+            -1) Extracting and preserving useful memories.
+            -2) Effectively leveraging them to avoid redundant rediscovery or repetition.
+
+3.2 ReasoningBank
+    -a. Concept
+        -1. Raw trajectories are long and noisy → unsuitable for direct reuse.
+        -2. ReasoningBank distills strategic reasoning hints into structured memory items for future reference.
+    -b. Memory Schema
+        -1. Each memory item includes:
+            -1) Title: concise identifier of the reasoning pattern or strategy.
+            -2) Description: one-sentence summary.
+            -3) Content: distilled reasoning steps, rationales, or operational insights.
+                These items are both human-readable and LLM-usable.
+    -c. Integration with Agents
+        The integration process consists of three stages:
+        -1. Memory Retrieval
+            -1) Retrieve top-k relevant memory items using embedding-based similarity search.
+            -2) Inject retrieved memories into system prompts to ground reasoning.
+        -2. Memory Construction
+            -1) After task completion, obtain proxy correctness signals using LLM-as-a-judge (Gu et al., 2024) to label success/failure.
+            -2) Successful cases yield validated strategies; failed ones yield counterfactuals and pitfalls.
+            -3) Multiple items are extracted per trajectory (details in Appendix A.1).
+        -3. Memory Consolidation
+            -1) Add new items into ReasoningBank (Appendix A.2).
+            -2) The system thus evolves continuously in a closed feedback loop:
+            | Experience → Task Execution → Memory Extraction → Repository Update → Improved Future Performance.
+
+3.3 MaTTS: Memory-aware Test-Time Scaling
+    -a. Motivation
+        -1. ReasoningBank allows agents to learn from accumulated experiences.
+        -2. Test-Time Scaling (TTS) (Snell et al., 2025) allocates more inference-time compute for exploration, producing richer trajectories.
+        -3. Naive combination of TTS + ReasoningBank (Figure 3a) simply yields more memory items but fails to exploit contrastive signals from redundant exploration.
+    -b. Proposed Method
+        --. Memory-aware Test-Time Scaling (MaTTS) integrates contrastive learning into TTS:
+            -1) Leverages both successful and failed trajectories to curate higher-quality memories.
+            -2) Two complementary variants:
+        -1. Parallel Scaling
+            -1) Generate multiple trajectories per query with guidance from retrieved memory.
+            -2) Use self-contrast (Chen et al., 2020) to compare trajectories, identifying consistent reasoning patterns and filtering spurious ones.
+            -3) Encourages diverse exploration and robust memory extraction.
+        -2. Sequential Scaling
+            -1) Apply self-refinement (Madaan et al., 2023) iteratively within one trajectory.
+            -2) Intermediate notes from refinement (reasoning corrections, insights) are stored as memory signals.
+            -3) Captures implicit reasoning dynamics not visible in final outputs.
+        Define scaling factor k = number of parallel trajectories or refinement steps.
+        Both scaling modes, when combined with ReasoningBank, ensure that extra computation at test time directly translates into more transferable and 
+        higher-quality memory for continual improvement.
+
+** Key Insight
+   MaTTS + ReasoningBank forms a self-evolving agent architecture that unifies:
+   -a. Experience distillation (ReasoningBank)
+   -b. Contrastive self-improvement (MaTTS)
+       → enabling lifelong, unsupervised test-time learning for LLM agents.
+
+
