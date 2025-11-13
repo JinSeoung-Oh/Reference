@@ -1,0 +1,56 @@
+### From https://pub.aimind.so/guide-to-compressing-machine-learning-models-0adc83d1296d
+
+1. Purpose & Scope
+   -a. Move beyond prototype-phase accuracy-only thinking to a production mindset that balances latency, throughput, and memory with accuracy.
+   -b. Model compression reduces parameters and compute while minimizing performance loss.
+   -c. Four pillars covered (theory → practice): Knowledge Distillation, Pruning, Low-Rank Factorization, Quantization.
+
+2. Why Compression
+   -a. Benchmarks reward max accuracy, but production cares about speed, footprint, cost.
+   -b. Real-time systems (voice assistants, recommenders) need near-instant responses, elastic scaling, and edge feasibility.
+   -c. Compression improves latency, throughput, memory footprint, and infrastructure cost.
+
+3. Runtime Metrics to Track
+   -a. Inference Latency: end-to-end time. Decomposed as T_compute vs T_memory; often latency = max(T_memory, T_compute). 
+                          Smaller weights / lower precision reduce both compute and memory traffic.
+   -b. Throughput: predictions per second; driven by batching, parallelism, and request concurrency. Lower complexity → higher throughput.
+   -c. Model Footprint: RAM/VRAM for weights, activations, buffers. Precision cuts matter (FP32 vs INT8 → ~4× smaller).
+
+4. Case Study: Netflix Prize
+   -a. The winning 10% accuracy improvement was not deployed due to complexity and cost.
+   -b. In production, minor accuracy loss can be outweighed by large gains in latency, cost, and maintainability.
+
+5. The Four Compression Techniques
+   -a. Knowledge Distillation
+      -1. Transfer a large teacher’s behavior (soft probabilities) to a smaller student to mimic the distribution.
+      -2. Works for classification, regression, and generative models.
+      -3. Example: DistilBERT—~97% of BERT’s language understanding, 40% smaller, 60% faster inference (up to 71% on mobile).
+      -4. Goal: comparable utility with much smaller compute/footprint.
+   -b. Pruning
+       -1. Remove weights/neurons/filters with marginal contribution to predictions.
+       -2. Unstructured (weight) pruning: zero out near-zero weights.
+           -1) Big parameter reduction; real speedups depend on sparse-compute hardware.
+       -3. Structured (unit/channel/layer) pruning: drop whole units; changes topology.
+           -2) Yields real speedups on standard hardware; requires careful importance metrics.
+       -4. Variations: activation-based (always-off neurons), redundancy-based (highly similar neurons).
+       -5. Combined gains (with quantization):
+           -1) AlexNet: 9× smaller (~3× faster) → 35× with quantization.
+           -2) VGG16: 13× → 49× with quantization.
+   -c. Low-Rank Factorization
+       -1. Many weight matrices are overparameterized; low effective rank allows approximation.
+       -2. Use SVD/Tucker: W ≈ U Σ Vᵀ; pick rank k to balance fidelity vs size.
+       -3. Reported gains: 30–50% inference speed-ups on dense layers.
+       -4. Costs: decomposition + fine-tuning; k selection is empirical.
+   -d. Quantization
+       -1. Reduce precision for weights/activations (FP32 → FP16/INT8/INT4/…).
+       -2. PTQ: convert after training—fastest to deploy; may lose some accuracy.
+       -3. QAT: simulate quantization during training—higher accuracy, extra training cost.
+       -4. Synergy with pruning: dramatic size reductions (e.g., 35× on AlexNet, 49× on VGG16), enabling edge/low-power use.
+6. Takeaways
+   -a. Production viability = accuracy × (latency, throughput, footprint). Optimize all.
+   -b. The four techniques are complementary; combining them often yields the largest wins.
+   -c. In real systems, lighter, faster, maintainable models often beat marginally more accurate ones.
+
+
+
+
