@@ -1,0 +1,122 @@
+### From https://medium.com/ai-exploration-journey/taming-chaotic-layouts-sft-layout-centric-rl-for-document-understanding-a7ac492237f0
+
+1. Motivation: Why Reading Order Is Still Hard in Document Understanding
+   Complex document layouts—such as multi-column newspapers, posters, and dense scientific PDFs—remain one of the most difficult challenges in document understanding. 
+   While large vision–language models (LVLMs) have improved OCR and multimodal reasoning, 
+   they still struggle to preserve natural reading order and global document structure when layouts become non-trivial.
+
+   The root cause lies in how most LVLMs are trained. Standard training paradigms emphasize token-level alignment between text and vision, 
+   but provide no explicit supervision for higher-level structural concepts, such as paragraph grouping, spatial zones, or sequential reading flow. 
+   As a result, models may produce outputs that appear locally correct (accurate tokens and bounding boxes) while being globally incorrect in how a human would
+   read the document.
+
+   Two major pain points are identified:
+   -a. Structural blindness in standard SFT
+       Supervised fine-tuning with cross-entropy loss does not penalize global layout errors. 
+       A model can scramble paragraph order or slightly misalign bounding boxes without incurring significant loss, as long as token-level accuracy remains high. 
+       This leads to outputs that look correct superficially but violate the logic of human reading.
+   -b. Insufficient visual fidelity for dense layouts
+       Many LVLMs rely on coarse image–text alignment or fixed-resolution inputs. This works for large, clean text, but fails on documents with small fonts, 
+       dense layouts, or subtle structural cues—exactly the cases where reading order matters most.
+
+2. Core Idea: Treat Reading Order as a First-Class Training Objective
+   The proposed solution, Logics-Parsing, introduces a fundamentally different perspective: instead of treating reading order as a side effect of good OCR, 
+   it is elevated to a primary optimization target.
+
+   The approach follows a clear two-stage philosophy:
+   -a. First, ensure the model sees and copies correctly (visual clarity, spatial alignment, structured output).
+   -b. Then, teach it to read like a human, optimizing not just correctness, but logical flow and reading order.
+
+3. Overall Pipeline: Two-Stage Training Framework
+   Logics-Parsing is built on top of Qwen2.5-VL-7B-Instruct and consists of two distinct training stages:
+   -a. Stage 1: Supervised Fine-Tuning (SFT)
+       The goal of this stage is to establish a strong foundation:
+       -1. Accurate text recognition
+       -2. Stable spatial alignment
+       -3. Consistent structured output
+       The model is trained to generate unified HTML outputs, which naturally encode hierarchical structure and spatial relationships. 
+       HTML is chosen because it makes layout explicit, supports visualization, and allows precise evaluation of structure and reading order.
+   -b. Stage 2: Layout-Centric Reinforcement Learning (LC-RL)
+       Once the model reliably produces structured outputs, it is further optimized using reinforcement learning to improve human-like reading behavior. 
+       This stage explicitly rewards correct reading order and penalizes unnatural reading flows.
+       The RL stage uses GRPO (Group Relative Policy Optimization) and focuses on correcting global structural errors that SFT alone cannot address.
+
+4. Data Pipeline: Multimodal, Layout-Focused, and Two-Stage by Design
+   -a. SFT Dataset Construction
+       The SFT dataset is drawn from diverse and layout-challenging sources, including:
+       -1. Table-centric datasets: FinTabNet, TNCR, PubTabNet
+       -2. Domain-specific layouts: ChEBI-20-MM (chemistry)
+       -3. Full-page OCR data: olmOCR-mix-0225
+
+       Annotations are produced through a three-step loop:
+       - Automatic extraction
+       - Correction by expert models
+       - Manual human verification
+      Approximately 10,000 pages are carefully hand-labeled, with special emphasis on correct reading order, to ensure coverage of genuinely difficult cases.
+
+5. LC-RL Dataset Construction: Mining “Almost Correct” Samples
+   Rather than relying on large-scale data, the RL stage focuses on high-quality, small-batch training.
+   In addition to human-annotated hard cases, the authors mine a special category of samples from the SFT model’s outputs:
+   -a. Outputs with normalized edit distances between 0.5 and 0.8
+   -b. These samples are neither completely wrong nor fully correct
+   These “almost correct” cases—where reading order or structure is subtly incorrect—are particularly informative. 
+   Around 8,000 pages of such samples form the core training set for LC-RL.
+
+6. Stage 1 Details: SFT for Structural Stability
+   During SFT:
+   -a. Only the LLM component is fine-tuned
+   -b. The vision encoder and projector are frozen
+   -c. Training uses:
+       -1. Batch size: 256
+       -2. Learning rate: 2e-5
+       -3. Epochs: 1
+
+   The objective is not aggressive optimization, but stability and consistency:
+   -a. Reliable HTML generation
+   -b. Precise spatial alignment
+   -c. Clean structural organization
+   The result is a baseline model, Logics-Parsing-SFT, which can see clearly and structure content correctly, but does not yet fully master reading order.
+
+7. Stage 2 Details: Layout-Centric Reinforcement Learning (LC-RL)
+   LC-RL introduces a reward function that explicitly models how humans read documents.
+   At each RL step:
+   -a. The model generates an HTML output.
+   -b. The output is parsed into:
+       -1. Text elements
+       -2. Bounding boxes
+   -c. The output is scored using a three-component reward:
+
+   Reward Components
+   -a. Text Accuracy
+       -1. Measured using the negative normalized Levenshtein distance
+       -2. Ensures character-level fidelity
+   -b. Bounding Box Alignment
+       -1. Evaluates how well predicted boxes match ground truth
+       -2. Encourages spatial correctness
+   -c. Reading Order
+       -1. A custom-designed penalty discourages paragraph skipping and unnatural jumps
+       -2. Directly targets non-human reading flows
+       This reward structure shifts optimization away from purely local correctness toward global layout coherence.
+
+
+8. Qualitative Analysis: Reading Order in Practice
+   Qualitative comparisons show that:
+   -a. The RL-trained model produces reading sequences that closely match ground truth
+   -b. Predicted reading paths align smoothly with human reading logic
+   -c. Visualizations highlight reduced paragraph jumping and improved narrative flow
+   These results confirm that LC-RL effectively instills a sense of order beyond what SFT alone can achieve.
+
+9. Reflections and Limitations
+   The Logics-Parsing approach follows a clear and practical strategy:
+   -a. Establish reliable perception and structure with SFT
+   -b. Refine reading logic with layout-centric RL
+
+   The reward design is transparent and intuitive, and consistently improves reading flow.
+   However, a limitation is noted in the linear combination of reward terms. 
+   When layout density or font size varies significantly, fixed reward weights can become imbalanced, 
+   causing the model to over-optimize one aspect at the expense of others.
+  
+   Potential future improvements suggested in the text include:
+   -a. Hierarchical or Pareto-style multi-objective optimization, where each reward retains its identity
+   -b. Defining reading order loss using topological distances on a layout graph, which could provide a more layout-aware and robust training signal
+
