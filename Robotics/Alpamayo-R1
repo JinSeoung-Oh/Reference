@@ -1,0 +1,203 @@
+### From https://arxiv.org/pdf/2511.00088
+
+1. Building a Reasoning-Capable VLA Architecture
+   Building a Vision–Language–Action (VLA) model that is suitable for autonomous driving requires capabilities that go significantly 
+   beyond those of existing general-purpose Vision–Language Models (VLMs). 
+   While recent VLMs demonstrate strong multimodal understanding, they are not designed to handle the structural, temporal, causal, 
+   and real-time constraints inherent to driving.
+
+1.1 Limitations of Existing VLMs for Autonomous Driving
+    Several fundamental gaps prevent standard VLMs from being directly applicable to autonomous vehicle (AV) decision-making:
+    -a. Multi-camera and multi-timestep perception
+        Autonomous vehicles rely on synchronized observations from multiple cameras over time to achieve full 360-degree situational awareness. 
+        However, most VLMs process images or video frames independently, without explicit temporal reasoning or cross-view integration. 
+        When naively applied to multi-camera setups, this leads to prohibitively large token counts that make real-time inference infeasible.
+    -b. Lack of causally structured reasoning
+        Driving decisions must be justified through causally grounded reasoning rather than free-form narrative descriptions. 
+        The model must explain why a maneuver is safe and legal, based solely on observable evidence within the historical context window, 
+        rather than speculative or descriptive language.
+    -c. Inefficient trajectory generation
+        Generating future driving trajectories by autoregressively decoding waypoints as text tokens is inefficient and unsuitable for control. 
+        Such representations lack explicit geometric and kinematic constraints, which are essential for safe and stable vehicle motion.
+    -d. Reasoning–action misalignment in safety-critical cases
+        To ensure robustness in long-tail scenarios, the model’s reasoning traces must be aligned with the actual actions executed by the vehicle. 
+        Explanations that do not correspond to behavior undermine both safety and interpretability.
+
+1.2 Alpamayo-R1 (AR1): A Modular Reasoning VLA
+    To address these challenges, the paper introduces Alpamayo-R1 (AR1), a modular VLA architecture that extends Alpamayo-VA by tightly integrating reasoning
+    with action prediction for autonomous driving.
+    -a. Design Philosophy
+        AR1 is designed with flexibility and modularity as core principles:
+        -1. It can incorporate any off-the-shelf VLM backbone.
+        -2. Domain-specific components are introduced for efficient vision encoding and real-time action decoding.
+        -3. The architecture explicitly bridges high-level reasoning and low-level vehicle control.
+    This modular approach allows AR1 to benefit from advances in large-scale vision–language pretraining while adapting them to the stringent
+    requirements of onboard autonomous driving.
+
+1.3 Problem Formulation
+    Given a sequence of past observations up to time 𝑇, denoted by 𝑜, AR1 performs both reasoning and future trajectory prediction.
+    The observation sequence consists of:
+    -a. Multi-camera images 𝑜_image
+    -b. Ego-motion history 𝑜_egomotion
+
+    The task is formulated as a sequential prediction problem, where the complete sequence is:
+    [𝑜_image,𝑜_egomotion,Reason,𝜏]
+    Each component is conditioned on all previous components.
+
+    By default, the model predicts a 6-second future trajectory:
+    𝜏={(𝑥_𝑖,𝑦_𝑖,𝜃_𝑖yaw)}^64 _𝑖=1
+​    where waypoints are sampled at 10 Hz in the ego-vehicle coordinate frame
+
+    Instead of directly predicting positional waypoints, AR1 adopts a control-based representation using unicycle dynamics, with control inputs:
+    𝑎={(𝑎_𝑖,𝜅_𝑖)}^64 _𝑖=1
+    where 𝑎_𝑖 is acceleration and 𝜅_𝑖 is curvature. This representation is used throughout training and inference to improve stability and control fidelity.
+
+1.4 End-to-End Architecture
+    AR1 processes multi-camera, multi-timestep visual observations, optionally augmented with textual inputs such as user commands or navigation instructions.
+    All inputs—including ego-motion history—are tokenized into a unified multimodal token sequence in a predefined order. 
+    This sequence is fed into the Cosmos-Reason backbone, which outputs:
+    -a. Structured reasoning traces,
+    -b. Meta-actions,
+    -c. Predicted future trajectories.
+   Training proceeds in multiple stages, combining supervised fine-tuning (SFT) and reinforcement learning (RL).
+
+1.5 VLM Backbone: Cosmos-Reason
+    AR1 adopts Cosmos-Reason as its VLM backbone. Cosmos-Reason is a Physical AI–oriented VLM post-trained on:
+      -1. 3.7 million Visual Question Answering (VQA) samples to develop physical commonsense and embodied reasoning,
+      -2. 24.7K curated driving-focused video VQA samples, including scene descriptions, difficulty annotations, and reasoning traces distilled from DeepSeek-R1.
+
+    -a. Domain-Specific Supervised Fine-Tuning
+        To further adapt Cosmos-Reason for autonomous driving:
+        -1. Additional datasets spanning multiple Physical AI domains (robotics, healthcare, smart cities, manufacturing, retail, logistics) are introduced.
+        -2. For autonomous driving specifically, 100K new samples are added with annotations for:
+            - Critical environmental objects,
+            - Causally grounded reasoning explaining the next driving action.
+        Driving data is curated using both human labeling and automated labeling:
+        -1. Human-labeled data provides high-quality annotations covering environmental conditions, traffic rules, ego behaviors, critical objects, and causal explanations.
+        -2. Automatically labeled data leverages teacher VLMs (e.g., Qwen3-VL) prompted with driving-specific priors to scale ego-behavior reasoning and prediction.
+
+1.6 Domain-Specific Adaptations
+    Despite a strong backbone, two major gaps remain for real-world deployment: efficient vision encoding and precise trajectory decoding.
+
+1.6.1 Vision Encoding
+      The goal of vision encoding is to minimize token count while preserving essential semantic information.
+      -a. Single-Image Tokenization
+          AR1’s default tokenizer follows the ViT paradigm:
+          -1. Images are split into patches and encoded as tokens.
+          -2. Example: a 448×280 image yields 160 tokens after downsampling.
+          While simple, this approach scales linearly with resolution and camera count.
+      -b. Multi-Camera Tokenization
+          To support 360-degree perception, AR1 integrates efficient multi-camera tokenizers based on triplane representations:
+          -1. Multiple camera views are encoded into a shared 3D inductive representation.
+          -2. Token count becomes independent of camera number and resolution.
+          -3. Example: a 7-camera setup requires only 288 tokens per timestep (~41 tokens per image), a 3.9× reduction.
+          This efficiency is achieved without significant degradation in driving performance.
+      -c. Multi-Camera Video Tokenization
+          To further reduce redundancy:
+          -1. AR1 supports video tokenizers that jointly encode multiple cameras across time.
+          -2. The Flex tokenizer compresses spatiotemporal tokens using full self-attention and fixed query vectors.
+          -3. This approach achieves up to 20× token compression relative to single-image tokenization, while maintaining or improving downstream driving metrics.
+          Additional token reduction can be achieved via post-training pruning techniques such as SparseVILA.
+
+1.6.2 Trajectory Decoding
+      Extending VLMs to physical action generation introduces several constraints:
+         -1. High-fidelity, multimodal action representation,
+         -2. Real-time decoding,
+         -3. Seamless integration with VLM training.
+
+      -a. Control-Based Representation
+          Direct prediction of positional waypoints is sensitive to sensor noise and harms convergence. Moreover, downstream controllers already smooth trajectories.
+          AR1 therefore adopts a unicycle dynamics–based control representation, using acceleration and curvature as control inputs. 
+          Euler discretization is applied with a timestep of 0.1s.
+
+          During training:
+          -1. Ground-truth control sequences are derived from trajectories via least-squares estimation with Tikhonov regularization to suppress high-frequency noise.
+          
+          During inference:
+          -1. Predicted controls are integrated forward to obtain trajectories.
+
+          Dual Representation Strategy
+          AR1 employs a dual representation:
+          -1. Discrete tokens during training for unified autoregressive learning of reasoning and action,
+          -2. Continuous decoding during inference via a flow-matching action expert.
+
+          This strategy:
+          -1. Enables tight coupling between reasoning and action,
+          -2. Facilitates RL optimization,
+          -3. Ensures physically feasible, multimodal trajectories,
+          -4. Allows fast, real-time inference.
+        
+          The flow-matching action expert follows a Transformer architecture and is trained using conditional flow matching. 
+          Gradients from the expert are stopped from propagating into the VLM backbone.
+
+3. Chain of Causation (CoC) Dataset
+   -a. Motivation
+       Existing Chain-of-Thought datasets for autonomous driving suffer from:
+       -1. Vague behavior descriptions weakly correlated with trajectories,
+       -2. Superficial reasoning lacking causal links to ego behavior,
+       -3. Causal confusion due to inclusion of future information.
+   -b. Core Principles
+       The Chain of Causation (CoC) dataset enforces:
+       -1. Explicit driving decisions,
+       -2. Causal factors strictly drawn from the observable history window,
+       -3. Direct alignment between reasoning and low-level trajectories.
+
+3.1 Structured CoC Representation
+    Each CoC sample consists of three components:
+    -a. A closed-set driving decision (longitudinal and/or lateral),
+    -b. A set of critical components (open-ended causal factors),
+    -c. A composed natural-language reasoning trace.
+   Driving decisions are selected from a predefined taxonomy and directly correspond to control intent, eliminating ambiguity.
+
+   The structured protocol enforces:
+   -a. Decision grounding,
+   -b. Causal locality,
+   -c. Annotation economy.
+
+2.2 Data Curation
+    Only clips with clear causal decision points are annotated:
+    -a. Reactive scenarios: immediate responses to events,
+    -b. Proactive scenarios: anticipatory decision-making.
+
+    Keyframes are carefully selected:
+    -a. For reactive cases, shortly before the behavior change,
+    -b. For proactive cases, over a keyframe range representing deliberation.
+    This separation prevents causal leakage.
+
+3.3 Hybrid Labeling and Evaluation
+    -a. Human Labeling
+        A two-stage process ensures causal integrity:
+        -1. Identification of causal factors from the historical window,
+        -2. Decision selection and reasoning composition.
+        Rigorous QA includes cross-checking and auditing.
+    -b. Auto-Labeling
+         -1. Meta-action transitions are detected via rule-based methods.
+         -2. VLMs (e.g., GPT-5) generate structured CoC annotations using both video and auxiliary signals.
+         -3. Causal factors are restricted to history; future information resolves modality and decision selection.
+    Evaluation
+    A hybrid evaluation strategy combines human verification with LLM-based grading using structured True/False checks. 
+    This approach achieves 92% alignment with human judgments and improves causal relationship scores by 132.8% over free-form reasoning.
+
+5. Training Strategy
+    AR1 is trained in three stages:
+    -a. Action modality injection,
+    -b. CoC-based supervised fine-tuning,
+    -c. RL-based post-training.
+
+5.1 Action Modality Injection
+    Discrete control tokens are used during training for unified autoregressive learning. 
+    Continuous trajectories are decoded via a flow-matching expert at inference, enabling efficient real-time control.
+
+5.2 Eliciting Reasoning via SFT
+    SFT on the CoC dataset teaches the model to generate causally grounded reasoning aligned with expert trajectories. 
+    However, SFT alone suffers from data noise, limited generalization, hallucination, and reasoning–action inconsistency.
+
+5.3 RL-Based Post-Training
+    RL addresses these limitations by optimizing:
+    -a. Reasoning quality (via large reasoning model critics),
+    -b. Reasoning–action consistency,
+    -c. Low-level trajectory quality.
+
+    GRPO is used as the optimization algorithm, with KL regularization to stabilize learning.
+    A curated RL dataset prioritizes samples where the model’s implicit preferences conflict with external rewards, improving alignment efficiency.
+    A customized Cosmos-RL infrastructure enables scalable, distributed multimodal RL training.
