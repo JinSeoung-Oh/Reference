@@ -1,0 +1,102 @@
+### From https://pub.towardsai.net/hierarchical-reasoning-what-happens-when-ai-stops-thinking-out-loud-e25676afeecf
+
+1. Limitations of Current Reasoning Models and the Motivation for HRM
+   Modern reasoning language models such as DeepSeek and Qwen rely heavily on explicit Chain-of-Thought (CoT) reasoning. 
+   By performing intensive planning, decomposition, self-reflection, and step-by-step reasoning, they achieve strong performance on complex tasks.
+
+   Their primary benefit lies in interpretability from a human perspective: while the internal reasoning of the model remains opaque, 
+   the generated “thinking traces” allow users to observe how an answer is derived.
+
+   However, this transparency introduces severe drawbacks:
+   -a. Computational cost: Verbalising every reasoning step requires multiple forward passes during inference and complex multi-step supervision during training, 
+                           scaling poorly with task complexity.
+   -b. Latency: Each reasoning token delays the final output, trading user experience for accuracy.
+   -c. Error propagation: A single mistake early in the chain can derail the entire reasoning process, with errors compounding across steps and making recovery fragile.
+
+   A promising alternative is latent reasoning, where reasoning occurs in an internal representation space rather than natural language. While less interpretable, 
+   such latent spaces are better aligned with deep learning and offer gains in both efficiency and robustness.
+   Hierarchical Reasoning Models (HRM) are built around this idea, inspired by the fact that humans do not fully verbalise their reasoning.
+
+2. Biological Inspiration: Fast and Slow Systems in the Brain
+   The human brain does not allocate the same resources to tying shoelaces as it does to solving differential equations. 
+   Cognitive science explains this through a dual-system architecture:
+   -a. Fast system (System 1): Handles simple, familiar tasks quickly and cheaply.
+   -b. Slow system (System 2): Engages only for novel, complex, or creative tasks, consuming significant energy.
+
+   The brain maximises efficiency by using the cheap system first and escalating only when necessary.
+   HRM translates this principle into deep learning by employing two networks operating at different update frequencies, which recursively interact with each other.
+
+3. HRM’s Dual-Network Architecture
+   HRM consists of two bidirectionally interacting recurrent networks, each maintaining an inner state updated through output embeddings.
+   -a. Input encoder (I): Converts tokenised input x into an embedding, independent of the two reasoning networks.
+   -b. Low-Level Network (L):
+       -1. Invoked frequently.
+       -2. Processes the input embedding x along with its own and the high-level inner state.
+       -3. Corresponds to the high-frequency, fast system.
+   -c. High-Level Network (H):
+       -1. Invoked less frequently.
+       -2. Operates only on the inner states of both networks, without direct access to input data.
+       -3. Represents the low-frequency, slow system, operating purely in abstract thought space.
+   L maintains grounded contact with the input, while H adjusts global reasoning strategies based on accumulated information from L.
+
+4. Thought Scheduling: Inner and Outer Cycles
+   HRM organises computation through two nested cycles:
+   -a. Inner cycle (T): Number of times L updates its inner state before invoking H.
+   -b. Outer cycle (N): Number of times H updates its inner state.
+
+   Thus, L performs T × N updates, while H performs N updates per segment.
+   Each outer cycle triggers a forward pass. The entire computation unit is called a segment, which represents a reasoning step.
+
+5. Deep Supervision Across All Steps
+   Deep supervision computes supervised loss from the output head for every high-level state. Instead of training only on the final state, 
+   HRM sums losses across all high-level updates before backpropagation.
+   This ensures that every low-level update contributes to learning.
+   However, naive backpropagation would create an enormous computational graph, which necessitates a solution.
+
+6. The Detachment Trick: Preventing Computational Explosion
+   Without intervention, all segments would be connected into a single graph, leading to vanishing or exploding gradients.
+   HRM resolves this by:
+   -a. Computing losses for a segment,
+   -b. Detaching the final inner states of both L and H,
+   -c. Performing backpropagation independently for that segment.
+
+   This creates a gradient barrier between segments while preserving gradient flow within each segment.
+
+7. Q-head: Adaptive Halting via Reinforcement Learning
+   HRM includes a Q-head, a learned halting mechanism. After each segment, the Q-head inspects the final high-level state and decides
+   whether to continue reasoning or halt and output an answer.
+
+   Training uses Q-learning:
+   -a. Correct answers with fewer segments are rewarded.
+   -b. Premature halting with incorrect answers is penalised.
+
+   This allows HRM to dynamically balance efficiency and accuracy.
+
+8. End-to-End Reasoning Flow
+   Each segment:
+   -a. Executes N high-level cycles, each with T low-level updates.
+   -b. Uses all high-level states for forward passes and the final one for prediction.
+   -c. Detaches final states to isolate computation.
+   -d. Performs independent backpropagation.
+   -e. Relies on the Q-head to determine the number of segments.
+
+   Thus, HRM learns both what to think and how long to think.
+
+9. Why HRM’s Recurrence Works Where RNNs Failed
+   Traditional RNNs struggled due to strict sequential processing, poor parallelisation, and gradient instability.
+   HRM differs fundamentally:
+   -a. Recurrence operates over abstract reasoning states, not input tokens.
+   -b. Gradient flow is controlled via detachment.
+   -c. Local inner-state updates explore reasoning paths, while weight updates store global knowledge.
+   -d. Memory and compute costs remain bounded.
+
+   This removes the sequential constraints that plagued earlier recurrent models.
+
+10. Beyond Transformers: Hierarchical AI Architectures
+    HRM reflects a broader architectural shift away from monolithic Transformer stacks toward hierarchies of interacting modules operating
+    at different speeds and abstraction levels.
+    Similar patterns appear in hierarchical memory transformers, hierarchical vision models, and latent recurrent reasoning systems.
+    This direction directly addresses core Transformer limitations: inefficient long-context handling, unstable deep computation, 
+    and the high cost of explicit chain-of-thought.
+    If this trend continues, “Transformer-based” models will increasingly resemble societies of interacting modules rather than a single unified stack.
+
