@@ -1,0 +1,168 @@
+### https://advanced.onlinelibrary.wiley.com/doi/10.1002/adrr.202500072
+
+1. Motivation: Why LLM-Based Robot Planning Still Fails in Practice
+   Recent Large Language Models (LLMs) demonstrate strong generalization abilities for robotic task planning, 
+   often generating coherent step-by-step plans for unseen tasks without retraining. 
+   Models such as GPT-5 can decompose high-level goals into natural language instructions across simulated and real-world environments. 
+   However, despite their semantic strength, LLM-based planners frequently fail during execution due to insufficient grounding in the physical environment.
+   A canonical example is a task like “Make me a coffee.” While an LLM may generate a plausible sequence of actions, 
+   it often omits critical intermediate steps required by physical constraints (e.g., opening doors, switching appliances on), 
+   or fails to adapt when required objects are missing. These failures arise because traditional LLM planners operate largely in an open-loop fashion, 
+   producing plans without robust mechanisms for incorporating execution feedback.
+
+   Existing work has attempted to mitigate this issue using heuristics, assertion-based checks, symbolic planning formalisms (e.g., PDDL), 
+   or human-in-the-loop corrections. 
+   While effective in constrained settings, such approaches often require heavy domain engineering, static world models, or manual intervention, 
+   limiting their scalability and autonomy—especially for long-horizon tasks.
+
+2. Core Idea: BrainBody-LLM
+   The paper introduces BrainBody-LLM, a hierarchical robotic task planning framework inspired by the human neural system. 
+   The key idea is to explicitly separate semantic reasoning from low-level control, while tightly coupling both through a closed-loop feedback mechanism.
+
+   Instead of relying on a single LLM to perform planning, execution, and correction simultaneously, BrainBody-LLM decomposes responsibility across two interacting LLMs:
+   -a. Brain-LLM: responsible for high-level reasoning, task decomposition, and replanning.
+   -b. Body-LLM: responsible for translating high-level steps into executable low-level action primitives.
+   This separation mirrors the division between cognitive planning and motor execution in humans, allowing each component to specialize while remaining coordinated.
+
+3. Key Contributions
+   1. Two-LLM Hierarchical Planning Architecture
+      BrainBody-LLM introduces a principled alternative to heuristic-driven or monolithic LLM planners by explicitly disentangling reasoning and control:
+      -a. The Brain-LLM interprets the task description and current environment state to synthesize physically feasible high-level plans expressed in natural language.
+      -b. The Body-LLM converts each high-level step into syntactically valid low-level commands following a predefined action grammar (e.g., <robot> <action> <object>).
+      This design avoids brittle rule-based filtering while maintaining compatibility with both simulation and real robotic systems.
+
+2. Closed-Loop Feedback for Robust Execution
+   A central contribution is the integration of execution feedback into the planning loop. When an action fails—due to missing objects, 
+   invalid preconditions, or controller errors—the resulting error messages are fed back to the Brain-LLM.
+   Rather than relying on boolean assertions, the system:
+   -a. Interprets raw simulator or controller error messages,
+   -b. Converts them into natural language explanations,
+   -c. Uses these explanations to trigger localized replanning, starting from the point of failure rather than restarting the entire task.
+   This feedback-driven replanning enables the system to recover from execution failures autonomously, significantly improving robustness in long-horizon tasks.
+
+3. Validation Across Simulation and Real Hardware
+   -a. The approach is evaluated comprehensively:
+        VirtualHome benchmark (80 embodied tasks):
+        BrainBody-LLM improves average task success rate by 17% over state-of-the-art baselines.
+        Achieves 84% goal-condition recall, indicating better completion of multi-step objectives.
+    -b. Franka Research 3 robotic arm:
+        Successfully executes seven complex tasks in both high-fidelity simulation and real-world trials.
+        Demonstrates that modern LLMs can leverage raw execution errors to revise plans in real time, without domain-specific retraining.
+
+Relationship to Prior Work
+
+The paper carefully positions BrainBody-LLM relative to existing approaches:
+
+Unlike static planners (e.g., ProgPrompt), BrainBody-LLM does not merely check preconditions but actively modifies plans based on feedback.
+
+Unlike dynamic planners relying on PDDL, knowledge graphs, or handcrafted world models, it avoids symbolic engineering and works directly with environment states and error messages.
+
+Unlike human-in-the-loop systems, it enables fully autonomous replanning.
+
+Compared to prior two-LLM approaches, BrainBody-LLM eliminates reliance on scene graphs or manual filtering, directly conditioning planning on raw state and execution feedback.
+
+Formal Problem Formulation
+
+The task planning problem is formalized as follows:
+
+Input:
+
+Natural language task description 
+𝑇
+T,
+
+Environment state 
+𝑆
+𝑡
+S
+t
+	​
+
+, including:
+
+Perceived objects,
+
+Available action primitives,
+
+Relational attributes and object states.
+
+Objective:
+
+Generate a sequence of low-level actions that transitions the environment from initial state 
+𝑆
+0
+S
+0
+	​
+
+ to a goal state 
+𝑆
+𝑔
+S
+g
+	​
+
+ satisfying 
+𝑇
+T.
+
+Key assumptions:
+
+High-level plans, action mappings, and execution outcomes are not known a priori.
+
+Action outcomes are uncertain, necessitating adaptive replanning.
+
+Replanning is allowed up to a fixed number of feedback cycles 
+𝐾
+K.
+
+Prompt Design: Planning, Execution, and Feedback
+Planning Prompt (Brain-LLM)
+
+Provides:
+
+Environment constraints,
+
+Available objects and actions,
+
+Few-shot examples mapping tasks to high-level plans.
+
+Purpose:
+
+Encourage grounded, temporally coherent plan generation consistent with physical constraints.
+
+Execution Prompt (Body-LLM)
+
+Maps:
+
+Natural language steps → low-level action primitives.
+
+Includes a special <pass> token:
+
+Used when no executable action exists,
+
+Prevents execution oscillations and repeated failures caused by limited context windows.
+
+Feedback Prompt (Brain-LLM)
+
+Supplies:
+
+Execution error messages,
+
+Natural language explanations of failure,
+
+Previously completed steps.
+
+Constrains replanning to:
+
+Start from the point of failure,
+
+Preserve already executed actions.
+
+This mirrors real-world constraints where tasks cannot be restarted arbitrarily.
+
+Broader Significance
+
+BrainBody-LLM demonstrates that modern LLMs are not only capable of generating plans, but can also learn from execution failures when embedded in a structured feedback loop. The work suggests that LLMs can function as adaptive planners, not merely as static instruction generators.
+
+Importantly, the framework is perception-agnostic and can be extended with visual grounding modules without architectural changes, making it a scalable foundation for embodied AI.
