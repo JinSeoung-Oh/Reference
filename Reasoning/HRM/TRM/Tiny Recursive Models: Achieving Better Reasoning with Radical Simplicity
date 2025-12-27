@@ -1,0 +1,117 @@
+### From https://pub.towardsai.net/tiny-recursive-models-achieving-better-reasoning-with-radical-simplicity-cdf0c3282080
+
+This article begins with the question that followed the celebration of Hierarchical Reasoning Models (HRM)—a 27-million-parameter model 
+that defeated some of the hardest AI reasoning benchmarks: 
+“Where are the ablation studies?” HRM was introduced as a biologically inspired, hierarchical, reinforcement-learning-based reasoning model, 
+yet a subsequent study, Tiny Recursive Model (TRM), systematically removed nearly every component considered “essential” in HRM. 
+The result was an uncomfortable conclusion: most of those components were not actually necessary.
+The core significance of this comparison lies in clearly distinguishing which architectural choices truly drive reasoning performance
+and which merely add unnecessary complexity. 
+Most importantly, it highlights that the primary source of performance gains is Deep Supervision, not hierarchical structure or biological analogy.
+
+1. The Foundations and Design Philosophy of HRM
+   HRM is inspired by dual-process theory from cognitive psychology. Humans are understood to employ two decision-making systems: 
+   a fast, intuitive System 1 and a slower, deliberative System 2, switching between them depending on task complexity.
+   HRM translates this idea into a machine-learning architecture consisting of two models operating at different update frequencies:
+   -a. A low-level model (L) that directly processes input and updates frequently
+   -b. A high-level model (H) that updates more slowly and operates only on the internal states of both models
+
+   The two models interact via internal states 𝑧_𝑙 and 𝑧_ℎ, enabling hierarchical reasoning in latent space rather than through explicit chain-of-thought tokens.
+   With this design, HRM achieved strong performance on ARC-AGI benchmarks and also solved tasks such as Sudoku, mazes, and visual puzzles 
+   that challenge most language models.
+
+   However, the HRM paper lacked critical ablation studies that would isolate the contribution of each architectural component. 
+   As a result, it was unclear whether the performance gains were truly driven by biological inspiration or 
+   whether simpler alternatives could achieve the same results.
+
+2. TRM’s Critique and Experimental Strategy
+   TRM addresses this gap by systematically testing the assumptions underlying HRM. It asks:
+   -a. Are the chosen recursion cycles optimal or arbitrary?
+   -b. Does coordination between exactly two models matter?
+   -c. How do gradient detachment strategies affect performance?
+   -d. Is a reinforcement-learning-based stopping mechanism truly necessary?
+
+   TRM’s core objective is to simplify HRM as much as possible while preserving or improving performance.
+
+3. One Model Is Enough: One Model to Rule Them All
+   TRM observes that HRM’s two models do not differ in fundamental capability; they differ mainly in update frequency and input selection. 
+   The high-level state 𝑧_ℎ in HRM effectively plays the same role as the encoded answer 𝑦 in TRM.
+   Accordingly, TRM uses:
+   -a. A single model 
+   -b. One latent state 𝑧
+   -c. One encoded answer 𝑦
+
+   This model performs two types of recursion:
+   -a. Inner cycles (N): Update the latent state 𝑧 using the input 𝑥, current answer 𝑦, and current 𝑧 (Latent Recursion)
+   -b. Outer cycles (T): Update the encoded answer 𝑦 using 𝑦 and 𝑧 (Deep Recursion)
+
+   A crucial optimization is that T−1 recursions are executed without gradient computation using torch.no_grad(). 
+   Only the final recursion builds a computational graph. By strategically detaching 𝑦 and 𝑧, TRM creates many small, 
+   independent computational graphs per supervision step instead of a single massive graph spanning all recursions. 
+   This drastically reduces memory usage while preserving learning signals.
+
+   As a result, TRM achieves comparable or better performance than HRM with half the architectural components.
+
+4. Supervised Learning Instead of Reinforcement Learning
+   HRM uses reinforcement learning to train a Q-head that decides when to stop reasoning, enabling an adaptive computation budget. 
+   While elegant in theory, this introduces substantial training complexity.
+   TRM simplifies this mechanism:
+   -a. The Q-head follows a fixed Deep Supervision schedule
+   -b. Binary Cross-Entropy loss directly compares the current answer to ground-truth labels
+   -c. Strictly speaking, this component is no longer a Q-learning head
+   This approach removes the overhead of reinforcement learning while retaining the ability to stop early when convergence occurs. 
+   The fixed schedule also aligns well with standard deep-learning frameworks optimized for predictable computation patterns, 
+   making training more stable and easier to converge.
+
+5. The Real Driver of Performance: Deep Supervision
+   HRM’s own ablation results reveal a striking finding:
+   -a. Removing Deep Supervision drops ARC-AGI accuracy from 39% to 19% (a 20-point decrease)
+   -b. Removing hierarchical reasoning reduces accuracy by only 3 points
+   This demonstrates that Deep Supervision—not hierarchical coordination—is responsible for most of the performance gains.
+
+   In HRM, each high-level state 𝑧_ℎ contributes a loss term, providing training signals throughout the reasoning process. 
+   TRM makes Deep Supervision even more central by performing supervision at every Deep Recursion step, while backpropagating only through the final recursion.
+   -a. HRM: Accumulates many deep recursions and computes losses once, resulting in deep, heavy graphs
+   -b. TRM: Uses more frequent supervision with smaller graphs
+   This allows TRM to correct the reasoning process more directly and more often, leading to improved performance.
+
+6. How Many Inner States Are Needed?
+   TRM also investigates how many inner states should be preserved during recursion.
+
+   -a. Only One Inner State
+       When TRM retains only the latent state 𝑧 and removes the recurrent use of the encoded answer 𝑦, performance degrades. 
+       This shows that the model must track both “where we are” (latent state) and “what we have concluded so far” (encoded answer).
+   -b. Many Inner States
+       TRM also experiments with preserving all intermediate latent states [𝑧_0,𝑧_1,…,𝑧_(𝑛−1)] across Deep Supervision steps. 
+       However, every configuration beyond two states performs worse.
+       The conclusion is that exactly two inner states—𝑧 and 𝑦—form an optimal balance. More states introduce noise and overhead; 
+       fewer states remove necessary contextual information.
+
+7. The Remaining Challenge: Scaling  
+   While TRM demonstrates that simpler architectures can achieve excellent reasoning performance, scaling these models to large sizes remains an unresolved problem.
+   The main issue is not parameter count but the accumulation of gradients and computational graphs caused by recursion.
+   Even when the model itself fits comfortably in memory, gradients accumulated across recursion depth can trigger out-of-memory (OOM) errors. 
+   Existing distributed-training frameworks such as DeepSpeed are designed to shard large models, optimizer states, 
+   and gradients—but they are not built to handle recursion-induced graph accumulation.
+   As a result, a 1-billion-parameter recursive model may require more memory than a standard 7-billion-parameter model, solely due to recursion depth.
+
+8. Key Takeaways
+   This comparison between HRM and TRM offers several essential lessons for reasoning-model development:
+   -a. Simplicity wins
+       A single model, a simpler halt mechanism, and more Deep Supervision outperform complex hierarchical designs.
+   -b. Deep Supervision is the key
+       It contributes far more to performance than hierarchical structure.
+   -c. Two inner states are optimal
+       Both the latent state and encoded answer are indispensable.
+   -d. Biological inspiration is not required
+       What matters is recursive refinement with frequent supervision, not mimicking human cognition.
+   -e. Scaling remains unsolved
+       New distributed-training infrastructure is required to handle recursion efficiently.
+
+9. Looking Forward
+   The progression from HRM to TRM exemplifies healthy scientific methodology: propose a complex idea, systematically ablate components, 
+   identify what truly matters, and simplify accordingly.
+   The next frontier is not merely higher benchmark scores, but making such reasoning models practical at scale, which requires:
+   -a. Training frameworks specialized for recursion-heavy architectures
+   -b. A deeper understanding of supervision frequency and recursion depth
+   -c. Exploration of how these ideas transfer to general-knowledge language models
