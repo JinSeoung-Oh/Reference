@@ -1,0 +1,109 @@
+### From https://athekunal.medium.com/from-adamw-to-muon-optimizer-cf67d43fb9e9
+
+1. Purpose and background: why Muon
+   This article introduces the Muon optimizer, which was used to train the Kimi2 model (1T total parameters, 32B active parameters), 
+   and systematically explains why Adam and AdamW are no longer sufficient on their own. 
+   The author describes the loss curve produced by Muon as “a dream for every ML researcher,” 
+   emphasizing that Muon represents a meaningful advancement in stability, efficiency, and scalability for large-scale LLM training.
+
+2. Core mechanisms of Adam and AdamW
+   Adam is an optimizer that combines several successful ideas from earlier methods:
+   -a. First moment (momentum): a moving average of gradients
+   -b. Second moment (variance): a moving average of squared gradients, inspired by RMSProp
+   -c. Bias correction: compensating for the fact that both moments are initialized to zero
+   Bias correction prevents excessively small updates in the early stages of training and stabilizes optimization behavior.
+
+3. Regularization issues in Adam and the emergence of AdamW
+   In deep learning, regularization is typically implemented by adding L1 or L2 penalties to the loss, which should be equivalent to weight decay. 
+   However, in Adam, the adaptive moment scaling introduces extra factors that weaken the effect of weight decay, 
+   meaning regularization does not behave as intended.
+   AdamW fixes this issue by decoupling weight decay from the gradient computation and applying it directly to the parameter update. 
+   This effectively corrects the regularization behavior and ensures proper generalization control.
+
+4. Why a new optimizer is needed
+   Adam and AdamW suffer from several structural limitations:
+   -a. Memory overhead
+       -1. Both first and second moments must be stored in fp32/tf32
+       -2. This requires 8 additional bytes per parameter
+   -b. Communication overhead
+       -1. Computing moments requires gradient all-gather operations
+       -2. This becomes a bottleneck in large-scale distributed training
+   -c. Low-rank update behavior
+       -1. For 2D parameters in Transformers (FFN layers, QKV projections), updates tend to be nearly low-rank
+       -2. Updates are dominated by a small number of directions (high condition number)
+       -3. Rare but important directions are underrepresented during learning
+   This leads to the key question posed by the authors:
+   If we already normalize weights, activations, and layers, why don’t we normalize the gradients themselves?
+
+5. Core idea of the Muon optimizer
+   Muon abandons the dual-moment structure of Adam and instead adopts the following design:
+   -a. Only Nesterov momentum is maintained
+   -b. The momentum matrix is normalized before parameter updates
+   -c. This normalization enforces orthogonality in the update direction
+   Rather than dynamically rescaling gradients, Muon structurally reshapes the update geometry.
+
+6. Why Newton–Schulz instead of SVD
+   While Singular Value Decomposition (SVD) provides exact orthogonalization, its computational complexity 
+   𝑂(𝑚𝑛^2) makes it impractical for large feed-forward layers.
+
+   Muon instead uses the Newton–Schulz iterative method to perform approximate orthogonal normalization:
+   -a. Gradients are first max-norm normalized
+   -b. Tall matrices are transposed into “fat matrices” to reduce computation
+   -c. Five iterations are sufficient for convergence
+   -d. bfloat16 is used to reduce computational cost
+   This approach achieves efficient and scalable orthogonalization.
+
+7. Use of Nesterov momentum
+   Muon uses Nesterov momentum rather than standard SGD momentum:
+   -a. First move in the momentum direction
+   -b. Then incorporate the gradient
+   This leads to more stable updates and reduces batch-induced noise.
+
+8. Memory efficiency compared to Adam
+   -a. Adam / AdamW:
+       -1. Two buffers (first and second moments)
+       -2. 8 bytes per parameter
+   -b. Muon:
+       -1. One momentum buffer only
+       -2. 4 bytes per parameter
+       -3. 50% reduction in memory footprint
+    This difference is critical for training large language models.
+
+9. Theoretical interpretation of Muon
+   Muon’s updates can be understood as:
+   -a. Steepest descent under Schatten p-norm constraints
+   -b. Equivalent to normalizing singular values from an SVD perspective
+   -c. Static normalization leads to stable updates
+   In contrast, Adam’s dynamic adaptation can introduce instability across dimensions.
+
+10. Scaling Muon for large LLMs
+    To make Muon practical at scale, the authors introduce additional refinements:
+    10.1 Weight decay
+         Explicit weight decay is applied after observing that weights and RMS norms tend to grow with prolonged training.
+    10.2 Dimension-based scaling
+         Newton–Schulz normalization shrinks updates for larger matrices and enlarges them for smaller ones. 
+         To correct this imbalance, updates are scaled by the square root of matrix dimensions.
+    10.3 Matching AdamW RMS norms
+         Muon is applied only to linear matrix parameters. For embeddings, RMSNorm, and LM heads, AdamW is retained. 
+         To maintain consistency, Muon updates are scaled (≈0.2) to match AdamW RMS norms.
+
+11. Experimental observations
+    -a. SVD entropy is consistently higher for Muon than for AdamW
+        → Updates are distributed across more dimensions
+    -b. Pretraining with Muon yields best SFT performance when Muon is also used during SFT
+    This shows that the optimizer’s geometric properties have long-term effects on learning.
+
+12. Key takeaways
+    -a. Muon is memory-efficient and communication-efficient
+    -b. It avoids low-rank update collapse
+    -c. It produces stable loss curves at scale
+    -d. It resolves structural instabilities in Adam/AdamW through geometric normalization
+
+13. Conclusion
+    Muon is not merely another optimizer. It redefines gradient updates geometrically:
+    -a. Retains momentum
+    -b. Discards variance tracking
+    -c. Enforces structured, orthogonal update directions
+    As a result, Muon achieves stability, efficiency, and scalability simultaneously, making it particularly well-suited for training extremely large language models.
+
+
