@@ -1,0 +1,49 @@
+### From https://medium.com/@shouke.wei/python-libraries-for-robot-simulation-ffc5685b7209
+
+1. PyBullet
+   -a. Purpose: Physics-based robot simulation and reinforcement learning environment.
+   -b. Key Features:
+       -1. Realistic physics simulation (collisions, rigid body dynamics).
+       -2. Support for URDF/SDF robot models.
+       -3. Integrated with OpenAI Gym for RL experiments.
+
+2. ROS + Gazebo (via Python APIs)
+   -a. Purpose: Robot Operating System (ROS) integrates with Gazebo for full-featured 3D simulation.
+   -b. Key Features:
+       -1. Full robotics stack integration (sensors, control, navigation).  
+       -2. High-fidelity physics and sensor simulation.
+       -3. Python APIs (rospy) to control robots, run nodes, and process sensor data.
+   -c. Use Cases: Autonomous vehicles, robotic arms, multi-robot systems.
+
+3. V-REP / CoppeliaSim (Python Remote API)
+   -a. Purpose: Industrial and research robot simulation platform with Python bindings.
+   -b. Key Features:
+       -1. Multi-robot coordination and path planning.
+       -2. Real-time simulation and control.
+       -3. Sensor and vision simulation.
+   -c. Use Cases: Robotic manipulation, swarm robotics, mobile robots.
+
+4. Webots
+   -a. Purpose: Open-source mobile robot simulation platform with Python support.
+   -b. Key Features:
+       -1. High-quality 3D robot models.
+       -2. Built-in controllers using Python.
+       -3. Easy export of simulation data for analysis.
+   -c. Use Cases: Autonomous navigation, robot learning, multi-robot experiments.
+
+5. RoboPy / Klampt
+   -a. Klampt: Kinematics, dynamics, and motion planning library in Python.
+   -b. Purpose: Focus on planning, control, and physical simulation.
+   -c. Features:
+       -1. Robot kinematics/dynamics computations.
+       -2. Collision detection.
+       -3. Integrates with physics engines for motion simulation.
+
+6. Gym and Reinforcement Learning Simulators
+   -a. OpenAI Gym Robotics:
+       -1. Python-friendly simulation environments for robotic tasks.
+       -2. Tasks include arm manipulation, peg insertion, pushing, and more.
+   -b. Features:
+       -1. Integrates with PyBullet, MuJoCo, or other physics engines.
+       -2. Used for testing RL algorithms on simulated robots.
+
