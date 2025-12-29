@@ -1,0 +1,95 @@
+### From https://ai.plainenglish.io/autoencoders-and-latent-space-31f3b393f5ee
+
+Autoencoders transform complex data into a simpler and more meaningful representation called a latent space. 
+With the first papers published 15 to 20 years ago, autoencoders laid the foundation for much of what we see in modern deep learning today.
+Autoencoders form the backbone of popular architectures such as UNet, which are widely used in a variety of image processing tasks. 
+Even cutting-edge generative models such as DALL·E and Midjourney are built upon the principles of autoencoders.
+
+1. Autoencoder Basics
+   An autoencoder is a type of neural network trained to copy its input 𝑥 to its output 𝑥^
+   However, if it simply maps the input data perfectly, it is not very useful. Instead, autoencoders are designed so that they cannot learn a perfect copy. 
+   Typically, they are constrained to copy only approximately, and only inputs that resemble the training data.
+
+   Because the model is forced to choose which aspects of the input should be copied, it often learns useful properties of the data. 
+   This means the model attempts to describe very large data using as few features as possible.
+
+   To put it more simply, imagine trying to describe a person to a friend. You could describe their hairstyle, height, age, or skin color. 
+   Suppose you decide to describe someone using only two numbers: their age and their height. It may not be the best representation, but it is certainly a very compact one.
+
+2. Vanilla Autoencoders
+   The basic architecture of an autoencoder consists of three main components:
+   -a. The encoder
+   -b. The bottleneck (or latent space)
+   -c. The decoder
+   The encoder function ℎ=𝑓(𝑥) compresses the input data into a latent-space representation. 
+   This latent space is a low-dimensional space that captures the essential features of the input data.
+   The bottleneck layer, which is the smallest layer in the network, holds this compressed representation.
+   Finally, the decoder reconstructs the input data from the compressed representation produced by the encoder and bottleneck, i.e., 𝑟=𝑔(ℎ)
+
+3. Undercomplete Autoencoders
+   We are typically not interested in the output of the decoder itself. Instead, we hope that training the autoencoder to perform the input-copying task will 
+   result in ℎ acquiring useful properties. One way to obtain useful features from an autoencoder is to constrain ℎ to have a smaller dimension than 𝑥
+   An autoencoder whose code dimension is smaller than the input dimension is called an undercomplete autoencoder.
+
+   Learning an undercomplete representation forces the autoencoder to capture the most salient features of the training data. 
+   The learning process can be described simply as minimizing the following loss function:
+   𝐿(𝑔(𝑓(𝑥)))
+   where 𝐿 is a loss function that penalizes 𝑔(𝑓(𝑥)) for being dissimilar from 𝑥, such as the mean squared error (MSE).
+   Simply put, the bottleneck of an undercomplete autoencoder performs dimensionality reduction. 
+   If the data is linear, we can use Principal Component Analysis (PCA). Autoencoders with nonlinear encoder functions 
+   𝑓 and nonlinear decoder functions 𝑔 can therefore learn a more powerful nonlinear generalization of PCA.
+
+   Unfortunately, if the encoder and decoder are allowed too much capacity, 
+   the autoencoder can learn to perform the copying task without extracting useful information about the data distribution.
+
+   Theoretically, one could imagine an autoencoder with a one-dimensional code but a very powerful nonlinear encoder that learns to represent each training example 
+   𝑥(𝑖) with the code 𝑖. The decoder could then learn to map these integer indices back to the values of specific training examples.
+   This scenario does not occur in practice, but it clearly illustrates that an autoencoder trained to perform the copying task can fail to learn 
+   anything useful about the dataset if its capacity becomes too large.
+
+4. Latent Space
+   The dimension of the latent space is determined by the number of neurons in the bottleneck layer. 
+   For example, if there are two neurons in the bottleneck, the latent space is two-dimensional. 
+   This allows us to visualize how each data point is encoded by treating the activation of each neuron as an axis on a plane.
+   If the first neuron is strongly activated, the encoded representation lies to the right of the plot. 
+   If the second neuron is activated, the latent representation lies toward the top.
+   Now consider instances of the digit 7 from the MNIST dataset and their latent representations. 
+   If the autoencoder is well trained, each instance of this digit will fall into the same region of the latent space. 
+   If we encode instances of another class, such as the digit 4, those instances will also form a cluster. In an ideal situation, this cluster will be far apart from clusters of other classes.
+   During training, the latent space becomes increasingly organized, with each class occupying its own distinct region.
+
+5. Latent Dimension
+   An important design choice in autoencoders is the latent dimension, which refers to the number of neurons in the bottleneck layer and is the most critical part of the network.
+   If we have two neurons, the data is encoded as two coordinates on a 2D plane. If we have more neurons, the data is encoded in 3D, 4D, or even higher-dimensional spaces.
+   If we train the same network in exactly the same way, changing only the latent dimension, and the latent space is too small, 
+   the autoencoder may struggle to identify essential features of the data.
+   This ultimately results in poor reconstruction quality, even if the network is trained for a long time. 
+   With a 2D latent space, reconstructions may not always be accurate. But if we use a larger latent dimension, such as 9, the digit is reconstructed correctly.
+
+6. Why Do We Care About Reconstruction Quality?
+   Poor reconstruction quality often translates into poor latent space organization. 
+   With a 2D latent space, we observed that reconstructions were not very good and that the latent space was not well organized. 
+   Some clusters can be seen, but they overlap, occupy the same region of space, and some are very sparse.
+   If we switch to a 5D latent space, we see that the clusters are much better separated.
+   One might wonder how a 5D space can be visualized in 2D; this is made possible through dimensionality reduction techniques.
+   Even with a 5D latent space, we can still observe relatively sparse and diffuse clusters. 
+   For example, an image of the digit 3 may be poorly encoded, resulting in it being reconstructed as an 8.
+
+7. Application
+   Suppose that in a dataset of brain MRI scans, information about the patient’s gender has been lost during data processing. 
+   Gender is very useful information, but it is extremely difficult to infer a patient’s gender from a brain MRI alone. 
+   In fact, even experienced practitioners cannot reliably do this.
+   Fortunately, we can train an autoencoder to recognize a patient’s gender from brain MRI data alone, 
+   based on the latent representation. The autoencoder represents brain MRIs in a lower-dimensional space, where it becomes much easier to identify the patient’s gender.
+   In this latent representation, men and women can be clearly distinguished.
+
+8. Limitations
+   While autoencoders are used everywhere, they are rarely used in this vanilla form. Let us examine their limitations.
+   An autoencoder’s greatest strength is also its greatest limitation: the latent space. If we rely only on the reconstruction loss to organize the latent space, 
+   we often end up with representations that are merely acceptable. As seen with handwritten digits, clusters are not as well defined as we would like.
+   Another noticeable problem is that when we take two points in the latent space, we expect that a point in between them will represent a mixture of the two. 
+   Unfortunately, this is not the case: most intermediate points produce meaningless results.
+   For example, interpolating between a 0 and a 6 yields a 5, even though there are no encoded fives anywhere nearby in the latent space.
+   Finally, autoencoders learn many irrelevant features, to the extent that adding a small amount of noise to the input prevents the autoencoder from reconstructing it at all.
+   For these reasons, most modern implementations of autoencoders regularize the latent space. 
+   The most famous type of regularized autoencoder is the Variational Autoencoder (VAE), which will be discussed in the next article.
