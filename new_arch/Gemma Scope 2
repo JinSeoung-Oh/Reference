@@ -1,0 +1,39 @@
+### From https://deepmind.google/blog/gemma-scope-2-helping-the-ai-safety-community-deepen-understanding-of-complex-language-model-behavior/
+
+Large Language Models (LLMs) demonstrate remarkable reasoning capabilities, yet their internal decision-making processes remain largely opaque. 
+When a system does not behave as expected, a lack of visibility into its internal workings makes it difficult to pinpoint the exact cause of that behavior. 
+Last year, we advanced the field of interpretability by releasing Gemma Scope, a toolkit designed to help researchers understand the inner workings of Gemma 2,
+our lightweight collection of open models.
+Today, we are releasing Gemma Scope 2 — a comprehensive and open suite of interpretability tools for all Gemma 3 model sizes, ranging from 270M to 27B parameters.
+These tools enable tracing potential risks across the entire “brain” of the model.
+To the best of our knowledge, this is the largest open-source release of interpretability tools ever published by an AI lab. 
+Producing Gemma Scope 2 required storing approximately 110 petabytes of data, as well as training over one trillion total parameters.
+As AI continues to advance, we hope the AI research community will use Gemma Scope 2 to debug emergent model behaviors, better audit and analyze AI agents, 
+and ultimately accelerate the development of practical and robust safety interventions addressing issues such as jailbreaks, hallucinations, and sycophancy.
+An interactive Gemma Scope 2 demo, provided with support from Neuronpedia, is also available to try.
+
+1. What’s New in Gemma Scope 2
+   Interpretability research aims to understand the internal workings and learned algorithms of AI models. 
+   As AI systems become increasingly capable and complex, interpretability becomes essential for building safe and reliable AI.
+   Like its predecessor, Gemma Scope 2 acts as a microscope for the Gemma family of language models. 
+   By combining sparse autoencoders (SAEs) and transcoders, it allows researchers to inspect the interior of models, 
+   observe what they are thinking about, and understand how those thoughts are formed and connected to the model’s behavior. 
+   This enables deeper study of jailbreaks and other safety-relevant AI behaviors, such as discrepancies between a model’s communicated reasoning and its internal state.
+   While the original Gemma Scope enabled research in key safety areas — including model hallucination, identifying secrets known by a model, 
+   and training safer models — Gemma Scope 2 supports even more ambitious research through major upgrades.
+
+2. Key Upgrades
+   -a. Full Coverage at Scale
+       Gemma Scope 2 provides a complete suite of tools for the entire Gemma 3 model family, up to 27B parameters. 
+       This full coverage is essential for studying emergent behaviors that appear only at scale. For example,
+       a previous 27B-parameter C2S Scale model uncovered a new potential cancer therapy pathway. 
+       Although Gemma Scope 2 is not trained on that model, this illustrates the type of emergent behavior that such tools may help to understand.
+   -b. More Refined Tools for Deciphering Complex Internal Behaviors
+       Gemma Scope 2 includes SAEs and transcoders trained on every layer of the Gemma 3 model family. 
+       Skip-transcoders and cross-layer transcoders make it easier to interpret multi-step computations and algorithms distributed throughout the model.
+   -c. Advanced Training Techniques
+       State-of-the-art methods are employed, notably the Matryoshka training technique, 
+       which helps SAEs detect more useful concepts and resolves certain flaws identified in the original Gemma Scope.
+   -d. Chatbot Behavior Analysis Tools
+       We also provide interpretability tools specifically designed for chat-tuned versions of Gemma 3. 
+       These tools enable analysis of complex, multi-step behaviors, including jailbreaks, refusal mechanisms, and chain-of-thought faithfulness.
