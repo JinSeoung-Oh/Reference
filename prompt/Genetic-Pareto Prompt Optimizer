@@ -1,0 +1,153 @@
+### From https://pub.towardsai.net/dspy-3-gepa-the-most-advanced-rag-framework-yet-auto-reasoning-prompting-f9124ebd975b
+
+GEPA: A New Paradigm in AI Prompt Optimization
+GEPA (Genetic-Pareto Prompt Optimizer) Innovation
+Problems with Traditional RL
+
+Only provides simple scalar rewards ("correct/incorrect") - highly inefficient
+Model fine-tuning requires massive computational costs
+
+GEPA's Approach
+Evolves the "prompt itself" instead of adjusting model parameters
+
+Reflection: LLM analyzes its own failures in natural language and suggests improvements
+Genetic Algorithms: Combines good prompts to create better ones
+Pareto Optimization: Maintains multiple effective prompts, not just one
+Prompt Evolution Tree: Each improvement accumulates like tree branches
+
+GEPA Performance
+
+35x more efficient than MIPROv2
+Prompts are 9x shorter while achieving 10% better performance
+
+DSPy and Agentic RAG Implementation
+Core Concept
+DSPy treats language models as unique "devices" (like CPUs/GPUs in deep learning). You only need to declare required "Natural Language Signatures" without worrying about specific prompt implementation details. DSPy automatically generates, optimizes, and fine-tunes prompts based on these signatures.
+
+1. TF-IDF Retriever
+Calculates similarity between documents and queries to retrieve most relevant documents:
+class TFIDFRetriever:
+    def __init__(self, documents: list[str], k: int = 3):
+        self.documents = documents
+        self.k = k
+        self.doc_tokens = [self._tokenize(doc) for doc in documents]
+        self.idf = self._compute_idf()
+    
+    def _compute_idf(self) -> dict[str, float]:
+        doc_count = len(self.documents)
+        term_doc_counts = Counter()
+        
+        for tokens in self.doc_tokens:
+            unique_tokens = set(tokens)
+            for token in unique_tokens:
+                term_doc_counts[token] += 1
+        
+        idf = {}
+        for term, count in term_doc_counts.items():
+            idf[term] = math.log((doc_count + 1) / (count + 1)) + 1
+        return idf
+    
+    def __call__(self, query: str) -> list[str]:
+        query_tokens = self._tokenize(query)
+        query_vec = self._compute_tfidf(query_tokens)
+        
+        scores = []
+        for i, doc_tokens in enumerate(self.doc_tokens):
+            doc_vec = self._compute_tfidf(doc_tokens)
+            score = self._cosine_similarity(query_vec, doc_vec)
+            scores.append((score, i, self.documents[i]))
+        
+        scores.sort(key=lambda x: x[0], reverse=True)
+        return [doc for score, idx, doc in scores[:self.k]]
+2. Confidence-Based RAG
+Uses Chain-of-Thought to generate answers with confidence levels, allowing the system to honestly say "I don't have enough information" instead of hallucinating:
+class RAGWithConfidence(dspy.Module):
+    def __init__(self, retriever):
+        super().__init__()
+        self.retriever = retriever
+        self.generate = dspy.ChainOfThought(AnswerWithConfidence)
+    
+    def forward(self, question: str):
+        docs = self.retriever(question)
+        context = "\n\n".join(docs)
+        result = self.generate(context=context, question=question)
+        result.retrieved_docs = docs
+        return result
+3. Multi-Hop RAG
+Two-step processing for complex questions that need information from multiple sources:
+class MultiHopRAG(dspy.Module):
+    def __init__(self, retriever):
+        super().__init__()
+        self.retriever = retriever
+        self.extract = dspy.Predict(ExtractFacts)
+        self.synthesize = dspy.Predict(SynthesizeAnswer)
+    
+    def forward(self, question: str):
+        # Step 1: Retrieve documents
+        docs = self.retriever(question)
+        context = "\n\n".join(docs)
+        
+        # Step 2: Extract key facts (bullet-pointed facts from context)
+        extraction = self.extract(context=context, question=question)
+        
+        # Step 3: Synthesize answer from facts
+        result = self.synthesize(facts=extraction.facts, question=question)
+        result.retrieved_docs = docs
+        result.extracted_facts = extraction.facts
+        return result
+Why Multi-Hop Matters: The two-step process (extract facts → synthesize) prevents the AI from getting confused or missing connections when combining information from multiple sources.
+
+4. GEPA Metric - Feedback-Based Learning
+Provides textual feedback instead of simple scores to guide prompt evolution:
+def gepa_metric(gold, pred, trace=None, pred_name=None, pred_trace=None):
+    expected = gold.expected_answer.lower()
+    actual = pred.answer.lower() if hasattr(pred, 'answer') else ""
+    
+    if expected in actual:
+        return 1.0  # Perfect match
+    
+    expected_words = set(expected.split())
+    actual_words = set(actual.split())
+    overlap = len(expected_words & actual_words) / len(expected_words) if expected_words else 0
+    
+    if overlap > 0.5:
+        score = 0.7
+        feedback = f"Partially correct. Expected '{gold.expected_answer}' but got related content."
+    elif overlap > 0:
+        score = 0.3
+        feedback = f"Contains some relevant info but missing key details. Expected: '{gold.expected_answer}'"
+    else:
+        score = 0.0
+        feedback = f"Incorrect. Expected answer to contain '{gold.expected_answer}' but got: '{actual[:100]}...'"
+    
+    from dspy.teleprompt.gepa.gepa_utils import ScoreWithFeedback
+    return ScoreWithFeedback(score=score, feedback=feedback)
+
+5. Simple RAG for Optimization
+Basic RAG module that GEPA will optimize:
+class SimpleRAGForOptimization(dspy.Module):
+    def __init__(self, retriever):
+        super().__init__()
+        self.retriever = retriever
+        self.generate = dspy.Predict("context, question -> answer")
+    
+    def forward(self, question: str):
+        docs = self.retriever(question)
+        context = "\n\n".join(docs)
+        return self.generate(context=context, question=question)
+How GEPA Works in Practice
+GEPA uses the scores and feedback from the metric to automatically evolve better prompts over time:
+
+Genetic algorithms combine good prompts to make better ones
+Pareto optimization maintains multiple effective prompts rather than just one
+Reflection learns from mistakes by reading textual feedback and making corrections
+Prompt evolution tree builds iteratively - each branch keeps what worked and adds improvements
+
+Over 35 optimization cycles, GEPA automatically generates increasingly better prompts for the RAG task.
+Key Summary
+
+GEPA: Evolves prompts through self-reflection instead of RL - 35x more efficient than MIPROv2
+DSPy: Treats LLMs as "devices," enables automatic prompt optimization without manual prompt engineering
+Practical Implementation: TF-IDF retrieval + Confidence-based RAG + Multi-Hop RAG + GEPA optimization
+Core Innovation: Uses textual feedback (not just scalar scores) to guide prompt evolution, enabling the LLM to understand why it failed and how to improve
+
